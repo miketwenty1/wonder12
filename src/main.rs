@@ -1,45 +1,47 @@
-use bevy::{
-    input::{
-        mouse::{MouseButtonInput, MouseMotion, MouseWheel},
-        touch::Touch,
-        touchpad::{TouchpadMagnify, TouchpadRotate},
-    },
-    prelude::*,
-    text::{scale_value, Text2dBounds},
-    ui::RelativeCursorPosition,
-    utils::HashMap,
-    winit::WinitSettings,
-};
+use bevy::{input::mouse::MouseMotion, prelude::*, text::Text2dBounds, utils::HashMap};
 use rand::Rng;
-// multiple of 100's is best for the tilemap
+use wasm_bindgen::prelude::wasm_bindgen;
+
+use crate::comms::{load_server_data::api_get_server_tiles, CommsPlugin};
+
 const CHUNK_PIXEL_SIZE: f32 = 400.0;
 const TILE_SCALE: f32 = 3.0;
 const TILE_PIXEL_SIZE: f32 = 32.0;
 const TILE_PADDING_SIZE: f32 = 2.0;
-//const TOTAL_TILE_SIZE: f32 = TILE_PIXEL_SIZE + TILE_PADDING_SIZE;
 const TOTAL_TILE_SCALE_SIZE: f32 = TILE_PIXEL_SIZE * TILE_SCALE + 4.0;
 const CHUNK_TILE_SPAN_COUNT: i32 = (CHUNK_PIXEL_SIZE / TOTAL_TILE_SCALE_SIZE) as i32;
-//const GRID_SIZE_WIDTH: i32 = 50;
-//const GRID_SIZE_HEIGHT: i32 = 50;
-const BORDER_PIXEL: f32 = CHUNK_TILE_SPAN_COUNT as f32 * TOTAL_TILE_SCALE_SIZE;
-const DESPAWN_TILE_THRESHOLD: i32 = CHUNK_TILE_SPAN_COUNT * 10;
-// first_pressed_position
-// get_pressed
-// just_pressed
-// just_released
+const DESPAWN_TILE_THRESHOLD: i32 = 51 + CHUNK_TILE_SPAN_COUNT * 2;
+const CAMERA_SANITY_FACTOR: f32 = 1.25;
+const MOVE_VELOCITY_FACTOR: f32 = 10.0;
+
+mod comms;
+
+use async_channel::{Receiver, Sender};
+
+#[derive(Resource, Clone)]
+pub struct TileDataChannel {
+    pub tx: Sender<String>,
+    pub rx: Receiver<String>,
+}
+
+#[derive(Resource, Clone)]
+pub struct ServerURL(String);
 
 #[derive(Resource, Deref, DerefMut, Clone)]
 struct SpriteSheetRes(Handle<TextureAtlas>);
 
+#[derive(Event, Debug)]
+struct UpdateTileTextureEvent;
+
+#[derive(Debug)]
 enum EdgeType {
     Top,
     Bottom,
     Left,
     Right,
-    Middle,
 }
 
-#[derive(Event)]
+#[derive(Event, Debug)]
 struct EdgeEvent {
     pub edge_type: EdgeType,
     pub x: i32,
@@ -58,13 +60,45 @@ struct Edge {
     pub bottom: EdgeData,
     pub left: EdgeData,
     pub right: EdgeData,
-    pub middle: EdgeData,
 }
 
 #[derive(Resource, Clone)]
 struct ChunkManager {
     pub map: HashMap<u32, bool>,
 }
+
+#[derive(Clone)]
+pub enum TileResource {
+    Wheat,
+    Brick,
+    Sheep,
+    Wood,
+    Stone,
+    Desert,
+    Water,
+    Grass,
+    Unknown,
+}
+
+#[derive(Resource, Clone)]
+pub struct TileData {
+    pub ln_address: String,
+    pub owner: String,
+    pub color: Color,
+    pub message: String,
+    pub resource: TileResource,
+    pub hash: String,
+    pub amount: u32,
+    pub height: u32,
+}
+
+#[derive(Resource, Clone)]
+pub struct TileMap {
+    pub map: HashMap<u32, TileData>,
+}
+
+#[derive(Resource, Clone)]
+pub struct TextureMap(HashMap<u32, u32>);
 
 #[derive(Debug)]
 struct SpawnDiffData {
@@ -87,7 +121,58 @@ struct Location {
     pub ulam: u32,
 }
 
-fn main() {
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum CommsState {
+    #[default]
+    Off,
+    On,
+}
+
+pub fn main() {
+    //game("localusertesting".to_string(), "localhost:8081".to_string());
+}
+#[wasm_bindgen]
+pub fn game12(username: String, server_url: String, ln_address: String) {
+    let mut numbers_map = HashMap::new();
+
+    numbers_map.insert(128, 3);
+    numbers_map.insert(256, 37);
+    numbers_map.insert(512, 39);
+    numbers_map.insert(1024, 43);
+    numbers_map.insert(2048, 61);
+    numbers_map.insert(4096, 73);
+    numbers_map.insert(8192, 79);
+    numbers_map.insert(16384, 778);
+    numbers_map.insert(32768, 786);
+    numbers_map.insert(65536, 789);
+    numbers_map.insert(131072, 799);
+    numbers_map.insert(262144, 812);
+    numbers_map.insert(524288, 844);
+    numbers_map.insert(1048576, 857);
+
+    info!(
+        "user: {}\nserver: {}, lnaddress: {}",
+        username, server_url, ln_address
+    );
+    let start_edge = Edge {
+        top: EdgeData {
+            pixel: CHUNK_PIXEL_SIZE / 2.0,
+            tile: CHUNK_TILE_SPAN_COUNT,
+        },
+        bottom: EdgeData {
+            pixel: -CHUNK_PIXEL_SIZE / 2.0,
+            tile: -CHUNK_TILE_SPAN_COUNT,
+        },
+        left: EdgeData {
+            pixel: -CHUNK_PIXEL_SIZE / 2.0,
+            tile: -CHUNK_TILE_SPAN_COUNT,
+        },
+        right: EdgeData {
+            pixel: CHUNK_PIXEL_SIZE / 2.0,
+            tile: CHUNK_TILE_SPAN_COUNT,
+        },
+    };
+
     App::new()
         //.add_plugins(DefaultPlugins)
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -99,33 +184,21 @@ fn main() {
             }),
             ..default()
         }))
+        .insert_resource(ServerURL(server_url))
+        .insert_resource(TextureMap(numbers_map))
+        .add_state::<CommsState>()
+        .add_plugins(CommsPlugin)
         // Only run the app when there is user input. This will significantly reduce CPU/GPU use.
         //.insert_resource(WinitSettings::desktop_app())
         .add_systems(Startup, setup)
+        .add_systems(PostStartup, api_get_server_tiles)
         .add_event::<EdgeEvent>()
-        .insert_resource(Edge {
-            top: EdgeData {
-                pixel: BORDER_PIXEL,
-                tile: CHUNK_TILE_SPAN_COUNT,
-            },
-            bottom: EdgeData {
-                pixel: -BORDER_PIXEL,
-                tile: -CHUNK_TILE_SPAN_COUNT,
-            },
-            left: EdgeData {
-                pixel: -BORDER_PIXEL,
-                tile: -CHUNK_TILE_SPAN_COUNT,
-            },
-            right: EdgeData {
-                pixel: BORDER_PIXEL,
-                tile: CHUNK_TILE_SPAN_COUNT,
-            },
-            middle: EdgeData {
-                pixel: 0.0,
-                tile: 0,
-            },
-        })
+        .add_event::<UpdateTileTextureEvent>()
+        .insert_resource(start_edge)
         .insert_resource(ChunkManager {
+            map: HashMap::new(),
+        })
+        .insert_resource(TileMap {
             map: HashMap::new(),
         })
         .add_systems(
@@ -134,8 +207,9 @@ fn main() {
                 zoom_out_button_system,
                 zoom_in_button_system,
                 mouse_camera_system,
-                //touch_event_system,
+                touch_event_system,
                 edge_system,
+                update_tile_textures,
             ), //, print_mouse_events_system, touch_event_system
         )
         .run();
@@ -158,88 +232,29 @@ fn mouse_camera_system(
         for event in mouse_motion_events.read() {
             for (mut cam_transform, cam_ortho) in camera.iter_mut() {
                 let direction = Vec3::new(-event.delta.x, event.delta.y, 0.0);
-                cam_transform.translation +=
-                    direction * time.delta_seconds() * TILE_SCALE * cam_ortho.scale * 20.0;
-                if cam_transform.translation.x < edge.left.pixel {
-                    cam_transform.translation.x = edge.left.pixel;
-
-                    edge.left.pixel -= CHUNK_PIXEL_SIZE;
-                    edge.left.tile -= CHUNK_TILE_SPAN_COUNT;
-                    edge.right.pixel -= CHUNK_PIXEL_SIZE;
-                    edge.right.tile -= CHUNK_TILE_SPAN_COUNT;
-
-                    info!("sending left?");
-                    edge_event.send(EdgeEvent {
-                        edge_type: EdgeType::Left,
-                        x: edge.left.tile,
-                        y: (edge.top.tile + edge.bottom.tile) / 2,
-                    });
-                    info!("new left {}", edge.left.pixel);
-                }
-                if cam_transform.translation.x > edge.right.pixel {
-                    cam_transform.translation.x = edge.right.pixel;
-                    edge.right.pixel += CHUNK_PIXEL_SIZE;
-                    edge.right.tile += CHUNK_TILE_SPAN_COUNT;
-                    edge.left.pixel += CHUNK_PIXEL_SIZE;
-                    edge.left.tile += CHUNK_TILE_SPAN_COUNT;
-                    info!("sending right?");
-                    edge_event.send(EdgeEvent {
-                        edge_type: EdgeType::Right,
-                        x: edge.right.tile,
-                        y: (edge.top.tile + edge.bottom.tile) / 2,
-                    });
-                    info!("new right {}", edge.right.pixel);
-                }
-                if cam_transform.translation.y > edge.top.pixel {
-                    cam_transform.translation.y = edge.top.pixel;
-                    edge.top.pixel += CHUNK_PIXEL_SIZE;
-                    edge.top.tile += CHUNK_TILE_SPAN_COUNT;
-                    edge.bottom.pixel += CHUNK_PIXEL_SIZE;
-                    edge.bottom.tile += CHUNK_TILE_SPAN_COUNT;
-
-                    info!("before local");
-                    info!("sending top?");
-                    edge_event.send(EdgeEvent {
-                        edge_type: EdgeType::Top,
-                        x: (edge.left.tile + edge.right.tile) / 2,
-                        y: edge.top.tile,
-                    });
-
-                    info!("new top {}", edge.top.pixel);
-                }
-                if cam_transform.translation.y < edge.bottom.pixel {
-                    cam_transform.translation.y = edge.bottom.pixel;
-                    edge.bottom.pixel -= CHUNK_PIXEL_SIZE;
-                    edge.bottom.tile -= CHUNK_TILE_SPAN_COUNT;
-                    edge.top.pixel -= CHUNK_PIXEL_SIZE;
-                    edge.top.tile -= CHUNK_TILE_SPAN_COUNT;
-                    info!("sending bottom?");
-                    edge_event.send(EdgeEvent {
-                        edge_type: EdgeType::Bottom,
-                        x: (edge.left.tile + edge.right.tile) / 2,
-                        y: edge.bottom.tile,
-                    });
-                    info!("new bottom {}", edge.bottom.pixel);
-                }
+                cam_transform.translation += direction
+                    * time.delta_seconds()
+                    * TILE_SCALE
+                    * cam_ortho.scale
+                    * MOVE_VELOCITY_FACTOR;
+                set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
             }
         }
     }
 }
 
 fn touch_event_system(
-    mut touch_events: EventReader<TouchInput>,
+    //mut touch_events: EventReader<TouchInput>,
     touches: Res<Touches>,
     mut camera: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
     time: Res<Time>,
+    mut edge: ResMut<Edge>,
+    mut edge_event: EventWriter<EdgeEvent>,
 ) {
     for touch in touches.iter() {
         for (mut cam_transform, cam_ortho) in camera.iter_mut() {
-            // let direction = Vec3::new(-touch.delta().x, touch.delta().y, 0.0);
-            // transform.translation += direction * time.delta_seconds() * 16.0;
-            let mut distx = 0.0;
-            let mut disty = 0.0;
-            //info!("distance {}", touch.distance());
-            //info!("delta {}", );
+            let distx;
+            let disty;
             if touch.delta().x > 0.5 && touch.delta().x < 2.0 {
                 distx = 2.0;
             } else if touch.delta().x < -0.5 && touch.delta().x > -2.0 {
@@ -263,28 +278,11 @@ fn touch_event_system(
             } else {
                 disty = touch.delta().y;
             }
-            // info!(
-            //     "celta [{} => {}, {} => {}]",
-            //     touch.delta().x,
-            //     distx,
-            //     touch.delta().y,
-            //     disty
-            // );
-            //let direction = Vec3::new(-touch.delta().x, touch.delta().y, 0.0);
             let direction = Vec3::new(-distx, disty, 0.0);
-            cam_transform.translation += direction * time.delta_seconds() * 21.0 * cam_ortho.scale;
-            if cam_transform.translation.x < -BORDER_PIXEL {
-                cam_transform.translation.x = -BORDER_PIXEL
-            }
-            if cam_transform.translation.x > BORDER_PIXEL {
-                cam_transform.translation.x = BORDER_PIXEL
-            }
-            if cam_transform.translation.y > BORDER_PIXEL {
-                cam_transform.translation.y = BORDER_PIXEL
-            }
-            if cam_transform.translation.y < -BORDER_PIXEL {
-                cam_transform.translation.y = -BORDER_PIXEL
-            }
+            cam_transform.translation +=
+                direction * time.delta_seconds() * cam_ortho.scale * MOVE_VELOCITY_FACTOR * 4.0;
+
+            set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
         }
     }
     // for event in touch_events.read() {
@@ -348,7 +346,7 @@ fn zoom_in_button_system(
         (Changed<Interaction>, With<Button>, With<ZoomIn>),
     >,
     mut text_query: Query<&mut Text>,
-    mut cam_query: Query<(&mut OrthographicProjection), With<Camera>>,
+    mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
@@ -385,6 +383,7 @@ fn setup(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     edge: Res<Edge>,
     mut chunk_map: ResMut<ChunkManager>,
+    tile_map: Res<TileMap>,
 ) {
     // ui camera
     commands.spawn(Camera2dBundle::default());
@@ -409,6 +408,7 @@ fn setup(
         //EdgeType::Middle,
         edge.clone(),
         &mut chunk_map,
+        &tile_map,
     );
 
     commands
@@ -483,6 +483,12 @@ fn setup(
                     ));
                 });
         });
+
+    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
+    commands.insert_resource(TileDataChannel {
+        tx: tx_tiledata,
+        rx: rx_tiledata,
+    });
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -494,130 +500,29 @@ fn edge_system(
     asset_server: Res<AssetServer>,
     texture_atlas_handle: Res<SpriteSheetRes>,
     mut chunk_map: ResMut<ChunkManager>,
+    tile_map: Res<TileMap>,
 ) {
     for edge_e in edge_event.read() {
         for (block_entity, block_location) in blocks.iter() {
-            // info!(
-            //     "blocklocation_y: {}, edge_y: {}, locklocation_x: {}, edge_x: {}, threshold: {}",
-            //     block_location.y, edge_e.y, block_location.x, edge_e.x, DESPAWN_TILE_THRESHOLD
-            // );
             if (block_location.y - edge_e.y).abs() > DESPAWN_TILE_THRESHOLD
                 || (block_location.x - edge_e.x).abs() > DESPAWN_TILE_THRESHOLD
             {
                 let ulam_i = ulam::value_of_xy(block_location.x, block_location.y);
                 commands.entity(block_entity).despawn_recursive();
-                let r = &chunk_map.map.remove(&ulam_i);
-                info!("despawning old tiles");
+                chunk_map.map.remove(&ulam_i);
             }
         }
-        // info!(
-        //     "tile top: {}, tile pixel: {}",
-        //     edge.top.tile, edge.top.pixel
-        // );
+
+        debug!("reached edge: {:?}", edge_e.edge_type);
+
         spawn_block_sprites(
             &mut commands,
             &asset_server,
             &texture_atlas_handle,
             edge.clone(),
             &mut chunk_map,
+            &tile_map,
         );
-
-        // match &edge_e.edge_type {
-        //     EdgeType::Top => {
-        //         info!("despawning bottom.. reached top");
-        //         for (block_entity, block_location) in blocks.iter() {
-        //             if (block_location.y - edge_e.y) > DESPAWN_TILE_THRESHOLD
-        //                 || (block_location.x - edge_e.x) > DESPAWN_TILE_THRESHOLD
-        //             //block_location.y * full_tile_pixel < (edge.bottom.pixel / TILE_SCALE) as i32
-        //             {
-        //                 commands.entity(block_entity).despawn_recursive();
-        //             }
-        //         }
-        //         info!(
-        //             "tile top: {}, tile pixel: {}",
-        //             edge.top.tile, edge.top.pixel
-        //         );
-        //         spawn_block_sprites(
-        //             &mut commands,
-        //             &asset_server,
-        //             &texture_atlas_handle,
-        //             EdgeType::Top,
-        //             edge.clone(),
-        //         );
-        //     }
-        //     EdgeType::Bottom => {
-        //         info!("despawning top.. reached bottom");
-        //         for (block_entity, block_location) in blocks.iter() {
-        //             if block_location.y * full_tile_pixel > (edge.top.pixel / TILE_SCALE) as i32 {
-        //                 commands.entity(block_entity).despawn_recursive();
-        //             }
-        //         }
-        //         info!(
-        //             "tile bottom: {}, tile pixel: {}",
-        //             edge.bottom.tile, edge.bottom.pixel
-        //         );
-        //         spawn_block_sprites(
-        //             &mut commands,
-        //             &asset_server,
-        //             &texture_atlas_handle,
-        //             EdgeType::Bottom,
-        //             edge.clone(),
-        //         );
-        //     }
-        //     EdgeType::Left => {
-        //         info!("despawning right.. reached left");
-        //         for (block_entity, block_location) in blocks.iter() {
-        //             if block_location.x * full_tile_pixel > (edge.right.pixel / TILE_SCALE) as i32 {
-        //                 commands.entity(block_entity).despawn_recursive();
-        //             }
-        //         }
-        //         info!(
-        //             "tile left: {}, tile pixel: {}",
-        //             edge.left.tile, edge.left.pixel
-        //         );
-        //         spawn_block_sprites(
-        //             &mut commands,
-        //             &asset_server,
-        //             &texture_atlas_handle,
-        //             EdgeType::Left,
-        //             edge.clone(),
-        //         );
-        //     }
-        //     EdgeType::Right => {
-        //         info!("despawning left.. reached right");
-        //         for (block_entity, block_location) in blocks.iter() {
-        //             if block_location.x * full_tile_pixel < (edge.left.pixel / TILE_SCALE) as i32 {
-        //                 commands.entity(block_entity).despawn_recursive();
-        //             }
-        //         }
-        //         info!(
-        //             "tile right: {}, tile pixel: {}",
-        //             edge.right.tile, edge.right.pixel
-        //         );
-        //         spawn_block_sprites(
-        //             &mut commands,
-        //             &asset_server,
-        //             &texture_atlas_handle,
-        //             EdgeType::Right,
-        //             edge.clone(),
-        //         );
-        //     }
-        //     EdgeType::Middle => {
-        //         info!("this shouldnt be reached wtf middle?");
-        //         // for (block_entity, block_location) in blocks.iter() {
-        //         //     if block_location.x * full_tile_pixel < (edge.left.pixel / TILE_SCALE) as i32 {
-        //         //         commands.entity(block_entity).despawn_recursive();
-        //         //         spawn_block_sprites(
-        //         //             &mut commands,
-        //         //             &asset_server,
-        //         //             &texture_atlas_handle,
-        //         //             EdgeType::Right,
-        //         //             edge.clone(),
-        //         //         );
-        //         //     }
-        //         // }
-        //     }
-        // }
     }
 }
 
@@ -628,6 +533,7 @@ fn spawn_block_sprites(
     //edge_type: EdgeType,
     edge_limit: Edge,
     chunk_map: &mut ResMut<ChunkManager>,
+    tile_map: &Res<TileMap>,
 ) {
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     let slightly_smaller_text_style = TextStyle {
@@ -635,14 +541,6 @@ fn spawn_block_sprites(
         font_size: 24.0,
         color: Color::WHITE,
     };
-    // info!(
-    //     "before middles top: {}, bottom: {}, left: {}, right: {}, chunk_tile_span_count: {}",
-    //     edge_limit.top.tile,
-    //     edge_limit.bottom.tile,
-    //     edge_limit.left.tile,
-    //     edge_limit.right.tile,
-    //     CHUNK_TILE_SPAN_COUNT
-    // );
 
     let middle_y = (edge_limit.top.tile + edge_limit.bottom.tile) / 2;
     let middle_x = (edge_limit.left.tile + edge_limit.right.tile) / 2;
@@ -655,41 +553,7 @@ fn spawn_block_sprites(
         yend: middle_y + CHUNK_TILE_SPAN_COUNT,
     };
 
-    // for loop for spawning
-    // let spawn_diff = match edge_type {
-    //     EdgeType::Top => SpawnDiffData {
-    //         xstart: edge_limit.left.tile,
-    //         xend: edge_limit.right.tile,
-    //         ystart: edge_limit.top.tile - CHUNK_TILE_SPAN_COUNT,
-    //         yend: edge_limit.top.tile - 1,
-    //     },
-    //     EdgeType::Bottom => SpawnDiffData {
-    //         xstart: edge_limit.left.tile + 1,
-    //         xend: edge_limit.right.tile,
-    //         ystart: edge_limit.bottom.tile,
-    //         yend: edge_limit.bottom.tile + CHUNK_TILE_SPAN_COUNT,
-    //     },
-    //     EdgeType::Left => SpawnDiffData {
-    //         xstart: edge_limit.left.tile,
-    //         xend: edge_limit.left.tile + CHUNK_TILE_SPAN_COUNT - 1,
-    //         ystart: edge_limit.bottom.tile,
-    //         yend: edge_limit.top.tile,
-    //     },
-    //     EdgeType::Right => SpawnDiffData {
-    //         xstart: edge_limit.right.tile - CHUNK_TILE_SPAN_COUNT + 1,
-    //         xend: edge_limit.right.tile,
-    //         ystart: edge_limit.bottom.tile,
-    //         yend: edge_limit.top.tile,
-    //     },
-    //     EdgeType::Middle => SpawnDiffData {
-    //         xstart: edge_limit.left.tile,
-    //         xend: edge_limit.right.tile,
-    //         ystart: edge_limit.bottom.tile,
-    //         yend: edge_limit.top.tile,
-    //     },
-    // };
-
-    info!("spawning {:#?}", spawn_diff);
+    //info!("spawning {:#?}", spawn_diff);
     for x in spawn_diff.xstart..=spawn_diff.xend {
         for y in spawn_diff.ystart..=spawn_diff.yend {
             let ulam_i = ulam::value_of_xy(x, y);
@@ -704,10 +568,18 @@ fn spawn_block_sprites(
                 };
 
                 let mut rng = rand::thread_rng();
-                let r: f32 = rng.gen_range(0.0..=1.0);
-                let g: f32 = rng.gen_range(0.0..=1.0);
-                let b: f32 = rng.gen_range(0.0..=1.0);
-
+                let r: f32; //= rng.gen_range(0.0..=1.0);
+                let g: f32; //= rng.gen_range(0.0..=1.0);
+                let b: f32; //= rng.gen_range(0.0..=1.0);
+                if tile_map.map.contains_key(&locationcoord.ulam) {
+                    r = 1.0;
+                    g = 1.0;
+                    b = 1.0;
+                } else {
+                    r = 0.5;
+                    g = 0.5;
+                    b = 0.5;
+                }
                 let ranindex: usize = rng.gen_range(194..=222);
 
                 commands
@@ -716,9 +588,9 @@ fn spawn_block_sprites(
                             texture_atlas: texture_atlas_handle.clone(),
                             sprite: TextureAtlasSprite {
                                 color: Color::Rgba {
-                                    red: 1.0,
-                                    green: 1.0,
-                                    blue: 1.0,
+                                    red: r,
+                                    green: g,
+                                    blue: b,
                                     alpha: 1.0,
                                 },
                                 index: ranindex,
@@ -768,5 +640,105 @@ fn spawn_block_sprites(
                     });
             }
         }
+    }
+}
+
+fn set_camera_tile_bounds(
+    mut camera_vec3: Vec3,
+    edge: &mut ResMut<Edge>,
+    edge_event: &mut EventWriter<EdgeEvent>,
+) {
+    if camera_vec3.x < edge.left.pixel {
+        edge.left.pixel -= CHUNK_PIXEL_SIZE;
+        edge.left.tile -= CHUNK_TILE_SPAN_COUNT;
+        edge.right.pixel -= CHUNK_PIXEL_SIZE;
+        edge.right.tile -= CHUNK_TILE_SPAN_COUNT;
+
+        edge_event.send(EdgeEvent {
+            edge_type: EdgeType::Left,
+            x: edge.left.tile,
+            y: (edge.top.tile + edge.bottom.tile) / 2,
+        });
+        info!("new left {}", edge.left.pixel);
+
+        if camera_vec3.x < edge.left.pixel * CAMERA_SANITY_FACTOR {
+            info!("adjust left?");
+            camera_vec3.x = edge.left.pixel;
+        }
+    }
+    if camera_vec3.x > edge.right.pixel {
+        //cam_transform.translation.x = edge.right.pixel;
+        edge.right.pixel += CHUNK_PIXEL_SIZE;
+        edge.right.tile += CHUNK_TILE_SPAN_COUNT;
+        edge.left.pixel += CHUNK_PIXEL_SIZE;
+        edge.left.tile += CHUNK_TILE_SPAN_COUNT;
+        edge_event.send(EdgeEvent {
+            edge_type: EdgeType::Right,
+            x: edge.right.tile,
+            y: (edge.top.tile + edge.bottom.tile) / 2,
+        });
+        info!("new right {}", edge.right.pixel);
+
+        if camera_vec3.x > edge.right.pixel * CAMERA_SANITY_FACTOR {
+            info!("adjust right?");
+            camera_vec3.x = edge.right.pixel;
+        }
+    }
+    if camera_vec3.y > edge.top.pixel {
+        //cam_transform.translation.y = edge.top.pixel;
+        edge.top.pixel += CHUNK_PIXEL_SIZE;
+        edge.top.tile += CHUNK_TILE_SPAN_COUNT;
+        edge.bottom.pixel += CHUNK_PIXEL_SIZE;
+        edge.bottom.tile += CHUNK_TILE_SPAN_COUNT;
+        edge_event.send(EdgeEvent {
+            edge_type: EdgeType::Top,
+            x: (edge.left.tile + edge.right.tile) / 2,
+            y: edge.top.tile,
+        });
+
+        info!("new top {}", edge.top.pixel);
+        if camera_vec3.y > edge.top.pixel * CAMERA_SANITY_FACTOR {
+            info!("adjust top");
+            camera_vec3.y = edge.top.pixel;
+        }
+    }
+    if camera_vec3.y < edge.bottom.pixel {
+        //cam_transform.translation.y = edge.bottom.pixel;
+        edge.bottom.pixel -= CHUNK_PIXEL_SIZE;
+        edge.bottom.tile -= CHUNK_TILE_SPAN_COUNT;
+        edge.top.pixel -= CHUNK_PIXEL_SIZE;
+        edge.top.tile -= CHUNK_TILE_SPAN_COUNT;
+        edge_event.send(EdgeEvent {
+            edge_type: EdgeType::Bottom,
+            x: (edge.left.tile + edge.right.tile) / 2,
+            y: edge.bottom.tile,
+        });
+        info!("new bottom {}", edge.bottom.pixel);
+        if camera_vec3.y < edge.bottom.pixel * CAMERA_SANITY_FACTOR {
+            info!("adjust bottom");
+            camera_vec3.y = edge.bottom.pixel;
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn update_tile_textures(
+    //mut commands: Commands,
+    mut blocks: Query<(&mut TextureAtlasSprite, &Location)>,
+    mut edge_event: EventReader<UpdateTileTextureEvent>,
+    tile_map: Res<TileMap>,
+    //chunk_map: Res<ChunkManager>,
+    texture_map: Res<TextureMap>,
+) {
+    for _edge_e in edge_event.read() {
+        for (mut texture, location) in blocks.iter_mut() {
+            if tile_map.map.contains_key(&location.ulam) {
+                let a = tile_map.map.get(&location.ulam).unwrap();
+                texture.color = a.color;
+                let b = a.amount;
+                texture.index = *texture_map.0.get(&b).unwrap() as usize;
+            }
+        }
+        info!("update textures real time or something");
     }
 }
