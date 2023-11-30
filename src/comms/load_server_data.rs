@@ -1,5 +1,5 @@
 use super::api_timer::ApiPollingTimer;
-use super::server_structs::{GameBlocksDataFromDB, GameBlocksDataFromDBMod};
+use super::server_structs::GameBlocksDataFromDBMod;
 use crate::{CommsState, ServerURL, TileMap, UpdateTileTextureEvent};
 use crate::{TileData, TileDataChannel, TileResource};
 use bevy::prelude::*;
@@ -44,6 +44,7 @@ pub fn api_receive_server_tiles(
         info!("checking for tiles response");
         let api_res = channel.rx.try_recv();
 
+        let mut send_update = false;
         match api_res {
             Ok(r) => {
                 //info!("response to move player: {}", r);
@@ -64,8 +65,12 @@ pub fn api_receive_server_tiles(
                             };
 
                             tile_map.map.insert(block_data.height as u32, td);
+                            send_update = true;
+                        }
+                        if send_update {
                             update_tile_event.send(UpdateTileTextureEvent);
                         }
+
                         api_state.set(CommsState::Off);
                     }
                     Err(e) => {

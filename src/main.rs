@@ -1,5 +1,6 @@
 use bevy::{input::mouse::MouseMotion, prelude::*, text::Text2dBounds, utils::HashMap};
 use rand::Rng;
+use ulam::Quad;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::comms::{load_server_data::api_get_server_tiles, CommsPlugin};
@@ -7,13 +8,14 @@ use crate::comms::{load_server_data::api_get_server_tiles, CommsPlugin};
 const CHUNK_PIXEL_SIZE: f32 = 400.0;
 const TILE_SCALE: f32 = 3.0;
 const TILE_PIXEL_SIZE: f32 = 32.0;
-const TILE_PADDING_SIZE: f32 = 2.0;
+const TILE_PADDING_SIZE: f32 = 0.0;
 const TOTAL_TILE_SCALE_SIZE: f32 = TILE_PIXEL_SIZE * TILE_SCALE + 4.0;
 const CHUNK_TILE_SPAN_COUNT: i32 = (CHUNK_PIXEL_SIZE / TOTAL_TILE_SCALE_SIZE) as i32;
 const DESPAWN_TILE_THRESHOLD: i32 = 51 + CHUNK_TILE_SPAN_COUNT * 2;
 const CAMERA_SANITY_FACTOR: f32 = 1.25;
 const MOVE_VELOCITY_FACTOR: f32 = 10.0;
 
+mod building_config;
 mod comms;
 
 use async_channel::{Receiver, Sender};
@@ -28,7 +30,10 @@ pub struct TileDataChannel {
 pub struct ServerURL(String);
 
 #[derive(Resource, Deref, DerefMut, Clone)]
-struct SpriteSheetRes(Handle<TextureAtlas>);
+struct SpriteSheetBgRes(Handle<TextureAtlas>);
+
+#[derive(Resource, Deref, DerefMut, Clone)]
+struct SpriteSheetBuildingRes(Handle<TextureAtlas>);
 
 #[derive(Event, Debug)]
 struct UpdateTileTextureEvent;
@@ -47,6 +52,9 @@ struct EdgeEvent {
     pub x: i32,
     pub y: i32,
 }
+
+#[derive(Event)]
+struct SpriteSpawnEvent;
 
 #[derive(Clone)]
 struct EdgeData {
@@ -119,6 +127,26 @@ struct Location {
     pub x: i32,
     pub y: i32,
     pub ulam: u32,
+    pub quad: ulam::Quad,
+}
+
+#[derive(Component, Clone, Copy)]
+struct Land;
+
+#[derive(Component, Clone, Copy)]
+enum BuildingStructure {
+    Empty,
+    Hut,
+    Road,
+    RoadCorner,
+    FirePit,
+}
+#[derive(Component, Clone, Copy)]
+struct WithinTilePlacement {
+    x: f32,
+    y: f32,
+    z: f32,
+    scale: f32,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -135,20 +163,37 @@ pub fn main() {
 pub fn game12(username: String, server_url: String, ln_address: String) {
     let mut numbers_map = HashMap::new();
 
-    numbers_map.insert(128, 3);
-    numbers_map.insert(256, 37);
-    numbers_map.insert(512, 39);
-    numbers_map.insert(1024, 43);
-    numbers_map.insert(2048, 61);
-    numbers_map.insert(4096, 73);
-    numbers_map.insert(8192, 79);
-    numbers_map.insert(16384, 778);
-    numbers_map.insert(32768, 786);
-    numbers_map.insert(65536, 789);
-    numbers_map.insert(131072, 799);
-    numbers_map.insert(262144, 812);
-    numbers_map.insert(524288, 844);
-    numbers_map.insert(1048576, 857);
+    // numbers_map.insert(0, 1500);
+    // numbers_map.insert(128, 844);
+    // numbers_map.insert(256, 812);
+    // numbers_map.insert(512, 3);
+    // numbers_map.insert(1024, 778);
+    // numbers_map.insert(2048, 79);
+    // numbers_map.insert(4096, 785);
+    // numbers_map.insert(8192, 37);
+    // numbers_map.insert(16384, 789);
+    // numbers_map.insert(32768, 857);
+    // numbers_map.insert(65536, 799);
+    // numbers_map.insert(131072, 73);
+    // numbers_map.insert(262144, 64);
+    // numbers_map.insert(524288, 61);
+    // numbers_map.insert(1048576, 43);
+
+    numbers_map.insert(0, 0);
+    numbers_map.insert(128, 1);
+    numbers_map.insert(256, 1);
+    numbers_map.insert(512, 1);
+    numbers_map.insert(1024, 1);
+    numbers_map.insert(2048, 1);
+    numbers_map.insert(4096, 1);
+    numbers_map.insert(8192, 1);
+    numbers_map.insert(16384, 1);
+    numbers_map.insert(32768, 1);
+    numbers_map.insert(65536, 1);
+    numbers_map.insert(131072, 1);
+    numbers_map.insert(262144, 1);
+    numbers_map.insert(524288, 1);
+    numbers_map.insert(1048576, 1);
 
     info!(
         "user: {}\nserver: {}, lnaddress: {}",
@@ -190,10 +235,11 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .add_plugins(CommsPlugin)
         // Only run the app when there is user input. This will significantly reduce CPU/GPU use.
         //.insert_resource(WinitSettings::desktop_app())
+        .add_event::<EdgeEvent>()
+        .add_event::<SpriteSpawnEvent>()
+        .add_event::<UpdateTileTextureEvent>()
         .add_systems(Startup, setup)
         .add_systems(PostStartup, api_get_server_tiles)
-        .add_event::<EdgeEvent>()
-        .add_event::<UpdateTileTextureEvent>()
         .insert_resource(start_edge)
         .insert_resource(ChunkManager {
             map: HashMap::new(),
@@ -209,7 +255,8 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
                 mouse_camera_system,
                 touch_event_system,
                 edge_system,
-                update_tile_textures,
+                //update_tile_textures,
+                spawn_block_sprites,
             ), //, print_mouse_events_system, touch_event_system
         )
         .run();
@@ -381,35 +428,43 @@ fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-    edge: Res<Edge>,
-    mut chunk_map: ResMut<ChunkManager>,
-    tile_map: Res<TileMap>,
+    // edge: Res<Edge>,
+    // mut chunk_map: ResMut<ChunkManager>,
+    // tile_map: Res<TileMap>,
+    mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
 ) {
     // ui camera
     commands.spawn(Camera2dBundle::default());
 
-    let texture_handle = asset_server.load("spritesheet/background-extruded.png");
+    let texture_handle = asset_server.load("spritesheet/grassdirtbg.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
         Vec2::new(TILE_PIXEL_SIZE, TILE_PIXEL_SIZE),
-        32,
-        47,
+        11,
+        1,
         Some(Vec2::new(TILE_PADDING_SIZE, TILE_PADDING_SIZE)),
         None,
     );
-
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    commands.insert_resource(SpriteSheetRes(texture_atlas_handle.clone()));
-
-    spawn_block_sprites(
-        &mut commands,
-        &asset_server,
-        &texture_atlas_handle,
-        //EdgeType::Middle,
-        edge.clone(),
-        &mut chunk_map,
-        &tile_map,
+    let texture_handle_buildings = asset_server.load("spritesheet/buildings.png");
+    let texture_atlas_building = TextureAtlas::from_grid(
+        texture_handle_buildings,
+        Vec2::new(TILE_PIXEL_SIZE, TILE_PIXEL_SIZE),
+        5,
+        1,
+        Some(Vec2::new(0., 0.)),
+        None,
     );
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let texture_atlas_handle_building = texture_atlases.add(texture_atlas_building);
+
+    // let mut spritesheet_texture_atlas_handle_map = HashMap::new();
+    // spritesheet_texture_atlas_handle_map.insert("background".to_string());
+    // spritesheet_texture_atlas_handle_map.insert("buildings".to_string());
+
+    commands.insert_resource(SpriteSheetBgRes(texture_atlas_handle.clone()));
+    commands.insert_resource(SpriteSheetBuildingRes(
+        texture_atlas_handle_building.clone(),
+    ));
 
     commands
         .spawn(NodeBundle {
@@ -489,24 +544,27 @@ fn setup(
         tx: tx_tiledata,
         rx: rx_tiledata,
     });
+    sprite_spawn_event.send(SpriteSpawnEvent);
 }
 
 #[allow(clippy::too_many_arguments)]
 fn edge_system(
-    edge: ResMut<Edge>,
+    //edge: ResMut<Edge>,
     mut commands: Commands,
-    blocks: Query<(Entity, &Location)>,
+    blocks: Query<(Entity, &Location), With<Land>>,
     mut edge_event: EventReader<EdgeEvent>,
-    asset_server: Res<AssetServer>,
-    texture_atlas_handle: Res<SpriteSheetRes>,
+    // asset_server: Res<AssetServer>,
+    // texture_atlases: Res<Assets<TextureAtlas>>,
     mut chunk_map: ResMut<ChunkManager>,
-    tile_map: Res<TileMap>,
+    // tile_map: Res<TileMap>,
+    mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
 ) {
     for edge_e in edge_event.read() {
         for (block_entity, block_location) in blocks.iter() {
             if (block_location.y - edge_e.y).abs() > DESPAWN_TILE_THRESHOLD
                 || (block_location.x - edge_e.x).abs() > DESPAWN_TILE_THRESHOLD
             {
+                info!("despawning");
                 let ulam_i = ulam::value_of_xy(block_location.x, block_location.y);
                 commands.entity(block_entity).despawn_recursive();
                 chunk_map.map.remove(&ulam_i);
@@ -515,129 +573,206 @@ fn edge_system(
 
         debug!("reached edge: {:?}", edge_e.edge_type);
 
-        spawn_block_sprites(
-            &mut commands,
-            &asset_server,
-            &texture_atlas_handle,
-            edge.clone(),
-            &mut chunk_map,
-            &tile_map,
-        );
+        // spawn_block_sprites(
+        //     &mut commands,
+        //     &asset_server,
+        //     &texture_atlas_handle,
+        //     edge.clone(),
+        //     &mut chunk_map,
+        //     &tile_map,
+        // );
+        sprite_spawn_event.send(SpriteSpawnEvent);
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_block_sprites(
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-    texture_atlas_handle: &Handle<TextureAtlas>,
-    //edge_type: EdgeType,
-    edge_limit: Edge,
-    chunk_map: &mut ResMut<ChunkManager>,
-    tile_map: &Res<TileMap>,
+    asset_server: Res<AssetServer>,
+    texture_map: Res<TextureMap>,
+    mut sprite_spawn_event: EventReader<SpriteSpawnEvent>,
+    mut commands: Commands,
+    texture_atlas_handle_bg: Res<SpriteSheetBgRes>,
+    texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
+    //mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    edge: Res<Edge>,
+    mut chunk_map: ResMut<ChunkManager>,
+    tile_map: Res<TileMap>,
 ) {
-    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-    let slightly_smaller_text_style = TextStyle {
-        font,
-        font_size: 24.0,
-        color: Color::WHITE,
-    };
+    for _event in sprite_spawn_event.read() {
+        let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+        let slightly_smaller_text_style = TextStyle {
+            font,
+            font_size: 24.0,
+            color: Color::WHITE,
+        };
 
-    let middle_y = (edge_limit.top.tile + edge_limit.bottom.tile) / 2;
-    let middle_x = (edge_limit.left.tile + edge_limit.right.tile) / 2;
+        let middle_y = (edge.top.tile + edge.bottom.tile) / 2;
+        let middle_x = (edge.left.tile + edge.right.tile) / 2;
 
-    //info!("middle_y: {}, middle_x: {}", middle_y, middle_x);
-    let spawn_diff = SpawnDiffData {
-        xstart: middle_x - CHUNK_TILE_SPAN_COUNT,
-        xend: middle_x + CHUNK_TILE_SPAN_COUNT,
-        ystart: middle_y - CHUNK_TILE_SPAN_COUNT,
-        yend: middle_y + CHUNK_TILE_SPAN_COUNT,
-    };
+        //info!("middle_y: {}, middle_x: {}", middle_y, middle_x);
+        let spawn_diff = SpawnDiffData {
+            xstart: middle_x - CHUNK_TILE_SPAN_COUNT,
+            xend: middle_x + CHUNK_TILE_SPAN_COUNT,
+            ystart: middle_y - CHUNK_TILE_SPAN_COUNT,
+            yend: middle_y + CHUNK_TILE_SPAN_COUNT,
+        };
 
-    //info!("spawning {:#?}", spawn_diff);
-    for x in spawn_diff.xstart..=spawn_diff.xend {
-        for y in spawn_diff.ystart..=spawn_diff.yend {
-            let ulam_i = ulam::value_of_xy(x, y);
-            if !chunk_map.map.contains_key(&ulam_i) {
-                chunk_map.map.insert(ulam_i, true);
+        //info!("spawning {:#?}", spawn_diff);
+        let mut building_sprite_index;
+        let mut color_for_tile;
 
-                //info!("spawning: x: {}, y: {}", x, y);
-                let locationcoord = Location {
-                    x,
-                    y,
-                    ulam: ulam::value_of_xy(x, y),
-                };
+        for x in spawn_diff.xstart..=spawn_diff.xend {
+            for y in spawn_diff.ystart..=spawn_diff.yend {
+                let ulam_i = ulam::value_of_xy(x, y);
+                if !chunk_map.map.contains_key(&ulam_i) {
+                    chunk_map.map.insert(ulam_i, true);
 
-                let mut rng = rand::thread_rng();
-                let r: f32; //= rng.gen_range(0.0..=1.0);
-                let g: f32; //= rng.gen_range(0.0..=1.0);
-                let b: f32; //= rng.gen_range(0.0..=1.0);
-                if tile_map.map.contains_key(&locationcoord.ulam) {
-                    r = 1.0;
-                    g = 1.0;
-                    b = 1.0;
-                } else {
-                    r = 0.5;
-                    g = 0.5;
-                    b = 0.5;
-                }
-                let ranindex: usize = rng.gen_range(194..=222);
+                    //info!("spawning: x: {}, y: {}", x, y);
 
-                commands
-                    .spawn((
-                        SpriteSheetBundle {
-                            texture_atlas: texture_atlas_handle.clone(),
-                            sprite: TextureAtlasSprite {
-                                color: Color::Rgba {
-                                    red: r,
-                                    green: g,
-                                    blue: b,
-                                    alpha: 1.0,
+                    let mut locationcoord = Location {
+                        x,
+                        y,
+                        ulam: ulam::value_of_xy(x, y),
+                        quad: ulam::quad_of_xy(x, y),
+                    };
+                    if locationcoord.ulam == 1 {
+                        locationcoord.quad = Quad::SouthEast
+                    } else if locationcoord.quad == Quad::SouthEast {
+                        locationcoord.quad = Quad::South
+                    } else if locationcoord.quad == Quad::East
+                        && ulam::quad_of_value(locationcoord.ulam - 1) == Quad::SouthEast
+                    {
+                        locationcoord.quad = Quad::SouthEast;
+                    }
+
+                    let mut rng = rand::thread_rng();
+                    let base_sprite_index: usize = rng.gen_range(0..=10);
+
+                    //let top_sprite_index;
+                    let r: f32; //= rng.gen_range(0.0..=1.0);
+                    let g: f32; //= rng.gen_range(0.0..=1.0);
+                    let b: f32; //= rng.gen_range(0.0..=1.0);
+                                //let amount_index_num;
+                    if tile_map.map.contains_key(&locationcoord.ulam) {
+                        let amount_from_tile =
+                            tile_map.map.get(&locationcoord.ulam).unwrap().amount;
+                        building_sprite_index =
+                            *texture_map.0.get(&amount_from_tile).unwrap() as usize;
+
+                        color_for_tile = tile_map.map.get(&locationcoord.ulam).unwrap().color;
+                        r = 1.0;
+                        g = 1.0;
+                        b = 1.0;
+
+                        //top_sprite_index = texture_map.0.get(&amount_index_num).unwrap();
+                    } else {
+                        r = 0.5;
+                        g = 0.5;
+                        b = 0.5;
+                        building_sprite_index = 0;
+                        color_for_tile = Color::Rgba {
+                            red: 0.5,
+                            green: 0.5,
+                            blue: 0.5,
+                            alpha: 1.0,
+                        };
+                        //top_sprite_index = texture_map.0.get(&0).unwrap();
+                    }
+                    // let textureatlashandle_background: &Handle<TextureAtlas> =
+                    //     texture_atlas_handle_.get("background").unwrap();
+                    // let textureatlashandle_buildings: &Handle<TextureAtlas> =
+                    //     texture_atlas_handle.get("buildings").unwrap();
+                    commands
+                        .spawn((
+                            SpriteSheetBundle {
+                                texture_atlas: texture_atlas_handle_bg.0.clone(), //textureatlashandle.clone(),
+                                sprite: TextureAtlasSprite {
+                                    color: Color::Rgba {
+                                        red: r,
+                                        green: g,
+                                        blue: b,
+                                        alpha: 1.0,
+                                    },
+                                    index: base_sprite_index,
+                                    ..Default::default()
                                 },
-                                index: ranindex,
+
+                                transform: Transform {
+                                    translation: Vec3::new(
+                                        TOTAL_TILE_SCALE_SIZE * x as f32,
+                                        TOTAL_TILE_SCALE_SIZE * y as f32,
+                                        0.,
+                                    ),
+                                    scale: Vec3::new(TILE_SCALE, TILE_SCALE, 1.0),
+                                    ..Default::default()
+                                },
                                 ..Default::default()
                             },
-                            // Sprite {
-                            //     color: Color::rgb(r, g, b),
-                            //     custom_size: Some(Vec2::new(100.0, 100.0)),
-                            //     ..default()
-                            // },
-                            transform: Transform {
-                                translation: Vec3::new(
-                                    TOTAL_TILE_SCALE_SIZE * x as f32,
-                                    TOTAL_TILE_SCALE_SIZE * y as f32,
-                                    0.,
-                                ),
-                                scale: Vec3::new(TILE_SCALE, TILE_SCALE, 1.0),
-                                ..Default::default()
-                            },
-                            ..Default::default()
-                        },
-                        locationcoord,
-                    ))
-                    .with_children(|builder| {
-                        builder.spawn(Text2dBundle {
-                            text: Text {
-                                sections: vec![TextSection::new(
-                                    format!("{}", locationcoord.ulam),
-                                    slightly_smaller_text_style.clone(),
-                                )],
-                                alignment: TextAlignment::Left,
-                                ..Default::default()
-                            },
-                            text_2d_bounds: Text2dBounds {
-                                // Wrap text in the rectangle
-                                // size: box_size,
+                            locationcoord,
+                            Land,
+                        ))
+                        .with_children(|builder| {
+                            building_config::road::spawn(
+                                &texture_atlas_handle_building.0.clone(),
+                                builder,
+                                Color::rgba(1.0, 1.0, 1.0, 2.0),
+                                locationcoord,
+                            );
+                        })
+                        .with_children(|builder| {
+                            builder.spawn(Text2dBundle {
+                                text: Text {
+                                    sections: vec![TextSection::new(
+                                        format!("{}", locationcoord.ulam),
+                                        slightly_smaller_text_style.clone(),
+                                    )],
+                                    alignment: TextAlignment::Left,
+                                    ..Default::default()
+                                },
+                                text_2d_bounds: Text2dBounds { ..default() },
+                                transform: Transform {
+                                    translation: Vec3::new(0., 0., 3.),
+                                    scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+                                    ..Default::default()
+                                },
                                 ..default()
-                            },
-                            // ensure the text is drawn on top of the box
-                            transform: Transform {
-                                translation: Vec3::Z,
-                                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
-                                ..Default::default()
-                            },
-                            ..default()
+                            });
+                        })
+                        .with_children(|builder| {
+                            match building_sprite_index {
+                                1 => {
+                                    building_config::level1::spawn(
+                                        &texture_atlas_handle_building.0.clone(),
+                                        builder,
+                                        color_for_tile,
+                                        locationcoord,
+                                    );
+                                }
+                                _ => {
+                                    // do nothing
+                                }
+                            }
+
+                            // builder.spawn((
+                            //     SpriteSheetBundle {
+                            //         texture_atlas: textureatlashandle_buildings.clone(),
+                            //         sprite: TextureAtlasSprite {
+                            //             color: color_for_tile,
+                            //             index: building_sprite_index,
+                            //             ..Default::default()
+                            //         },
+                            //         transform: Transform {
+                            //             translation: Vec3::new(5., 0., 3.),
+                            //             scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+                            //             ..Default::default()
+                            //         },
+                            //         ..Default::default()
+                            //     },
+                            //     BuildingStructure::Hut,
+                            //     locationcoord,
+                            // ));
                         });
-                    });
+                }
             }
         }
     }
@@ -721,17 +856,25 @@ fn set_camera_tile_bounds(
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 fn update_tile_textures(
     //mut commands: Commands,
-    mut blocks: Query<(&mut TextureAtlasSprite, &Location)>,
-    mut edge_event: EventReader<UpdateTileTextureEvent>,
+    //mut blocks: Query<&mut Location>,
+    mut block_buildings: Query<
+        (&mut TextureAtlasSprite, &Location),
+        (With<BuildingStructure>, Without<Land>),
+    >,
+    mut lands: Query<
+        (&mut TextureAtlasSprite, &Location),
+        (With<Land>, Without<BuildingStructure>),
+    >,
+    mut event: EventReader<UpdateTileTextureEvent>,
     tile_map: Res<TileMap>,
     //chunk_map: Res<ChunkManager>,
     texture_map: Res<TextureMap>,
 ) {
-    for _edge_e in edge_event.read() {
-        for (mut texture, location) in blocks.iter_mut() {
+    for _e in event.read() {
+        for (mut texture, location) in block_buildings.iter_mut() {
             if tile_map.map.contains_key(&location.ulam) {
                 let a = tile_map.map.get(&location.ulam).unwrap();
                 texture.color = a.color;
@@ -739,6 +882,17 @@ fn update_tile_textures(
                 texture.index = *texture_map.0.get(&b).unwrap() as usize;
             }
         }
-        info!("update textures real time or something");
+
+        for (mut texture, location) in lands.iter_mut() {
+            if tile_map.map.contains_key(&location.ulam) {
+                texture.color = Color::Rgba {
+                    red: 1.,
+                    green: 1.,
+                    blue: 1.,
+                    alpha: 1.,
+                };
+            }
+        }
+        info!("updated textures");
     }
 }
