@@ -1,4 +1,6 @@
+use bevy::window::PrimaryWindow;
 use bevy::{input::mouse::MouseMotion, prelude::*, text::Text2dBounds, utils::HashMap};
+use building_config::spawn_tile_level;
 use rand::Rng;
 use ulam::Quad;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -8,7 +10,7 @@ use crate::comms::{load_server_data::api_get_server_tiles, CommsPlugin};
 const CHUNK_PIXEL_SIZE: f32 = 400.0;
 const TILE_SCALE: f32 = 3.0;
 const TILE_PIXEL_SIZE: f32 = 32.0;
-const TILE_PADDING_SIZE: f32 = 0.0;
+//const TILE_PADDING_SIZE: f32 = 0.0;
 const TOTAL_TILE_SCALE_SIZE: f32 = TILE_PIXEL_SIZE * TILE_SCALE + 4.0;
 const CHUNK_TILE_SPAN_COUNT: i32 = (CHUNK_PIXEL_SIZE / TOTAL_TILE_SCALE_SIZE) as i32;
 const DESPAWN_TILE_THRESHOLD: i32 = 51 + CHUNK_TILE_SPAN_COUNT * 2;
@@ -20,6 +22,18 @@ mod comms;
 
 use async_channel::{Receiver, Sender};
 
+#[derive(Component)]
+struct Selected;
+
+#[derive(Component)]
+pub struct AnimationIndices {
+    first: usize,
+    last: usize,
+}
+
+#[derive(Component, Deref, DerefMut)]
+struct AnimationTimer(Timer);
+
 #[derive(Resource, Clone)]
 pub struct TileDataChannel {
     pub tx: Sender<String>,
@@ -29,6 +43,9 @@ pub struct TileDataChannel {
 #[derive(Resource, Clone)]
 pub struct ServerURL(String);
 
+#[derive(Resource, Clone, Copy)]
+pub struct LastSelectedTile(i32, i32);
+
 #[derive(Resource, Deref, DerefMut, Clone)]
 struct SpriteSheetBgRes(Handle<TextureAtlas>);
 
@@ -37,6 +54,9 @@ struct SpriteSheetBuildingRes(Handle<TextureAtlas>);
 
 #[derive(Event, Debug)]
 struct UpdateTileTextureEvent;
+
+#[derive(Event, Debug)]
+struct SelectTileEvent(i32, i32);
 
 #[derive(Debug)]
 enum EdgeType {
@@ -106,7 +126,7 @@ pub struct TileMap {
 }
 
 #[derive(Resource, Clone)]
-pub struct TextureMap(HashMap<u32, u32>);
+pub struct SpriteIndexBuilding(HashMap<u32, u32>);
 
 #[derive(Debug)]
 struct SpawnDiffData {
@@ -122,12 +142,13 @@ struct ZoomOut;
 #[derive(Component)]
 struct ZoomIn;
 
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Clone, Copy, Debug)]
 struct Location {
     pub x: i32,
     pub y: i32,
     pub ulam: u32,
     pub quad: ulam::Quad,
+    pub selected: bool,
 }
 
 #[derive(Component, Clone, Copy)]
@@ -135,18 +156,13 @@ struct Land;
 
 #[derive(Component, Clone, Copy)]
 enum BuildingStructure {
-    Empty,
+    //Empty,
     Hut,
-    Road,
-    RoadCorner,
+    DirtRoad,
+    //DirtRoadCorner,
+    //DirtRoad2,
+    //DirtRoadCorner2,
     FirePit,
-}
-#[derive(Component, Clone, Copy)]
-struct WithinTilePlacement {
-    x: f32,
-    y: f32,
-    z: f32,
-    scale: f32,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -163,37 +179,21 @@ pub fn main() {
 pub fn game12(username: String, server_url: String, ln_address: String) {
     let mut numbers_map = HashMap::new();
 
-    // numbers_map.insert(0, 1500);
-    // numbers_map.insert(128, 844);
-    // numbers_map.insert(256, 812);
-    // numbers_map.insert(512, 3);
-    // numbers_map.insert(1024, 778);
-    // numbers_map.insert(2048, 79);
-    // numbers_map.insert(4096, 785);
-    // numbers_map.insert(8192, 37);
-    // numbers_map.insert(16384, 789);
-    // numbers_map.insert(32768, 857);
-    // numbers_map.insert(65536, 799);
-    // numbers_map.insert(131072, 73);
-    // numbers_map.insert(262144, 64);
-    // numbers_map.insert(524288, 61);
-    // numbers_map.insert(1048576, 43);
-
     numbers_map.insert(0, 0);
     numbers_map.insert(128, 1);
-    numbers_map.insert(256, 1);
-    numbers_map.insert(512, 1);
-    numbers_map.insert(1024, 1);
-    numbers_map.insert(2048, 1);
-    numbers_map.insert(4096, 1);
-    numbers_map.insert(8192, 1);
-    numbers_map.insert(16384, 1);
-    numbers_map.insert(32768, 1);
-    numbers_map.insert(65536, 1);
-    numbers_map.insert(131072, 1);
-    numbers_map.insert(262144, 1);
-    numbers_map.insert(524288, 1);
-    numbers_map.insert(1048576, 1);
+    numbers_map.insert(256, 2);
+    numbers_map.insert(512, 3);
+    numbers_map.insert(1024, 3);
+    numbers_map.insert(2048, 3);
+    numbers_map.insert(4096, 3);
+    numbers_map.insert(8192, 3);
+    numbers_map.insert(16384, 3);
+    numbers_map.insert(32768, 3);
+    numbers_map.insert(65536, 3);
+    numbers_map.insert(131072, 3);
+    numbers_map.insert(262144, 3);
+    numbers_map.insert(524288, 3);
+    numbers_map.insert(1048576, 3);
 
     info!(
         "user: {}\nserver: {}, lnaddress: {}",
@@ -230,7 +230,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
             ..default()
         }))
         .insert_resource(ServerURL(server_url))
-        .insert_resource(TextureMap(numbers_map))
+        .insert_resource(SpriteIndexBuilding(numbers_map))
         .add_state::<CommsState>()
         .add_plugins(CommsPlugin)
         // Only run the app when there is user input. This will significantly reduce CPU/GPU use.
@@ -238,7 +238,8 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .add_event::<EdgeEvent>()
         .add_event::<SpriteSpawnEvent>()
         .add_event::<UpdateTileTextureEvent>()
-        .add_systems(Startup, setup)
+        .add_event::<SelectTileEvent>()
+        .add_systems(Startup, setup) //setupcoords
         .add_systems(PostStartup, api_get_server_tiles)
         .insert_resource(start_edge)
         .insert_resource(ChunkManager {
@@ -247,6 +248,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .insert_resource(TileMap {
             map: HashMap::new(),
         })
+        .insert_resource(LastSelectedTile(1_000_000, 1_000_000))
         .add_systems(
             Update,
             (
@@ -255,8 +257,11 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
                 mouse_camera_system,
                 touch_event_system,
                 edge_system,
-                //update_tile_textures,
+                update_tile_textures,
                 spawn_block_sprites,
+                animate_firepit,
+                select_tile,
+                //my_cursor_system,
             ), //, print_mouse_events_system, touch_event_system
         )
         .run();
@@ -270,14 +275,65 @@ const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 fn mouse_camera_system(
     mut mouse_motion_events: EventReader<MouseMotion>,
     mouse: Res<Input<MouseButton>>,
-    mut camera: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
+    mut q_camera: Query<
+        (
+            &mut Transform,
+            &OrthographicProjection,
+            &Camera,
+            &GlobalTransform,
+        ),
+        With<Camera>,
+    >,
     time: Res<Time>,
     mut edge: ResMut<Edge>,
     mut edge_event: EventWriter<EdgeEvent>,
+    q_window: Query<&Window, With<PrimaryWindow>>,
+    mut select_tile_event: EventWriter<SelectTileEvent>,
+    mut last_selected_tile: ResMut<LastSelectedTile>,
+    location_query: Query<&Location>,
 ) {
     if mouse.pressed(MouseButton::Middle) || mouse.pressed(MouseButton::Left) {
-        for event in mouse_motion_events.read() {
-            for (mut cam_transform, cam_ortho) in camera.iter_mut() {
+        for (mut cam_transform, cam_ortho, camera, camera_transform) in q_camera.iter_mut() {
+            let window = q_window.single();
+            // check if the cursor is inside the window and get its position
+            // then, ask bevy to convert into world coordinates, and truncate to discard Z
+            if let Some(world_position) = window
+                .cursor_position()
+                .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
+                .map(|ray| ray.origin.truncate())
+            {
+                //mycoords.0 = world_position;
+
+                let x: i32 = if world_position.x >= 0.0 {
+                    ((world_position.x + TOTAL_TILE_SCALE_SIZE / 2. - 1.) / TOTAL_TILE_SCALE_SIZE)
+                        as i32
+                } else {
+                    ((world_position.x - TOTAL_TILE_SCALE_SIZE / 2. + 1.) / TOTAL_TILE_SCALE_SIZE)
+                        as i32
+                };
+
+                let y: i32 = if world_position.y >= 0.0 {
+                    ((world_position.y + TOTAL_TILE_SCALE_SIZE / 2. - 1.) / TOTAL_TILE_SCALE_SIZE)
+                        as i32
+                } else {
+                    ((world_position.y - TOTAL_TILE_SCALE_SIZE / 2. + 1.) / TOTAL_TILE_SCALE_SIZE)
+                        as i32
+                };
+
+                info!("mouse World coords: {}/{}", x, y);
+
+                if mouse.just_pressed(MouseButton::Left) {
+                    // for location in location_query.iter() {
+                    //     if location.x == x && location.y == y {
+                    info!("send mouse select");
+                    select_tile_event.send(SelectTileEvent(x, y));
+                    //   }
+                    //}
+                    //*last_selected_tile = LastSelectedTile(x, y);
+                }
+            }
+
+            for event in mouse_motion_events.read() {
                 let direction = Vec3::new(-event.delta.x, event.delta.y, 0.0);
                 cam_transform.translation += direction
                     * time.delta_seconds()
@@ -290,16 +346,41 @@ fn mouse_camera_system(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn touch_event_system(
-    //mut touch_events: EventReader<TouchInput>,
     touches: Res<Touches>,
     mut camera: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
     time: Res<Time>,
     mut edge: ResMut<Edge>,
     mut edge_event: EventWriter<EdgeEvent>,
+    q_window: Query<&Window, With<PrimaryWindow>>,
+    mut select_tile_event: EventWriter<SelectTileEvent>,
+    mut last_selected_tile: ResMut<LastSelectedTile>,
+    location_query: Query<&Location>,
 ) {
     for touch in touches.iter() {
         for (mut cam_transform, cam_ortho) in camera.iter_mut() {
+            let window = q_window.single();
+            let height = window.resolution.height();
+            let width = window.resolution.width();
+
+            let world_x = cam_transform.translation.x + touch.position().x * cam_ortho.scale
+                - width / 2. * cam_ortho.scale;
+            let world_y = cam_transform.translation.y - touch.position().y * cam_ortho.scale
+                + height / 2. * cam_ortho.scale;
+
+            let x: i32 = if world_x >= 0.0 {
+                ((world_x + TOTAL_TILE_SCALE_SIZE / 2. - 1.) / TOTAL_TILE_SCALE_SIZE) as i32
+            } else {
+                ((world_x - TOTAL_TILE_SCALE_SIZE / 2. + 1.) / TOTAL_TILE_SCALE_SIZE) as i32
+            };
+
+            let y: i32 = if world_y >= 0.0 {
+                ((world_y + TOTAL_TILE_SCALE_SIZE / 2. - 1.) / TOTAL_TILE_SCALE_SIZE) as i32
+            } else {
+                ((world_y - TOTAL_TILE_SCALE_SIZE / 2. + 1.) / TOTAL_TILE_SCALE_SIZE) as i32
+            };
+
             let distx;
             let disty;
             if touch.delta().x > 0.5 && touch.delta().x < 2.0 {
@@ -330,12 +411,16 @@ fn touch_event_system(
                 direction * time.delta_seconds() * cam_ortho.scale * MOVE_VELOCITY_FACTOR * 4.0;
 
             set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
+
+            if touches.just_pressed(touch.id()) {
+                info!("send touch select");
+                select_tile_event.send(SelectTileEvent(x, y));
+                //*last_selected_tile = LastSelectedTile(x, y);
+            }
+
+            info!("touch World coords: {}/{}", x, y);
         }
     }
-    // for event in touch_events.read() {
-    //     info!("{:?}", event);
-    //     info!("{:?}", touches.);
-    // }
 }
 
 #[allow(clippy::type_complexity)]
@@ -437,31 +522,27 @@ fn setup(
     commands.spawn(Camera2dBundle::default());
 
     let texture_handle = asset_server.load("spritesheet/grassdirtbg.png");
-    let texture_atlas = TextureAtlas::from_grid(
+    let texture_atlas_bg = TextureAtlas::from_grid(
         texture_handle,
         Vec2::new(TILE_PIXEL_SIZE, TILE_PIXEL_SIZE),
         11,
         1,
-        Some(Vec2::new(TILE_PADDING_SIZE, TILE_PADDING_SIZE)),
+        Some(Vec2::new(0.0, 0.0)),
         None,
     );
     let texture_handle_buildings = asset_server.load("spritesheet/buildings.png");
     let texture_atlas_building = TextureAtlas::from_grid(
         texture_handle_buildings,
-        Vec2::new(TILE_PIXEL_SIZE, TILE_PIXEL_SIZE),
-        5,
+        Vec2::new(32.0, 32.0),
+        10,
         1,
-        Some(Vec2::new(0., 0.)),
-        None,
+        Some(Vec2::new(0.0, 0.0)),
+        Some(Vec2::new(0.0, 0.0)),
     );
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let texture_atlas_handle_bg = texture_atlases.add(texture_atlas_bg);
     let texture_atlas_handle_building = texture_atlases.add(texture_atlas_building);
 
-    // let mut spritesheet_texture_atlas_handle_map = HashMap::new();
-    // spritesheet_texture_atlas_handle_map.insert("background".to_string());
-    // spritesheet_texture_atlas_handle_map.insert("buildings".to_string());
-
-    commands.insert_resource(SpriteSheetBgRes(texture_atlas_handle.clone()));
+    commands.insert_resource(SpriteSheetBgRes(texture_atlas_handle_bg.clone()));
     commands.insert_resource(SpriteSheetBuildingRes(
         texture_atlas_handle_building.clone(),
     ));
@@ -573,14 +654,6 @@ fn edge_system(
 
         debug!("reached edge: {:?}", edge_e.edge_type);
 
-        // spawn_block_sprites(
-        //     &mut commands,
-        //     &asset_server,
-        //     &texture_atlas_handle,
-        //     edge.clone(),
-        //     &mut chunk_map,
-        //     &tile_map,
-        // );
         sprite_spawn_event.send(SpriteSpawnEvent);
     }
 }
@@ -588,7 +661,7 @@ fn edge_system(
 #[allow(clippy::too_many_arguments)]
 fn spawn_block_sprites(
     asset_server: Res<AssetServer>,
-    texture_map: Res<TextureMap>,
+    texture_map: Res<SpriteIndexBuilding>,
     mut sprite_spawn_event: EventReader<SpriteSpawnEvent>,
     mut commands: Commands,
     texture_atlas_handle_bg: Res<SpriteSheetBgRes>,
@@ -619,6 +692,7 @@ fn spawn_block_sprites(
 
         //info!("spawning {:#?}", spawn_diff);
         let mut building_sprite_index;
+        let mut color_for_sprites;
         let mut color_for_tile;
 
         for x in spawn_diff.xstart..=spawn_diff.xend {
@@ -634,6 +708,7 @@ fn spawn_block_sprites(
                         y,
                         ulam: ulam::value_of_xy(x, y),
                         quad: ulam::quad_of_xy(x, y),
+                        selected: false,
                     };
                     if locationcoord.ulam == 1 {
                         locationcoord.quad = Quad::SouthEast
@@ -648,51 +723,35 @@ fn spawn_block_sprites(
                     let mut rng = rand::thread_rng();
                     let base_sprite_index: usize = rng.gen_range(0..=10);
 
-                    //let top_sprite_index;
-                    let r: f32; //= rng.gen_range(0.0..=1.0);
-                    let g: f32; //= rng.gen_range(0.0..=1.0);
-                    let b: f32; //= rng.gen_range(0.0..=1.0);
-                                //let amount_index_num;
                     if tile_map.map.contains_key(&locationcoord.ulam) {
                         let amount_from_tile =
                             tile_map.map.get(&locationcoord.ulam).unwrap().amount;
                         building_sprite_index =
                             *texture_map.0.get(&amount_from_tile).unwrap() as usize;
 
-                        color_for_tile = tile_map.map.get(&locationcoord.ulam).unwrap().color;
-                        r = 1.0;
-                        g = 1.0;
-                        b = 1.0;
-
-                        //top_sprite_index = texture_map.0.get(&amount_index_num).unwrap();
+                        color_for_sprites = tile_map.map.get(&locationcoord.ulam).unwrap().color;
+                        color_for_tile = Color::Rgba {
+                            red: 1.,
+                            green: 1.,
+                            blue: 1.,
+                            alpha: 1.,
+                        };
                     } else {
-                        r = 0.5;
-                        g = 0.5;
-                        b = 0.5;
                         building_sprite_index = 0;
                         color_for_tile = Color::Rgba {
-                            red: 0.5,
-                            green: 0.5,
-                            blue: 0.5,
+                            red: 0.2,
+                            green: 0.2,
+                            blue: 0.2,
                             alpha: 1.0,
                         };
-                        //top_sprite_index = texture_map.0.get(&0).unwrap();
+                        color_for_sprites = color_for_tile;
                     }
-                    // let textureatlashandle_background: &Handle<TextureAtlas> =
-                    //     texture_atlas_handle_.get("background").unwrap();
-                    // let textureatlashandle_buildings: &Handle<TextureAtlas> =
-                    //     texture_atlas_handle.get("buildings").unwrap();
                     commands
                         .spawn((
                             SpriteSheetBundle {
                                 texture_atlas: texture_atlas_handle_bg.0.clone(), //textureatlashandle.clone(),
                                 sprite: TextureAtlasSprite {
-                                    color: Color::Rgba {
-                                        red: r,
-                                        green: g,
-                                        blue: b,
-                                        alpha: 1.0,
-                                    },
+                                    color: color_for_tile,
                                     index: base_sprite_index,
                                     ..Default::default()
                                 },
@@ -711,14 +770,6 @@ fn spawn_block_sprites(
                             locationcoord,
                             Land,
                         ))
-                        .with_children(|builder| {
-                            building_config::road::spawn(
-                                &texture_atlas_handle_building.0.clone(),
-                                builder,
-                                Color::rgba(1.0, 1.0, 1.0, 2.0),
-                                locationcoord,
-                            );
-                        })
                         .with_children(|builder| {
                             builder.spawn(Text2dBundle {
                                 text: Text {
@@ -739,38 +790,13 @@ fn spawn_block_sprites(
                             });
                         })
                         .with_children(|builder| {
-                            match building_sprite_index {
-                                1 => {
-                                    building_config::level1::spawn(
-                                        &texture_atlas_handle_building.0.clone(),
-                                        builder,
-                                        color_for_tile,
-                                        locationcoord,
-                                    );
-                                }
-                                _ => {
-                                    // do nothing
-                                }
-                            }
-
-                            // builder.spawn((
-                            //     SpriteSheetBundle {
-                            //         texture_atlas: textureatlashandle_buildings.clone(),
-                            //         sprite: TextureAtlasSprite {
-                            //             color: color_for_tile,
-                            //             index: building_sprite_index,
-                            //             ..Default::default()
-                            //         },
-                            //         transform: Transform {
-                            //             translation: Vec3::new(5., 0., 3.),
-                            //             scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
-                            //             ..Default::default()
-                            //         },
-                            //         ..Default::default()
-                            //     },
-                            //     BuildingStructure::Hut,
-                            //     locationcoord,
-                            // ));
+                            spawn_tile_level(
+                                building_sprite_index,
+                                &texture_atlas_handle_building.0.clone(),
+                                builder,
+                                color_for_sprites,
+                                locationcoord,
+                            );
                         });
                 }
             }
@@ -858,39 +884,192 @@ fn set_camera_tile_bounds(
 
 #[allow(clippy::too_many_arguments, clippy::type_complexity)]
 fn update_tile_textures(
-    //mut commands: Commands,
-    //mut blocks: Query<&mut Location>,
-    mut block_buildings: Query<
-        (&mut TextureAtlasSprite, &Location),
-        (With<BuildingStructure>, Without<Land>),
-    >,
+    mut commands: Commands,
     mut lands: Query<
-        (&mut TextureAtlasSprite, &Location),
+        (&mut TextureAtlasSprite, &Location, Entity),
         (With<Land>, Without<BuildingStructure>),
     >,
     mut event: EventReader<UpdateTileTextureEvent>,
     tile_map: Res<TileMap>,
-    //chunk_map: Res<ChunkManager>,
-    texture_map: Res<TextureMap>,
+    texture_map: Res<SpriteIndexBuilding>,
+    texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
 ) {
     for _e in event.read() {
-        for (mut texture, location) in block_buildings.iter_mut() {
+        for (mut texture, location, parent_entity) in lands.iter_mut() {
             if tile_map.map.contains_key(&location.ulam) {
-                let a = tile_map.map.get(&location.ulam).unwrap();
-                texture.color = a.color;
-                let b = a.amount;
-                texture.index = *texture_map.0.get(&b).unwrap() as usize;
+                let tile_data = tile_map.map.get(&location.ulam).unwrap();
+                let building_sprite_index = *texture_map.0.get(&tile_data.amount).unwrap() as usize;
+
+                let c = ulam::calc_coord::calc_coord(tile_data.height);
+                let mut locationcoord = Location {
+                    x: c.x,
+                    y: c.y,
+                    ulam: tile_data.height,
+                    quad: ulam::quad_of_xy(c.x, c.y),
+                    selected: false,
+                };
+                if locationcoord.ulam == 1 {
+                    locationcoord.quad = Quad::SouthEast
+                } else if locationcoord.quad == Quad::SouthEast {
+                    locationcoord.quad = Quad::South
+                } else if locationcoord.quad == Quad::East
+                    && ulam::quad_of_value(locationcoord.ulam - 1) == Quad::SouthEast
+                {
+                    locationcoord.quad = Quad::SouthEast;
+                }
+
+                texture.color = Color::Rgba {
+                    red: 1.0,
+                    green: 1.0,
+                    blue: 1.0,
+                    alpha: 1.0,
+                };
+                let mut rng = rand::thread_rng();
+                let base_sprite_index: usize = rng.gen_range(0..=10);
+
+                texture.index = base_sprite_index; //*texture_map.0.get(&base_sprite_index).unwrap() as usize;
+
+                commands
+                    .entity(parent_entity)
+                    .with_children(|child_builder| {
+                        spawn_tile_level(
+                            building_sprite_index,
+                            &texture_atlas_handle_building.0.clone(),
+                            child_builder,
+                            tile_data.color,
+                            locationcoord,
+                        );
+                    });
             }
         }
+        info!("updated textures");
+    }
+}
 
-        for (mut texture, location) in lands.iter_mut() {
-            if tile_map.map.contains_key(&location.ulam) {
-                texture.color = Color::Rgba {
-                    red: 1.,
-                    green: 1.,
-                    blue: 1.,
-                    alpha: 1.,
-                };
+fn animate_firepit(
+    time: Res<Time>,
+    mut query: Query<(
+        &AnimationIndices,
+        &mut AnimationTimer,
+        &mut TextureAtlasSprite,
+    )>,
+) {
+    for (indices, mut timer, mut sprite) in &mut query {
+        timer.tick(time.delta());
+        if timer.just_finished() {
+            sprite.index = if sprite.index == indices.last {
+                indices.first
+            } else {
+                sprite.index + 1
+            };
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+fn select_tile(
+    mut commands: Commands,
+    mut lands: Query<(&mut Location, Entity), (With<Land>, Without<BuildingStructure>)>,
+    //chunk_map: Res<ChunkManager>,
+    texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
+    mut event: EventReader<SelectTileEvent>,
+    mut selected_lands: Query<
+        (Entity, &Location),
+        (With<Selected>, Without<Land>, Without<BuildingStructure>),
+    >,
+    mut last_selected_tile: ResMut<LastSelectedTile>,
+) {
+    for e in event.read() {
+        //let event_val = ulam::value_of_xy(e.0, e.1);
+        for (mut location, parent_entity) in lands.iter_mut() {
+            if location.x == e.0 && location.y == e.1 {
+                if last_selected_tile.0 == e.0 && last_selected_tile.1 == e.1 && !location.selected
+                {
+                    // spawn
+                    info!("spawn branch1");
+                    commands
+                        .entity(parent_entity)
+                        .with_children(|child_builder| {
+                            spawn_tile_level(
+                                100,
+                                &texture_atlas_handle_building.0.clone(),
+                                child_builder,
+                                Color::Rgba {
+                                    red: 1.,
+                                    green: 1.,
+                                    blue: 1.,
+                                    alpha: 1.,
+                                },
+                                *location,
+                            );
+                        });
+                    location.selected = true;
+                } else if last_selected_tile.0 != e.0
+                    && last_selected_tile.1 != e.1
+                    && !location.selected
+                {
+                    info!("last selected res set for {}, {}", e.0, e.1);
+                    *last_selected_tile = LastSelectedTile(e.0, e.1);
+                } else if location.selected {
+                    for (sentity, slocation) in selected_lands.iter_mut() {
+                        if slocation.x == e.0
+                            && slocation.y == e.1
+                            && slocation.x == location.x
+                            && slocation.y == location.y
+                        {
+                            info!("despawn branch");
+                            commands.entity(sentity).despawn();
+                            location.selected = false;
+                        }
+                    }
+                } else {
+                    // info!("this shouldnt be reached");
+                    // info!(
+                    //     "{}, {}, {}, {}, {}, {}, {}",
+                    //     e.0,
+                    //     e.1,
+                    //     location.x,
+                    //     location.y,
+                    //     last_selected_tile.0,
+                    //     last_selected_tile.1,
+                    //     location.selected
+                    // );
+                    *last_selected_tile = LastSelectedTile(e.0, e.1);
+                }
+            }
+        }
+    }
+}
+
+fn cancel_select_tile(
+    mut commands: Commands,
+    mut lands: Query<(&Location, Entity), (With<Land>, Without<BuildingStructure>)>,
+    chunk_map: Res<ChunkManager>,
+    texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
+    mut event: EventReader<SelectTileEvent>,
+) {
+    for e in event.read() {
+        let event_val = ulam::value_of_xy(e.0, e.1);
+        if chunk_map.map.contains_key(&event_val) {
+            for (location, parent_entity) in lands.iter_mut() {
+                if location.ulam == event_val {
+                    commands
+                        .entity(parent_entity)
+                        .with_children(|child_builder| {
+                            spawn_tile_level(
+                                100,
+                                &texture_atlas_handle_building.0.clone(),
+                                child_builder,
+                                Color::Rgba {
+                                    red: 1.,
+                                    green: 1.,
+                                    blue: 1.,
+                                    alpha: 1.,
+                                },
+                                *location,
+                            );
+                        });
+                }
             }
         }
         info!("updated textures");

@@ -1,24 +1,26 @@
-use crate::{BuildingStructure, Location, TILE_SCALE};
+use crate::{BuildingStructure, Location};
 use bevy::prelude::*;
 
+const RADIAN_90: f32 = 1.5707961;
 #[allow(clippy::too_many_arguments)]
 pub fn spawn(
     texture: &Handle<TextureAtlas>,
     builder: &mut ChildBuilder,
     color: Color,
     locationcoord: Location,
+    road_offset: usize,
 ) {
     info!("roadbuilding");
-    // index number on sprite sheet and rotation degree. seems like 90 degrees is = 1.565
+    // index number on sprite sheet and rotation degree. seems like 90 degrees is = 1.5707961
     let road: (usize, f32) = match locationcoord.quad {
         ulam::Quad::North => (2, 0.0),
-        ulam::Quad::NorthEast => (3, 1.565),
-        ulam::Quad::East => (2, 1.565),
+        ulam::Quad::NorthEast => (3, RADIAN_90),
+        ulam::Quad::East => (2, RADIAN_90),
         ulam::Quad::SouthEast => (3, 0.0),
         ulam::Quad::South => (2, 0.0),
-        ulam::Quad::SouthWest => (3, 4.695),
-        ulam::Quad::West => (2, 1.56),
-        ulam::Quad::NorthWest => (3, 3.13),
+        ulam::Quad::SouthWest => (3, RADIAN_90 * 3.),
+        ulam::Quad::West => (2, RADIAN_90),
+        ulam::Quad::NorthWest => (3, RADIAN_90 * 2.),
         ulam::Quad::Center => (2, 0.0),
     };
     builder.spawn((
@@ -26,7 +28,7 @@ pub fn spawn(
             texture_atlas: texture.clone(),
             sprite: TextureAtlasSprite {
                 color,
-                index: road.0,
+                index: road.0 + road_offset,
                 ..Default::default()
             },
             transform: Transform {
@@ -37,7 +39,7 @@ pub fn spawn(
             },
             ..Default::default()
         },
-        BuildingStructure::Road,
+        BuildingStructure::DirtRoad,
         locationcoord,
     ));
 }

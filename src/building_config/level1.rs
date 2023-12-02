@@ -27,4 +27,12 @@ pub fn spawn(
         BuildingStructure::Hut,
         locationcoord,
     ));
+
+    crate::building_config::road::spawn(
+        &texture.clone(),
+        builder,
+        Color::rgba(1.0, 1.0, 1.0, 1.0),
+        locationcoord,
+        0,
+    );
 }
