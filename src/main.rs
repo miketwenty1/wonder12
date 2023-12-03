@@ -1,3 +1,4 @@
+//use bevy::asset::AssetMetaCheck;
 use bevy::window::PrimaryWindow;
 use bevy::{input::mouse::MouseMotion, prelude::*, text::Text2dBounds, utils::HashMap};
 use building_config::spawn_tile_level;
@@ -17,10 +18,17 @@ const DESPAWN_TILE_THRESHOLD: i32 = 51 + CHUNK_TILE_SPAN_COUNT * 2;
 const CAMERA_SANITY_FACTOR: f32 = 1.25;
 const MOVE_VELOCITY_FACTOR: f32 = 10.0;
 
+const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
+const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
+const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
+
 mod building_config;
 mod comms;
 
 use async_channel::{Receiver, Sender};
+
+#[derive(Component)]
+struct UiNode;
 
 #[derive(Component)]
 struct Selected;
@@ -231,6 +239,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         }))
         .insert_resource(ServerURL(server_url))
         .insert_resource(SpriteIndexBuilding(numbers_map))
+        //.insert_resource(AssetMetaCheck::Never)
         .add_state::<CommsState>()
         .add_plugins(CommsPlugin)
         // Only run the app when there is user input. This will significantly reduce CPU/GPU use.
@@ -255,21 +264,139 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
                 zoom_out_button_system,
                 zoom_in_button_system,
                 mouse_camera_system,
-                touch_event_system,
+                //touch_event_system,
                 edge_system,
-                update_tile_textures,
+                //update_tile_textures,
                 spawn_block_sprites,
-                animate_firepit,
-                select_tile,
+                //animate_sprites,
+                //select_tile,
                 //my_cursor_system,
-            ), //, print_mouse_events_system, touch_event_system
+            ), //, print_mouse_events_system,
         )
         .run();
 }
 
-const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    // edge: Res<Edge>,
+    // mut chunk_map: ResMut<ChunkManager>,
+    // tile_map: Res<TileMap>,
+    mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
+) {
+    // ui camera
+    commands.spawn(Camera2dBundle::default());
+
+    let texture_handle = asset_server.load("spritesheet/grassdirtbg.png");
+    let texture_atlas_bg = TextureAtlas::from_grid(
+        texture_handle,
+        Vec2::new(TILE_PIXEL_SIZE, TILE_PIXEL_SIZE),
+        11,
+        1,
+        Some(Vec2::new(0.0, 0.0)),
+        None,
+    );
+    let texture_handle_buildings = asset_server.load("spritesheet/buildings.png");
+    let texture_atlas_building = TextureAtlas::from_grid(
+        texture_handle_buildings,
+        Vec2::new(32.0, 32.0),
+        17,
+        1,
+        Some(Vec2::new(0.0, 0.0)),
+        Some(Vec2::new(0.0, 0.0)),
+    );
+    let texture_atlas_handle_bg = texture_atlases.add(texture_atlas_bg);
+    let texture_atlas_handle_building = texture_atlases.add(texture_atlas_building);
+
+    commands.insert_resource(SpriteSheetBgRes(texture_atlas_handle_bg.clone()));
+    commands.insert_resource(SpriteSheetBuildingRes(
+        texture_atlas_handle_building.clone(),
+    ));
+
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::FlexEnd,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            UiNode,
+        ))
+        .with_children(|parent| {
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            width: Val::Px(100.0),
+                            height: Val::Px(65.0),
+                            border: UiRect::all(Val::Px(5.0)),
+                            // horizontally center child text
+                            justify_content: JustifyContent::Center,
+                            // vertically center child text
+                            align_items: AlignItems::Center,
+                            ..default()
+                        },
+                        border_color: BorderColor(Color::BLACK),
+                        background_color: NORMAL_BUTTON.into(),
+                        ..default()
+                    },
+                    ZoomOut,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "-",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 40.0,
+                            color: Color::rgb(0.9, 0.9, 0.9),
+                        },
+                    ));
+                });
+
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            width: Val::Px(100.0),
+                            height: Val::Px(65.0),
+                            border: UiRect::all(Val::Px(5.0)),
+                            // horizontally center child text
+                            justify_content: JustifyContent::Center,
+                            // vertically center child text
+                            align_items: AlignItems::Center,
+                            ..default()
+                        },
+                        border_color: BorderColor(Color::BLACK),
+                        background_color: NORMAL_BUTTON.into(),
+                        ..default()
+                    },
+                    ZoomIn,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "+",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 40.0,
+                            color: Color::rgb(0.9, 0.9, 0.9),
+                        },
+                    ));
+                });
+        });
+
+    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
+    commands.insert_resource(TileDataChannel {
+        tx: tx_tiledata,
+        rx: rx_tiledata,
+    });
+    sprite_spawn_event.send(SpriteSpawnEvent);
+}
 
 #[allow(clippy::too_many_arguments)]
 fn mouse_camera_system(
@@ -289,12 +416,14 @@ fn mouse_camera_system(
     mut edge_event: EventWriter<EdgeEvent>,
     q_window: Query<&Window, With<PrimaryWindow>>,
     mut select_tile_event: EventWriter<SelectTileEvent>,
-    mut last_selected_tile: ResMut<LastSelectedTile>,
-    location_query: Query<&Location>,
+    //mut last_selected_tile: ResMut<LastSelectedTile>,
+    //location_query: Query<&Location>,
 ) {
     if mouse.pressed(MouseButton::Middle) || mouse.pressed(MouseButton::Left) {
         for (mut cam_transform, cam_ortho, camera, camera_transform) in q_camera.iter_mut() {
             let window = q_window.single();
+            // let height = window.resolution.height();
+            // let width = window.resolution.width();
             // check if the cursor is inside the window and get its position
             // then, ask bevy to convert into world coordinates, and truncate to discard Z
             if let Some(world_position) = window
@@ -303,7 +432,6 @@ fn mouse_camera_system(
                 .map(|ray| ray.origin.truncate())
             {
                 //mycoords.0 = world_position;
-
                 let x: i32 = if world_position.x >= 0.0 {
                     ((world_position.x + TOTAL_TILE_SCALE_SIZE / 2. - 1.) / TOTAL_TILE_SCALE_SIZE)
                         as i32
@@ -320,12 +448,12 @@ fn mouse_camera_system(
                         as i32
                 };
 
-                info!("mouse World coords: {}/{}", x, y);
+                //info!("mouse World coords: {}/{}", x, y);
 
                 if mouse.just_pressed(MouseButton::Left) {
                     // for location in location_query.iter() {
                     //     if location.x == x && location.y == y {
-                    info!("send mouse select");
+                    //info!("send mouse select");
                     select_tile_event.send(SelectTileEvent(x, y));
                     //   }
                     //}
@@ -355,8 +483,8 @@ fn touch_event_system(
     mut edge_event: EventWriter<EdgeEvent>,
     q_window: Query<&Window, With<PrimaryWindow>>,
     mut select_tile_event: EventWriter<SelectTileEvent>,
-    mut last_selected_tile: ResMut<LastSelectedTile>,
-    location_query: Query<&Location>,
+    //mut last_selected_tile: ResMut<LastSelectedTile>,
+    //location_query: Query<&Location>,
 ) {
     for touch in touches.iter() {
         for (mut cam_transform, cam_ortho) in camera.iter_mut() {
@@ -410,6 +538,12 @@ fn touch_event_system(
             cam_transform.translation +=
                 direction * time.delta_seconds() * cam_ortho.scale * MOVE_VELOCITY_FACTOR * 4.0;
 
+            info!(
+                "direction: {}, timedelta: {}, camscale: {}",
+                direction,
+                time.delta_seconds(),
+                cam_ortho.scale
+            );
             set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
 
             if touches.just_pressed(touch.id()) {
@@ -507,125 +641,6 @@ fn zoom_in_button_system(
             }
         }
     }
-}
-
-fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-    // edge: Res<Edge>,
-    // mut chunk_map: ResMut<ChunkManager>,
-    // tile_map: Res<TileMap>,
-    mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
-) {
-    // ui camera
-    commands.spawn(Camera2dBundle::default());
-
-    let texture_handle = asset_server.load("spritesheet/grassdirtbg.png");
-    let texture_atlas_bg = TextureAtlas::from_grid(
-        texture_handle,
-        Vec2::new(TILE_PIXEL_SIZE, TILE_PIXEL_SIZE),
-        11,
-        1,
-        Some(Vec2::new(0.0, 0.0)),
-        None,
-    );
-    let texture_handle_buildings = asset_server.load("spritesheet/buildings.png");
-    let texture_atlas_building = TextureAtlas::from_grid(
-        texture_handle_buildings,
-        Vec2::new(32.0, 32.0),
-        10,
-        1,
-        Some(Vec2::new(0.0, 0.0)),
-        Some(Vec2::new(0.0, 0.0)),
-    );
-    let texture_atlas_handle_bg = texture_atlases.add(texture_atlas_bg);
-    let texture_atlas_handle_building = texture_atlases.add(texture_atlas_building);
-
-    commands.insert_resource(SpriteSheetBgRes(texture_atlas_handle_bg.clone()));
-    commands.insert_resource(SpriteSheetBuildingRes(
-        texture_atlas_handle_building.clone(),
-    ));
-
-    commands
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::FlexEnd,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
-            ..default()
-        })
-        .with_children(|parent| {
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(100.0),
-                            height: Val::Px(65.0),
-                            border: UiRect::all(Val::Px(5.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: NORMAL_BUTTON.into(),
-                        ..default()
-                    },
-                    ZoomOut,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "-",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 40.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
-                        },
-                    ));
-                });
-
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(100.0),
-                            height: Val::Px(65.0),
-                            border: UiRect::all(Val::Px(5.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: NORMAL_BUTTON.into(),
-                        ..default()
-                    },
-                    ZoomIn,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "+",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 40.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
-                        },
-                    ));
-                });
-        });
-
-    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
-    commands.insert_resource(TileDataChannel {
-        tx: tx_tiledata,
-        rx: rx_tiledata,
-    });
-    sprite_spawn_event.send(SpriteSpawnEvent);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -822,10 +837,10 @@ fn set_camera_tile_bounds(
         });
         info!("new left {}", edge.left.pixel);
 
-        if camera_vec3.x < edge.left.pixel * CAMERA_SANITY_FACTOR {
-            info!("adjust left?");
-            camera_vec3.x = edge.left.pixel;
-        }
+        // if camera_vec3.x < edge.left.pixel * CAMERA_SANITY_FACTOR {
+        //     info!("adjust left?");
+        //     camera_vec3.x = edge.left.pixel;
+        // }
     }
     if camera_vec3.x > edge.right.pixel {
         //cam_transform.translation.x = edge.right.pixel;
@@ -946,7 +961,7 @@ fn update_tile_textures(
     }
 }
 
-fn animate_firepit(
+fn animate_sprites(
     time: Res<Time>,
     mut query: Query<(
         &AnimationIndices,
@@ -1041,37 +1056,13 @@ fn select_tile(
     }
 }
 
-fn cancel_select_tile(
+fn cancel_highlight_tile(
     mut commands: Commands,
-    mut lands: Query<(&Location, Entity), (With<Land>, Without<BuildingStructure>)>,
-    chunk_map: Res<ChunkManager>,
-    texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
+    mut selected_lands: Query<
+        (Entity, &Location),
+        (With<Selected>, Without<Land>, Without<BuildingStructure>),
+    >,
     mut event: EventReader<SelectTileEvent>,
 ) {
-    for e in event.read() {
-        let event_val = ulam::value_of_xy(e.0, e.1);
-        if chunk_map.map.contains_key(&event_val) {
-            for (location, parent_entity) in lands.iter_mut() {
-                if location.ulam == event_val {
-                    commands
-                        .entity(parent_entity)
-                        .with_children(|child_builder| {
-                            spawn_tile_level(
-                                100,
-                                &texture_atlas_handle_building.0.clone(),
-                                child_builder,
-                                Color::Rgba {
-                                    red: 1.,
-                                    green: 1.,
-                                    blue: 1.,
-                                    alpha: 1.,
-                                },
-                                *location,
-                            );
-                        });
-                }
-            }
-        }
-        info!("updated textures");
-    }
+    for e in event.read() {}
 }

@@ -51,16 +51,6 @@ pub fn spawn(
     builder.spawn((
         SpriteSheetBundle {
             texture_atlas: texture.clone(),
-            // sprite: TextureAtlasSprite {
-            //     color: Color::Rgba {
-            //         red: 1.0,
-            //         green: 1.0,
-            //         blue: 1.0,
-            //         alpha: 1.0,
-            //     },
-            //     index: 6,
-            //     ..Default::default()
-            // },
             sprite: TextureAtlasSprite::new(animation_indices.first),
             transform: Transform {
                 translation: Vec3::new(4.5, -6.5, 5.),
