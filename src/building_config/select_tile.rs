@@ -6,11 +6,11 @@ use crate::{AnimationIndices, AnimationTimer, Location, Selected};
 pub fn spawn(
     texture: &Handle<TextureAtlas>,
     builder: &mut ChildBuilder,
-    color: Color,
+    _color: Color,
     locationcoord: Location,
 ) {
     let animation_indices = AnimationIndices { first: 9, last: 16 };
-    info!("spawn select");
+    //info!("spawn select");
     builder.spawn((
         SpriteSheetBundle {
             texture_atlas: texture.clone(),

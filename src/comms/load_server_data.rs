@@ -41,7 +41,7 @@ pub fn api_receive_server_tiles(
     mut update_tile_event: EventWriter<UpdateTileTextureEvent>,
 ) {
     if api_timer.timer.finished() && !channel.rx.is_empty() {
-        info!("checking for tiles response");
+        //info!("checking for tiles response");
         let api_res = channel.rx.try_recv();
 
         let mut send_update = false;
@@ -51,7 +51,7 @@ pub fn api_receive_server_tiles(
                 let r_invoice_result = serde_json::from_str::<GameBlocksDataFromDBMod>(&r);
                 match r_invoice_result {
                     Ok(server_block_data) => {
-                        info!("{:?}", server_block_data);
+                        //info!("{:?}", server_block_data);
                         for block_data in server_block_data.blocks {
                             let td = TileData {
                                 ln_address: block_data.refund_ln_addr,

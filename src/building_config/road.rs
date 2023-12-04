@@ -10,7 +10,7 @@ pub fn spawn(
     locationcoord: Location,
     road_offset: usize,
 ) {
-    info!("roadbuilding");
+    //info!("roadbuilding");
     // index number on sprite sheet and rotation degree. seems like 90 degrees is = 1.5707961
     let road: (usize, f32) = match locationcoord.quad {
         ulam::Quad::North => (2, 0.0),
