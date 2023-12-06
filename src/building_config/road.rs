@@ -1,5 +1,6 @@
-use crate::{BuildingStructure, Location};
 use bevy::prelude::*;
+
+use crate::componenty::{BuildingStructure, Location};
 
 const RADIAN_90: f32 = 1.5707961;
 #[allow(clippy::too_many_arguments)]

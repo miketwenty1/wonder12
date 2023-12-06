@@ -1,7 +1,8 @@
 use super::api_timer::ApiPollingTimer;
 use super::server_structs::GameBlocksDataFromDBMod;
+use crate::resourcey::{TileData, TileDataChannel};
+use crate::structy::TileResource;
 use crate::{CommsState, ServerURL, TileMap, UpdateTileTextureEvent};
-use crate::{TileData, TileDataChannel, TileResource};
 use bevy::prelude::*;
 use bevy::tasks::IoTaskPool;
 

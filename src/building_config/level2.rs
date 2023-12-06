@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{BuildingStructure, Location, TILE_SCALE};
+use crate::{
+    componenty::{BuildingStructure, Location},
+    consty::TILE_SCALE,
+};
 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn(

@@ -1,5 +1,6 @@
-use crate::Location;
 use bevy::prelude::*;
+
+use crate::componenty::Location;
 
 pub mod level1;
 pub mod level2;
