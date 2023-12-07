@@ -54,3 +54,6 @@ pub struct TileDataChannel {
 
 #[derive(Resource, Clone)]
 pub struct ServerURL(pub String);
+
+#[derive(Resource, Clone)]
+pub struct ToggleMap(pub HashMap<String, bool>);

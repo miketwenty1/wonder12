@@ -52,3 +52,84 @@ pub enum BuildingStructure {
     //DirtRoadCorner2,
     FirePit,
 }
+
+#[derive(Component)]
+pub struct UiToggle;
+
+#[derive(Component)]
+pub struct ToggleParent;
+
+#[derive(Component)]
+pub struct ToggleButton;
+
+#[derive(Component)]
+pub struct HideBuilding;
+
+#[derive(Component)]
+pub struct ShowBuilding;
+
+#[derive(Component)]
+pub struct ShowColors;
+
+#[derive(Component)]
+pub struct HideColors;
+
+#[derive(Component)]
+pub struct ShowValues;
+
+#[derive(Component)]
+pub struct ShowHeights;
+
+#[derive(Component)]
+pub struct ShowText;
+
+#[derive(Component)]
+pub struct HideText;
+
+#[derive(Component)]
+pub struct HideBuildingText;
+
+#[derive(Component)]
+pub struct ShowBuildingText;
+
+#[derive(Component)]
+pub struct ShowColorsText;
+
+#[derive(Component)]
+pub struct HideColorsText;
+
+#[derive(Component)]
+pub struct ShowValuesText;
+
+#[derive(Component)]
+pub struct ShowHeightsText;
+
+#[derive(Component)]
+pub struct ShowTextText;
+
+#[derive(Component)]
+pub struct HideTextText;
+
+#[derive(Component)]
+pub struct Toggle1Btn;
+
+#[derive(Component)]
+pub struct Toggle2Btn;
+
+#[derive(Component)]
+pub struct Toggle3Btn;
+
+#[derive(Component)]
+pub struct Toggle4Btn;
+
+#[derive(Component)]
+pub struct Toggle1BtnText;
+
+#[derive(Component)]
+pub struct Toggle2BtnText;
+
+#[derive(Component)]
+pub struct Toggle3BtnText;
+
+#[derive(Component)]
+pub struct Toggle4BtnText;

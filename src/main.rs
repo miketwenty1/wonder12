@@ -2,9 +2,10 @@ use crate::comms::{load_server_data::api_get_server_tiles, CommsPlugin};
 use crate::consty::{CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT};
 use crate::eventy::{EdgeEvent, SelectTileEvent, SpriteSpawnEvent, UpdateTileTextureEvent};
 use crate::explore_scene::ExplorePlugin;
-use crate::overlay_detail_ui::OverlayUiPlugin;
+use crate::overlay_ui::OverlayUiPlugin;
 use crate::resourcey::{
     ChunkManager, Edge, LastSelectedTile, ServerURL, SpriteIndexBuilding, TileDataChannel, TileMap,
+    ToggleMap,
 };
 use crate::statey::{CommsState, DisplayUiState, ExploreState};
 use crate::structy::EdgeData;
@@ -15,7 +16,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 mod building_config;
 mod comms;
 mod explore_scene;
-mod overlay_detail_ui;
+mod overlay_ui;
 
 mod componenty;
 mod consty;
@@ -29,6 +30,16 @@ pub fn main() {
 }
 #[wasm_bindgen]
 pub fn game12(username: String, server_url: String, ln_address: String) {
+    let mut toggle_map = HashMap::new();
+    toggle_map.insert("hidebuildings".to_string(), true);
+    toggle_map.insert("showbuildings".to_string(), false);
+    toggle_map.insert("showcolors".to_string(), true);
+    toggle_map.insert("hidecolors".to_string(), false);
+    toggle_map.insert("showvalues".to_string(), true);
+    toggle_map.insert("showheights".to_string(), false);
+    toggle_map.insert("showtext".to_string(), false);
+    toggle_map.insert("hidetext".to_string(), true);
+
     let mut numbers_map = HashMap::new();
 
     numbers_map.insert(0, 0);
@@ -84,6 +95,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .insert_resource(AssetMetaCheck::Never)
         .insert_resource(ServerURL(server_url))
         .insert_resource(SpriteIndexBuilding(numbers_map))
+        .insert_resource(ToggleMap(toggle_map))
         .insert_resource(AssetMetaCheck::Never)
         .add_state::<ExploreState>()
         .add_state::<CommsState>()
