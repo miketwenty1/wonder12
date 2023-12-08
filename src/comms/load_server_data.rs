@@ -1,9 +1,11 @@
 use super::api_timer::ApiPollingTimer;
 use super::server_structs::GameBlocksDataFromDBMod;
+use crate::resourcey::{TileData, TileDataChannel};
+use crate::structy::TileResource;
 use crate::{CommsState, ServerURL, TileMap, UpdateTileTextureEvent};
-use crate::{TileData, TileDataChannel, TileResource};
 use bevy::prelude::*;
 use bevy::tasks::IoTaskPool;
+use rand::Rng;
 
 //pub fn load_server_data(mut commands: Commands, mut tile_map: ResMut<TileMap>) {}
 //SetTileDataChannel
@@ -43,7 +45,7 @@ pub fn api_receive_server_tiles(
     if api_timer.timer.finished() && !channel.rx.is_empty() {
         //info!("checking for tiles response");
         let api_res = channel.rx.try_recv();
-
+        let mut rng = rand::thread_rng();
         let mut send_update = false;
         match api_res {
             Ok(r) => {
@@ -62,6 +64,7 @@ pub fn api_receive_server_tiles(
                                 amount: block_data.amount as u32,
                                 hash: "".to_string(),
                                 height: block_data.height as u32,
+                                land_index: rng.gen_range(1..=11),
                             };
 
                             tile_map.map.insert(block_data.height as u32, td);

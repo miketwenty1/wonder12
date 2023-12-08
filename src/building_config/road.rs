@@ -1,5 +1,6 @@
-use crate::{BuildingStructure, Location};
 use bevy::prelude::*;
+
+use crate::componenty::{BuildingStructure, Location};
 
 const RADIAN_90: f32 = 1.5707961;
 #[allow(clippy::too_many_arguments)]
@@ -9,6 +10,7 @@ pub fn spawn(
     color: Color,
     locationcoord: Location,
     road_offset: usize,
+    visibility: Visibility,
 ) {
     //info!("roadbuilding");
     // index number on sprite sheet and rotation degree. seems like 90 degrees is = 1.5707961
@@ -37,6 +39,7 @@ pub fn spawn(
                 rotation: Quat::from_rotation_z(road.1),
                 ..Default::default()
             },
+            visibility,
             ..Default::default()
         },
         BuildingStructure::DirtRoad,

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{AnimationIndices, AnimationTimer, Location, Selected};
+use crate::componenty::{AnimationIndices, AnimationTimer, Location, Selected};
 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn(

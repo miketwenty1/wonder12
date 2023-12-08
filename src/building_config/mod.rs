@@ -1,5 +1,6 @@
-use crate::Location;
 use bevy::prelude::*;
+
+use crate::componenty::Location;
 
 pub mod level1;
 pub mod level2;
@@ -13,16 +14,35 @@ pub fn spawn_tile_level(
     builder: &mut ChildBuilder,
     color_for_sprites: Color,
     locationcoord: Location,
+    visibility_toggle: Visibility,
 ) {
     match building_sprite_index {
         1 => {
-            level1::spawn(texture_handle, builder, color_for_sprites, locationcoord);
+            level1::spawn(
+                texture_handle,
+                builder,
+                color_for_sprites,
+                locationcoord,
+                visibility_toggle,
+            );
         }
         2 => {
-            level2::spawn(texture_handle, builder, color_for_sprites, locationcoord);
+            level2::spawn(
+                texture_handle,
+                builder,
+                color_for_sprites,
+                locationcoord,
+                visibility_toggle,
+            );
         }
         3 => {
-            level3::spawn(texture_handle, builder, color_for_sprites, locationcoord);
+            level3::spawn(
+                texture_handle,
+                builder,
+                color_for_sprites,
+                locationcoord,
+                visibility_toggle,
+            );
         }
         100 => {
             select_tile::spawn(texture_handle, builder, color_for_sprites, locationcoord);
