@@ -6,7 +6,7 @@ use crate::{
     building_config::spawn_tile_level,
     componenty::{
         AnimationIndices, AnimationTimer, BuildingStructure, ClearSelectionButton,
-        DetailSelectionButton, Land, Location, Selected, UiNode, UiTileSelectedButton,
+        DetailSelectionButton, Land, Location, Selected, TileText, UiNode, UiTileSelectedButton,
         ZoomInButton, ZoomOutButton,
     },
     consty::{
@@ -38,7 +38,7 @@ pub fn setup_explorer(
     let texture_atlas_bg = TextureAtlas::from_grid(
         texture_handle,
         Vec2::new(TILE_PIXEL_SIZE, TILE_PIXEL_SIZE),
-        11,
+        12,
         1,
         Some(Vec2::new(0.0, 0.0)),
         None,
@@ -350,6 +350,7 @@ pub fn touch_event_system(
 
 #[allow(clippy::type_complexity)]
 pub fn zoom_out_button_system(
+    mut mouse: ResMut<Input<MouseButton>>,
     mut interaction_query: Query<
         (
             &Interaction,
@@ -366,6 +367,7 @@ pub fn zoom_out_button_system(
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
+                mouse.clear_just_pressed(MouseButton::Left);
                 text.sections[0].value = "-".to_string();
                 *color = PRESSED_BUTTON.into();
                 border_color.0 = Color::GRAY;
@@ -393,6 +395,7 @@ pub fn zoom_out_button_system(
 
 #[allow(clippy::type_complexity)]
 pub fn zoom_in_button_system(
+    mut mouse: ResMut<Input<MouseButton>>,
     mut interaction_query: Query<
         (
             &Interaction,
@@ -409,6 +412,7 @@ pub fn zoom_in_button_system(
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
+                mouse.clear_just_pressed(MouseButton::Left);
                 text.sections[0].value = "+".to_string();
                 *color = PRESSED_BUTTON.into();
                 border_color.0 = Color::GRAY;
@@ -436,14 +440,10 @@ pub fn zoom_in_button_system(
 
 #[allow(clippy::too_many_arguments)]
 pub fn edge_system(
-    //edge: ResMut<Edge>,
     mut commands: Commands,
     blocks: Query<(Entity, &Location), With<Land>>,
     mut edge_event: EventReader<EdgeEvent>,
-    // asset_server: Res<AssetServer>,
-    // texture_atlases: Res<Assets<TextureAtlas>>,
     mut chunk_map: ResMut<ChunkManager>,
-    // tile_map: Res<TileMap>,
     mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
 ) {
     for edge_e in edge_event.read() {
@@ -476,6 +476,7 @@ pub fn spawn_block_sprites(
     edge: Res<Edge>,
     mut chunk_map: ResMut<ChunkManager>,
     tile_map: Res<TileMap>,
+    //toggle_map: Res<ToggleMap>,
 ) {
     for _event in sprite_spawn_event.read() {
         let font = asset_server.load("fonts/FiraSans-Bold.ttf");
@@ -498,8 +499,10 @@ pub fn spawn_block_sprites(
 
         //info!("spawning {:#?}", spawn_diff);
         let mut building_sprite_index;
+        let mut land_sprite_index: usize;
         let mut color_for_sprites;
         let mut color_for_tile;
+        // let mut tile_text = "".to_string();
 
         for x in spawn_diff.xstart..=spawn_diff.xend {
             for y in spawn_diff.ystart..=spawn_diff.yend {
@@ -526,8 +529,10 @@ pub fn spawn_block_sprites(
                         locationcoord.quad = Quad::SouthEast;
                     }
 
+                    // writing this code to make tile_text populate correctly where it updates tiles correctly based on toggle.
+
                     let mut rng = rand::thread_rng();
-                    let base_sprite_index: usize = rng.gen_range(0..=10);
+                    land_sprite_index = rng.gen_range(1..=11);
 
                     if tile_map.map.contains_key(&locationcoord.ulam) {
                         let amount_from_tile =
@@ -536,6 +541,8 @@ pub fn spawn_block_sprites(
                             *texture_map.0.get(&amount_from_tile).unwrap() as usize;
 
                         color_for_sprites = tile_map.map.get(&locationcoord.ulam).unwrap().color;
+                        land_sprite_index =
+                            tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
                         color_for_tile = Color::Rgba {
                             red: 1.,
                             green: 1.,
@@ -558,7 +565,7 @@ pub fn spawn_block_sprites(
                                 texture_atlas: texture_atlas_handle_bg.0.clone(), //textureatlashandle.clone(),
                                 sprite: TextureAtlasSprite {
                                     color: color_for_tile,
-                                    index: base_sprite_index,
+                                    index: land_sprite_index,
                                     ..Default::default()
                                 },
 
@@ -577,23 +584,27 @@ pub fn spawn_block_sprites(
                             Land,
                         ))
                         .with_children(|builder| {
-                            builder.spawn(Text2dBundle {
-                                text: Text {
-                                    sections: vec![TextSection::new(
-                                        format!("{}", locationcoord.ulam),
-                                        slightly_smaller_text_style.clone(),
-                                    )],
-                                    alignment: TextAlignment::Left,
-                                    ..Default::default()
+                            builder.spawn((
+                                Text2dBundle {
+                                    text: Text {
+                                        sections: vec![TextSection::new(
+                                            format!("{}", locationcoord.ulam),
+                                            slightly_smaller_text_style.clone(),
+                                        )],
+                                        alignment: TextAlignment::Left,
+                                        ..Default::default()
+                                    },
+                                    text_2d_bounds: Text2dBounds { ..default() },
+                                    transform: Transform {
+                                        translation: Vec3::new(0., 0., 3.),
+                                        scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+                                        ..Default::default()
+                                    },
+                                    ..default()
                                 },
-                                text_2d_bounds: Text2dBounds { ..default() },
-                                transform: Transform {
-                                    translation: Vec3::new(0., 0., 3.),
-                                    scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
-                                    ..Default::default()
-                                },
-                                ..default()
-                            });
+                                locationcoord,
+                                TileText,
+                            ));
                         })
                         .with_children(|builder| {
                             spawn_tile_level(
@@ -602,6 +613,7 @@ pub fn spawn_block_sprites(
                                 builder,
                                 color_for_sprites,
                                 locationcoord,
+                                Visibility::Visible,
                             );
                         });
                 }
@@ -699,8 +711,16 @@ pub fn update_tile_textures(
     tile_map: Res<TileMap>,
     texture_map: Res<SpriteIndexBuilding>,
     texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
+    //toggle_map: Res<ToggleMap>,
 ) {
     for _e in event.read() {
+        // let dd = toggle_map.0.get("showbuildings").unwrap();
+        // let mut visibility_building_toggle;
+        // if !*dd {
+        //     visibility_building_toggle = Visibility::Visible;
+        // } else {
+        //     visibility_building_toggle = Visibility::Hidden;
+        // }
         for (mut texture, location, parent_entity) in lands.iter_mut() {
             if tile_map.map.contains_key(&location.ulam) {
                 let tile_data = tile_map.map.get(&location.ulam).unwrap();
@@ -730,10 +750,9 @@ pub fn update_tile_textures(
                     blue: 1.0,
                     alpha: 1.0,
                 };
-                let mut rng = rand::thread_rng();
-                let base_sprite_index: usize = rng.gen_range(0..=10);
-
-                texture.index = base_sprite_index; //*texture_map.0.get(&base_sprite_index).unwrap() as usize;
+                //let base_sprite_index: usize = rng.gen_range(1..=11);
+                let land_sprite_index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
+                texture.index = land_sprite_index; //*texture_map.0.get(&base_sprite_index).unwrap() as usize;
 
                 commands
                     .entity(parent_entity)
@@ -744,6 +763,7 @@ pub fn update_tile_textures(
                             child_builder,
                             tile_data.color,
                             locationcoord,
+                            Visibility::Visible, //visibility_building_toggle,
                         );
                     });
             }
@@ -808,6 +828,7 @@ pub fn select_tile(
                                     alpha: 1.,
                                 },
                                 *location,
+                                Visibility::Inherited,
                             );
                         });
                     location.selected = true;

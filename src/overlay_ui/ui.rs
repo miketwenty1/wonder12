@@ -199,7 +199,6 @@ pub fn go_button_system(
                 //text.sections[0].value = button_text;
                 *color = PRESSED_BUTTON.into();
                 //game_state.set(DisplayUiState::On);
-                info!("go baby");
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;

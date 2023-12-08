@@ -10,6 +10,7 @@ pub fn spawn(
     color: Color,
     locationcoord: Location,
     road_offset: usize,
+    visibility: Visibility,
 ) {
     //info!("roadbuilding");
     // index number on sprite sheet and rotation degree. seems like 90 degrees is = 1.5707961
@@ -38,6 +39,7 @@ pub fn spawn(
                 rotation: Quat::from_rotation_z(road.1),
                 ..Default::default()
             },
+            visibility,
             ..Default::default()
         },
         BuildingStructure::DirtRoad,

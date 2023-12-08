@@ -14,6 +14,7 @@ pub struct TileData {
     pub hash: String,
     pub amount: u32,
     pub height: u32,
+    pub land_index: usize,
 }
 
 #[derive(Resource, Clone)]

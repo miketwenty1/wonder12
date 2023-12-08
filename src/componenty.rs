@@ -133,3 +133,6 @@ pub struct Toggle3BtnText;
 
 #[derive(Component)]
 pub struct Toggle4BtnText;
+
+#[derive(Component)]
+pub struct TileText;

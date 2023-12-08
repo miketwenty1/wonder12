@@ -32,3 +32,10 @@ pub struct SpawnDiffData {
     pub ystart: i32,
     pub yend: i32,
 }
+
+#[derive(Clone, Debug)]
+pub enum TileTextType {
+    Height,
+    Value,
+    Blank,
+}

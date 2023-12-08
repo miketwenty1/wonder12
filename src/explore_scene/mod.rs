@@ -1,9 +1,10 @@
 pub mod explore;
 pub mod toggle_ui;
+pub mod update_toggle_events;
 
 use bevy::prelude::*;
 
-use crate::{despawn_screen, ExploreState};
+use crate::ExploreState;
 
 use self::{
     explore::{
@@ -12,12 +13,10 @@ use self::{
         update_tile_textures, zoom_in_button_system, zoom_out_button_system,
     },
     toggle_ui::{
-        setup_toggle, toggle_button_sub_system_hide_colors, toggle_button_sub_system_hide_text,
-        toggle_button_sub_system_show_buildings, toggle_button_sub_system_show_colors,
-        toggle_button_sub_system_show_heights, toggle_button_sub_system_show_text,
-        toggle_button_sub_system_show_values, toggle_button_sub_system_toggle1,
-        toggle_button_system,
+        setup_toggle, toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
+        toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4, toggle_button_system,
     },
+    update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
 };
 
 pub struct ExplorePlugin;
@@ -38,9 +37,17 @@ impl Plugin for ExplorePlugin {
                 Update,
                 (
                     zoom_out_button_system,
-                    zoom_in_button_system,
-                    mouse_camera_system,
-                    touch_event_system,
+                    (
+                        zoom_in_button_system,
+                        touch_event_system,
+                        toggle_button_system,
+                        toggle_button_sub_system_toggle1,
+                        toggle_button_sub_system_toggle2,
+                        toggle_button_sub_system_toggle3,
+                        toggle_button_sub_system_toggle4,
+                        mouse_camera_system,
+                    )
+                        .chain(),
                     edge_system,
                     update_tile_textures,
                     spawn_block_sprites,
@@ -48,8 +55,9 @@ impl Plugin for ExplorePlugin {
                     select_tile,
                     clear_selection_button,
                     detail_selection_button,
-                    toggle_button_system,
-                    toggle_button_sub_system_toggle1,
+                    buildings_visibility_event,
+                    land_color_event,
+                    change_tile_text_event,
                     // toggle_button_sub_system_show_buildings,
                     // toggle_button_sub_system_show_colors,
                     // toggle_button_sub_system_hide_colors,

@@ -11,6 +11,7 @@ pub fn spawn(
     builder: &mut ChildBuilder,
     color: Color,
     locationcoord: Location,
+    visibility_toggle: Visibility,
 ) {
     builder.spawn((
         SpriteSheetBundle {
@@ -25,6 +26,7 @@ pub fn spawn(
                 scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
                 ..Default::default()
             },
+            visibility: visibility_toggle,
             ..Default::default()
         },
         BuildingStructure::Hut,
@@ -37,5 +39,6 @@ pub fn spawn(
         Color::rgba(1.0, 1.0, 1.0, 1.0),
         locationcoord,
         0,
+        visibility_toggle,
     );
 }
