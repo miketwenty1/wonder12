@@ -58,3 +58,6 @@ pub struct ServerURL(pub String);
 
 #[derive(Resource, Clone)]
 pub struct ToggleMap(pub HashMap<String, bool>);
+
+// #[derive(Resource, Clone)]
+// pub struct AmountSelected(pub u32);

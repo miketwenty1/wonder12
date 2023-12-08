@@ -2,7 +2,7 @@ use crate::comms::{load_server_data::api_get_server_tiles, CommsPlugin};
 use crate::consty::{CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT};
 use crate::eventy::{
     EdgeEvent, SelectTileEvent, SpriteSpawnEvent, ToggleBuildings, ToggleColors, ToggleText,
-    UpdateTileTextureEvent,
+    UpdateTileTextureEvent, UpdateUiAmount,
 };
 use crate::explore_scene::ExplorePlugin;
 use crate::overlay_ui::OverlayUiPlugin;
@@ -115,6 +115,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .add_event::<ToggleBuildings>()
         .add_event::<ToggleColors>()
         .add_event::<ToggleText>()
+        .add_event::<UpdateUiAmount>()
         .add_systems(Startup, setup) //setupcoords
         .add_systems(PostStartup, api_get_server_tiles)
         .insert_resource(start_edge)

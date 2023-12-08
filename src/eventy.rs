@@ -26,3 +26,6 @@ pub struct ToggleColors;
 
 #[derive(Event, Debug)]
 pub struct ToggleText(pub TileTextType);
+
+#[derive(Event, Debug)]
+pub struct UpdateUiAmount;

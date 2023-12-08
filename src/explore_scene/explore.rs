@@ -14,7 +14,9 @@ use crate::{
         HOVERED_BUTTON, MOVE_VELOCITY_FACTOR, NORMAL_BUTTON, PRESSED_BUTTON, TILE_PIXEL_SIZE,
         TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
     },
-    eventy::{EdgeEvent, SelectTileEvent, SpriteSpawnEvent, UpdateTileTextureEvent},
+    eventy::{
+        EdgeEvent, SelectTileEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
+    },
     resourcey::{
         ChunkManager, Edge, LastSelectedTile, SpriteIndexBuilding, SpriteSheetBgRes,
         SpriteSheetBuildingRes, TileMap,
@@ -27,9 +29,6 @@ pub fn setup_explorer(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-    // edge: Res<Edge>,
-    // mut chunk_map: ResMut<ChunkManager>,
-    // tile_map: Res<TileMap>,
     mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
 ) {
     // ui camera
@@ -198,11 +197,6 @@ pub fn setup_explorer(
                 });
         });
 
-    // let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
-    // commands.insert_resource(TileDataChannel {
-    //     tx: tx_tiledata,
-    //     rx: rx_tiledata,
-    // });
     sprite_spawn_event.send(SpriteSpawnEvent);
 }
 
@@ -299,42 +293,10 @@ pub fn touch_event_system(
                 ((world_y - TOTAL_TILE_SCALE_SIZE / 2. + 1.) / TOTAL_TILE_SCALE_SIZE) as i32
             };
 
-            // let distx;
-            // let disty;
-            // if touch.delta().x > 0.5 && touch.delta().x < 2.0 {
-            //     distx = 2.0;
-            // } else if touch.delta().x < -0.5 && touch.delta().x > -2.0 {
-            //     distx = -2.0;
-            // } else if touch.delta().x > 20.0 {
-            //     distx = 20.0;
-            // } else if touch.delta().x < -20.0 {
-            //     distx = -20.0;
-            // } else {
-            //     distx = touch.delta().x;
-            // }
-
-            // if touch.delta().y > 0.5 && touch.delta().y < 2.0 {
-            //     disty = 2.0;
-            // } else if touch.delta().y < -0.5 && touch.delta().y > -2.0 {
-            //     disty = -2.0;
-            // } else if touch.delta().y > 20.0 {
-            //     disty = 20.0;
-            // } else if touch.delta().y < -20.0 {
-            //     disty = -20.0;
-            // } else {
-            //     disty = touch.delta().y;
-            // }
-            //let direction = Vec3::new(-distx, disty, 0.0);
             let direction = Vec3::new(-touch.delta().x, touch.delta().y, 0.0);
             cam_transform.translation +=
                 direction * time.delta_seconds() * cam_ortho.scale * MOVE_VELOCITY_FACTOR * 5.0;
 
-            // info!(
-            //     "direction: {}, timedelta: {}, camscale: {}",
-            //     direction,
-            //     time.delta_seconds(),
-            //     cam_ortho.scale
-            // );
             set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
 
             if touches.just_pressed(touch.id()) {
@@ -374,8 +336,8 @@ pub fn zoom_out_button_system(
                 for mut ortho in cam_query.iter_mut() {
                     ortho.scale += 0.25;
                     //info!("{}", ortho.scale);
-                    if ortho.scale > 20.0 {
-                        ortho.scale = 10.0;
+                    if ortho.scale > 5.0 {
+                        ortho.scale = 5.0;
                     }
                 }
             }
@@ -396,6 +358,7 @@ pub fn zoom_out_button_system(
 #[allow(clippy::type_complexity)]
 pub fn zoom_in_button_system(
     mut mouse: ResMut<Input<MouseButton>>,
+    //mut touch: ResMut<Touches>, // need a clear method or a clear fn work around
     mut interaction_query: Query<
         (
             &Interaction,
@@ -418,8 +381,8 @@ pub fn zoom_in_button_system(
                 border_color.0 = Color::GRAY;
                 for mut ortho in cam_query.iter_mut() {
                     ortho.scale -= 0.25;
-                    if ortho.scale < 0.5 {
-                        ortho.scale = 0.5;
+                    if ortho.scale < 0.25 {
+                        ortho.scale = 0.25;
                     }
                     //info!("{}", ortho.scale);
                 }
@@ -445,6 +408,7 @@ pub fn edge_system(
     mut edge_event: EventReader<EdgeEvent>,
     mut chunk_map: ResMut<ChunkManager>,
     mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
+    mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
 ) {
     for edge_e in edge_event.read() {
         for (block_entity, block_location) in blocks.iter() {
@@ -461,6 +425,7 @@ pub fn edge_system(
         //debug!("reached edge: {:?}", edge_e.edge_type);
 
         sprite_spawn_event.send(SpriteSpawnEvent);
+        update_ui_amount_event.send(UpdateUiAmount);
     }
 }
 
@@ -638,12 +603,6 @@ pub fn set_camera_tile_bounds(
             x: edge.left.tile,
             y: (edge.top.tile + edge.bottom.tile) / 2,
         });
-        //info!("new left {}", edge.left.pixel);
-
-        // if camera_vec3.x < edge.left.pixel * CAMERA_SANITY_FACTOR {
-        //     info!("adjust left?");
-        //     camera_vec3.x = edge.left.pixel;
-        // }
     }
     if camera_vec3.x > edge.right.pixel {
         //cam_transform.translation.x = edge.right.pixel;
@@ -792,7 +751,7 @@ pub fn animate_sprites(
     }
 }
 
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn select_tile(
     mut commands: Commands,
     mut lands: Query<(&mut Location, Entity), (With<Land>, Without<BuildingStructure>)>,
@@ -805,6 +764,7 @@ pub fn select_tile(
     >,
     mut last_selected_tile: ResMut<LastSelectedTile>,
     mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
+    mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
 ) {
     for e in event.read() {
         //let event_val = ulam::value_of_xy(e.0, e.1);
@@ -832,6 +792,7 @@ pub fn select_tile(
                             );
                         });
                     location.selected = true;
+                    update_ui_amount_event.send(UpdateUiAmount);
 
                     for mut visibility in tile_selected_button_q.iter_mut() {
                         *visibility = Visibility::Visible;
@@ -852,6 +813,7 @@ pub fn select_tile(
                             //info!("despawn branch");
                             commands.entity(sentity).despawn();
                             location.selected = false;
+                            update_ui_amount_event.send(UpdateUiAmount);
                         }
                     }
                     if selected_lands.iter_mut().len() <= 1 {
@@ -887,6 +849,7 @@ pub fn clear_selection_button(
     mut selected_q: Query<Entity, (With<Selected>, Without<Land>, Without<BuildingStructure>)>,
     mut selected_lands_q: Query<&mut Location>,
     mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
+    mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
@@ -904,6 +867,7 @@ pub fn clear_selection_button(
                 for mut visibility in tile_selected_button_q.iter_mut() {
                     *visibility = Visibility::Hidden;
                 }
+                update_ui_amount_event.send(UpdateUiAmount);
             }
             Interaction::Hovered => {
                 text.sections[0].value = "Clear".to_string();
@@ -937,9 +901,6 @@ pub fn detail_selection_button(
     //    mut commands: Commands,
     mut text_query: Query<&mut Text>,
     mut ui_state: ResMut<NextState<DisplayUiState>>,
-    // mut selected_q: Query<Entity, (With<Selected>, Without<Land>, Without<BuildingStructure>)>,
-    // mut selected_lands_q: Query<&mut Location>,
-    // mut clear_button_q: Query<&mut Visibility, With<ClearSelectionButton>>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();

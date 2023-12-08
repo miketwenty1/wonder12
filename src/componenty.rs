@@ -136,3 +136,9 @@ pub struct Toggle4BtnText;
 
 #[derive(Component)]
 pub struct TileText;
+
+#[derive(Component)]
+pub struct AmountSelectedNode;
+
+#[derive(Component)]
+pub struct AmountSelectedText(pub u32);
