@@ -1,4 +1,10 @@
-use bevy::{input::mouse::MouseMotion, prelude::*, text::Text2dBounds, window::PrimaryWindow};
+use bevy::{
+    input::mouse::MouseMotion,
+    prelude::*,
+    render::texture::{ImageLoaderSettings, ImageSampler},
+    text::Text2dBounds,
+    window::PrimaryWindow,
+};
 use rand::Rng;
 use ulam::Quad;
 
@@ -33,23 +39,33 @@ pub fn setup_explorer(
 ) {
     // ui camera
 
-    let texture_handle = asset_server.load("spritesheet/grassdirtbg.png");
+    let texture_handle_bg: Handle<Image> = asset_server.load_with_settings(
+        "spritesheet/grassdirtbg.png",
+        |settings: &mut ImageLoaderSettings| {
+            settings.sampler = ImageSampler::linear();
+        },
+    );
     let texture_atlas_bg = TextureAtlas::from_grid(
-        texture_handle,
+        texture_handle_bg,
         Vec2::new(TILE_PIXEL_SIZE, TILE_PIXEL_SIZE),
         12,
         1,
-        Some(Vec2::new(0.0, 0.0)),
-        None,
+        Some(Vec2::new(2.0, 2.0)),
+        Some(Vec2::new(1.0, 1.0)),
     );
-    let texture_handle_buildings = asset_server.load("spritesheet/buildings.png");
+    let texture_handle_buildings: Handle<Image> = asset_server.load_with_settings(
+        "spritesheet/buildings.png",
+        |settings: &mut ImageLoaderSettings| {
+            settings.sampler = ImageSampler::linear();
+        },
+    );
     let texture_atlas_building = TextureAtlas::from_grid(
         texture_handle_buildings,
         Vec2::new(32.0, 32.0),
         17,
         1,
-        Some(Vec2::new(0.0, 0.0)),
-        Some(Vec2::new(0.0, 0.0)),
+        Some(Vec2::new(2.0, 2.0)),
+        Some(Vec2::new(1.0, 1.0)),
     );
     let texture_atlas_handle_bg = texture_atlases.add(texture_atlas_bg);
     let texture_atlas_handle_building = texture_atlases.add(texture_atlas_building);

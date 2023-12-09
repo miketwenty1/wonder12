@@ -85,21 +85,32 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
     };
 
     App::new()
-        //.add_plugins(DefaultPlugins)
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                //resolution: [width as f32, height as f32].into(),
-                fit_canvas_to_parent: true,
-                title: "SatoshiSettlers".to_string(),
-                ..default()
-            }),
-            ..default()
-        }))
+        .insert_resource(start_edge)
+        .insert_resource(ChunkManager {
+            map: HashMap::new(),
+        })
+        .insert_resource(TileMap {
+            map: HashMap::new(),
+        })
+        .insert_resource(LastSelectedTile(1_000_000, 1_000_000))
         .insert_resource(AssetMetaCheck::Never)
         .insert_resource(ServerURL(server_url))
         .insert_resource(SpriteIndexBuilding(numbers_map))
         .insert_resource(ToggleMap(toggle_map))
-        .insert_resource(AssetMetaCheck::Never)
+        //.add_plugins(DefaultPlugins)
+        .add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        //resolution: [width as f32, height as f32].into(),
+                        fit_canvas_to_parent: true,
+                        title: "SatoshiSettlers".to_string(),
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .set(ImagePlugin::default_nearest()), //default_nearest()),
+        )
         .add_state::<ExploreState>()
         .add_state::<CommsState>()
         .add_state::<DisplayUiState>()
@@ -118,14 +129,6 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .add_event::<UpdateUiAmount>()
         .add_systems(Startup, setup) //setupcoords
         .add_systems(PostStartup, api_get_server_tiles)
-        .insert_resource(start_edge)
-        .insert_resource(ChunkManager {
-            map: HashMap::new(),
-        })
-        .insert_resource(TileMap {
-            map: HashMap::new(),
-        })
-        .insert_resource(LastSelectedTile(1_000_000, 1_000_000))
         .run();
 }
 
