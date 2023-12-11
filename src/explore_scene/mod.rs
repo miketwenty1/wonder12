@@ -10,7 +10,7 @@ use crate::ExploreState;
 use self::{
     amount_ui::{setup_amount_selected_text, update_amount_selected_text},
     explore::{
-        animate_sprites, clear_selection_button, detail_selection_button, edge_system,
+        animate_sprites, buy_selection_button, clear_selection_button, edge_system,
         mouse_camera_system, select_tile, setup_explorer, spawn_block_sprites, touch_event_system,
         update_tile_textures, zoom_in_button_system, zoom_out_button_system,
     },
@@ -42,7 +42,7 @@ impl Plugin for ExplorePlugin {
                         zoom_out_button_system,
                         zoom_in_button_system,
                         clear_selection_button,
-                        detail_selection_button,
+                        buy_selection_button,
                         touch_event_system,
                         toggle_button_system,
                         toggle_button_sub_system_toggle1,
@@ -56,11 +56,10 @@ impl Plugin for ExplorePlugin {
                     update_tile_textures,
                     spawn_block_sprites,
                     animate_sprites,
-                    select_tile,
+                    (select_tile, apply_deferred, update_amount_selected_text).chain(),
                     buildings_visibility_event,
                     land_color_event,
                     change_tile_text_event,
-                    update_amount_selected_text,
                 )
                     .run_if(in_state(ExploreState::On)),
             ); //.add_systems(OnExit(ExploreState::On), despawn_screen::<UiOverlay>);

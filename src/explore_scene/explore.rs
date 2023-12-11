@@ -11,8 +11,8 @@ use ulam::Quad;
 use crate::{
     building_config::spawn_tile_level,
     componenty::{
-        AnimationIndices, AnimationTimer, BuildingStructure, ClearSelectionButton,
-        DetailSelectionButton, Land, Location, Selected, TileText, UiNode, UiTileSelectedButton,
+        AnimationIndices, AnimationTimer, BuildingStructure, BuySelectionButton,
+        ClearSelectionButton, Land, Location, Selected, TileText, UiNode, UiTileSelectedButton,
         ZoomInButton, ZoomOutButton,
     },
     consty::{
@@ -23,11 +23,12 @@ use crate::{
     eventy::{
         EdgeEvent, SelectTileEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
     },
+    keyboard::KeyboardState,
     resourcey::{
         ChunkManager, Edge, LastSelectedTile, SpriteIndexBuilding, SpriteSheetBgRes,
-        SpriteSheetBuildingRes, TileMap,
+        SpriteSheetBuildingRes, TileCart, TileMap,
     },
-    statey::DisplayUiState,
+    statey::DisplayBuyUiState,
     structy::{EdgeType, SpawnDiffData},
 };
 
@@ -198,12 +199,12 @@ pub fn setup_explorer(
                         visibility: Visibility::Hidden,
                         ..default()
                     },
-                    DetailSelectionButton,
+                    BuySelectionButton,
                     UiTileSelectedButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section(
-                        "Details",
+                        "Buy",
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                             font_size: 30.0,
@@ -808,7 +809,6 @@ pub fn select_tile(
                             );
                         });
                     location.selected = true;
-                    update_ui_amount_event.send(UpdateUiAmount);
 
                     for mut visibility in tile_selected_button_q.iter_mut() {
                         *visibility = Visibility::Visible;
@@ -829,7 +829,6 @@ pub fn select_tile(
                             //info!("despawn branch");
                             commands.entity(sentity).despawn();
                             location.selected = false;
-                            update_ui_amount_event.send(UpdateUiAmount);
                         }
                     }
                     if selected_lands.iter_mut().len() <= 1 {
@@ -842,6 +841,7 @@ pub fn select_tile(
                 }
             }
         }
+        update_ui_amount_event.send(UpdateUiAmount);
     }
 }
 
@@ -900,7 +900,7 @@ pub fn clear_selection_button(
 }
 
 #[allow(clippy::type_complexity)]
-pub fn detail_selection_button(
+pub fn buy_selection_button(
     mut interaction_query: Query<
         (
             &Interaction,
@@ -908,33 +908,31 @@ pub fn detail_selection_button(
             &mut BorderColor,
             &Children,
         ),
-        (
-            Changed<Interaction>,
-            With<Button>,
-            With<DetailSelectionButton>,
-        ),
+        (Changed<Interaction>, With<Button>, With<BuySelectionButton>),
     >,
     //    mut commands: Commands,
     mut text_query: Query<&mut Text>,
-    mut ui_state: ResMut<NextState<DisplayUiState>>,
+    mut ui_state: ResMut<NextState<DisplayBuyUiState>>,
+    mut buy_state: ResMut<NextState<KeyboardState>>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
-                text.sections[0].value = "Details".to_string();
+                text.sections[0].value = "Buy".to_string();
                 *color = PRESSED_BUTTON.into();
                 border_color.0 = Color::GRAY;
-                ui_state.set(DisplayUiState::On);
-                info!("coming soon");
+
+                ui_state.set(DisplayBuyUiState::On);
+                buy_state.set(KeyboardState::On);
             }
             Interaction::Hovered => {
-                text.sections[0].value = "Details".to_string();
+                text.sections[0].value = "Buy".to_string();
                 *color = HOVERED_BUTTON.into();
                 border_color.0 = Color::WHITE;
             }
             Interaction::None => {
-                text.sections[0].value = "Details".to_string();
+                text.sections[0].value = "Buy".to_string();
                 *color = NORMAL_BUTTON.into();
                 border_color.0 = Color::BLACK;
             }

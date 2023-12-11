@@ -31,7 +31,7 @@ pub struct Location {
 pub struct ClearSelectionButton;
 
 #[derive(Component)]
-pub struct DetailSelectionButton;
+pub struct BuySelectionButton;
 
 #[derive(Component)]
 pub struct ZoomOutButton;
@@ -142,3 +142,18 @@ pub struct AmountSelectedNode;
 
 #[derive(Component)]
 pub struct AmountSelectedText(pub u32);
+
+#[derive(Component)]
+pub struct RightCartButton;
+
+#[derive(Component)]
+pub struct LeftCartButton;
+
+#[derive(Component)]
+pub struct BlockHeightCartText;
+
+#[derive(Component)]
+pub struct CurrentBlockValueText;
+
+#[derive(Component)]
+pub struct CurrentBlockDateText;

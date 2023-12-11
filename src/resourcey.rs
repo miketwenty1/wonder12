@@ -3,6 +3,7 @@ use bevy::{prelude::*, utils::HashMap};
 
 use crate::structy::EdgeData;
 use crate::structy::TileResource;
+use chrono::{DateTime, Utc};
 
 #[derive(Resource, Clone)]
 pub struct TileData {
@@ -15,11 +16,38 @@ pub struct TileData {
     pub amount: u32,
     pub height: u32,
     pub land_index: usize,
+    pub event_date: DateTime<Utc>,
 }
 
 #[derive(Resource, Clone)]
 pub struct TileMap {
     pub map: HashMap<u32, TileData>,
+}
+
+#[derive(Resource, Clone, Debug)]
+pub struct TileCartData {
+    pub event_date: Option<DateTime<Utc>>,
+    pub ln_address: String,
+    pub owner: String,
+    pub color: Option<Color>,
+    pub message: String,
+    pub amount: u32,
+    pub height: u32,
+    pub new_ln_address: String,
+    pub new_owner: String,
+    pub new_color: Color,
+    pub new_message: String,
+}
+
+#[derive(Resource, Clone)]
+pub struct TileCart {
+    pub map: HashMap<u32, TileCartData>,
+}
+
+#[derive(Resource, Clone)]
+pub struct TileCartVec {
+    pub vec: Vec<TileCartData>,
+    pub index: usize,
 }
 
 #[derive(Resource, Clone)]

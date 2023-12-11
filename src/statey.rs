@@ -16,7 +16,7 @@ pub enum ExploreState {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-pub enum DisplayUiState {
+pub enum DisplayBuyUiState {
     #[default]
     Off,
     On,

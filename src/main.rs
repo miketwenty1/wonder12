@@ -5,12 +5,14 @@ use crate::eventy::{
     UpdateTileTextureEvent, UpdateUiAmount,
 };
 use crate::explore_scene::ExplorePlugin;
+use crate::keyboard::resources::KeyboardData;
+use crate::keyboard::{KeyboardPlugin, KeyboardState};
 use crate::overlay_ui::OverlayUiPlugin;
 use crate::resourcey::{
-    ChunkManager, Edge, LastSelectedTile, ServerURL, SpriteIndexBuilding, TileDataChannel, TileMap,
-    ToggleMap,
+    ChunkManager, Edge, LastSelectedTile, ServerURL, SpriteIndexBuilding, TileCart, TileCartData,
+    TileCartVec, TileDataChannel, TileMap, ToggleMap,
 };
-use crate::statey::{CommsState, DisplayUiState, ExploreState};
+use crate::statey::{CommsState, DisplayBuyUiState, ExploreState};
 use crate::structy::EdgeData;
 use bevy::asset::AssetMetaCheck;
 use bevy::{prelude::*, utils::HashMap};
@@ -19,6 +21,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 mod building_config;
 mod comms;
 mod explore_scene;
+mod keyboard;
 mod overlay_ui;
 
 mod componenty;
@@ -92,11 +95,19 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .insert_resource(TileMap {
             map: HashMap::new(),
         })
+        .insert_resource(TileCart {
+            map: HashMap::new(),
+        })
+        .insert_resource(TileCartVec {
+            vec: Vec::new(),
+            index: 0,
+        })
         .insert_resource(LastSelectedTile(1_000_000, 1_000_000))
         .insert_resource(AssetMetaCheck::Never)
         .insert_resource(ServerURL(server_url))
         .insert_resource(SpriteIndexBuilding(numbers_map))
         .insert_resource(ToggleMap(toggle_map))
+        .insert_resource(KeyboardData("".to_string()))
         //.add_plugins(DefaultPlugins)
         .add_plugins(
             DefaultPlugins
@@ -113,10 +124,13 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         )
         .add_state::<ExploreState>()
         .add_state::<CommsState>()
-        .add_state::<DisplayUiState>()
+        .add_state::<DisplayBuyUiState>()
+        .add_state::<DisplayBuyUiState>()
+        .add_state::<KeyboardState>()
         .add_plugins(CommsPlugin)
         .add_plugins(OverlayUiPlugin)
         .add_plugins(ExplorePlugin)
+        .add_plugins(KeyboardPlugin)
         // Only run the app when there is user input. This will significantly reduce CPU/GPU use.
         //.insert_resource(WinitSettings::desktop_app())
         .add_event::<EdgeEvent>()

@@ -261,7 +261,7 @@ pub fn toggle_button_system(
                 mouse.clear_just_pressed(MouseButton::Left);
                 //text.sections[0].value = button_text;
                 *color = PRESSED_BUTTON.into();
-                //game_state.set(DisplayUiState::On);
+                //game_state.set(DisplayBuyUiState::On);
                 if *toggle_visible {
                     for mut btn_vis in param_set.p0().iter_mut() {
                         *btn_vis = Visibility::Hidden;

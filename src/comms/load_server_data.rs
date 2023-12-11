@@ -65,6 +65,7 @@ pub fn api_receive_server_tiles(
                                 hash: "".to_string(),
                                 height: block_data.height as u32,
                                 land_index: rng.gen_range(1..=11),
+                                event_date: block_data.event_date,
                             };
 
                             tile_map.map.insert(block_data.height as u32, td);
