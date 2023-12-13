@@ -9,8 +9,8 @@ use crate::keyboard::resources::KeyboardData;
 use crate::keyboard::{KeyboardPlugin, KeyboardState};
 use crate::overlay_ui::OverlayUiPlugin;
 use crate::resourcey::{
-    ChunkManager, Edge, LastSelectedTile, ServerURL, SpriteIndexBuilding, TileCart, TileCartData,
-    TileCartVec, TileDataChannel, TileMap, ToggleMap,
+    ChunkManager, CurrentCartBlock, Edge, KeyboardTarget, LastSelectedTile, ServerURL,
+    SpriteIndexBuilding, TargetType, TileCart, TileCartVec, TileDataChannel, TileMap, ToggleMap,
 };
 use crate::statey::{CommsState, DisplayBuyUiState, ExploreState};
 use crate::structy::EdgeData;
@@ -30,6 +30,8 @@ mod eventy;
 mod resourcey;
 mod statey;
 mod structy;
+
+mod utils;
 
 pub fn main() {
     //game("localusertesting".to_string(), "localhost:8081".to_string());
@@ -102,12 +104,18 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
             vec: Vec::new(),
             index: 0,
         })
+        .insert_resource(CurrentCartBlock {
+            ln_address: "".to_string(),
+            color: "".to_string(),
+            message: "".to_string(),
+        })
         .insert_resource(LastSelectedTile(1_000_000, 1_000_000))
         .insert_resource(AssetMetaCheck::Never)
         .insert_resource(ServerURL(server_url))
         .insert_resource(SpriteIndexBuilding(numbers_map))
         .insert_resource(ToggleMap(toggle_map))
         .insert_resource(KeyboardData("".to_string()))
+        .insert_resource(KeyboardTarget(TargetType::Nothing))
         //.add_plugins(DefaultPlugins)
         .add_plugins(
             DefaultPlugins

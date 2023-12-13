@@ -21,6 +21,7 @@ reqwest = { version = "0.11", features = ["json"] }
 chrono = { version = "0.4", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
+all-colors = "0.0.4"
 # [dependencies.web-sys]
 # version = "0.3"
 # features = ["Clipboard", "Window", "Navigator", "Permissions"]

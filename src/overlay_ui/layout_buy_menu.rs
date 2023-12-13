@@ -2,23 +2,25 @@ use bevy::prelude::*;
 
 use crate::{
     componenty::{
-        BlockHeightCartText, CurrentBlockDateText, CurrentBlockValueText, LeftCartButton,
-        RightCartButton,
+        BlockCostText, BlockHeightCartText, CartButton, CurrentBlockDateText,
+        CurrentBlockLnAddressText, CurrentBlockMessageText, CurrentBlockOwnerText,
+        CurrentBlockValueText, NewBlockColorButton, NewBlockColorText, NewBlockDataButton,
+        NewBlockLnAddressButton, NewBlockLnAddressText, NewBlockMessageButton, NewBlockMessageText,
+    },
+    consty::{
+        DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
+        DEFAULT_NO_PICK_COLOR,
     },
     keyboard::{components::KeyboardNode, KeyboardState},
     resourcey::{TileCart, TileCartData, TileCartVec},
     statey::ExploreState,
-    DisplayBuyUiState,
 };
 
 use super::UiOverlay;
 
 const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 
 //const INTRO_TEXT: &str = "This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!";
-const RANDOM_TEXT: &str = "This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!";
 
 #[derive(Component)]
 pub struct ButtonGo;
@@ -40,6 +42,7 @@ pub fn spawn_layout(
     a.sort_by_key(|tile| tile.height);
     tile_cart_vec.vec = a;
     tile_cart_vec.index = 0;
+    let cart_total: u32 = tile_cart_vec.vec.iter().map(|tile| tile.cost).sum();
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     // Top-level grid (app frame)
     commands
@@ -47,14 +50,18 @@ pub fn spawn_layout(
             NodeBundle {
                 style: Style {
                     display: Display::Grid,
-                    width: Val::Percent(100.0),
+                    // width: Val::Percent(100.0),
                     height: Val::Percent(100.0),
-                    align_content: AlignContent::FlexStart,
+                    align_items: AlignItems::Stretch,
+                    justify_content: JustifyContent::Stretch,
+                    align_content: AlignContent::Stretch,
                     justify_items: JustifyItems::Stretch,
                     //align_items: AlignItems::Center,
                     grid_template_columns: vec![GridTrack::auto()],
                     grid_template_rows: vec![
+                        GridTrack::min_content(),
                         GridTrack::auto(),
+                        GridTrack::min_content(),
                         GridTrack::auto(),
                         GridTrack::min_content(),
                         GridTrack::auto(),
@@ -62,13 +69,9 @@ pub fn spawn_layout(
                         GridTrack::auto(),
                         //GridTrack::flex(1.0),
                     ],
-                    // padding: UiRect {
-                    //     left: Val::Percent(2.),
-                    //     right: Val::Percent(2.),
-                    //     top: Val::Percent(2.),
-                    //     bottom: Val::Percent(2.),
-                    // },
+
                     max_width: Val::Px(800.0),
+                    min_width: Val::Percent(25.0),
                     ..default()
                 },
 
@@ -84,21 +87,50 @@ pub fn spawn_layout(
         ))
         .with_children(|builder| {
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
+            // TOTAL for cart
+            builder
+                .spawn(NodeBundle {
+                    style: Style {
+                        width: Val::Percent(100.0),
+                        flex_direction: FlexDirection::Row,
+                        align_content: AlignContent::Center,
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        justify_items: JustifyItems::Center,
+
+                        //padding: UiRect::all(Val::Px(5.0)),
+                        ..Default::default()
+                    },
+                    background_color: BackgroundColor(Color::PINK),
+                    ..Default::default() // style: Style {
+                })
+                .with_children(|builder| {
+                    spawn_new_total_cart_cost(
+                        builder,
+                        font.clone(),
+                        &format!("Total: {} sats", cart_total),
+                        20.0,
+                        Color::WHITE,
+                    );
+                });
+
+            // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
             // block height left and right
             builder
                 .spawn(NodeBundle {
                     style: Style {
-                        //width: Val::Percent(100.0),
-                        //height: Val::Px(25.0),
-                        display: Display::Flex,
-                        justify_items: JustifyItems::Center,
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
+                        width: Val::Percent(100.0),
+                        flex_direction: FlexDirection::Row,
                         align_content: AlignContent::Center,
-                        ..default()
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        justify_items: JustifyItems::Center,
+
+                        //padding: UiRect::all(Val::Px(5.0)),
+                        ..Default::default()
                     },
                     background_color: BackgroundColor(Color::DARK_GREEN),
-                    ..default()
+                    ..Default::default()
                 })
                 .with_children(|builder| {
                     setup_left_block_menu_button(builder, font.clone(), "<-".to_string());
@@ -111,9 +143,36 @@ pub fn spawn_layout(
                     );
                     setup_right_block_menu_button(builder, font.clone(), "->".to_string());
                 });
+            // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
+            // specific cost for the block in context
+            builder
+                .spawn(NodeBundle {
+                    style: Style {
+                        width: Val::Percent(100.0),
+                        flex_direction: FlexDirection::Row,
+                        align_content: AlignContent::Center,
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        justify_items: JustifyItems::Center,
+
+                        //padding: UiRect::all(Val::Px(5.0)),
+                        ..Default::default()
+                    },
+                    background_color: BackgroundColor(Color::PINK),
+                    ..Default::default() // style: Style {
+                })
+                .with_children(|builder| {
+                    spawn_new_value_block_cost(
+                        builder,
+                        font.clone(),
+                        &format!("Cost: {} sats", tile_cart_vec.vec[0].cost),
+                        20.0,
+                        Color::WHITE,
+                    );
+                });
 
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
-            // current data
+            //new block data
             builder
                 .spawn(NodeBundle {
                     style: Style {
@@ -121,7 +180,8 @@ pub fn spawn_layout(
                         //height: Val::Px(100.0),
                         display: Display::Grid,
                         justify_items: JustifyItems::Center,
-                        padding: UiRect::all(Val::Px(1.0)),
+                        margin: UiRect::all(Val::Px(5.0)),
+                        //padding: UiRect::all(Val::Px(2.0)),
                         grid_template_columns: vec![GridTrack::auto(), GridTrack::auto()],
                         grid_template_rows: vec![
                             GridTrack::auto(),
@@ -134,22 +194,22 @@ pub fn spawn_layout(
                     ..default()
                 })
                 .with_children(|builder| {
-                    current_value_title(builder, font.clone(), "Current Data", 20.0, Color::WHITE);
-                    let datetime_string = tile_cart_vec.vec[0]
-                        .event_date
-                        .map_or("".to_string(), |datetime| {
-                            datetime.date_naive().format("%Y-%m-%d").to_string()
-                        });
-                    current_value_left(
+                    new_value_title(builder, font.clone(), "Set New Values", 20.0, Color::WHITE);
+                    setup_ln_addr_menu_button(
                         builder,
                         font.clone(),
-                        tile_cart_vec.vec[0].amount.to_string(),
-                        datetime_string,
-                        16.0,
-                        Color::WHITE,
+                        DEFAULT_NEW_LN_TEXT.to_string(),
                     );
-                    current_value_right(builder, font.clone(), RANDOM_TEXT, 16.0, Color::WHITE);
-                    current_value_message(builder, font.clone(), RANDOM_TEXT, 16.0, Color::WHITE);
+                    setup_color_menu_button(
+                        builder,
+                        font.clone(),
+                        DEFAULT_NEW_COLOR_TEXT.to_string(),
+                    );
+                    setup_message_menu_button(
+                        builder,
+                        font.clone(),
+                        DEFAULT_NEW_MESSAGE_TEXT.to_string(),
+                    );
                 });
 
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
@@ -183,15 +243,14 @@ pub fn spawn_layout(
                     );
                 });
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
-            //new block data
+            // current data
             builder
                 .spawn(NodeBundle {
                     style: Style {
-                        //width: Val::Percent(100.0),
-                        //height: Val::Px(100.0),
                         display: Display::Grid,
                         justify_items: JustifyItems::Center,
-                        padding: UiRect::all(Val::Px(1.0)),
+                        margin: UiRect::all(Val::Px(5.0)),
+                        padding: UiRect::all(Val::Px(2.0)),
                         grid_template_columns: vec![GridTrack::auto(), GridTrack::auto()],
                         grid_template_rows: vec![
                             GridTrack::auto(),
@@ -204,19 +263,37 @@ pub fn spawn_layout(
                     ..default()
                 })
                 .with_children(|builder| {
-                    new_value_title(builder, font.clone(), "Set New Values", 20.0, Color::WHITE);
-                    setup_ln_addr_menu_button(
+                    current_value_title(builder, font.clone(), "Current Data", 20.0, Color::WHITE);
+                    let datetime_string = tile_cart_vec.vec[0]
+                        .event_date
+                        .map_or("".to_string(), |datetime| {
+                            datetime.date_naive().format("%Y-%m-%d").to_string()
+                        });
+                    current_value_left(
                         builder,
                         font.clone(),
-                        "Required:\ntype in a lightning address".to_string(),
+                        (tile_cart_vec.vec[0].value).to_string(),
+                        datetime_string,
+                        16.0,
+                        Color::WHITE,
                     );
-                    setup_color_menu_button(
+                    current_value_right(
                         builder,
                         font.clone(),
-                        "write in a color\nor get a random color".to_string(),
+                        tile_cart_vec.vec[0].owner.to_string(),
+                        tile_cart_vec.vec[0].ln_address.to_string(),
+                        16.0,
+                        Color::WHITE,
                     );
-                    setup_message_menu_button(builder, font.clone(), "Write a message".to_string());
+                    current_value_message(
+                        builder,
+                        font.clone(),
+                        &tile_cart_vec.vec[0].message.to_string(),
+                        16.0,
+                        Color::WHITE,
+                    );
                 });
+
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
             //buy and back buttons
             builder
@@ -241,11 +318,11 @@ pub fn spawn_layout(
             builder.spawn((
                 NodeBundle {
                     style: Style {
-                        //width: Val::Percent(100.0),
-                        //height: Val::Px(150.0),
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(23.0),
                         display: Display::Grid,
                         justify_items: JustifyItems::Center,
-                        padding: UiRect::all(Val::Px(1.0)),
+                        //padding: UiRect::all(Val::Px(1.0)),
                         ..default()
                     },
                     background_color: BackgroundColor(Color::BLUE),
@@ -256,6 +333,78 @@ pub fn spawn_layout(
         });
 }
 
+pub fn set_keyboard(mut buy_state: ResMut<NextState<KeyboardState>>) {
+    buy_state.set(KeyboardState::On);
+}
+
+fn spawn_new_total_cart_cost(
+    builder: &mut ChildBuilder,
+    font: Handle<Font>,
+    text: &str,
+    font_size: f32,
+    color: Color,
+) {
+    builder
+        .spawn(NodeBundle {
+            style: Style {
+                display: Display::Grid,
+                justify_items: JustifyItems::Start,
+                align_items: AlignItems::Start,
+                align_content: AlignContent::Start,
+                grid_column: GridPlacement::span(2),
+                padding: UiRect::all(Val::Px(1.0)),
+                ..default()
+            },
+            background_color: BackgroundColor(Color::BLACK),
+            ..default()
+        })
+        .with_children(|builder| {
+            builder.spawn(TextBundle::from_section(
+                text,
+                TextStyle {
+                    font,
+                    font_size,
+                    color,
+                },
+            ));
+        });
+}
+
+fn spawn_new_value_block_cost(
+    builder: &mut ChildBuilder,
+    font: Handle<Font>,
+    text: &str,
+    font_size: f32,
+    color: Color,
+) {
+    builder
+        .spawn(NodeBundle {
+            style: Style {
+                display: Display::Grid,
+                justify_items: JustifyItems::Start,
+                align_items: AlignItems::Start,
+                align_content: AlignContent::Start,
+                grid_column: GridPlacement::span(2),
+                padding: UiRect::all(Val::Px(1.0)),
+                ..default()
+            },
+            background_color: BackgroundColor(Color::BLACK),
+            ..default()
+        })
+        .with_children(|builder| {
+            builder.spawn((
+                TextBundle::from_section(
+                    text,
+                    TextStyle {
+                        font,
+                        font_size,
+                        color,
+                    },
+                ),
+                BlockCostText,
+            ));
+        });
+}
 fn setup_config_for_all_blocks_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
@@ -402,85 +551,6 @@ fn setup_back_from_buy_menu_button(
         });
 }
 
-#[allow(clippy::type_complexity)]
-pub fn buy_button_system(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<ButtonGo>),
-    >,
-    //mut text_query: Query<&mut Text>,
-    //mut game_state: ResMut<NextState<DisplayBuyUiState>>,
-) {
-    for (interaction, mut color) in &mut interaction_query {
-        //let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                //text.sections[0].value = button_text;
-                *color = PRESSED_BUTTON.into();
-                //game_state.set(DisplayBuyUiState::On);
-            }
-            Interaction::Hovered => {
-                //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
-            }
-            Interaction::None => {
-                //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
-            }
-        }
-    }
-}
-
-#[allow(clippy::type_complexity)]
-pub fn back_button_system(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<ButtonBack>),
-    >,
-    //mut text_query: Query<&mut Text>,
-    mut overlay_state: ResMut<NextState<DisplayBuyUiState>>,
-    mut explore_state: ResMut<NextState<ExploreState>>,
-    mut keyboard_state: ResMut<NextState<KeyboardState>>,
-) {
-    for (interaction, mut color) in &mut interaction_query {
-        //let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                //text.sections[0].value = button_text;
-                *color = PRESSED_BUTTON.into();
-                overlay_state.set(DisplayBuyUiState::Off);
-                explore_state.set(ExploreState::On);
-                keyboard_state.set(KeyboardState::Off);
-            }
-            Interaction::Hovered => {
-                //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
-            }
-            Interaction::None => {
-                //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
-            }
-        }
-    }
-}
-
-// fn spawn_nested_text_bundle(
-//     builder: &mut ChildBuilder,
-//     font: Handle<Font>,
-//     text: &str,
-//     font_size: f32,
-//     color: Color,
-// ) {
-//     builder.spawn(TextBundle::from_section(
-//         text,
-//         TextStyle {
-//             font,
-//             font_size,
-//             color,
-//         },
-//     ));
-// }
-
 fn spawn_block_text_bundle(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
@@ -543,8 +613,10 @@ fn setup_left_block_menu_button(
                 style: Style {
                     width: Val::Px(40.0),
                     height: Val::Px(25.0),
-                    justify_content: JustifyContent::Center,
+                    justify_items: JustifyItems::Center,
                     align_items: AlignItems::Center,
+                    align_content: AlignContent::Center,
+                    justify_content: JustifyContent::Center,
                     margin: UiRect {
                         left: Val::Px(10.),
                         right: Val::Px(10.),
@@ -556,44 +628,7 @@ fn setup_left_block_menu_button(
                 background_color: NORMAL_BUTTON.into(),
                 ..default()
             },
-            LeftCartButton,
-        ))
-        .with_children(|parent2| {
-            parent2.spawn(TextBundle::from_section(
-                button_text,
-                TextStyle {
-                    font: font.clone(),
-                    font_size: 20.0,
-                    color: Color::rgb(1.0, 1.0, 1.0),
-                },
-            ));
-        });
-}
-fn setup_right_block_menu_button(
-    builder: &mut ChildBuilder,
-    font: Handle<Font>,
-    button_text: String,
-) {
-    builder
-        .spawn((
-            ButtonBundle {
-                style: Style {
-                    width: Val::Px(40.0),
-                    height: Val::Px(25.0),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    margin: UiRect {
-                        left: Val::Px(10.),
-                        right: Val::Px(10.),
-                        top: Val::Px(2.),
-                        bottom: Val::Px(2.),
-                    },
-                    ..default()
-                },
-                background_color: NORMAL_BUTTON.into(),
-                ..default()
-            },
-            RightCartButton,
+            CartButton(-1),
         ))
         .with_children(|parent2| {
             parent2.spawn(TextBundle::from_section(
@@ -607,38 +642,45 @@ fn setup_right_block_menu_button(
         });
 }
 
-// #[allow(clippy::type_complexity)]
-// pub fn left_block_button_system(
-//     mut interaction_query: Query<
-//         (&Interaction, &mut BackgroundColor),
-//         (Changed<Interaction>, With<ButtonBack>),
-//     >,
-//     //mut text_query: Query<&mut Text>,
-//     mut overlay_state: ResMut<NextState<DisplayBuyUiState>>,
-//     mut explore_state: ResMut<NextState<ExploreState>>,
-//     mut keyboard_state: ResMut<NextState<KeyboardState>>,
-// ) {
-//     for (interaction, mut color) in &mut interaction_query {
-//         //let mut text = text_query.get_mut(children[0]).unwrap();
-//         match *interaction {
-//             Interaction::Pressed => {
-//                 //text.sections[0].value = button_text;
-//                 *color = PRESSED_BUTTON.into();
-//                 overlay_state.set(DisplayBuyUiState::Off);
-//                 explore_state.set(ExploreState::On);
-//                 keyboard_state.set(KeyboardState::Off);
-//             }
-//             Interaction::Hovered => {
-//                 //text.sections[0].value = button_text;
-//                 *color = HOVERED_BUTTON.into();
-//             }
-//             Interaction::None => {
-//                 //text.sections[0].value = button_text;
-//                 *color = NORMAL_BUTTON.into();
-//             }
-//         }
-//     }
-// }
+fn setup_right_block_menu_button(
+    builder: &mut ChildBuilder,
+    font: Handle<Font>,
+    button_text: String,
+) {
+    builder
+        .spawn((
+            ButtonBundle {
+                style: Style {
+                    width: Val::Px(40.0),
+                    height: Val::Px(25.0),
+                    justify_items: JustifyItems::Center,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    align_content: AlignContent::Center,
+                    margin: UiRect {
+                        left: Val::Px(10.),
+                        right: Val::Px(10.),
+                        top: Val::Px(2.),
+                        bottom: Val::Px(2.),
+                    },
+                    ..default()
+                },
+                background_color: NORMAL_BUTTON.into(),
+                ..default()
+            },
+            CartButton(1),
+        ))
+        .with_children(|parent2| {
+            parent2.spawn(TextBundle::from_section(
+                button_text,
+                TextStyle {
+                    font: font.clone(),
+                    font_size: 20.0,
+                    color: Color::rgb(1.0, 1.0, 1.0),
+                },
+            ));
+        });
+}
 
 fn current_value_title(
     builder: &mut ChildBuilder,
@@ -651,9 +693,10 @@ fn current_value_title(
         .spawn(NodeBundle {
             style: Style {
                 display: Display::Grid,
-                justify_items: JustifyItems::Start,
-                align_items: AlignItems::Start,
-                align_content: AlignContent::Start,
+                justify_items: JustifyItems::Center,
+                align_items: AlignItems::Center,
+                align_content: AlignContent::Center,
+                justify_content: JustifyContent::Center,
                 grid_column: GridPlacement::span(2),
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
@@ -685,9 +728,6 @@ fn current_value_left(
         .spawn(NodeBundle {
             style: Style {
                 display: Display::Flex,
-                // justify_items: JustifyItems::Start,
-                // align_items: AlignItems::Start,
-                // align_content: AlignContent::Start,
                 flex_direction: FlexDirection::Column,
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
@@ -720,35 +760,48 @@ fn current_value_left(
             ));
         });
 }
+
 fn current_value_right(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
-    text: &str,
+    owner: String,
+    ln_address: String,
     font_size: f32,
     color: Color,
 ) {
     builder
         .spawn(NodeBundle {
             style: Style {
-                display: Display::Grid,
-                justify_items: JustifyItems::Start,
-                align_items: AlignItems::Start,
-                align_content: AlignContent::Start,
-
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::GREEN),
+            background_color: BackgroundColor(Color::RED),
             ..default()
         })
         .with_children(|builder| {
-            builder.spawn(TextBundle::from_section(
-                text,
-                TextStyle {
-                    font,
-                    font_size,
-                    color,
-                },
+            builder.spawn((
+                TextBundle::from_section(
+                    format!("Owner: {}", owner),
+                    TextStyle {
+                        font: font.clone(),
+                        font_size,
+                        color,
+                    },
+                ),
+                CurrentBlockOwnerText,
+            ));
+            builder.spawn((
+                TextBundle::from_section(
+                    ln_address.to_string(),
+                    TextStyle {
+                        font,
+                        font_size,
+                        color,
+                    },
+                ),
+                CurrentBlockLnAddressText,
             ));
         });
 }
@@ -775,13 +828,16 @@ fn current_value_message(
             ..default()
         })
         .with_children(|builder| {
-            builder.spawn(TextBundle::from_section(
-                text,
-                TextStyle {
-                    font,
-                    font_size,
-                    color,
-                },
+            builder.spawn((
+                TextBundle::from_section(
+                    text,
+                    TextStyle {
+                        font,
+                        font_size,
+                        color,
+                    },
+                ),
+                CurrentBlockMessageText,
             ));
         });
 }
@@ -797,9 +853,10 @@ fn new_value_title(
         .spawn(NodeBundle {
             style: Style {
                 display: Display::Grid,
-                justify_items: JustifyItems::Start,
-                align_items: AlignItems::Start,
-                align_content: AlignContent::Start,
+                justify_items: JustifyItems::Center,
+                align_items: AlignItems::Center,
+                align_content: AlignContent::Center,
+                justify_content: JustifyContent::Center,
                 grid_column: GridPlacement::span(2),
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
@@ -824,14 +881,20 @@ fn setup_ln_addr_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
         .spawn(NodeBundle {
             style: Style {
                 display: Display::Grid,
-                justify_items: JustifyItems::Start,
-                align_items: AlignItems::Start,
-                align_content: AlignContent::Start,
-
-                padding: UiRect::all(Val::Px(1.0)),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                justify_items: JustifyItems::Center,
+                align_content: AlignContent::Center,
+                //max_height: Val::Percent(50.0),
+                //min_height: Val::Percent(50.0),
+                min_width: Val::Px(198.0),
+                max_width: Val::Px(198.0),
+                min_height: Val::Px(36.0),
+                max_height: Val::Px(36.0),
+                //padding: UiRect::all(Val::Px(2.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::RED),
+            background_color: BackgroundColor(Color::MAROON),
             ..default()
         })
         .with_children(|parent| {
@@ -839,25 +902,36 @@ fn setup_ln_addr_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(80.0),
-                            height: Val::Px(30.0),
-                            justify_content: JustifyContent::Center,
+                            justify_content: JustifyContent::Start,
                             align_items: AlignItems::Center,
+                            justify_items: JustifyItems::Center,
+                            align_content: AlignContent::Center,
+                            margin: UiRect::all(Val::Px(1.0)),
+                            flex_wrap: FlexWrap::Wrap,
+                            min_width: Val::Px(194.0),
+                            max_width: Val::Px(194.0),
+                            min_height: Val::Px(32.0),
+                            max_height: Val::Px(32.0),
+                            //min_height: Val::Px(80.0),
                             ..default()
                         },
                         background_color: NORMAL_BUTTON.into(),
                         ..default()
                     },
-                    ButtonBack,
+                    NewBlockLnAddressButton,
+                    NewBlockDataButton,
                 ))
                 .with_children(|parent2| {
-                    parent2.spawn(TextBundle::from_section(
-                        button_text,
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: 16.0,
-                            color: Color::rgb(1.0, 1.0, 1.0),
-                        },
+                    parent2.spawn((
+                        TextBundle::from_section(
+                            button_text.clone(),
+                            TextStyle {
+                                font: font.clone(),
+                                font_size: 16.0,
+                                color: DEFAULT_NO_PICK_COLOR,
+                            },
+                        ),
+                        NewBlockLnAddressText,
                     ));
                 });
         });
@@ -868,14 +942,20 @@ fn setup_color_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, butto
         .spawn(NodeBundle {
             style: Style {
                 display: Display::Grid,
-                justify_items: JustifyItems::Start,
-                align_items: AlignItems::Start,
-                align_content: AlignContent::Start,
-
-                padding: UiRect::all(Val::Px(1.0)),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                justify_items: JustifyItems::Center,
+                align_content: AlignContent::Center,
+                //max_height: Val::Percent(50.0),
+                //min_height: Val::Percent(50.0),
+                min_width: Val::Px(198.0),
+                max_width: Val::Px(198.0),
+                min_height: Val::Px(36.0),
+                max_height: Val::Px(36.0),
+                //padding: UiRect::all(Val::Px(2.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::YELLOW),
+            background_color: BackgroundColor(Color::ORANGE_RED),
             ..default()
         })
         .with_children(|parent| {
@@ -883,25 +963,36 @@ fn setup_color_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, butto
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(80.0),
-                            height: Val::Px(30.0),
-                            justify_content: JustifyContent::Center,
+                            justify_content: JustifyContent::Start,
                             align_items: AlignItems::Center,
+                            justify_items: JustifyItems::Center,
+                            align_content: AlignContent::Center,
+                            margin: UiRect::all(Val::Px(1.0)),
+                            //flex_wrap: FlexWrap::Wrap,
+                            min_width: Val::Px(194.0),
+                            max_width: Val::Px(194.0),
+                            min_height: Val::Px(32.0),
+                            max_height: Val::Px(32.0),
+                            //min_height: Val::Px(80.0),
                             ..default()
                         },
                         background_color: NORMAL_BUTTON.into(),
                         ..default()
                     },
-                    ButtonBack,
+                    NewBlockColorButton,
+                    NewBlockDataButton,
                 ))
                 .with_children(|parent2| {
-                    parent2.spawn(TextBundle::from_section(
-                        button_text,
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: 16.0,
-                            color: Color::rgb(1.0, 1.0, 1.0),
-                        },
+                    parent2.spawn((
+                        TextBundle::from_section(
+                            button_text.clone(),
+                            TextStyle {
+                                font: font.clone(),
+                                font_size: 16.0,
+                                color: DEFAULT_NO_PICK_COLOR,
+                            },
+                        ),
+                        NewBlockColorText,
                     ));
                 });
         });
@@ -912,11 +1003,16 @@ fn setup_message_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
         .spawn(NodeBundle {
             style: Style {
                 display: Display::Grid,
-                justify_items: JustifyItems::Start,
-                align_items: AlignItems::Start,
-                align_content: AlignContent::Start,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                justify_items: JustifyItems::Center,
+                align_content: AlignContent::Center,
                 grid_column: GridPlacement::span(2),
-                padding: UiRect::all(Val::Px(1.0)),
+                min_width: Val::Px(224.0),
+                max_width: Val::Px(224.0),
+                min_height: Val::Px(104.0),
+                max_height: Val::Px(104.0),
+                //padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
             background_color: BackgroundColor(Color::PURPLE),
@@ -927,134 +1023,35 @@ fn setup_message_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(80.0),
-                            height: Val::Px(30.0),
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Start,
+                            align_items: AlignItems::Start,
+                            justify_items: JustifyItems::Start,
+                            align_content: AlignContent::Start,
+                            min_width: Val::Px(220.0),
+                            max_width: Val::Px(220.0),
+                            min_height: Val::Px(100.0),
+                            max_height: Val::Px(100.0),
+                            margin: UiRect::all(Val::Px(1.0)),
                             ..default()
                         },
                         background_color: NORMAL_BUTTON.into(),
                         ..default()
                     },
-                    ButtonBack,
+                    NewBlockMessageButton,
+                    NewBlockDataButton,
                 ))
                 .with_children(|parent2| {
-                    parent2.spawn(TextBundle::from_section(
-                        button_text,
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: 16.0,
-                            color: Color::rgb(1.0, 1.0, 1.0),
-                        },
+                    parent2.spawn((
+                        TextBundle::from_section(
+                            button_text.clone(),
+                            TextStyle {
+                                font: font.clone(),
+                                font_size: 16.0,
+                                color: DEFAULT_NO_PICK_COLOR,
+                            },
+                        ),
+                        NewBlockMessageText,
                     ));
                 });
         });
-}
-
-#[allow(clippy::type_complexity)]
-pub fn right_cart_button_system(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<RightCartButton>),
-    >,
-    mut cart: ResMut<TileCartVec>,
-    mut param_set: ParamSet<(
-        Query<&mut Text, With<BlockHeightCartText>>,
-        Query<&mut Text, With<CurrentBlockValueText>>,
-        Query<&mut Text, With<CurrentBlockDateText>>,
-    )>,
-) {
-    for (interaction, mut color) in &mut interaction_query {
-        //let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                *color = PRESSED_BUTTON.into();
-                // info!("pre index {}", cart.index);
-                let index = (cart.index + 1) % cart.vec.len();
-                cart.index = index;
-                // info!("post index {}", cart.index);
-                // info!("vec len {}", cart.vec.len());
-                for mut text in param_set.p0().iter_mut() {
-                    text.sections[0].value = format!("Block {}", cart.vec[cart.index].height);
-                }
-                for mut text in param_set.p1().iter_mut() {
-                    text.sections[0].value = format!("Value {}", cart.vec[cart.index].amount);
-                }
-                for mut text in param_set.p2().iter_mut() {
-                    let datetime_string = cart.vec[cart.index]
-                        .event_date
-                        .map_or("".to_string(), |datetime| {
-                            datetime.date_naive().format("%Y-%m-%d").to_string()
-                        });
-
-                    text.sections[0].value = format!("Date {}", datetime_string);
-                }
-            }
-            Interaction::Hovered => {
-                //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
-            }
-            Interaction::None => {
-                //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
-            }
-        }
-    }
-}
-
-#[allow(clippy::type_complexity)]
-pub fn left_cart_button_system(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<LeftCartButton>),
-    >,
-    mut cart: ResMut<TileCartVec>,
-    mut param_set: ParamSet<(
-        Query<&mut Text, With<BlockHeightCartText>>,
-        Query<&mut Text, With<CurrentBlockValueText>>,
-        Query<&mut Text, With<CurrentBlockDateText>>,
-    )>,
-    // mut block_height:
-    // mut current_value:
-    // mut current_date:
-) {
-    for (interaction, mut color) in &mut interaction_query {
-        //let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                //text.sections[0].value = button_text;
-                *color = PRESSED_BUTTON.into();
-
-                let ind = if cart.index == 0 {
-                    cart.vec.len() - 1
-                } else {
-                    (cart.index - 1) % cart.vec.len()
-                };
-                cart.index = ind;
-                for mut text in param_set.p0().iter_mut() {
-                    text.sections[0].value = format!("Block {}", cart.vec[cart.index].height);
-                }
-                for mut text in param_set.p1().iter_mut() {
-                    text.sections[0].value = format!("Value {}", cart.vec[cart.index].amount);
-                }
-                for mut text in param_set.p2().iter_mut() {
-                    let datetime_string = cart.vec[cart.index]
-                        .event_date
-                        .map_or("".to_string(), |datetime| {
-                            datetime.date_naive().format("%Y-%m-%d").to_string()
-                        });
-
-                    text.sections[0].value = format!("Date {}", datetime_string);
-                }
-            }
-            Interaction::Hovered => {
-                //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
-            }
-            Interaction::None => {
-                //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
-            }
-        }
-    }
 }

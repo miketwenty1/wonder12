@@ -24,8 +24,8 @@ pub fn setup_keyboard(
             NodeBundle {
                 style: Style {
                     display: Display::Grid,
-                    width: Val::Percent(99.0),
-                    height: Val::Percent(99.0),
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
                     grid_template_columns: vec![GridTrack::flex(1.0)],
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::SpaceEvenly,
@@ -43,6 +43,7 @@ pub fn setup_keyboard(
                     ..default()
                 },
                 background_color: BackgroundColor(Color::rgb(0.3, 0.3, 0.3)),
+                //z_index: ZIndex::Global(20),
                 ..default()
             },
             KeyBoard,

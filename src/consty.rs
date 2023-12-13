@@ -14,3 +14,21 @@ pub const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
 pub const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
 pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 pub const MINIMUM_BLOCK_AMOUNT: u32 = 128;
+
+pub const DEFAULT_NEW_LN_TEXT: &str = "Type in a lightning address!";
+pub const DEFAULT_NEW_COLOR_TEXT: &str = "Random Color, if not specified.";
+pub const DEFAULT_NEW_MESSAGE_TEXT: &str = "Leave an optional message for others to see";
+
+pub const DEFAULT_NO_PICK_COLOR: Color = Color::Rgba {
+    red: 0.7,
+    green: 0.7,
+    blue: 0.7,
+    alpha: 1.0,
+};
+
+pub const PICKED_COLOR: Color = Color::Rgba {
+    red: 1.,
+    green: 1.,
+    blue: 1.,
+    alpha: 1.,
+};

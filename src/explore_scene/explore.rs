@@ -23,10 +23,9 @@ use crate::{
     eventy::{
         EdgeEvent, SelectTileEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
     },
-    keyboard::KeyboardState,
     resourcey::{
         ChunkManager, Edge, LastSelectedTile, SpriteIndexBuilding, SpriteSheetBgRes,
-        SpriteSheetBuildingRes, TileCart, TileMap,
+        SpriteSheetBuildingRes, TileMap,
     },
     statey::DisplayBuyUiState,
     structy::{EdgeType, SpawnDiffData},
@@ -517,8 +516,7 @@ pub fn spawn_block_sprites(
                     land_sprite_index = rng.gen_range(1..=11);
 
                     if tile_map.map.contains_key(&locationcoord.ulam) {
-                        let amount_from_tile =
-                            tile_map.map.get(&locationcoord.ulam).unwrap().amount;
+                        let amount_from_tile = tile_map.map.get(&locationcoord.ulam).unwrap().cost;
                         building_sprite_index =
                             *texture_map.0.get(&amount_from_tile).unwrap() as usize;
 
@@ -700,7 +698,7 @@ pub fn update_tile_textures(
         for (mut texture, location, parent_entity) in lands.iter_mut() {
             if tile_map.map.contains_key(&location.ulam) {
                 let tile_data = tile_map.map.get(&location.ulam).unwrap();
-                let building_sprite_index = *texture_map.0.get(&tile_data.amount).unwrap() as usize;
+                let building_sprite_index = *texture_map.0.get(&tile_data.cost).unwrap() as usize;
 
                 let c = ulam::calc_coord::calc_coord(tile_data.height);
                 let mut locationcoord = Location {
@@ -913,7 +911,6 @@ pub fn buy_selection_button(
     //    mut commands: Commands,
     mut text_query: Query<&mut Text>,
     mut ui_state: ResMut<NextState<DisplayBuyUiState>>,
-    mut buy_state: ResMut<NextState<KeyboardState>>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
@@ -924,7 +921,6 @@ pub fn buy_selection_button(
                 border_color.0 = Color::GRAY;
 
                 ui_state.set(DisplayBuyUiState::On);
-                buy_state.set(KeyboardState::On);
             }
             Interaction::Hovered => {
                 text.sections[0].value = "Buy".to_string();

@@ -47,7 +47,7 @@ pub fn update_amount_selected_text(
     mut tile_cart: ResMut<TileCart>,
 ) {
     for _e in event.read() {
-        let mut total_amount: u32 = 0;
+        let mut total_cost: u32 = 0;
         tile_cart.map.clear();
         for land in selected_lands.iter() {
             let a = tile_map.map.get(&land.ulam);
@@ -55,8 +55,14 @@ pub fn update_amount_selected_text(
             let r: f32 = rng.gen_range(0.0..1.0);
             let g: f32 = rng.gen_range(0.0..1.0);
             let b: f32 = rng.gen_range(0.0..1.0);
+            let new_color = Color::Rgba {
+                red: r,
+                green: g,
+                blue: b,
+                alpha: 1.0,
+            };
             if let Some(val) = a {
-                total_amount += val.amount * 2;
+                total_cost += val.cost;
                 tile_cart.map.insert(
                     land.ulam,
                     TileCartData {
@@ -65,22 +71,18 @@ pub fn update_amount_selected_text(
                         owner: val.owner.clone(),
                         color: Some(val.color),
                         message: val.message.clone(),
-                        amount: val.amount,
+                        value: val.value,
+                        cost: val.cost,
                         height: val.height,
                         new_ln_address: "".to_string(),
                         new_owner: "".to_string(),
-                        new_color: Color::Rgba {
-                            red: r,
-                            green: g,
-                            blue: b,
-                            alpha: 1.,
-                        },
+                        new_color,
                         new_message: "".to_string(),
                     },
                 );
             } else {
                 //info!("{}", land.ulam);
-                total_amount += MINIMUM_BLOCK_AMOUNT;
+                total_cost += MINIMUM_BLOCK_AMOUNT;
                 tile_cart.map.insert(
                     land.ulam,
                     TileCartData {
@@ -89,26 +91,22 @@ pub fn update_amount_selected_text(
                         owner: "".to_string(),
                         color: None,
                         message: "".to_string(),
-                        amount: 0,
+                        value: 0,
+                        cost: MINIMUM_BLOCK_AMOUNT,
                         height: land.ulam,
                         new_ln_address: "".to_string(),
                         new_owner: "".to_string(),
-                        new_color: Color::Rgba {
-                            red: r,
-                            green: g,
-                            blue: b,
-                            alpha: 1.,
-                        },
+                        new_color,
                         new_message: "".to_string(),
                     },
                 );
             }
         }
         for mut text in amount_selected_text.iter_mut() {
-            if total_amount == 0 {
+            if total_cost == 0 {
                 text.sections[0].value = "".to_string();
             } else {
-                text.sections[0].value = format!("Total: {} sats", total_amount);
+                text.sections[0].value = format!("Total: {} sats", total_cost);
             }
         }
     }

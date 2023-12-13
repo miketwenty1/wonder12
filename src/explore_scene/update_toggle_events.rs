@@ -70,7 +70,7 @@ pub fn change_tile_text_event(
                         text.sections[0].value = val.height.to_string();
                     }
                     TileTextType::Value => {
-                        text.sections[0].value = val.amount.to_string();
+                        text.sections[0].value = val.cost.to_string();
                     }
                     TileTextType::Blank => {
                         text.sections[0].value = "".to_string();

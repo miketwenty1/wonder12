@@ -143,11 +143,14 @@ pub struct AmountSelectedNode;
 #[derive(Component)]
 pub struct AmountSelectedText(pub u32);
 
-#[derive(Component)]
-pub struct RightCartButton;
+// #[derive(Component)]
+// pub struct RightCartButton;
+
+// #[derive(Component)]
+// pub struct LeftCartButton;
 
 #[derive(Component)]
-pub struct LeftCartButton;
+pub struct CartButton(pub i32);
 
 #[derive(Component)]
 pub struct BlockHeightCartText;
@@ -157,3 +160,36 @@ pub struct CurrentBlockValueText;
 
 #[derive(Component)]
 pub struct CurrentBlockDateText;
+
+#[derive(Component)]
+pub struct CurrentBlockOwnerText;
+
+#[derive(Component)]
+pub struct CurrentBlockLnAddressText;
+
+#[derive(Component)]
+pub struct CurrentBlockMessageText;
+
+#[derive(Component)]
+pub struct NewBlockLnAddressButton;
+
+#[derive(Component)]
+pub struct NewBlockLnAddressText;
+
+#[derive(Component)]
+pub struct NewBlockColorButton;
+
+#[derive(Component)]
+pub struct NewBlockColorText;
+
+#[derive(Component)]
+pub struct NewBlockMessageButton;
+
+#[derive(Component)]
+pub struct NewBlockMessageText;
+
+#[derive(Component)]
+pub struct NewBlockDataButton;
+
+#[derive(Component)]
+pub struct BlockCostText;

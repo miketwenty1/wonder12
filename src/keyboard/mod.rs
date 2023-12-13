@@ -31,7 +31,7 @@ impl Plugin for KeyboardPlugin {
         app
             // OnEnter State Systems
             .insert_resource(CapitalizeToggle(false))
-            .add_systems(OnEnter(KeyboardState::On), setup_keyboard)
+            .add_systems(OnEnter(KeyboardState::On), (setup_keyboard).chain())
             .add_systems(
                 Update,
                 (

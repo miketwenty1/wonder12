@@ -13,7 +13,8 @@ pub struct TileData {
     pub message: String,
     pub resource: TileResource,
     pub hash: String,
-    pub amount: u32,
+    pub value: u32,
+    pub cost: u32,
     pub height: u32,
     pub land_index: usize,
     pub event_date: DateTime<Utc>,
@@ -31,7 +32,8 @@ pub struct TileCartData {
     pub owner: String,
     pub color: Option<Color>,
     pub message: String,
-    pub amount: u32,
+    pub value: u32,
+    pub cost: u32,
     pub height: u32,
     pub new_ln_address: String,
     pub new_owner: String,
@@ -87,5 +89,23 @@ pub struct ServerURL(pub String);
 #[derive(Resource, Clone)]
 pub struct ToggleMap(pub HashMap<String, bool>);
 
+#[derive(Resource, Clone)]
+pub enum TargetType {
+    Nothing,
+    NewLnAddress,
+    NewColor,
+    NewMessage,
+}
+
+#[derive(Resource, Clone)]
+pub struct KeyboardTarget(pub TargetType);
+
 // #[derive(Resource, Clone)]
 // pub struct AmountSelected(pub u32);
+
+#[derive(Resource, Clone)]
+pub struct CurrentCartBlock {
+    pub ln_address: String,
+    pub color: String,
+    pub message: String,
+}
