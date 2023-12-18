@@ -2,10 +2,11 @@ use bevy::prelude::*;
 
 use crate::{
     componenty::{
-        BlockCostText, BlockHeightCartText, CartButton, CurrentBlockDateText,
-        CurrentBlockLnAddressText, CurrentBlockMessageText, CurrentBlockOwnerText,
-        CurrentBlockValueText, NewBlockColorButton, NewBlockColorText, NewBlockDataButton,
-        NewBlockLnAddressButton, NewBlockLnAddressText, NewBlockMessageButton, NewBlockMessageText,
+        AllCartConfigButton, AllCartConfigText, BlockCostText, BlockHeightCartText, BuyMenuButton,
+        CartButton, CouldBeEditabledTextBox, CurrentBlockDateText, CurrentBlockLnAddressText,
+        CurrentBlockMessageText, CurrentBlockUsernameText, CurrentBlockValueText, EditabledTextBox,
+        NewBlockColorButton, NewBlockColorText, NewBlockDataButton, NewBlockLnAddressButton,
+        NewBlockLnAddressText, NewBlockMessageButton, NewBlockMessageText,
     },
     consty::{
         DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
@@ -21,9 +22,6 @@ use super::UiOverlay;
 const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
 
 //const INTRO_TEXT: &str = "This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!";
-
-#[derive(Component)]
-pub struct ButtonGo;
 
 #[derive(Component)]
 pub struct ButtonBack;
@@ -233,7 +231,7 @@ pub fn spawn_layout(
                     ..default()
                 })
                 .with_children(|builder| {
-                    setup_config_for_all_blocks_button(builder, font.clone(), "X".to_string());
+                    setup_config_for_all_blocks_button(builder, font.clone(), " ".to_string());
                     spawn_nested_text_bundle_flex(
                         builder,
                         font.clone(),
@@ -280,7 +278,7 @@ pub fn spawn_layout(
                     current_value_right(
                         builder,
                         font.clone(),
-                        tile_cart_vec.vec[0].owner.to_string(),
+                        tile_cart_vec.vec[0].username.to_string(),
                         tile_cart_vec.vec[0].ln_address.to_string(),
                         16.0,
                         Color::WHITE,
@@ -440,16 +438,19 @@ fn setup_config_for_all_blocks_button(
                         background_color: NORMAL_BUTTON.into(),
                         ..default()
                     },
-                    ButtonBack,
+                    AllCartConfigButton,
                 ))
                 .with_children(|parent2| {
-                    parent2.spawn(TextBundle::from_section(
-                        button_text,
-                        TextStyle {
-                            font: font.clone(),
-                            font_size: 12.0,
-                            color: Color::rgb(1., 1., 1.),
-                        },
+                    parent2.spawn((
+                        TextBundle::from_section(
+                            button_text,
+                            TextStyle {
+                                font: font.clone(),
+                                font_size: 12.0,
+                                color: Color::rgb(1., 1., 1.),
+                            },
+                        ),
+                        AllCartConfigText,
                     ));
                 });
         });
@@ -485,10 +486,10 @@ fn setup_buy_create_invoice_button(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        background_color: NORMAL_BUTTON.into(),
+                        background_color: Color::DARK_GREEN.into(),
                         ..default()
                     },
-                    ButtonGo,
+                    BuyMenuButton,
                 ))
                 .with_children(|parent2| {
                     parent2.spawn(TextBundle::from_section(
@@ -738,7 +739,7 @@ fn current_value_left(
         .with_children(|builder| {
             builder.spawn((
                 TextBundle::from_section(
-                    format!("Value: {}", value),
+                    format!("Value: {} sats", value),
                     TextStyle {
                         font: font.clone(),
                         font_size,
@@ -764,7 +765,7 @@ fn current_value_left(
 fn current_value_right(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
-    owner: String,
+    username: String,
     ln_address: String,
     font_size: f32,
     color: Color,
@@ -783,14 +784,14 @@ fn current_value_right(
         .with_children(|builder| {
             builder.spawn((
                 TextBundle::from_section(
-                    format!("Owner: {}", owner),
+                    format!("Owner: {}", username),
                     TextStyle {
                         font: font.clone(),
                         font_size,
                         color,
                     },
                 ),
-                CurrentBlockOwnerText,
+                CurrentBlockUsernameText,
             ));
             builder.spawn((
                 TextBundle::from_section(
@@ -822,6 +823,7 @@ fn current_value_message(
                 align_content: AlignContent::Start,
                 grid_column: GridPlacement::span(2),
                 padding: UiRect::all(Val::Px(1.0)),
+                max_width: Val::Px(250.0),
                 ..default()
             },
             background_color: BackgroundColor(Color::PINK),
@@ -920,6 +922,7 @@ fn setup_ln_addr_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
                     },
                     NewBlockLnAddressButton,
                     NewBlockDataButton,
+                    //EditabledTextBox,
                 ))
                 .with_children(|parent2| {
                     parent2.spawn((
@@ -981,6 +984,8 @@ fn setup_color_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, butto
                     },
                     NewBlockColorButton,
                     NewBlockDataButton,
+                    EditabledTextBox,
+                    CouldBeEditabledTextBox,
                 ))
                 .with_children(|parent2| {
                     parent2.spawn((
@@ -1039,6 +1044,8 @@ fn setup_message_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
                     },
                     NewBlockMessageButton,
                     NewBlockDataButton,
+                    EditabledTextBox,
+                    CouldBeEditabledTextBox,
                 ))
                 .with_children(|parent2| {
                     parent2.spawn((

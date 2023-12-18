@@ -162,7 +162,7 @@ pub struct CurrentBlockValueText;
 pub struct CurrentBlockDateText;
 
 #[derive(Component)]
-pub struct CurrentBlockOwnerText;
+pub struct CurrentBlockUsernameText;
 
 #[derive(Component)]
 pub struct CurrentBlockLnAddressText;
@@ -193,3 +193,18 @@ pub struct NewBlockDataButton;
 
 #[derive(Component)]
 pub struct BlockCostText;
+
+#[derive(Component)]
+pub struct AllCartConfigText;
+
+#[derive(Component)]
+pub struct AllCartConfigButton;
+
+#[derive(Component)]
+pub struct EditabledTextBox;
+
+#[derive(Component)]
+pub struct CouldBeEditabledTextBox;
+
+#[derive(Component)]
+pub struct BuyMenuButton;

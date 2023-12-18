@@ -29,7 +29,7 @@ pub fn physical_keyboard_system(
             info!("no likey this character sorry")
         }
 
-        info!("new pkeydata {:?}", keyboard_text.0);
+        //info!("new pkeydata {:?}", keyboard_text.0);
     }
 }
 

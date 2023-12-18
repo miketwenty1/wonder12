@@ -1,5 +1,5 @@
 use bevy::{
-    input::mouse::MouseMotion,
+    input::mouse::{MouseMotion, MouseWheel},
     prelude::*,
     render::texture::{ImageLoaderSettings, ImageSampler},
     text::Text2dBounds,
@@ -329,6 +329,7 @@ pub fn touch_event_system(
 #[allow(clippy::type_complexity)]
 pub fn zoom_out_button_system(
     mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse_wheel_events: EventReader<MouseWheel>,
     mut interaction_query: Query<
         (
             &Interaction,
@@ -341,6 +342,8 @@ pub fn zoom_out_button_system(
     mut text_query: Query<&mut Text>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
 ) {
+    let mut zoom_out = false;
+
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
@@ -349,13 +352,7 @@ pub fn zoom_out_button_system(
                 text.sections[0].value = "-".to_string();
                 *color = PRESSED_BUTTON.into();
                 border_color.0 = Color::GRAY;
-                for mut ortho in cam_query.iter_mut() {
-                    ortho.scale += 0.25;
-                    //info!("{}", ortho.scale);
-                    if ortho.scale > 5.0 {
-                        ortho.scale = 5.0;
-                    }
-                }
+                zoom_out = true;
             }
             Interaction::Hovered => {
                 text.sections[0].value = "-".to_string();
@@ -369,11 +366,28 @@ pub fn zoom_out_button_system(
             }
         }
     }
+
+    for mouse_wheel in mouse_wheel_events.read() {
+        if mouse_wheel.y < 0.0 {
+            zoom_out = true;
+        }
+    }
+
+    if zoom_out {
+        for mut ortho in cam_query.iter_mut() {
+            ortho.scale += 0.25;
+            //info!("{}", ortho.scale);
+            if ortho.scale > 5.0 {
+                ortho.scale = 5.0;
+            }
+        }
+    }
 }
 
 #[allow(clippy::type_complexity)]
 pub fn zoom_in_button_system(
     mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse_wheel_events: EventReader<MouseWheel>,
     //mut touch: ResMut<Touches>, // need a clear method or a clear fn work around
     mut interaction_query: Query<
         (
@@ -387,6 +401,7 @@ pub fn zoom_in_button_system(
     mut text_query: Query<&mut Text>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
 ) {
+    let mut zoom_in = false;
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
@@ -395,13 +410,7 @@ pub fn zoom_in_button_system(
                 text.sections[0].value = "+".to_string();
                 *color = PRESSED_BUTTON.into();
                 border_color.0 = Color::GRAY;
-                for mut ortho in cam_query.iter_mut() {
-                    ortho.scale -= 0.25;
-                    if ortho.scale < 0.25 {
-                        ortho.scale = 0.25;
-                    }
-                    //info!("{}", ortho.scale);
-                }
+                zoom_in = true;
             }
             Interaction::Hovered => {
                 text.sections[0].value = "+".to_string();
@@ -413,6 +422,21 @@ pub fn zoom_in_button_system(
                 *color = NORMAL_BUTTON.into();
                 border_color.0 = Color::BLACK;
             }
+        }
+    }
+
+    for mouse_wheel in mouse_wheel_events.read() {
+        if mouse_wheel.y > 0.0 {
+            zoom_in = true;
+        }
+    }
+    if zoom_in {
+        for mut ortho in cam_query.iter_mut() {
+            ortho.scale -= 0.25;
+            if ortho.scale < 0.25 {
+                ortho.scale = 0.25;
+            }
+            //info!("{}", ortho.scale);
         }
     }
 }
@@ -516,9 +540,9 @@ pub fn spawn_block_sprites(
                     land_sprite_index = rng.gen_range(1..=11);
 
                     if tile_map.map.contains_key(&locationcoord.ulam) {
-                        let amount_from_tile = tile_map.map.get(&locationcoord.ulam).unwrap().cost;
+                        let value_from_tile = tile_map.map.get(&locationcoord.ulam).unwrap().value;
                         building_sprite_index =
-                            *texture_map.0.get(&amount_from_tile).unwrap() as usize;
+                            *texture_map.0.get(&value_from_tile).unwrap() as usize;
 
                         color_for_sprites = tile_map.map.get(&locationcoord.ulam).unwrap().color;
                         land_sprite_index =
@@ -698,7 +722,7 @@ pub fn update_tile_textures(
         for (mut texture, location, parent_entity) in lands.iter_mut() {
             if tile_map.map.contains_key(&location.ulam) {
                 let tile_data = tile_map.map.get(&location.ulam).unwrap();
-                let building_sprite_index = *texture_map.0.get(&tile_data.cost).unwrap() as usize;
+                let building_sprite_index = *texture_map.0.get(&tile_data.value).unwrap() as usize;
 
                 let c = ulam::calc_coord::calc_coord(tile_data.height);
                 let mut locationcoord = Location {

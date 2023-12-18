@@ -1,21 +1,23 @@
 use crate::comms::{load_server_data::api_get_server_tiles, CommsPlugin};
 use crate::consty::{CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT};
 use crate::eventy::{
-    EdgeEvent, SelectTileEvent, SpriteSpawnEvent, ToggleBuildings, ToggleColors, ToggleText,
-    UpdateTileTextureEvent, UpdateUiAmount,
+    BuyBlockRequest, EdgeEvent, SelectTileEvent, SpriteSpawnEvent, ToggleBuildings, ToggleColors,
+    ToggleText, UpdateTileTextureEvent, UpdateUiAmount,
 };
 use crate::explore_scene::ExplorePlugin;
 use crate::keyboard::resources::KeyboardData;
 use crate::keyboard::{KeyboardPlugin, KeyboardState};
 use crate::overlay_ui::OverlayUiPlugin;
 use crate::resourcey::{
-    ChunkManager, CurrentCartBlock, Edge, KeyboardTarget, LastSelectedTile, ServerURL,
-    SpriteIndexBuilding, TargetType, TileCart, TileCartVec, TileDataChannel, TileMap, ToggleMap,
+    ChunkManager, CurrentCartBlock, Edge, InvoiceCheckFromServer, InvoiceDataFromServer,
+    KeyboardTarget, LastSelectedTile, ServerURL, SpriteIndexBuilding, TargetType, TileCart,
+    TileCartVec, TileDataChannel, TileMap, ToggleMap, User,
 };
-use crate::statey::{CommsState, DisplayBuyUiState, ExploreState};
+use crate::statey::{CommsApiState, DisplayBuyUiState, ExploreState};
 use crate::structy::EdgeData;
 use bevy::asset::AssetMetaCheck;
 use bevy::{prelude::*, utils::HashMap};
+use resourcey::{CheckInvoiceChannel, RequestInvoiceChannel};
 use wasm_bindgen::prelude::wasm_bindgen;
 
 mod building_config;
@@ -116,6 +118,12 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .insert_resource(ToggleMap(toggle_map))
         .insert_resource(KeyboardData("".to_string()))
         .insert_resource(KeyboardTarget(TargetType::Nothing))
+        .insert_resource(User {
+            name: username,
+            ln_address,
+        })
+        .init_resource::<InvoiceDataFromServer>()
+        .init_resource::<InvoiceCheckFromServer>()
         //.add_plugins(DefaultPlugins)
         .add_plugins(
             DefaultPlugins
@@ -131,8 +139,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
                 .set(ImagePlugin::default_nearest()), //default_nearest()),
         )
         .add_state::<ExploreState>()
-        .add_state::<CommsState>()
-        .add_state::<DisplayBuyUiState>()
+        .add_state::<CommsApiState>()
         .add_state::<DisplayBuyUiState>()
         .add_state::<KeyboardState>()
         .add_plugins(CommsPlugin)
@@ -149,6 +156,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .add_event::<ToggleColors>()
         .add_event::<ToggleText>()
         .add_event::<UpdateUiAmount>()
+        .add_event::<BuyBlockRequest>()
         .add_systems(Startup, setup) //setupcoords
         .add_systems(PostStartup, api_get_server_tiles)
         .run();
@@ -161,7 +169,16 @@ fn setup(mut commands: Commands, mut ui_state: ResMut<NextState<ExploreState>>) 
         tx: tx_tiledata,
         rx: rx_tiledata,
     });
-
+    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
+    commands.insert_resource(RequestInvoiceChannel {
+        tx: tx_tiledata,
+        rx: rx_tiledata,
+    });
+    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
+    commands.insert_resource(CheckInvoiceChannel {
+        tx: tx_tiledata,
+        rx: rx_tiledata,
+    });
     ui_state.set(ExploreState::On);
 }
 

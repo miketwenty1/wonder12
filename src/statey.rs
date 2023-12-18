@@ -1,10 +1,14 @@
 use bevy::prelude::*;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-pub enum CommsState {
+pub enum CommsApiState {
     #[default]
     Off,
-    On,
+    SetName,
+    LoadBlockData,
+    ReceiveInvoice,
+    Buy,
+    CheckInvoice,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -20,4 +24,5 @@ pub enum DisplayBuyUiState {
     #[default]
     Off,
     On,
+    Qr,
 }

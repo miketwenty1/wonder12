@@ -1,5 +1,6 @@
 use async_channel::{Receiver, Sender};
 use bevy::{prelude::*, utils::HashMap};
+use serde::Deserialize;
 
 use crate::structy::EdgeData;
 use crate::structy::TileResource;
@@ -8,7 +9,7 @@ use chrono::{DateTime, Utc};
 #[derive(Resource, Clone)]
 pub struct TileData {
     pub ln_address: String,
-    pub owner: String,
+    pub username: String,
     pub color: Color,
     pub message: String,
     pub resource: TileResource,
@@ -29,14 +30,14 @@ pub struct TileMap {
 pub struct TileCartData {
     pub event_date: Option<DateTime<Utc>>,
     pub ln_address: String,
-    pub owner: String,
+    pub username: String,
     pub color: Option<Color>,
     pub message: String,
     pub value: u32,
     pub cost: u32,
     pub height: u32,
     pub new_ln_address: String,
-    pub new_owner: String,
+    pub new_username: String,
     pub new_color: Color,
     pub new_message: String,
 }
@@ -84,7 +85,25 @@ pub struct TileDataChannel {
 }
 
 #[derive(Resource, Clone)]
+pub struct RequestInvoiceChannel {
+    pub tx: Sender<String>,
+    pub rx: Receiver<String>,
+}
+
+#[derive(Resource, Clone)]
+pub struct CheckInvoiceChannel {
+    pub tx: Sender<String>,
+    pub rx: Receiver<String>,
+}
+
+#[derive(Resource, Clone)]
 pub struct ServerURL(pub String);
+
+#[derive(Resource, Clone)]
+pub struct User {
+    pub ln_address: String,
+    pub name: String,
+}
 
 #[derive(Resource, Clone)]
 pub struct ToggleMap(pub HashMap<String, bool>);
@@ -108,4 +127,16 @@ pub struct CurrentCartBlock {
     pub ln_address: String,
     pub color: String,
     pub message: String,
+}
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct InvoiceDataFromServer {
+    pub invoice: String,
+    pub expires: DateTime<Utc>,
+    pub code: String,
+}
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct InvoiceCheckFromServer {
+    pub status: String,
 }

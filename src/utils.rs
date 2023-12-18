@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::render::color::Color;
+use regex::Regex;
 
 fn convert_to_string(value: f32) -> String {
     // Ensure the input value is within the range 0.0 to 1.0
@@ -17,8 +18,13 @@ pub fn convert_color_to_hexstring(value: Color) -> String {
     let g = convert_to_string(value.g());
     let b = convert_to_string(value.b());
     let concat = format!("{}{}{}", r, g, b);
-    info!("concat {}, {}, {}", r, g, b);
+    //info!("concat {}, {}, {}", r, g, b);
     let hex_color_string = all_colors::get_color_hex(concat.as_str());
 
     hex_color_string
+}
+
+pub fn is_valid_email_format_string(email: &str) -> bool {
+    let email_regex = Regex::new(r"(?i)^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$").unwrap();
+    email_regex.is_match(email)
 }

@@ -29,3 +29,6 @@ pub struct ToggleText(pub TileTextType);
 
 #[derive(Event, Debug)]
 pub struct UpdateUiAmount;
+
+#[derive(Event, Debug)]
+pub struct BuyBlockRequest;
