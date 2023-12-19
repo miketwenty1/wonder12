@@ -1,4 +1,3 @@
-use bevy::prelude::*;
 use bevy::render::color::Color;
 use regex::Regex;
 

@@ -25,7 +25,7 @@ use crate::{
     },
     resourcey::{
         ChunkManager, Edge, LastSelectedTile, SpriteIndexBuilding, SpriteSheetBgRes,
-        SpriteSheetBuildingRes, TileMap,
+        SpriteSheetBuildingRes, TileMap, ToggleMap,
     },
     statey::DisplayBuyUiState,
     structy::{EdgeType, SpawnDiffData},
@@ -217,7 +217,7 @@ pub fn setup_explorer(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn mouse_camera_system(
+pub fn desktop_movement_camera_system(
     mut mouse_motion_events: EventReader<MouseMotion>,
     mouse: Res<Input<MouseButton>>,
     mut q_camera: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
@@ -227,6 +227,7 @@ pub fn mouse_camera_system(
     mut edge_event: EventWriter<EdgeEvent>,
     q_window: Query<&Window, With<PrimaryWindow>>,
     mut select_tile_event: EventWriter<SelectTileEvent>,
+    keys: Res<Input<KeyCode>>,
     //mut last_selected_tile: ResMut<LastSelectedTile>,
     //location_query: Query<&Location>,
 ) {
@@ -244,6 +245,42 @@ pub fn mouse_camera_system(
             }
         }
     }
+    if keys.pressed(KeyCode::W)
+        || keys.pressed(KeyCode::A)
+        || keys.pressed(KeyCode::S)
+        || keys.pressed(KeyCode::D)
+        || keys.pressed(KeyCode::Up)
+        || keys.pressed(KeyCode::Left)
+        || keys.pressed(KeyCode::Down)
+        || keys.pressed(KeyCode::Right)
+    {
+        for (mut cam_transform, cam_ortho) in q_camera.iter_mut() {
+            let y: f32 = if keys.pressed(KeyCode::W) || keys.pressed(KeyCode::Up) {
+                15.0
+            } else if keys.pressed(KeyCode::S) || keys.pressed(KeyCode::Down) {
+                -15.0
+            } else {
+                0.0
+            };
+            let x: f32 = if keys.pressed(KeyCode::A) || keys.pressed(KeyCode::Left) {
+                -15.0
+            } else if keys.pressed(KeyCode::D) || keys.pressed(KeyCode::Right) {
+                15.0
+            } else {
+                0.0
+            };
+
+            let direction = Vec3::new(x, y, 0.0);
+            cam_transform.translation += direction
+                * time.delta_seconds()
+                * TILE_SCALE
+                * cam_ortho.scale
+                * MOVE_VELOCITY_FACTOR
+                * 1.0;
+            set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
+        }
+    }
+
     if mouse.just_pressed(MouseButton::Left) {
         for (camera, camera_transform) in q_camera_simple.iter_mut() {
             let window = q_window.single();
@@ -339,10 +376,12 @@ pub fn zoom_out_button_system(
         ),
         (Changed<Interaction>, With<Button>, With<ZoomOutButton>),
     >,
+    time: Res<Time>,
     mut text_query: Query<&mut Text>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
 ) {
     let mut zoom_out = false;
+    let mut zoom_amount: f32 = 0.0;
 
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
@@ -353,6 +392,7 @@ pub fn zoom_out_button_system(
                 *color = PRESSED_BUTTON.into();
                 border_color.0 = Color::GRAY;
                 zoom_out = true;
+                zoom_amount = 0.25;
             }
             Interaction::Hovered => {
                 text.sections[0].value = "-".to_string();
@@ -370,12 +410,13 @@ pub fn zoom_out_button_system(
     for mouse_wheel in mouse_wheel_events.read() {
         if mouse_wheel.y < 0.0 {
             zoom_out = true;
+            zoom_amount = 0.25 * time.delta_seconds() * 4.0;
         }
     }
 
     if zoom_out {
         for mut ortho in cam_query.iter_mut() {
-            ortho.scale += 0.25;
+            ortho.scale += zoom_amount;
             //info!("{}", ortho.scale);
             if ortho.scale > 5.0 {
                 ortho.scale = 5.0;
@@ -398,10 +439,13 @@ pub fn zoom_in_button_system(
         ),
         (Changed<Interaction>, With<Button>, With<ZoomInButton>),
     >,
+    time: Res<Time>,
     mut text_query: Query<&mut Text>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
 ) {
     let mut zoom_in = false;
+    let mut zoom_amount: f32 = 0.0;
+
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
@@ -411,6 +455,7 @@ pub fn zoom_in_button_system(
                 *color = PRESSED_BUTTON.into();
                 border_color.0 = Color::GRAY;
                 zoom_in = true;
+                zoom_amount = 0.25;
             }
             Interaction::Hovered => {
                 text.sections[0].value = "+".to_string();
@@ -428,11 +473,12 @@ pub fn zoom_in_button_system(
     for mouse_wheel in mouse_wheel_events.read() {
         if mouse_wheel.y > 0.0 {
             zoom_in = true;
+            zoom_amount = 0.25 * time.delta_seconds() * 4.0;
         }
     }
     if zoom_in {
         for mut ortho in cam_query.iter_mut() {
-            ortho.scale -= 0.25;
+            ortho.scale -= zoom_amount;
             if ortho.scale < 0.25 {
                 ortho.scale = 0.25;
             }
@@ -481,7 +527,7 @@ pub fn spawn_block_sprites(
     edge: Res<Edge>,
     mut chunk_map: ResMut<ChunkManager>,
     tile_map: Res<TileMap>,
-    //toggle_map: Res<ToggleMap>,
+    toggle_map: Res<ToggleMap>,
 ) {
     for _event in sprite_spawn_event.read() {
         let font = asset_server.load("fonts/FiraSans-Bold.ttf");
@@ -537,10 +583,10 @@ pub fn spawn_block_sprites(
                     // writing this code to make tile_text populate correctly where it updates tiles correctly based on toggle.
 
                     let mut rng = rand::thread_rng();
-                    land_sprite_index = rng.gen_range(1..=11);
-
+                    //land_sprite_index = rng.gen_range(1..=11);
+                    let mut value_from_tile = 0;
                     if tile_map.map.contains_key(&locationcoord.ulam) {
-                        let value_from_tile = tile_map.map.get(&locationcoord.ulam).unwrap().value;
+                        value_from_tile = tile_map.map.get(&locationcoord.ulam).unwrap().value;
                         building_sprite_index =
                             *texture_map.0.get(&value_from_tile).unwrap() as usize;
 
@@ -553,7 +599,12 @@ pub fn spawn_block_sprites(
                             blue: 1.,
                             alpha: 1.,
                         };
+                        if *toggle_map.0.get("hidecolors").unwrap() {
+                            land_sprite_index = 0;
+                            color_for_tile = color_for_sprites;
+                        };
                     } else {
+                        land_sprite_index = rng.gen_range(1..=11);
                         building_sprite_index = 0;
                         color_for_tile = Color::Rgba {
                             red: 0.2,
@@ -563,63 +614,108 @@ pub fn spawn_block_sprites(
                         };
                         color_for_sprites = color_for_tile;
                     }
-                    commands
-                        .spawn((
-                            SpriteSheetBundle {
-                                texture_atlas: texture_atlas_handle_bg.0.clone(), //textureatlashandle.clone(),
-                                sprite: TextureAtlasSprite {
-                                    color: color_for_tile,
-                                    index: land_sprite_index,
-                                    ..Default::default()
-                                },
 
-                                transform: Transform {
-                                    translation: Vec3::new(
-                                        TOTAL_TILE_SCALE_SIZE * x as f32,
-                                        TOTAL_TILE_SCALE_SIZE * y as f32,
-                                        0.,
-                                    ),
-                                    scale: Vec3::new(TILE_SCALE, TILE_SCALE, 1.0),
-                                    ..Default::default()
-                                },
+                    let mut cmd = commands.spawn((
+                        SpriteSheetBundle {
+                            texture_atlas: texture_atlas_handle_bg.0.clone(), //textureatlashandle.clone(),
+                            sprite: TextureAtlasSprite {
+                                color: color_for_tile,
+                                index: land_sprite_index,
                                 ..Default::default()
                             },
-                            locationcoord,
-                            Land,
-                        ))
-                        .with_children(|builder| {
-                            builder.spawn((
-                                Text2dBundle {
-                                    text: Text {
-                                        sections: vec![TextSection::new(
-                                            format!("{}", locationcoord.ulam),
-                                            slightly_smaller_text_style.clone(),
-                                        )],
-                                        alignment: TextAlignment::Left,
-                                        ..Default::default()
-                                    },
-                                    text_2d_bounds: Text2dBounds { ..default() },
-                                    transform: Transform {
-                                        translation: Vec3::new(0., 0., 3.),
-                                        scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
-                                        ..Default::default()
-                                    },
-                                    ..default()
+
+                            transform: Transform {
+                                translation: Vec3::new(
+                                    TOTAL_TILE_SCALE_SIZE * x as f32,
+                                    TOTAL_TILE_SCALE_SIZE * y as f32,
+                                    0.,
+                                ),
+                                scale: Vec3::new(TILE_SCALE, TILE_SCALE, 1.0),
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        },
+                        locationcoord,
+                        Land,
+                    ));
+
+                    // SPAWN correct text for tile based on toggle
+                    let tile_text = if *toggle_map.0.get("showtext").unwrap() {
+                        "".to_string()
+                    } else if *toggle_map.0.get("showvalues").unwrap() {
+                        locationcoord.ulam.to_string()
+                    } else if *toggle_map.0.get("showheights").unwrap() {
+                        let a = value_from_tile;
+                        if a == 0 {
+                            "".to_string()
+                        } else {
+                            a.to_string()
+                        }
+                    } else {
+                        "somethingwrongvalue".to_string()
+                    };
+
+                    // SPAWN building visibility based on toggle
+                    let visibility_setting = if *toggle_map.0.get("showbuildings").unwrap() {
+                        Visibility::Hidden
+                    } else {
+                        Visibility::Visible
+                    };
+
+                    // if *toggle_map.0.get("hidecolors").unwrap() {
+                    //     let a = tile_res.map.get(&loc.ulam);
+                    //     if let Some(val) = a {
+                    //         texture.color = val.color;
+                    //         texture.index = 0;
+                    //     }
+                    // } else {
+                    //     let a = tile_res.map.get(&loc.ulam);
+                    //     if let Some(_val) = a {
+                    //         texture.color = Color::Rgba {
+                    //             red: 1.0,
+                    //             green: 1.0,
+                    //             blue: 1.0,
+                    //             alpha: 1.0,
+                    //         };
+                    //         texture.index = tile_res.map.get(&loc.ulam).unwrap().land_index;
+                    //     }
+                    // }
+
+                    info!("tiletext {}", tile_text);
+                    cmd.with_children(|builder| {
+                        builder.spawn((
+                            Text2dBundle {
+                                text: Text {
+                                    sections: vec![TextSection::new(
+                                        tile_text,
+                                        //format!("{}", locationcoord.ulam),
+                                        slightly_smaller_text_style.clone(),
+                                    )],
+                                    alignment: TextAlignment::Left,
+                                    ..Default::default()
                                 },
-                                locationcoord,
-                                TileText,
-                            ));
-                        })
-                        .with_children(|builder| {
-                            spawn_tile_level(
-                                building_sprite_index,
-                                &texture_atlas_handle_building.0.clone(),
-                                builder,
-                                color_for_sprites,
-                                locationcoord,
-                                Visibility::Visible,
-                            );
-                        });
+                                text_2d_bounds: Text2dBounds { ..default() },
+                                transform: Transform {
+                                    translation: Vec3::new(0., 0., 5.),
+                                    scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+                                    ..Default::default()
+                                },
+                                ..default()
+                            },
+                            locationcoord,
+                            TileText,
+                        ));
+                    });
+                    cmd.with_children(|builder| {
+                        spawn_tile_level(
+                            building_sprite_index,
+                            &texture_atlas_handle_building.0.clone(),
+                            builder,
+                            color_for_sprites,
+                            locationcoord,
+                            visibility_setting,
+                        );
+                    });
                 }
             }
         }
@@ -749,8 +845,8 @@ pub fn update_tile_textures(
                     alpha: 1.0,
                 };
                 //let base_sprite_index: usize = rng.gen_range(1..=11);
-                let land_sprite_index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
-                texture.index = land_sprite_index; //*texture_map.0.get(&base_sprite_index).unwrap() as usize;
+                //let land_sprite_index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
+                //texture.index = land_sprite_index; //*texture_map.0.get(&base_sprite_index).unwrap() as usize;
 
                 commands
                     .entity(parent_entity)
@@ -944,7 +1040,7 @@ pub fn buy_selection_button(
                 *color = PRESSED_BUTTON.into();
                 border_color.0 = Color::GRAY;
 
-                ui_state.set(DisplayBuyUiState::On);
+                ui_state.set(DisplayBuyUiState::BlockDetail);
             }
             Interaction::Hovered => {
                 text.sections[0].value = "Buy".to_string();

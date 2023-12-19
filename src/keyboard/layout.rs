@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 
-use super::{
-    components::{Capitalizable, KeyBoard, KeyBoardButton, KeyType, KeyboardNode},
-    styles::NORMAL_BUTTON,
-};
+use crate::resourcey::ColorPalette;
+
+use super::components::{Capitalizable, KeyBoard, KeyBoardButton, KeyType, KeyboardNode};
 
 const NUMBER_SET: &str = "1234567890";
 const FUNCTION_SET: &str = "<^ ";
@@ -13,6 +12,7 @@ pub fn setup_keyboard(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     placement_query: Query<Entity, With<KeyboardNode>>,
+    colors: Res<ColorPalette>,
 ) {
     info!("keyboard setup!");
     for ent in placement_query.iter() {
@@ -61,7 +61,7 @@ pub fn setup_keyboard(
                     ..default()
                 })
                 .with_children(|builder| {
-                    spawn_keyboard_row(builder, font.clone(), key_chars[0]);
+                    spawn_keyboard_row(builder, font.clone(), key_chars[0], colors.button_color);
                 });
             builder
                 .spawn(NodeBundle {
@@ -74,7 +74,7 @@ pub fn setup_keyboard(
                     ..default()
                 })
                 .with_children(|builder| {
-                    spawn_keyboard_row(builder, font.clone(), key_chars[1]);
+                    spawn_keyboard_row(builder, font.clone(), key_chars[1], colors.button_color);
                 });
             builder
                 .spawn(NodeBundle {
@@ -87,7 +87,7 @@ pub fn setup_keyboard(
                     ..default()
                 })
                 .with_children(|builder| {
-                    spawn_keyboard_row(builder, font.clone(), key_chars[2]);
+                    spawn_keyboard_row(builder, font.clone(), key_chars[2], colors.button_color);
                 });
             builder
                 .spawn(NodeBundle {
@@ -100,7 +100,7 @@ pub fn setup_keyboard(
                     ..default()
                 })
                 .with_children(|builder| {
-                    spawn_keyboard_row(builder, font.clone(), key_chars[3]);
+                    spawn_keyboard_row(builder, font.clone(), key_chars[3], colors.button_color);
                 });
         });
 
@@ -108,7 +108,12 @@ pub fn setup_keyboard(
     }
 }
 
-fn spawn_keyboard_row(builder: &mut ChildBuilder, font: Handle<Font>, row_keys: &str) {
+fn spawn_keyboard_row(
+    builder: &mut ChildBuilder,
+    font: Handle<Font>,
+    row_keys: &str,
+    button_color: Color,
+) {
     builder
         .spawn(NodeBundle {
             style: Style {
@@ -134,12 +139,12 @@ fn spawn_keyboard_row(builder: &mut ChildBuilder, font: Handle<Font>, row_keys: 
         })
         .with_children(|builder| {
             for key in row_keys.chars() {
-                keyboard_button(builder, font.clone(), key);
+                keyboard_button(builder, font.clone(), key, button_color);
             }
         });
 }
 
-fn keyboard_button(builder: &mut ChildBuilder, font: Handle<Font>, key: char) {
+fn keyboard_button(builder: &mut ChildBuilder, font: Handle<Font>, key: char, button_color: Color) {
     let key_type: KeyType;
 
     if LETTER_SET.contains(key) {
@@ -179,7 +184,7 @@ fn keyboard_button(builder: &mut ChildBuilder, font: Handle<Font>, key: char) {
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        background_color: NORMAL_BUTTON.into(),
+                        background_color: button_color.into(),
                         ..default()
                     },
                     KeyBoardButton(key),

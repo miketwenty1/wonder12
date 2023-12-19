@@ -6,10 +6,10 @@ use crate::{
     },
     consty::{
         DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
-        DEFAULT_NO_PICK_COLOR, PICKED_COLOR,
+        DEFAULT_NO_PICK_COLOR,
     },
     keyboard::resources::KeyboardData,
-    resourcey::{CurrentCartBlock, KeyboardTarget, TargetType},
+    resourcey::{ColorPalette, CurrentCartBlock, KeyboardTarget, TargetType},
 };
 
 #[allow(clippy::type_complexity)]
@@ -23,6 +23,7 @@ pub fn write_keyboard_target(
     keyboard_text: Res<KeyboardData>,
     target: ResMut<KeyboardTarget>,
     mut block_new_data: ResMut<CurrentCartBlock>,
+    colors: Res<ColorPalette>,
 ) {
     if keyboard_text.is_changed() {
         let mut clear_configbox = false;
@@ -37,7 +38,7 @@ pub fn write_keyboard_target(
                         text.sections[0].style.color = DEFAULT_NO_PICK_COLOR;
                     } else {
                         text.sections[0].value = keyboard_text.0.to_string();
-                        text.sections[0].style.color = PICKED_COLOR;
+                        text.sections[0].style.color = colors.text_color;
                     }
                     block_new_data.ln_address = keyboard_text.0.to_string();
                 }
@@ -51,7 +52,7 @@ pub fn write_keyboard_target(
                     } else {
                         //info!("why though? {}", keyboard_text.0);
                         text.sections[0].value = keyboard_text.0.to_string();
-                        text.sections[0].style.color = PICKED_COLOR;
+                        text.sections[0].style.color = colors.text_color;
                     }
                     clear_configbox = true;
                     block_new_data.color = keyboard_text.0.to_string();
@@ -64,7 +65,7 @@ pub fn write_keyboard_target(
                         text.sections[0].style.color = DEFAULT_NO_PICK_COLOR;
                     } else {
                         text.sections[0].value = keyboard_text.0.to_string();
-                        text.sections[0].style.color = PICKED_COLOR;
+                        text.sections[0].style.color = colors.text_color;
                     }
                     clear_configbox = true;
                     block_new_data.message = keyboard_text.0.to_string();

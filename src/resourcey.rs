@@ -140,3 +140,17 @@ pub struct InvoiceDataFromServer {
 pub struct InvoiceCheckFromServer {
     pub status: String,
 }
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct UpdateGameTimetamp {
+    pub ts: DateTime<Utc>,
+}
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct ColorPalette {
+    pub node_color: Color,
+    pub button_color: Color,
+    pub accent_color: Color,
+    pub light_color: Color,
+    pub text_color: Color,
+}

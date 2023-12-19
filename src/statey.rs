@@ -4,10 +4,10 @@ use bevy::prelude::*;
 pub enum CommsApiState {
     #[default]
     Off,
-    SetName,
+    //SetName,
     LoadBlockData,
     ReceiveInvoice,
-    Buy,
+    //Buy,
     CheckInvoice,
 }
 
@@ -23,6 +23,6 @@ pub enum ExploreState {
 pub enum DisplayBuyUiState {
     #[default]
     Off,
-    On,
+    BlockDetail,
     Qr,
 }

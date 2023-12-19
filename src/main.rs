@@ -1,22 +1,24 @@
-use crate::comms::{load_server_data::api_get_server_tiles, CommsPlugin};
+use crate::comms::CommsPlugin;
 use crate::consty::{CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT};
 use crate::eventy::{
-    BuyBlockRequest, EdgeEvent, SelectTileEvent, SpriteSpawnEvent, ToggleBuildings, ToggleColors,
-    ToggleText, UpdateTileTextureEvent, UpdateUiAmount,
+    BuyBlockRequest, EdgeEvent, RequestTileUpdates, SelectTileEvent, SpriteSpawnEvent,
+    ToggleBuildings, ToggleColors, ToggleText, UpdateTileTextureEvent, UpdateUiAmount,
 };
 use crate::explore_scene::ExplorePlugin;
 use crate::keyboard::resources::KeyboardData;
 use crate::keyboard::{KeyboardPlugin, KeyboardState};
 use crate::overlay_ui::OverlayUiPlugin;
 use crate::resourcey::{
-    ChunkManager, CurrentCartBlock, Edge, InvoiceCheckFromServer, InvoiceDataFromServer,
-    KeyboardTarget, LastSelectedTile, ServerURL, SpriteIndexBuilding, TargetType, TileCart,
-    TileCartVec, TileDataChannel, TileMap, ToggleMap, User,
+    ChunkManager, ColorPalette, CurrentCartBlock, Edge, InvoiceCheckFromServer,
+    InvoiceDataFromServer, KeyboardTarget, LastSelectedTile, ServerURL, SpriteIndexBuilding,
+    TargetType, TileCart, TileCartVec, TileDataChannel, TileMap, ToggleMap, UpdateGameTimetamp,
+    User,
 };
 use crate::statey::{CommsApiState, DisplayBuyUiState, ExploreState};
 use crate::structy::EdgeData;
 use bevy::asset::AssetMetaCheck;
 use bevy::{prelude::*, utils::HashMap};
+use chrono::{Duration, Utc};
 use resourcey::{CheckInvoiceChannel, RequestInvoiceChannel};
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -68,6 +70,13 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
     numbers_map.insert(524288, 3);
     numbers_map.insert(1048576, 3);
 
+    let color_palette = ColorPalette {
+        node_color: Color::hex("222831").unwrap(),
+        button_color: Color::hex("393E46").unwrap(),
+        accent_color: Color::hex("00ADB5").unwrap(),
+        light_color: Color::hex("EEEEEE").unwrap(),
+        text_color: Color::hex("FAFAFA").unwrap(),
+    };
     info!(
         "user: {}\nserver: {}, lnaddress: {}",
         username, server_url, ln_address
@@ -93,6 +102,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
 
     App::new()
         .insert_resource(start_edge)
+        .insert_resource(color_palette)
         .insert_resource(ChunkManager {
             map: HashMap::new(),
         })
@@ -121,6 +131,9 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .insert_resource(User {
             name: username,
             ln_address,
+        })
+        .insert_resource(UpdateGameTimetamp {
+            ts: Utc::now() - Duration::days(10 * 365),
         })
         .init_resource::<InvoiceDataFromServer>()
         .init_resource::<InvoiceCheckFromServer>()
@@ -157,12 +170,17 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .add_event::<ToggleText>()
         .add_event::<UpdateUiAmount>()
         .add_event::<BuyBlockRequest>()
+        .add_event::<RequestTileUpdates>()
         .add_systems(Startup, setup) //setupcoords
-        .add_systems(PostStartup, api_get_server_tiles)
+        //.add_systems(PostStartup, api_get_server_tiles)
         .run();
 }
 
-fn setup(mut commands: Commands, mut ui_state: ResMut<NextState<ExploreState>>) {
+fn setup(
+    mut commands: Commands,
+    mut ui_state: ResMut<NextState<ExploreState>>,
+    mut request_tiles_event: EventWriter<RequestTileUpdates>,
+) {
     commands.spawn(Camera2dBundle::default());
     let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
     commands.insert_resource(TileDataChannel {
@@ -179,6 +197,7 @@ fn setup(mut commands: Commands, mut ui_state: ResMut<NextState<ExploreState>>) 
         tx: tx_tiledata,
         rx: rx_tiledata,
     });
+    request_tiles_event.send(RequestTileUpdates);
     ui_state.set(ExploreState::On);
 }
 

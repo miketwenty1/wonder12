@@ -2,7 +2,7 @@ use bevy::{prelude::*, tasks::IoTaskPool};
 use serde::Deserialize;
 
 use crate::{
-    eventy::{BuyBlockRequest, UpdateTileTextureEvent},
+    eventy::{BuyBlockRequest, RequestTileUpdates},
     resourcey::{
         CheckInvoiceChannel, InvoiceCheckFromServer, InvoiceDataFromServer, RequestInvoiceChannel,
         TileCartVec, User,
@@ -179,7 +179,7 @@ pub fn api_receive_invoice_check(
     mut api_name_set_state: ResMut<NextState<CommsApiState>>,
     mut game_set_state: ResMut<NextState<ExploreState>>,
     mut qr_set_state: ResMut<NextState<DisplayBuyUiState>>,
-    mut event: EventWriter<UpdateTileTextureEvent>,
+    mut event: EventWriter<RequestTileUpdates>,
     mut invoice_data: ResMut<InvoiceDataFromServer>,
 ) {
     if api_timer.timer.finished() {
@@ -198,7 +198,7 @@ pub fn api_receive_invoice_check(
                             }
                             "completed" => {
                                 info!("completed invoice");
-                                event.send(UpdateTileTextureEvent);
+                                event.send(RequestTileUpdates);
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);

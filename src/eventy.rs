@@ -32,3 +32,6 @@ pub struct UpdateUiAmount;
 
 #[derive(Event, Debug)]
 pub struct BuyBlockRequest;
+
+#[derive(Event, Debug)]
+pub struct RequestTileUpdates;

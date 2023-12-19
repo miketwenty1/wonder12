@@ -16,6 +16,9 @@ use crate::resourcey::InvoiceDataFromServer;
 // // mut tile_cart_vec: ResMut<TileCartVec>,
 // qr_data: Res<Qr>,
 
+#[derive(Component, Debug)]
+pub struct UiQrOverlay;
+
 pub fn spawn_qr(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
@@ -54,24 +57,27 @@ pub fn spawn_qr(
     };
 
     commands
-        .spawn((NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_content: AlignContent::Center,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                justify_items: JustifyItems::Center,
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_content: AlignContent::Center,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    justify_items: JustifyItems::Center,
+                    ..default()
+                },
+                background_color: BackgroundColor(Color::Rgba {
+                    red: 1.,
+                    green: 1.,
+                    blue: 1.,
+                    alpha: 0.,
+                }),
                 ..default()
             },
-            background_color: BackgroundColor(Color::Rgba {
-                red: 1.,
-                green: 1.,
-                blue: 1.,
-                alpha: 0.,
-            }),
-            ..default()
-        },))
+            UiQrOverlay,
+        ))
         .with_children(|builder2| {
             builder2
                 .spawn(NodeBundle {

@@ -7,7 +7,7 @@ use self::{
     invoice::{
         api_check_invoice, api_receive_invoice, api_receive_invoice_check, api_request_invoice,
     },
-    load_server_data::api_receive_server_tiles,
+    load_server_data::{api_get_server_tiles, api_receive_server_tiles},
 };
 
 mod api_timer;
@@ -41,6 +41,6 @@ impl Plugin for CommsPlugin {
                 )
                     .run_if(in_state(CommsApiState::CheckInvoice)),
             )
-            .add_systems(Update, api_request_invoice);
+            .add_systems(Update, (api_get_server_tiles, api_request_invoice));
     }
 }

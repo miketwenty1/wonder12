@@ -14,7 +14,6 @@ mod cleanup;
 pub mod components;
 pub mod layout;
 pub mod resources;
-mod styles;
 mod systems;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]

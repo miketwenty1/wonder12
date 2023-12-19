@@ -13,15 +13,11 @@ use crate::{
         DEFAULT_NO_PICK_COLOR,
     },
     keyboard::{components::KeyboardNode, KeyboardState},
-    resourcey::{TileCart, TileCartData, TileCartVec},
+    resourcey::{ColorPalette, TileCart, TileCartData, TileCartVec},
     statey::ExploreState,
 };
 
 use super::UiOverlay;
-
-const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-
-//const INTRO_TEXT: &str = "This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!";
 
 #[derive(Component)]
 pub struct ButtonBack;
@@ -32,6 +28,7 @@ pub fn spawn_layout(
     mut explore_state: ResMut<NextState<ExploreState>>,
     tile_cart: Res<TileCart>,
     mut tile_cart_vec: ResMut<TileCartVec>,
+    colors: Res<ColorPalette>,
 ) {
     explore_state.set(ExploreState::Paused);
 
@@ -73,12 +70,7 @@ pub fn spawn_layout(
                     ..default()
                 },
 
-                background_color: BackgroundColor(Color::Rgba {
-                    red: 0.5,
-                    green: 0.5,
-                    blue: 0.5,
-                    alpha: 0.15,
-                }),
+                background_color: BackgroundColor(colors.node_color),
                 ..default()
             },
             UiOverlay,
@@ -99,7 +91,7 @@ pub fn spawn_layout(
                         //padding: UiRect::all(Val::Px(5.0)),
                         ..Default::default()
                     },
-                    background_color: BackgroundColor(Color::PINK),
+                    background_color: BackgroundColor(colors.node_color),
                     ..Default::default() // style: Style {
                 })
                 .with_children(|builder| {
@@ -108,7 +100,8 @@ pub fn spawn_layout(
                         font.clone(),
                         &format!("Total: {} sats", cart_total),
                         20.0,
-                        Color::WHITE,
+                        colors.text_color,
+                        colors.node_color,
                     );
                 });
 
@@ -127,19 +120,31 @@ pub fn spawn_layout(
                         //padding: UiRect::all(Val::Px(5.0)),
                         ..Default::default()
                     },
-                    background_color: BackgroundColor(Color::DARK_GREEN),
+                    background_color: BackgroundColor(colors.node_color),
                     ..Default::default()
                 })
                 .with_children(|builder| {
-                    setup_left_block_menu_button(builder, font.clone(), "<-".to_string());
+                    setup_left_block_menu_button(
+                        builder,
+                        font.clone(),
+                        colors.button_color,
+                        colors.text_color,
+                        "<-".to_string(),
+                    );
                     spawn_block_text_bundle(
                         builder,
                         font.clone(),
                         &format!("Block {}", tile_cart_vec.vec[0].height),
                         20.0,
-                        Color::WHITE,
+                        colors.text_color,
                     );
-                    setup_right_block_menu_button(builder, font.clone(), "->".to_string());
+                    setup_right_block_menu_button(
+                        builder,
+                        font.clone(),
+                        "->".to_string(),
+                        colors.button_color,
+                        colors.text_color,
+                    );
                 });
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
             // specific cost for the block in context
@@ -156,7 +161,7 @@ pub fn spawn_layout(
                         //padding: UiRect::all(Val::Px(5.0)),
                         ..Default::default()
                     },
-                    background_color: BackgroundColor(Color::PINK),
+                    background_color: BackgroundColor(colors.node_color),
                     ..Default::default() // style: Style {
                 })
                 .with_children(|builder| {
@@ -165,7 +170,8 @@ pub fn spawn_layout(
                         font.clone(),
                         &format!("Cost: {} sats", tile_cart_vec.vec[0].cost),
                         20.0,
-                        Color::WHITE,
+                        colors.text_color,
+                        colors.node_color,
                     );
                 });
 
@@ -188,25 +194,38 @@ pub fn spawn_layout(
                         ],
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::BLUE),
+                    background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
                 .with_children(|builder| {
-                    new_value_title(builder, font.clone(), "Set New Values", 20.0, Color::WHITE);
+                    new_value_title(
+                        builder,
+                        font.clone(),
+                        "Set New Values",
+                        20.0,
+                        colors.node_color,
+                        colors.text_color,
+                    );
                     setup_ln_addr_menu_button(
                         builder,
                         font.clone(),
                         DEFAULT_NEW_LN_TEXT.to_string(),
+                        colors.accent_color,
+                        colors.button_color,
                     );
                     setup_color_menu_button(
                         builder,
                         font.clone(),
                         DEFAULT_NEW_COLOR_TEXT.to_string(),
+                        colors.accent_color,
+                        colors.button_color,
                     );
                     setup_message_menu_button(
                         builder,
                         font.clone(),
                         DEFAULT_NEW_MESSAGE_TEXT.to_string(),
+                        colors.accent_color,
+                        colors.button_color,
                     );
                 });
 
@@ -220,24 +239,33 @@ pub fn spawn_layout(
                         align_items: AlignItems::Center,
                         align_content: AlignContent::Center,
                         justify_content: JustifyContent::Center,
-                        padding: UiRect::all(Val::Px(1.0)),
+                        padding: UiRect::all(Val::Px(3.0)),
+                        //margin: UiRect::all(Val::Px(3.0)),
                         //width: Val::Percent(100.0),
                         //height: Val::Percent(50.0),
                         //grid_template_columns: vec![GridTrack::auto(), GridTrack::auto()],
                         //grid_template_rows: vec![GridTrack::auto()],
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::DARK_GREEN),
+                    background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
                 .with_children(|builder| {
-                    setup_config_for_all_blocks_button(builder, font.clone(), " ".to_string());
+                    setup_config_for_all_blocks_button(
+                        builder,
+                        font.clone(),
+                        " ".to_string(),
+                        colors.accent_color,
+                        colors.text_color,
+                        colors.button_color,
+                    );
                     spawn_nested_text_bundle_flex(
                         builder,
                         font.clone(),
                         "Use these values for every blocks",
                         15.0,
-                        Color::WHITE,
+                        colors.node_color,
+                        colors.text_color,
                     );
                 });
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
@@ -257,11 +285,18 @@ pub fn spawn_layout(
                         ],
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::BLUE),
+                    background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
                 .with_children(|builder| {
-                    current_value_title(builder, font.clone(), "Current Data", 20.0, Color::WHITE);
+                    current_value_title(
+                        builder,
+                        font.clone(),
+                        "Current Data",
+                        20.0,
+                        colors.node_color,
+                        colors.text_color,
+                    );
                     let datetime_string = tile_cart_vec.vec[0]
                         .event_date
                         .map_or("".to_string(), |datetime| {
@@ -273,7 +308,8 @@ pub fn spawn_layout(
                         (tile_cart_vec.vec[0].value).to_string(),
                         datetime_string,
                         16.0,
-                        Color::WHITE,
+                        colors.node_color,
+                        colors.text_color,
                     );
                     current_value_right(
                         builder,
@@ -281,14 +317,16 @@ pub fn spawn_layout(
                         tile_cart_vec.vec[0].username.to_string(),
                         tile_cart_vec.vec[0].ln_address.to_string(),
                         16.0,
-                        Color::WHITE,
+                        colors.text_color,
+                        colors.node_color,
                     );
                     current_value_message(
                         builder,
                         font.clone(),
                         &tile_cart_vec.vec[0].message.to_string(),
                         16.0,
-                        Color::WHITE,
+                        colors.node_color,
+                        colors.text_color,
                     );
                 });
 
@@ -308,8 +346,22 @@ pub fn spawn_layout(
                     ..default()
                 })
                 .with_children(|builder| {
-                    setup_buy_create_invoice_button(builder, font.clone(), "Buy".to_string());
-                    setup_back_from_buy_menu_button(builder, font.clone(), "Back".to_string());
+                    setup_buy_create_invoice_button(
+                        builder,
+                        font.clone(),
+                        "Buy".to_string(),
+                        colors.node_color,
+                        colors.button_color,
+                        colors.text_color,
+                    );
+                    setup_back_from_buy_menu_button(
+                        builder,
+                        font.clone(),
+                        "Back".to_string(),
+                        colors.node_color,
+                        colors.button_color,
+                        colors.text_color,
+                    );
                 });
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
             //keyboard
@@ -340,7 +392,8 @@ fn spawn_new_total_cart_cost(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    color: Color,
+    text_color: Color,
+    node_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -353,7 +406,7 @@ fn spawn_new_total_cart_cost(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::BLACK),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|builder| {
@@ -362,7 +415,7 @@ fn spawn_new_total_cart_cost(
                 TextStyle {
                     font,
                     font_size,
-                    color,
+                    color: text_color,
                 },
             ));
         });
@@ -373,7 +426,8 @@ fn spawn_new_value_block_cost(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    color: Color,
+    text_color: Color,
+    node_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -386,7 +440,7 @@ fn spawn_new_value_block_cost(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::BLACK),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|builder| {
@@ -396,7 +450,7 @@ fn spawn_new_value_block_cost(
                     TextStyle {
                         font,
                         font_size,
-                        color,
+                        color: text_color,
                     },
                 ),
                 BlockCostText,
@@ -407,6 +461,9 @@ fn setup_config_for_all_blocks_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
+    node_color: Color,
+    text_color: Color,
+    button_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -419,7 +476,7 @@ fn setup_config_for_all_blocks_button(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::PURPLE),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|parent| {
@@ -435,7 +492,7 @@ fn setup_config_for_all_blocks_button(
                             justify_content: JustifyContent::Center,
                             ..default()
                         },
-                        background_color: NORMAL_BUTTON.into(),
+                        background_color: button_color.into(),
                         ..default()
                     },
                     AllCartConfigButton,
@@ -447,7 +504,7 @@ fn setup_config_for_all_blocks_button(
                             TextStyle {
                                 font: font.clone(),
                                 font_size: 12.0,
-                                color: Color::rgb(1., 1., 1.),
+                                color: text_color,
                             },
                         ),
                         AllCartConfigText,
@@ -460,6 +517,9 @@ fn setup_buy_create_invoice_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
+    node_color: Color,
+    button_color: Color,
+    text_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -471,7 +531,7 @@ fn setup_buy_create_invoice_button(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::PURPLE),
+            background_color: BackgroundColor(node_color),
 
             ..default()
         })
@@ -486,7 +546,7 @@ fn setup_buy_create_invoice_button(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        background_color: Color::DARK_GREEN.into(),
+                        background_color: button_color.into(),
                         ..default()
                     },
                     BuyMenuButton,
@@ -497,7 +557,7 @@ fn setup_buy_create_invoice_button(
                         TextStyle {
                             font: font.clone(),
                             font_size: 16.0,
-                            color: Color::rgb(1.0, 1.0, 1.0),
+                            color: text_color,
                         },
                     ));
                 });
@@ -508,6 +568,9 @@ fn setup_back_from_buy_menu_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
+    node_color: Color,
+    button_color: Color,
+    text_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -520,7 +583,7 @@ fn setup_back_from_buy_menu_button(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::RED),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|parent| {
@@ -534,7 +597,7 @@ fn setup_back_from_buy_menu_button(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        background_color: NORMAL_BUTTON.into(),
+                        background_color: button_color.into(),
                         ..default()
                     },
                     ButtonBack,
@@ -545,7 +608,7 @@ fn setup_back_from_buy_menu_button(
                         TextStyle {
                             font: font.clone(),
                             font_size: 16.0,
-                            color: Color::rgb(1.0, 1.0, 1.0),
+                            color: text_color,
                         },
                     ));
                 });
@@ -577,7 +640,8 @@ fn spawn_nested_text_bundle_flex(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    color: Color,
+    node_color: Color,
+    text_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -588,7 +652,7 @@ fn spawn_nested_text_bundle_flex(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::RED),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|builder| {
@@ -597,7 +661,7 @@ fn spawn_nested_text_bundle_flex(
                 TextStyle {
                     font,
                     font_size,
-                    color,
+                    color: text_color,
                 },
             ));
         });
@@ -606,6 +670,8 @@ fn spawn_nested_text_bundle_flex(
 fn setup_left_block_menu_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
+    button_color: Color,
+    text_color: Color,
     button_text: String,
 ) {
     builder
@@ -626,7 +692,7 @@ fn setup_left_block_menu_button(
                     },
                     ..default()
                 },
-                background_color: NORMAL_BUTTON.into(),
+                background_color: button_color.into(),
                 ..default()
             },
             CartButton(-1),
@@ -637,7 +703,7 @@ fn setup_left_block_menu_button(
                 TextStyle {
                     font: font.clone(),
                     font_size: 20.0,
-                    color: Color::rgb(1.0, 1.0, 1.0),
+                    color: text_color,
                 },
             ));
         });
@@ -647,6 +713,8 @@ fn setup_right_block_menu_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
+    button_color: Color,
+    text_color: Color,
 ) {
     builder
         .spawn((
@@ -666,7 +734,7 @@ fn setup_right_block_menu_button(
                     },
                     ..default()
                 },
-                background_color: NORMAL_BUTTON.into(),
+                background_color: button_color.into(),
                 ..default()
             },
             CartButton(1),
@@ -677,7 +745,7 @@ fn setup_right_block_menu_button(
                 TextStyle {
                     font: font.clone(),
                     font_size: 20.0,
-                    color: Color::rgb(1.0, 1.0, 1.0),
+                    color: text_color,
                 },
             ));
         });
@@ -688,7 +756,8 @@ fn current_value_title(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    color: Color,
+    node_color: Color,
+    text_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -702,7 +771,7 @@ fn current_value_title(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::BLACK),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|builder| {
@@ -711,7 +780,7 @@ fn current_value_title(
                 TextStyle {
                     font,
                     font_size,
-                    color,
+                    color: text_color,
                 },
             ));
         });
@@ -723,7 +792,8 @@ fn current_value_left(
     value: String,
     event_date: String,
     font_size: f32,
-    color: Color,
+    node_color: Color,
+    text_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -733,7 +803,7 @@ fn current_value_left(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::RED),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|builder| {
@@ -743,7 +813,7 @@ fn current_value_left(
                     TextStyle {
                         font: font.clone(),
                         font_size,
-                        color,
+                        color: text_color,
                     },
                 ),
                 CurrentBlockValueText,
@@ -754,7 +824,7 @@ fn current_value_left(
                     TextStyle {
                         font,
                         font_size,
-                        color,
+                        color: text_color,
                     },
                 ),
                 CurrentBlockDateText,
@@ -768,7 +838,8 @@ fn current_value_right(
     username: String,
     ln_address: String,
     font_size: f32,
-    color: Color,
+    text_color: Color,
+    node_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -778,7 +849,7 @@ fn current_value_right(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::RED),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|builder| {
@@ -788,7 +859,7 @@ fn current_value_right(
                     TextStyle {
                         font: font.clone(),
                         font_size,
-                        color,
+                        color: text_color,
                     },
                 ),
                 CurrentBlockUsernameText,
@@ -799,7 +870,7 @@ fn current_value_right(
                     TextStyle {
                         font,
                         font_size,
-                        color,
+                        color: text_color,
                     },
                 ),
                 CurrentBlockLnAddressText,
@@ -812,7 +883,8 @@ fn current_value_message(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    color: Color,
+    node_color: Color,
+    text_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -822,11 +894,11 @@ fn current_value_message(
                 align_items: AlignItems::Start,
                 align_content: AlignContent::Start,
                 grid_column: GridPlacement::span(2),
-                padding: UiRect::all(Val::Px(1.0)),
+                padding: UiRect::all(Val::Px(2.0)),
                 max_width: Val::Px(250.0),
                 ..default()
             },
-            background_color: BackgroundColor(Color::PINK),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|builder| {
@@ -836,7 +908,7 @@ fn current_value_message(
                     TextStyle {
                         font,
                         font_size,
-                        color,
+                        color: text_color,
                     },
                 ),
                 CurrentBlockMessageText,
@@ -849,7 +921,8 @@ fn new_value_title(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    color: Color,
+    node_color: Color,
+    text_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -863,7 +936,7 @@ fn new_value_title(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::BLACK),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|builder| {
@@ -872,13 +945,19 @@ fn new_value_title(
                 TextStyle {
                     font,
                     font_size,
-                    color,
+                    color: text_color,
                 },
             ));
         });
 }
 
-fn setup_ln_addr_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, button_text: String) {
+fn setup_ln_addr_menu_button(
+    builder: &mut ChildBuilder,
+    font: Handle<Font>,
+    button_text: String,
+    node_color: Color,
+    button_color: Color,
+) {
     builder
         .spawn(NodeBundle {
             style: Style {
@@ -896,7 +975,7 @@ fn setup_ln_addr_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
                 //padding: UiRect::all(Val::Px(2.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::MAROON),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|parent| {
@@ -910,14 +989,14 @@ fn setup_ln_addr_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
                             align_content: AlignContent::Center,
                             margin: UiRect::all(Val::Px(1.0)),
                             flex_wrap: FlexWrap::Wrap,
-                            min_width: Val::Px(194.0),
-                            max_width: Val::Px(194.0),
-                            min_height: Val::Px(32.0),
-                            max_height: Val::Px(32.0),
+                            min_width: Val::Px(196.0),
+                            max_width: Val::Px(196.0),
+                            min_height: Val::Px(34.0),
+                            max_height: Val::Px(34.0),
                             //min_height: Val::Px(80.0),
                             ..default()
                         },
-                        background_color: NORMAL_BUTTON.into(),
+                        background_color: button_color.into(),
                         ..default()
                     },
                     NewBlockLnAddressButton,
@@ -940,7 +1019,13 @@ fn setup_ln_addr_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
         });
 }
 
-fn setup_color_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, button_text: String) {
+fn setup_color_menu_button(
+    builder: &mut ChildBuilder,
+    font: Handle<Font>,
+    button_text: String,
+    node_color: Color,
+    button_color: Color,
+) {
     builder
         .spawn(NodeBundle {
             style: Style {
@@ -958,7 +1043,7 @@ fn setup_color_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, butto
                 //padding: UiRect::all(Val::Px(2.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::ORANGE_RED),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|parent| {
@@ -972,14 +1057,14 @@ fn setup_color_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, butto
                             align_content: AlignContent::Center,
                             margin: UiRect::all(Val::Px(1.0)),
                             //flex_wrap: FlexWrap::Wrap,
-                            min_width: Val::Px(194.0),
-                            max_width: Val::Px(194.0),
-                            min_height: Val::Px(32.0),
-                            max_height: Val::Px(32.0),
+                            min_width: Val::Px(196.0),
+                            max_width: Val::Px(196.0),
+                            min_height: Val::Px(34.0),
+                            max_height: Val::Px(34.0),
                             //min_height: Val::Px(80.0),
                             ..default()
                         },
-                        background_color: NORMAL_BUTTON.into(),
+                        background_color: button_color.into(),
                         ..default()
                     },
                     NewBlockColorButton,
@@ -1003,7 +1088,13 @@ fn setup_color_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, butto
         });
 }
 
-fn setup_message_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, button_text: String) {
+fn setup_message_menu_button(
+    builder: &mut ChildBuilder,
+    font: Handle<Font>,
+    button_text: String,
+    node_color: Color,
+    button_color: Color,
+) {
     builder
         .spawn(NodeBundle {
             style: Style {
@@ -1020,7 +1111,7 @@ fn setup_message_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
                 //padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(Color::PURPLE),
+            background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|parent| {
@@ -1032,14 +1123,14 @@ fn setup_message_menu_button(builder: &mut ChildBuilder, font: Handle<Font>, but
                             align_items: AlignItems::Start,
                             justify_items: JustifyItems::Start,
                             align_content: AlignContent::Start,
-                            min_width: Val::Px(220.0),
-                            max_width: Val::Px(220.0),
-                            min_height: Val::Px(100.0),
-                            max_height: Val::Px(100.0),
+                            min_width: Val::Px(222.0),
+                            max_width: Val::Px(222.0),
+                            min_height: Val::Px(102.0),
+                            max_height: Val::Px(102.0),
                             margin: UiRect::all(Val::Px(1.0)),
                             ..default()
                         },
-                        background_color: NORMAL_BUTTON.into(),
+                        background_color: button_color.into(),
                         ..default()
                     },
                     NewBlockMessageButton,

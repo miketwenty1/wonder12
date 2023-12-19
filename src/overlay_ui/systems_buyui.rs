@@ -14,7 +14,7 @@ use crate::{
     },
     eventy::BuyBlockRequest,
     keyboard::{resources::KeyboardData, KeyboardState},
-    resourcey::{CurrentCartBlock, KeyboardTarget, TargetType, TileCartVec, User},
+    resourcey::{ColorPalette, CurrentCartBlock, KeyboardTarget, TargetType, TileCartVec, User},
     statey::ExploreState,
     utils::{convert_color_to_hexstring, is_valid_email_format_string},
     DisplayBuyUiState,
@@ -24,10 +24,10 @@ use all_colors::get_color_hex;
 
 use super::layout_buy_menu::ButtonBack;
 
-const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-//const BUY_BUTTON: Color = Color::rgb(0.35, 0.50, 0.35);
-const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
+// const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
+// //const BUY_BUTTON: Color = Color::rgb(0.35, 0.50, 0.35);
+// const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
+// const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 const FAIL_PRESSED_BUTTON: Color = Color::rgb(0.9, 0.1, 0.1);
 
 //const INTRO_TEXT: &str = "This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!";
@@ -50,6 +50,7 @@ pub fn leftright_cart_button_system(
         Query<&mut Text, With<CurrentBlockMessageText>>,
         Query<&mut Text, With<BlockCostText>>,
     )>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color, button_comp) in &mut interaction_query {
         //let mut text = text_query.get_mut(children[0]).unwrap();
@@ -66,7 +67,7 @@ pub fn leftright_cart_button_system(
                 cart.vec[ind].new_color = c;
                 cart.vec[ind].new_message = cart_item.message.to_string();
 
-                *color = PRESSED_BUTTON.into();
+                *color = colors.light_color.into();
 
                 match button_comp.0 {
                     -1 => {
@@ -132,11 +133,11 @@ pub fn leftright_cart_button_system(
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }
@@ -151,6 +152,7 @@ pub fn leftright_cart_button_system_set_new_text(
     cart: Res<TileCartVec>,
     mut color_new_text: Query<&mut Text, (With<NewBlockColorText>, Without<NewBlockMessageText>)>,
     mut message_new_text: Query<&mut Text, (With<NewBlockMessageText>, Without<NewBlockColorText>)>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         //let mut text = text_query.get_mut(children[0]).unwrap();
@@ -166,11 +168,11 @@ pub fn leftright_cart_button_system_set_new_text(
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }
@@ -188,11 +190,13 @@ pub fn config_cart_button_system(
     mut config: Local<bool>,
     // editable_textbox_q: Query<Entity, With<CouldBeEditabledTextBox>>,
     // mut commands: Commands,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
+                *color = colors.light_color.into();
                 *config = !*config;
                 for mut text in config_text.iter_mut() {
                     if *config {
@@ -222,11 +226,11 @@ pub fn config_cart_button_system(
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }
@@ -248,23 +252,24 @@ pub fn new_ln_address_button_system(
     mut keyboard: ResMut<KeyboardData>,
     // text_query: Query<&Text, With<NewBlockLnAddressText>>,
     block_new_data: Res<CurrentCartBlock>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 //text.sections[0].value = button_text;
-                *color = PRESSED_BUTTON.into();
+                *color = colors.light_color.into();
                 *target = KeyboardTarget(TargetType::NewLnAddress);
 
                 keyboard.0 = block_new_data.ln_address.to_string();
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }
@@ -286,22 +291,23 @@ pub fn new_color_button_system(
     mut keyboard: ResMut<KeyboardData>,
     // text_query: Query<&Text, With<NewBlockColorText>>,
     block_new_data: Res<CurrentCartBlock>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 //text.sections[0].value = button_text;
-                *color = PRESSED_BUTTON.into();
+                *color = colors.light_color.into();
                 *target = KeyboardTarget(TargetType::NewColor);
                 keyboard.0 = block_new_data.color.to_string();
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }
@@ -323,22 +329,23 @@ pub fn new_message_button_system(
     mut keyboard: ResMut<KeyboardData>,
     // text_query: Query<&Text, With<NewBlockMessageText>>,
     block_new_data: Res<CurrentCartBlock>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 //text.sections[0].value = button_text;
-                *color = PRESSED_BUTTON.into();
+                *color = colors.light_color.into();
                 *target = KeyboardTarget(TargetType::NewMessage);
                 keyboard.0 = block_new_data.message.to_string();
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }
@@ -399,8 +406,8 @@ pub fn buy_button_system(
         Query<&mut Text, With<NewBlockColorText>>,
         Query<&mut Text, With<NewBlockMessageText>>,
     )>,
-
     mut user: ResMut<User>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         let index = cart.index;
@@ -412,7 +419,7 @@ pub fn buy_button_system(
                     let a = &text.sections[0].value;
                     if is_valid_email_format_string(a) {
                         user.ln_address = a.to_string();
-                        *color = PRESSED_BUTTON.into();
+                        *color = colors.light_color.into();
                         info!("yay!");
                         cart.vec[index].new_ln_address = text.sections[0].value.to_string();
                         buy_event.send(BuyBlockRequest);
@@ -435,7 +442,7 @@ pub fn buy_button_system(
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
@@ -455,24 +462,25 @@ pub fn back_button_system(
     mut overlay_state: ResMut<NextState<DisplayBuyUiState>>,
     mut explore_state: ResMut<NextState<ExploreState>>,
     mut keyboard_state: ResMut<NextState<KeyboardState>>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
+                *color = colors.light_color.into();
                 //text.sections[0].value = button_text;
-                *color = PRESSED_BUTTON.into();
                 overlay_state.set(DisplayBuyUiState::Off);
                 explore_state.set(ExploreState::On);
                 keyboard_state.set(KeyboardState::Off);
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }

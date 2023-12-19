@@ -1,11 +1,10 @@
 use bevy::prelude::*;
 
-use crate::keyboard::styles::PRESSED_BUTTON;
+use crate::resourcey::ColorPalette;
 
 use super::{
     components::{Capitalizable, KeyBoardButton},
     resources::{CapitalizeToggle, KeyboardData},
-    styles::{HOVERED_BUTTON, NORMAL_BUTTON},
 };
 
 const ACCEPTABLE_CHARS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 @.";
@@ -41,6 +40,7 @@ pub fn virtual_keyboard_system(
     >,
     mut keyboard_text: ResMut<KeyboardData>,
     mut c_toggle: ResMut<CapitalizeToggle>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color, keyboard_button) in &mut interaction_query {
         let k = keyboard_button.0;
@@ -70,15 +70,15 @@ pub fn virtual_keyboard_system(
 
                 info!("new vkeydata {:?}", keyboard_text.0);
 
-                *color = PRESSED_BUTTON.into();
+                *color = colors.light_color.into();
             }
             Interaction::Hovered => {
                 //text.sections[0].value = "Ready?".to_string();
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = "Start".to_string();
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }

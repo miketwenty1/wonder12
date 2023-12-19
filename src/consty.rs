@@ -25,10 +25,3 @@ pub const DEFAULT_NO_PICK_COLOR: Color = Color::Rgba {
     blue: 0.7,
     alpha: 1.0,
 };
-
-pub const PICKED_COLOR: Color = Color::Rgba {
-    red: 1.,
-    green: 1.,
-    blue: 1.,
-    alpha: 1.,
-};

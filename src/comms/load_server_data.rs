@@ -1,10 +1,12 @@
 use super::api_timer::ApiPollingTimer;
 use super::server_structs::GameBlocksDataFromDBMod;
-use crate::resourcey::{TileData, TileDataChannel};
+use crate::eventy::RequestTileUpdates;
+use crate::resourcey::{TileData, TileDataChannel, UpdateGameTimetamp};
 use crate::structy::TileResource;
 use crate::{CommsApiState, ServerURL, TileMap, UpdateTileTextureEvent};
 use bevy::prelude::*;
 use bevy::tasks::IoTaskPool;
+use chrono::Utc;
 use rand::Rng;
 
 //pub fn load_server_data(mut commands: Commands, mut tile_map: ResMut<TileMap>) {}
@@ -14,25 +16,30 @@ pub fn api_get_server_tiles(
     set_player_move_channel: Res<TileDataChannel>,
     api_server: Res<ServerURL>,
     mut api_state: ResMut<NextState<CommsApiState>>,
-    // mut player_move_event_reader: EventReader<PlayerMove>,
+    mut gametime: ResMut<UpdateGameTimetamp>,
+    mut event: EventReader<RequestTileUpdates>,
 ) {
-    info!("send api request for tiles");
-    //for event in player_move_event_reader.read() {
-    let pool = IoTaskPool::get();
-    let cc = set_player_move_channel.tx.clone();
-    let server = api_server.0.to_owned();
-    let _task = pool.spawn(async move {
-        let api_response_text = reqwest::get(format!("{}/comms/blockdelta", server))
-            .await
-            .unwrap()
-            .text()
-            .await
-            .unwrap();
-        cc.try_send(api_response_text);
-    });
+    for _e in event.read() {
+        info!("send api request for tiles");
+        let ts_str = gametime.ts.to_string();
+        //for event in player_move_event_reader.read() {
+        let pool = IoTaskPool::get();
+        let cc = set_player_move_channel.tx.clone();
+        let server = api_server.0.to_owned();
+        let _task = pool.spawn(async move {
+            let api_response_text = reqwest::get(format!("{}/comms/blockdelta/{}", server, ts_str))
+                .await
+                .unwrap()
+                .text()
+                .await
+                .unwrap();
+            cc.try_send(api_response_text);
+        });
 
-    api_state.set(CommsApiState::LoadBlockData);
-    //}
+        gametime.ts = Utc::now();
+
+        api_state.set(CommsApiState::LoadBlockData);
+    }
 }
 
 pub fn api_receive_server_tiles(
@@ -49,7 +56,7 @@ pub fn api_receive_server_tiles(
         let mut send_update = false;
         match api_res {
             Ok(r) => {
-                //info!("response to move player: {}", r);
+                //info!("api_receive_server_tiles: {}", r);
                 let r_invoice_result = serde_json::from_str::<GameBlocksDataFromDBMod>(&r);
                 match r_invoice_result {
                     Ok(server_block_data) => {

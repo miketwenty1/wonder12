@@ -10,9 +10,10 @@ use crate::ExploreState;
 use self::{
     amount_ui::{setup_amount_selected_text, update_amount_selected_text},
     explore::{
-        animate_sprites, buy_selection_button, clear_selection_button, edge_system,
-        mouse_camera_system, select_tile, setup_explorer, spawn_block_sprites, touch_event_system,
-        update_tile_textures, zoom_in_button_system, zoom_out_button_system,
+        animate_sprites, buy_selection_button, clear_selection_button,
+        desktop_movement_camera_system, edge_system, select_tile, setup_explorer,
+        spawn_block_sprites, touch_event_system, update_tile_textures, zoom_in_button_system,
+        zoom_out_button_system,
     },
     toggle_ui::{
         setup_toggle, toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
@@ -49,11 +50,10 @@ impl Plugin for ExplorePlugin {
                         toggle_button_sub_system_toggle2,
                         toggle_button_sub_system_toggle3,
                         toggle_button_sub_system_toggle4,
-                        mouse_camera_system,
+                        desktop_movement_camera_system,
                     )
                         .chain(),
                     edge_system,
-                    update_tile_textures,
                     spawn_block_sprites,
                     animate_sprites,
                     (select_tile, apply_deferred, update_amount_selected_text).chain(),
@@ -62,6 +62,7 @@ impl Plugin for ExplorePlugin {
                     change_tile_text_event,
                 )
                     .run_if(in_state(ExploreState::On)),
-            ); //.add_systems(OnExit(ExploreState::On), despawn_screen::<UiOverlay>);
+            )
+            .add_systems(Update, update_tile_textures); //.add_systems(OnExit(ExploreState::On), despawn_screen::<UiOverlay>);
     }
 }
