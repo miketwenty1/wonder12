@@ -154,3 +154,6 @@ pub struct ColorPalette {
     pub light_color: Color,
     pub text_color: Color,
 }
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct MaxBlockHeight(pub u32);

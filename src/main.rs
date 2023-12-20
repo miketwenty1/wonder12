@@ -10,9 +10,9 @@ use crate::keyboard::{KeyboardPlugin, KeyboardState};
 use crate::overlay_ui::OverlayUiPlugin;
 use crate::resourcey::{
     ChunkManager, ColorPalette, CurrentCartBlock, Edge, InvoiceCheckFromServer,
-    InvoiceDataFromServer, KeyboardTarget, LastSelectedTile, ServerURL, SpriteIndexBuilding,
-    TargetType, TileCart, TileCartVec, TileDataChannel, TileMap, ToggleMap, UpdateGameTimetamp,
-    User,
+    InvoiceDataFromServer, KeyboardTarget, LastSelectedTile, MaxBlockHeight, ServerURL,
+    SpriteIndexBuilding, TargetType, TileCart, TileCartVec, TileDataChannel, TileMap, ToggleMap,
+    UpdateGameTimetamp, User,
 };
 use crate::statey::{CommsApiState, DisplayBuyUiState, ExploreState};
 use crate::structy::EdgeData;
@@ -42,6 +42,7 @@ pub fn main() {
 }
 #[wasm_bindgen]
 pub fn game12(username: String, server_url: String, ln_address: String) {
+    let max_block_height: u32 = 840_000;
     let mut toggle_map = HashMap::new();
     toggle_map.insert("hidebuildings".to_string(), true);
     toggle_map.insert("showbuildings".to_string(), false);
@@ -103,6 +104,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
     App::new()
         .insert_resource(start_edge)
         .insert_resource(color_palette)
+        .insert_resource(MaxBlockHeight(max_block_height))
         .insert_resource(ChunkManager {
             map: HashMap::new(),
         })

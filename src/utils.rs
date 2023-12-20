@@ -1,4 +1,5 @@
 use bevy::render::color::Color;
+use rand::Rng;
 use regex::Regex;
 
 fn convert_to_string(value: f32) -> String {
@@ -26,4 +27,18 @@ pub fn convert_color_to_hexstring(value: Color) -> String {
 pub fn is_valid_email_format_string(email: &str) -> bool {
     let email_regex = Regex::new(r"(?i)^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$").unwrap();
     email_regex.is_match(email)
+}
+
+pub fn get_random_color() -> Color {
+    let mut rng = rand::thread_rng();
+    let r: f32 = rng.gen_range(0.0..1.0);
+    let g: f32 = rng.gen_range(0.0..1.0);
+    let b: f32 = rng.gen_range(0.0..1.0);
+    let new_color = Color::Rgba {
+        red: r,
+        green: g,
+        blue: b,
+        alpha: 1.0,
+    };
+    new_color
 }

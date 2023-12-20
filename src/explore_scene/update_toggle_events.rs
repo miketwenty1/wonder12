@@ -9,11 +9,11 @@ use crate::{
 
 #[allow(clippy::too_many_arguments)]
 pub fn buildings_visibility_event(
-    mut edge_event: EventReader<ToggleBuildings>,
+    mut toggle: EventReader<ToggleBuildings>,
     mut buildings_q: Query<&mut Visibility, With<BuildingStructure>>,
     toggle_map: Res<ToggleMap>,
 ) {
-    for _edge_e in edge_event.read() {
+    for _t in toggle.read() {
         for mut building_visi in buildings_q.iter_mut() {
             if *toggle_map.0.get("hidebuildings").unwrap() {
                 *building_visi = Visibility::Visible;

@@ -66,6 +66,8 @@ pub fn api_request_invoice(
             let mut block_request_block_vec = Vec::new();
 
             for tile in &tile_cart_vec.vec {
+                // info!("tile new color {:#?}", tile.new_color);
+                // info!("tile new color {:#?}", tile.new_message);
                 let invoice_block = InvoiceGameBlock {
                     height: tile.height,
                     color: convert_color_to_hexstring(tile.new_color),
@@ -131,6 +133,7 @@ pub fn api_receive_invoice(
                     }
                     Err(e) => {
                         info!("response to invoice creation - fail: {}", e);
+                        api_name_set_state.set(CommsApiState::Off);
                     }
                 };
                 r

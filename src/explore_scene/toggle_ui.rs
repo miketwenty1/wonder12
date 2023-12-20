@@ -422,18 +422,18 @@ pub fn toggle_button_sub_system_toggle3(
         match *interaction {
             Interaction::Pressed => {
                 mouse.clear_just_pressed(MouseButton::Left);
-                let mut text = text_query3.get_single_mut().unwrap();
+                let mut text3 = text_query3.get_single_mut().unwrap();
                 let mut text4 = text_query4.get_single_mut().unwrap();
 
-                match text.sections[0].value.as_str() {
+                match text3.sections[0].value.as_str() {
                     "Show Values" => {
-                        text.sections[0].value = "Show Heights".to_string();
+                        text3.sections[0].value = "Show Heights".to_string();
                         *toggle_map.0.get_mut("showheights").unwrap() = true;
                         *toggle_map.0.get_mut("showvalues").unwrap() = false;
                         tile_text_type.send(ToggleText(TileTextType::Value));
                     }
                     "Show Heights" => {
-                        text.sections[0].value = "Show Values".to_string();
+                        text3.sections[0].value = "Show Values".to_string();
                         *toggle_map.0.get_mut("showheights").unwrap() = false;
                         *toggle_map.0.get_mut("showvalues").unwrap() = true;
                         tile_text_type.send(ToggleText(TileTextType::Height));
@@ -444,6 +444,7 @@ pub fn toggle_button_sub_system_toggle3(
                 };
                 text4.sections[0].value = "Hide Text".to_string();
                 *toggle_map.0.get_mut("hidetext").unwrap() = true;
+                *toggle_map.0.get_mut("showtext").unwrap() = false;
                 *color = PRESSED_BUTTON.into();
             }
             Interaction::Hovered => {

@@ -16,7 +16,7 @@ use crate::{
     keyboard::{resources::KeyboardData, KeyboardState},
     resourcey::{ColorPalette, CurrentCartBlock, KeyboardTarget, TargetType, TileCartVec, User},
     statey::ExploreState,
-    utils::{convert_color_to_hexstring, is_valid_email_format_string},
+    utils::{convert_color_to_hexstring, get_random_color, is_valid_email_format_string},
     DisplayBuyUiState,
 };
 
@@ -431,11 +431,19 @@ pub fn buy_button_system(
                 }
 
                 for text in param_set.p1().iter() {
-                    let c = all_colors::get_color_hex(&text.sections[0].value);
-                    cart.vec[index].new_color = Color::hex(c).unwrap();
+                    if text.sections[0].value == DEFAULT_NEW_COLOR_TEXT {
+                        cart.vec[index].new_color = get_random_color();
+                    } else {
+                        let c = all_colors::get_color_hex(&text.sections[0].value);
+                        cart.vec[index].new_color = Color::hex(c).unwrap();
+                    }
                 }
                 for text in param_set.p2().iter() {
-                    cart.vec[index].new_message = text.sections[0].value.to_string();
+                    if text.sections[0].value == DEFAULT_NEW_MESSAGE_TEXT {
+                        cart.vec[index].new_message = "".to_string();
+                    } else {
+                        cart.vec[index].new_message = text.sections[0].value.to_string();
+                    }
                 }
 
                 //game_state.set(DisplayBuyUiState::On);

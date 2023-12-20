@@ -21,14 +21,15 @@ use crate::{
         TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
-        EdgeEvent, SelectTileEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
+        EdgeEvent, SelectTileEvent, SpriteSpawnEvent, ToggleBuildings, ToggleColors, ToggleText,
+        UpdateTileTextureEvent, UpdateUiAmount,
     },
     resourcey::{
-        ChunkManager, Edge, LastSelectedTile, SpriteIndexBuilding, SpriteSheetBgRes,
-        SpriteSheetBuildingRes, TileMap, ToggleMap,
+        ChunkManager, Edge, LastSelectedTile, MaxBlockHeight, SpriteIndexBuilding,
+        SpriteSheetBgRes, SpriteSheetBuildingRes, TileMap, ToggleMap,
     },
     statey::DisplayBuyUiState,
-    structy::{EdgeType, SpawnDiffData},
+    structy::{EdgeType, SpawnDiffData, TileTextType},
 };
 
 pub fn setup_explorer(
@@ -228,13 +229,26 @@ pub fn desktop_movement_camera_system(
     q_window: Query<&Window, With<PrimaryWindow>>,
     mut select_tile_event: EventWriter<SelectTileEvent>,
     keys: Res<Input<KeyCode>>,
+    max_height: Res<MaxBlockHeight>,
     //mut last_selected_tile: ResMut<LastSelectedTile>,
     //location_query: Query<&Location>,
 ) {
     for event in mouse_motion_events.read() {
         if mouse.pressed(MouseButton::Middle) || mouse.pressed(MouseButton::Left) {
             for (mut cam_transform, cam_ortho) in q_camera.iter_mut() {
-                let direction = Vec3::new(-event.delta.x, event.delta.y, 0.0);
+                // if around edge limits push back
+                let direction = if edge.bottom.tile + 10_000 > max_height.0.try_into().unwrap() {
+                    Vec3::new(-event.delta.x, 100.0, 0.0)
+                } else if edge.top.tile + 10_000 > max_height.0.try_into().unwrap() {
+                    Vec3::new(-event.delta.x, -100.0, 0.0)
+                } else if edge.left.tile + 10_000 > max_height.0.try_into().unwrap() {
+                    Vec3::new(100.0, event.delta.y, 0.0)
+                } else if edge.right.tile + 10_000 > max_height.0.try_into().unwrap() {
+                    Vec3::new(-100.0, event.delta.y, 0.0)
+                } else {
+                    Vec3::new(-event.delta.x, event.delta.y, 0.0)
+                };
+
                 cam_transform.translation += direction
                     * time.delta_seconds()
                     * TILE_SCALE
@@ -270,7 +284,25 @@ pub fn desktop_movement_camera_system(
                 0.0
             };
 
-            let direction = Vec3::new(x, y, 0.0);
+            // if around edge limits push back
+
+            let direction = if ulam::value_of_xy(0, edge.bottom.tile) + 1_000 > max_height.0 {
+                Vec3::new(x, 100.0, 0.0)
+            } else if ulam::value_of_xy(0, edge.top.tile) + 1_000 > max_height.0 {
+                Vec3::new(x, -100.0, 0.0)
+            } else if ulam::value_of_xy(edge.left.tile, 0) + 1_000 > max_height.0 {
+                Vec3::new(100.0, y, 0.0)
+            } else if ulam::value_of_xy(edge.right.tile, 0) + 1_000 > max_height.0 {
+                Vec3::new(-100.0, y, 0.0)
+            } else {
+                Vec3::new(x, y, 0.0)
+            };
+
+            // info!(
+            //     "bottom tile {}, maxheight {}, direction {:?}",
+            //     edge.bottom.tile, max_height.0, direction
+            // );
+
             cam_transform.translation += direction
                 * time.delta_seconds()
                 * TILE_SCALE
@@ -410,7 +442,7 @@ pub fn zoom_out_button_system(
     for mouse_wheel in mouse_wheel_events.read() {
         if mouse_wheel.y < 0.0 {
             zoom_out = true;
-            zoom_amount = 0.25 * time.delta_seconds() * 4.0;
+            zoom_amount = 0.25 * time.delta_seconds() * 10.0;
         }
     }
 
@@ -473,7 +505,7 @@ pub fn zoom_in_button_system(
     for mouse_wheel in mouse_wheel_events.read() {
         if mouse_wheel.y > 0.0 {
             zoom_in = true;
-            zoom_amount = 0.25 * time.delta_seconds() * 4.0;
+            zoom_amount = 0.25 * time.delta_seconds() * 10.0;
         }
     }
     if zoom_in {
@@ -528,6 +560,7 @@ pub fn spawn_block_sprites(
     mut chunk_map: ResMut<ChunkManager>,
     tile_map: Res<TileMap>,
     toggle_map: Res<ToggleMap>,
+    max_height: Res<MaxBlockHeight>,
 ) {
     for _event in sprite_spawn_event.read() {
         let font = asset_server.load("fonts/FiraSans-Bold.ttf");
@@ -542,10 +575,10 @@ pub fn spawn_block_sprites(
 
         //info!("middle_y: {}, middle_x: {}", middle_y, middle_x);
         let spawn_diff = SpawnDiffData {
-            xstart: middle_x - CHUNK_TILE_SPAN_COUNT,
-            xend: middle_x + CHUNK_TILE_SPAN_COUNT,
-            ystart: middle_y - CHUNK_TILE_SPAN_COUNT,
-            yend: middle_y + CHUNK_TILE_SPAN_COUNT,
+            xstart: middle_x - CHUNK_TILE_SPAN_COUNT * 4,
+            xend: middle_x + CHUNK_TILE_SPAN_COUNT * 4,
+            ystart: middle_y - CHUNK_TILE_SPAN_COUNT * 4,
+            yend: middle_y + CHUNK_TILE_SPAN_COUNT * 4,
         };
 
         //info!("spawning {:#?}", spawn_diff);
@@ -558,7 +591,7 @@ pub fn spawn_block_sprites(
         for x in spawn_diff.xstart..=spawn_diff.xend {
             for y in spawn_diff.ystart..=spawn_diff.yend {
                 let ulam_i = ulam::value_of_xy(x, y);
-                if !chunk_map.map.contains_key(&ulam_i) {
+                if max_height.0 >= ulam_i && !chunk_map.map.contains_key(&ulam_i) {
                     chunk_map.map.insert(ulam_i, true);
 
                     //info!("spawning: x: {}, y: {}", x, y);
@@ -681,7 +714,6 @@ pub fn spawn_block_sprites(
                     //     }
                     // }
 
-                    info!("tiletext {}", tile_text);
                     cmd.with_children(|builder| {
                         builder.spawn((
                             Text2dBundle {
@@ -805,16 +837,23 @@ pub fn update_tile_textures(
     tile_map: Res<TileMap>,
     texture_map: Res<SpriteIndexBuilding>,
     texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
-    //toggle_map: Res<ToggleMap>,
+    toggle_map: Res<ToggleMap>,
+    mut toggle_buildings: EventWriter<ToggleBuildings>,
+    mut toggle_colors: EventWriter<ToggleColors>,
+    mut toggle_text: EventWriter<ToggleText>,
 ) {
     for _e in event.read() {
-        // let dd = toggle_map.0.get("showbuildings").unwrap();
+        // let showing_colors = toggle_map.0.get("hidecolors").unwrap();
+        // let showing_buildings = toggle_map.0.get("hidebuildings").unwrap();
+        let showing_value = toggle_map.0.get("showheights").unwrap();
+        let showing_text = toggle_map.0.get("hidetext").unwrap();
         // let mut visibility_building_toggle;
         // if !*dd {
         //     visibility_building_toggle = Visibility::Visible;
         // } else {
         //     visibility_building_toggle = Visibility::Hidden;
         // }
+
         for (mut texture, location, parent_entity) in lands.iter_mut() {
             if tile_map.map.contains_key(&location.ulam) {
                 let tile_data = tile_map.map.get(&location.ulam).unwrap();
@@ -838,12 +877,18 @@ pub fn update_tile_textures(
                     locationcoord.quad = Quad::SouthEast;
                 }
 
+                // show correct color based on toggle
+                // if *showing_colors {
+                //     texture.color = tile_data.color;
+                // } else {
                 texture.color = Color::Rgba {
                     red: 1.0,
                     green: 1.0,
                     blue: 1.0,
                     alpha: 1.0,
                 };
+                //}
+
                 //let base_sprite_index: usize = rng.gen_range(1..=11);
                 //let land_sprite_index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
                 //texture.index = land_sprite_index; //*texture_map.0.get(&base_sprite_index).unwrap() as usize;
@@ -862,7 +907,18 @@ pub fn update_tile_textures(
                     });
             }
         }
-        //info!("updated textures");
+        info!("updated textures");
+        toggle_buildings.send(ToggleBuildings);
+        toggle_colors.send(ToggleColors);
+        if *showing_text {
+            if *showing_value {
+                toggle_text.send(ToggleText(TileTextType::Value));
+            } else {
+                toggle_text.send(ToggleText(TileTextType::Height));
+            }
+        } else {
+            toggle_text.send(ToggleText(TileTextType::Blank));
+        }
     }
 }
 
