@@ -9,7 +9,10 @@ pub fn spawn(
     _color: Color,
     locationcoord: Location,
 ) {
-    let animation_indices = AnimationIndices { first: 9, last: 16 };
+    let animation_indices = AnimationIndices {
+        first: 11,
+        last: 18,
+    };
     //info!("spawn select");
     builder.spawn((
         SpriteSheetBundle {

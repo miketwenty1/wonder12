@@ -18,7 +18,7 @@ pub fn spawn(
             texture_atlas: texture.clone(),
             sprite: TextureAtlasSprite {
                 color,
-                index: 17,
+                index: 19,
                 ..Default::default()
             },
             transform: Transform {
@@ -38,7 +38,7 @@ pub fn spawn(
             texture_atlas: texture.clone(),
             sprite: TextureAtlasSprite {
                 color,
-                index: 17,
+                index: 19,
                 ..Default::default()
             },
             transform: Transform {
@@ -53,7 +53,7 @@ pub fn spawn(
         locationcoord,
     ));
 
-    let animation_indices = AnimationIndices { first: 6, last: 8 };
+    let animation_indices = AnimationIndices { first: 8, last: 10 };
     builder.spawn((
         SpriteSheetBundle {
             texture_atlas: texture.clone(),
@@ -77,7 +77,7 @@ pub fn spawn(
             texture_atlas: texture.clone(),
             sprite: TextureAtlasSprite {
                 color,
-                index: 18,
+                index: 20,
                 ..Default::default()
             },
             transform: Transform {
@@ -98,7 +98,7 @@ pub fn spawn(
         builder,
         Color::rgba(1.0, 1.0, 1.0, 1.0),
         locationcoord,
-        2,
+        3,
         visibility_toggle,
     );
 }

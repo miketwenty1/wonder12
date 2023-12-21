@@ -63,7 +63,7 @@ pub fn setup_explorer(
     let texture_atlas_building = TextureAtlas::from_grid(
         texture_handle_buildings,
         Vec2::new(32.0, 32.0),
-        19,
+        21,
         1,
         Some(Vec2::new(2.0, 2.0)),
         Some(Vec2::new(1.0, 1.0)),

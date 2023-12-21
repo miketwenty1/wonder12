@@ -53,7 +53,7 @@ pub fn spawn(
         locationcoord,
     ));
 
-    let animation_indices = AnimationIndices { first: 6, last: 8 };
+    let animation_indices = AnimationIndices { first: 8, last: 10 };
     builder.spawn((
         SpriteSheetBundle {
             texture_atlas: texture.clone(),
