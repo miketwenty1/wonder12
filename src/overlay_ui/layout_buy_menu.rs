@@ -262,7 +262,7 @@ pub fn spawn_layout(
                     spawn_nested_text_bundle_flex(
                         builder,
                         font.clone(),
-                        "Use these values for every blocks",
+                        "Apply to all selected blocks",
                         15.0,
                         colors.node_color,
                         colors.text_color,

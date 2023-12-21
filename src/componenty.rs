@@ -208,3 +208,6 @@ pub struct CouldBeEditabledTextBox;
 
 #[derive(Component)]
 pub struct BuyMenuButton;
+
+#[derive(Component)]
+pub struct ClipboardBtn;

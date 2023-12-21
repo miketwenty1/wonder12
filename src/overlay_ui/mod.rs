@@ -2,7 +2,7 @@ use self::{
     cleanup_buy_menu::cleanup_keyboard_system,
     keyboard_system::write_keyboard_target,
     layout_buy_menu::{set_keyboard, spawn_layout},
-    qr_code_layout::{spawn_qr, UiQrOverlay},
+    qr_code_layout::{clipboard_button_system, spawn_qr, UiQrOverlay},
     systems_buyui::{
         back_button_system, buy_button_system, config_cart_button_system,
         leftright_cart_button_system, leftright_cart_button_system_set_new_text,
@@ -62,6 +62,10 @@ impl Plugin for OverlayUiPlugin {
                 OnExit(DisplayBuyUiState::Qr),
                 (despawn_screen::<UiQrOverlay>, cleanup_keyboard_system),
             )
-            .add_systems(OnEnter(DisplayBuyUiState::Qr), spawn_qr);
+            .add_systems(OnEnter(DisplayBuyUiState::Qr), spawn_qr)
+            .add_systems(
+                Update,
+                (clipboard_button_system).run_if(in_state(DisplayBuyUiState::Qr)),
+            );
     }
 }

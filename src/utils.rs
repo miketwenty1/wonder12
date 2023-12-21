@@ -34,11 +34,11 @@ pub fn get_random_color() -> Color {
     let r: f32 = rng.gen_range(0.0..1.0);
     let g: f32 = rng.gen_range(0.0..1.0);
     let b: f32 = rng.gen_range(0.0..1.0);
-    let new_color = Color::Rgba {
+
+    Color::Rgba {
         red: r,
         green: g,
         blue: b,
         alpha: 1.0,
-    };
-    new_color
+    }
 }
