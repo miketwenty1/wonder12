@@ -51,6 +51,8 @@ pub enum BuildingStructure {
     //DirtRoad2,
     //DirtRoadCorner2,
     FirePit,
+    Hut2,
+    Waterwell,
 }
 
 #[derive(Component)]

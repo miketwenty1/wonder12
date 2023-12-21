@@ -31,7 +31,6 @@ use super::layout_buy_menu::ButtonBack;
 const FAIL_PRESSED_BUTTON: Color = Color::rgb(0.9, 0.1, 0.1);
 
 //const INTRO_TEXT: &str = "This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!";
-//const RANDOM_TEXT: &str = "This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!This game is in alpha, be prepared to lose all funds. Your lightning address must be correct to get a refund if someone steals your block!";
 
 #[allow(clippy::type_complexity)]
 pub fn leftright_cart_button_system(

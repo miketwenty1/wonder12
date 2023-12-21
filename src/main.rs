@@ -59,17 +59,17 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
     numbers_map.insert(128, 1);
     numbers_map.insert(256, 2);
     numbers_map.insert(512, 3);
-    numbers_map.insert(1024, 3);
-    numbers_map.insert(2048, 3);
-    numbers_map.insert(4096, 3);
-    numbers_map.insert(8192, 3);
-    numbers_map.insert(16384, 3);
-    numbers_map.insert(32768, 3);
-    numbers_map.insert(65536, 3);
-    numbers_map.insert(131072, 3);
-    numbers_map.insert(262144, 3);
-    numbers_map.insert(524288, 3);
-    numbers_map.insert(1048576, 3);
+    numbers_map.insert(1024, 4);
+    numbers_map.insert(2048, 4);
+    numbers_map.insert(4096, 4);
+    numbers_map.insert(8192, 4);
+    numbers_map.insert(16384, 4);
+    numbers_map.insert(32768, 4);
+    numbers_map.insert(65536, 4);
+    numbers_map.insert(131072, 4);
+    numbers_map.insert(262144, 4);
+    numbers_map.insert(524288, 4);
+    numbers_map.insert(1048576, 4);
 
     let color_palette = ColorPalette {
         node_color: Color::hex("222831").unwrap(),
