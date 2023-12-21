@@ -5,6 +5,7 @@ use crate::componenty::Location;
 pub mod level1;
 pub mod level2;
 pub mod level3;
+pub mod level4;
 pub mod road;
 pub mod select_tile;
 
@@ -37,6 +38,15 @@ pub fn spawn_tile_level(
         }
         3 => {
             level3::spawn(
+                texture_handle,
+                builder,
+                color_for_sprites,
+                locationcoord,
+                visibility_toggle,
+            );
+        }
+        4 => {
+            level4::spawn(
                 texture_handle,
                 builder,
                 color_for_sprites,
