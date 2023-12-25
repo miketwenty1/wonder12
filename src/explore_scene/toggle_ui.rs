@@ -12,7 +12,7 @@ use crate::{
     componenty::{
         HideBuilding, HideText, HideTextText, ShowColors, ShowValues, Toggle1Btn, Toggle1BtnText,
         Toggle2Btn, Toggle2BtnText, Toggle3Btn, Toggle3BtnText, Toggle4Btn, Toggle4BtnText,
-        ToggleButton, ToggleParent, UiToggle,
+        ToggleButton, ToggleParent, UiOverlayingExplorerButton, UiToggle,
     },
     consty::{HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON},
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
@@ -60,6 +60,7 @@ pub fn setup_toggle(
                         ..default()
                     },
                     ToggleParent,
+                    UiOverlayingExplorerButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section(
@@ -92,6 +93,7 @@ pub fn setup_toggle(
                     HideBuilding,
                     Toggle1Btn,
                     ToggleButton,
+                    UiOverlayingExplorerButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn((
@@ -127,6 +129,7 @@ pub fn setup_toggle(
                     ShowColors,
                     ToggleButton,
                     Toggle2Btn,
+                    UiOverlayingExplorerButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn((
@@ -163,6 +166,7 @@ pub fn setup_toggle(
                     ShowValues,
                     ToggleButton,
                     Toggle3Btn,
+                    UiOverlayingExplorerButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn((
@@ -198,6 +202,7 @@ pub fn setup_toggle(
                     HideText,
                     ToggleButton,
                     Toggle4Btn,
+                    UiOverlayingExplorerButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn((
@@ -330,13 +335,11 @@ pub fn toggle_button_sub_system_toggle1(
                     "Show Buildings" => {
                         text.sections[0].value = "Hide Buildings".to_string();
                         *toggle_map.0.get_mut("showbuildings").unwrap() = false;
-                        *toggle_map.0.get_mut("hidebuildings").unwrap() = true;
                         toggle.send(ToggleBuildings);
                     }
                     "Hide Buildings" => {
                         text.sections[0].value = "Show Buildings".to_string();
                         *toggle_map.0.get_mut("showbuildings").unwrap() = true;
-                        *toggle_map.0.get_mut("hidebuildings").unwrap() = false;
                         toggle.send(ToggleBuildings);
                     }
                     _ => {
@@ -378,13 +381,11 @@ pub fn toggle_button_sub_system_toggle2(
                 match text.sections[0].value.as_str() {
                     "Show Colors" => {
                         text.sections[0].value = "Hide Colors".to_string();
-                        *toggle_map.0.get_mut("hidecolors").unwrap() = true;
                         *toggle_map.0.get_mut("showcolors").unwrap() = false;
                         toggle.send(ToggleColors);
                     }
                     "Hide Colors" => {
                         text.sections[0].value = "Show Colors".to_string();
-                        *toggle_map.0.get_mut("hidecolors").unwrap() = false;
                         *toggle_map.0.get_mut("showcolors").unwrap() = true;
                         toggle.send(ToggleColors);
                     }
@@ -443,7 +444,6 @@ pub fn toggle_button_sub_system_toggle3(
                     }
                 };
                 text4.sections[0].value = "Hide Text".to_string();
-                *toggle_map.0.get_mut("hidetext").unwrap() = true;
                 *toggle_map.0.get_mut("showtext").unwrap() = false;
                 *color = PRESSED_BUTTON.into();
             }
@@ -480,13 +480,11 @@ pub fn toggle_button_sub_system_toggle4(
                     "Hide Text" => {
                         text.sections[0].value = "Show Text".to_string();
                         *toggle_map.0.get_mut("showtext").unwrap() = true;
-                        *toggle_map.0.get_mut("hidetext").unwrap() = false;
                         tile_text_type.send(ToggleText(TileTextType::Blank));
                     }
                     "Show Text" => {
                         text.sections[0].value = "Hide Text".to_string();
                         *toggle_map.0.get_mut("showtext").unwrap() = false;
-                        *toggle_map.0.get_mut("hidetext").unwrap() = true;
                         if *toggle_map.0.get("showvalues").unwrap() {
                             tile_text_type.send(ToggleText(TileTextType::Height));
                         } else {

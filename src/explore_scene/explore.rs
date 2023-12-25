@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use bevy::{
     input::mouse::{MouseMotion, MouseWheel},
     prelude::*,
@@ -9,37 +11,45 @@ use rand::Rng;
 use ulam::Quad;
 
 use crate::{
-    building_config::spawn_tile_level,
+    building_config::{spawn_tile_level, utils::sanitize_building_color},
     componenty::{
         AnimationIndices, AnimationTimer, BuildingStructure, BuySelectionButton,
-        ClearSelectionButton, Land, Location, Selected, TileText, UiNode, UiTileSelectedButton,
-        ZoomInButton, ZoomOutButton,
+        ClearSelectionButton, InitLoadingNode, InitLoadingText, Land, Location, Selected, TileText,
+        UiNode, UiOverlayingExplorerButton, UiTileSelectedButton, ZoomInButton, ZoomOutButton,
     },
     consty::{
         CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT, DESPAWN_TILE_THRESHOLD,
-        HOVERED_BUTTON, MOVE_VELOCITY_FACTOR, NORMAL_BUTTON, PRESSED_BUTTON, TILE_PIXEL_SIZE,
-        TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
+        HOVERED_BUTTON, MAX_VELOCITY, MOVE_VELOCITY_FACTOR, NORMAL_BUTTON, PRESSED_BUTTON,
+        TILE_PIXEL_SIZE, TILE_SCALE, TOTAL_TILE_SCALE_SIZE, ZOOM_IN_MAX, ZOOM_OUT_MAX,
     },
     eventy::{
-        EdgeEvent, SelectTileEvent, SpriteSpawnEvent, ToggleBuildings, ToggleColors, ToggleText,
+        ClearEvent, ClearLastSelectedTile, EdgeEvent, SelectTileEvent, SpriteSpawnEvent,
         UpdateTileTextureEvent, UpdateUiAmount,
     },
     resourcey::{
-        ChunkManager, Edge, LastSelectedTile, MaxBlockHeight, SpriteIndexBuilding,
-        SpriteSheetBgRes, SpriteSheetBuildingRes, TileMap, ToggleMap,
+        ChunkManager, ColorPalette, Edge, InitBlockCount, LastSelectedTile, MaxBlockHeight,
+        SpriteIndexBuilding, SpriteSheetBgRes, SpriteSheetBuildingRes, TileData, TileMap,
+        ToggleMap,
     },
-    statey::DisplayBuyUiState,
-    structy::{EdgeType, SpawnDiffData, TileTextType},
+    statey::{DisplayBuyUiState, InitLoadingBlocksState},
+    structy::{EdgeType, SpawnDiffData},
 };
 
-pub fn setup_explorer(
+// pub fn setup_explorer(mut clear_event: EventWriter<ClearEvent>) {
+//     clear_event.send(ClearEvent);
+// }
+
+pub fn init_explorer(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
+    inires: Res<InitBlockCount>,
+    colors: Res<ColorPalette>,
+    mut loading_init_block_text: ResMut<NextState<InitLoadingBlocksState>>,
 ) {
     // ui camera
-
+    info!("initblockcount: {}", inires.0);
     let texture_handle_bg: Handle<Image> = asset_server.load_with_settings(
         "spritesheet/grassdirtbg.png",
         |settings: &mut ImageLoaderSettings| {
@@ -111,6 +121,7 @@ pub fn setup_explorer(
                     },
                     ClearSelectionButton,
                     UiTileSelectedButton,
+                    UiOverlayingExplorerButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section(
@@ -141,6 +152,7 @@ pub fn setup_explorer(
                         ..default()
                     },
                     ZoomOutButton,
+                    UiOverlayingExplorerButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section(
@@ -170,6 +182,7 @@ pub fn setup_explorer(
                         ..default()
                     },
                     ZoomInButton,
+                    UiOverlayingExplorerButton,
                 ))
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section(
@@ -199,6 +212,7 @@ pub fn setup_explorer(
                         visibility: Visibility::Hidden,
                         ..default()
                     },
+                    UiOverlayingExplorerButton,
                     BuySelectionButton,
                     UiTileSelectedButton,
                 ))
@@ -214,7 +228,103 @@ pub fn setup_explorer(
                 });
         });
 
+    // this is the same text as above but outlined
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::Center,
+                    align_content: AlignContent::Center,
+                    justify_content: JustifyContent::Center,
+                    justify_items: JustifyItems::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            InitLoadingNode,
+        ))
+        .with_children(|child| {
+            child
+                .spawn(NodeBundle {
+                    style: Style {
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
+                        align_items: AlignItems::Start,
+                        align_content: AlignContent::Center,
+                        justify_content: JustifyContent::Center, //nope left right
+                        justify_items: JustifyItems::Center,
+                        margin: UiRect::top(Val::Percent(29.9)),
+                        ..default()
+                    },
+                    // background_color: Color::PINK.into(),
+                    ..default()
+                })
+                .with_children(|childtext| {
+                    childtext.spawn((
+                        TextBundle::from_section(
+                            "Initilizing Game Map 0%",
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 30.2,
+                                color: colors.text_color,
+                            },
+                        ),
+                        InitLoadingText,
+                    ));
+                });
+        });
+
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::Center,
+                    align_content: AlignContent::Center,
+                    justify_content: JustifyContent::Center,
+                    justify_items: JustifyItems::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            InitLoadingNode,
+        ))
+        .with_children(|child| {
+            child
+                .spawn(NodeBundle {
+                    style: Style {
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
+                        align_items: AlignItems::Start,
+                        align_content: AlignContent::Center,
+                        justify_content: JustifyContent::Center, //nope left right
+                        justify_items: JustifyItems::Center,
+                        margin: UiRect::top(Val::Percent(30.0)),
+                        ..default()
+                    },
+                    // background_color: Color::PINK.into(),
+                    ..default()
+                })
+                .with_children(|childtext| {
+                    childtext.spawn((
+                        TextBundle::from_section(
+                            "Initilizing Game Map 0%",
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 30.0,
+                                color: colors.accent_color,
+                            },
+                        ),
+                        InitLoadingText,
+                    ));
+                });
+        });
+
     sprite_spawn_event.send(SpriteSpawnEvent);
+    loading_init_block_text.set(InitLoadingBlocksState::On);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -230,6 +340,7 @@ pub fn desktop_movement_camera_system(
     mut select_tile_event: EventWriter<SelectTileEvent>,
     keys: Res<Input<KeyCode>>,
     max_height: Res<MaxBlockHeight>,
+    mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
     //mut last_selected_tile: ResMut<LastSelectedTile>,
     //location_query: Query<&Location>,
 ) {
@@ -237,7 +348,8 @@ pub fn desktop_movement_camera_system(
         if mouse.pressed(MouseButton::Middle) || mouse.pressed(MouseButton::Left) {
             for (mut cam_transform, cam_ortho) in q_camera.iter_mut() {
                 // if around edge limits push back
-                let direction = if edge.bottom.tile + 10_000 > max_height.0.try_into().unwrap() {
+                let mut direction = if edge.bottom.tile + 10_000 > max_height.0.try_into().unwrap()
+                {
                     Vec3::new(-event.delta.x, 100.0, 0.0)
                 } else if edge.top.tile + 10_000 > max_height.0.try_into().unwrap() {
                     Vec3::new(-event.delta.x, -100.0, 0.0)
@@ -249,6 +361,25 @@ pub fn desktop_movement_camera_system(
                     Vec3::new(-event.delta.x, event.delta.y, 0.0)
                 };
 
+                if direction.x.abs() > 0.1 || direction.y.abs() > 0.1 {
+                    clear_last_selected.send(ClearLastSelectedTile);
+                }
+
+                // hopefully to help with jumpiness
+                if direction.x.abs() > MAX_VELOCITY {
+                    if direction.x > 0.0 {
+                        direction.x = MAX_VELOCITY;
+                    } else {
+                        direction.x = -MAX_VELOCITY;
+                    }
+                }
+                if direction.y.abs() > MAX_VELOCITY {
+                    if direction.y > 0.0 {
+                        direction.y = MAX_VELOCITY;
+                    } else {
+                        direction.y = -MAX_VELOCITY;
+                    }
+                }
                 cam_transform.translation += direction
                     * time.delta_seconds()
                     * TILE_SCALE
@@ -302,6 +433,9 @@ pub fn desktop_movement_camera_system(
             //     "bottom tile {}, maxheight {}, direction {:?}",
             //     edge.bottom.tile, max_height.0, direction
             // );
+            if direction.x.abs() > 0.1 || direction.y.abs() > 0.1 {
+                clear_last_selected.send(ClearLastSelectedTile);
+            }
 
             cam_transform.translation += direction
                 * time.delta_seconds()
@@ -352,6 +486,7 @@ pub fn touch_event_system(
     mut edge_event: EventWriter<EdgeEvent>,
     q_window: Query<&Window, With<PrimaryWindow>>,
     mut select_tile_event: EventWriter<SelectTileEvent>,
+    mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
     //mut last_selected_tile: ResMut<LastSelectedTile>,
     //location_query: Query<&Location>,
 ) {
@@ -379,6 +514,7 @@ pub fn touch_event_system(
             };
 
             let direction = Vec3::new(-touch.delta().x, touch.delta().y, 0.0);
+
             cam_transform.translation +=
                 direction * time.delta_seconds() * cam_ortho.scale * MOVE_VELOCITY_FACTOR * 5.0;
 
@@ -386,10 +522,14 @@ pub fn touch_event_system(
 
             if touches.just_pressed(touch.id()) {
                 //info!("send touch select");
+
                 select_tile_event.send(SelectTileEvent(x, y));
+
                 //*last_selected_tile = LastSelectedTile(x, y);
             }
-
+            if direction.x.abs() > 0.1 || direction.y.abs() > 0.1 {
+                clear_last_selected.send(ClearLastSelectedTile);
+            }
             //info!("touch World coords: {}/{}", x, y);
         }
     }
@@ -411,6 +551,7 @@ pub fn zoom_out_button_system(
     time: Res<Time>,
     mut text_query: Query<&mut Text>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
+    mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
 ) {
     let mut zoom_out = false;
     let mut zoom_amount: f32 = 0.0;
@@ -419,6 +560,8 @@ pub fn zoom_out_button_system(
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
+                // for mobile keep eye on https://github.com/bevyengine/bevy/pull/10930
+                clear_last_selected.send(ClearLastSelectedTile);
                 mouse.clear_just_pressed(MouseButton::Left);
                 text.sections[0].value = "-".to_string();
                 *color = PRESSED_BUTTON.into();
@@ -450,8 +593,8 @@ pub fn zoom_out_button_system(
         for mut ortho in cam_query.iter_mut() {
             ortho.scale += zoom_amount;
             //info!("{}", ortho.scale);
-            if ortho.scale > 5.0 {
-                ortho.scale = 5.0;
+            if ortho.scale > ZOOM_OUT_MAX {
+                ortho.scale = ZOOM_OUT_MAX;
             }
         }
     }
@@ -474,6 +617,7 @@ pub fn zoom_in_button_system(
     time: Res<Time>,
     mut text_query: Query<&mut Text>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
+    mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
 ) {
     let mut zoom_in = false;
     let mut zoom_amount: f32 = 0.0;
@@ -482,6 +626,8 @@ pub fn zoom_in_button_system(
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
+                // for mobile keep eye on https://github.com/bevyengine/bevy/pull/10930
+                clear_last_selected.send(ClearLastSelectedTile);
                 mouse.clear_just_pressed(MouseButton::Left);
                 text.sections[0].value = "+".to_string();
                 *color = PRESSED_BUTTON.into();
@@ -511,8 +657,8 @@ pub fn zoom_in_button_system(
     if zoom_in {
         for mut ortho in cam_query.iter_mut() {
             ortho.scale -= zoom_amount;
-            if ortho.scale < 0.25 {
-                ortho.scale = 0.25;
+            if ortho.scale < ZOOM_IN_MAX {
+                ortho.scale = ZOOM_IN_MAX;
             }
             //info!("{}", ortho.scale);
         }
@@ -632,7 +778,7 @@ pub fn spawn_block_sprites(
                             blue: 1.,
                             alpha: 1.,
                         };
-                        if *toggle_map.0.get("hidecolors").unwrap() {
+                        if !*toggle_map.0.get("showcolors").unwrap() {
                             land_sprite_index = 0;
                             color_for_tile = color_for_sprites;
                         };
@@ -738,12 +884,15 @@ pub fn spawn_block_sprites(
                             TileText,
                         ));
                     });
+
+                    let building_color = sanitize_building_color(color_for_sprites);
+
                     cmd.with_children(|builder| {
                         spawn_tile_level(
                             building_sprite_index,
                             &texture_atlas_handle_building.0.clone(),
                             builder,
-                            color_for_sprites,
+                            building_color,
                             locationcoord,
                             visibility_setting,
                         );
@@ -833,29 +982,38 @@ pub fn update_tile_textures(
         (&mut TextureAtlasSprite, &Location, Entity),
         (With<Land>, Without<BuildingStructure>),
     >,
+    buildings: Query<(&Location, Entity), (Without<Land>, With<BuildingStructure>)>,
     mut event: EventReader<UpdateTileTextureEvent>,
     tile_map: Res<TileMap>,
     texture_map: Res<SpriteIndexBuilding>,
     texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
     toggle_map: Res<ToggleMap>,
-    mut toggle_buildings: EventWriter<ToggleBuildings>,
-    mut toggle_colors: EventWriter<ToggleColors>,
-    mut toggle_text: EventWriter<ToggleText>,
+    mut text_q: Query<(&mut Text, &Location), With<TileText>>,
+    // mut toggle_buildings: EventWriter<ToggleBuildings>,
+    // mut toggle_colors: EventWriter<ToggleColors>,
+    // mut toggle_text: EventWriter<ToggleText>,
 ) {
-    for _e in event.read() {
+    for tile_vec in event.read() {
+        let tiles = tile_vec.0.clone();
+        let tile_map_from_e: HashMap<u32, TileData> =
+            tiles.into_iter().map(|tile| (tile.height, tile)).collect();
+
         // let showing_colors = toggle_map.0.get("hidecolors").unwrap();
         // let showing_buildings = toggle_map.0.get("hidebuildings").unwrap();
         let showing_value = toggle_map.0.get("showheights").unwrap();
-        let showing_text = toggle_map.0.get("hidetext").unwrap();
-        // let mut visibility_building_toggle;
-        // if !*dd {
-        //     visibility_building_toggle = Visibility::Visible;
-        // } else {
-        //     visibility_building_toggle = Visibility::Hidden;
-        // }
+        let hiding_text = toggle_map.0.get("showtext").unwrap();
+        let hiding_colors = toggle_map.0.get("showcolors").unwrap();
+        let hiding_buildings = toggle_map.0.get("showbuildings").unwrap();
+        let visibility_building_toggle = if *hiding_buildings {
+            Visibility::Hidden
+        } else {
+            Visibility::Visible
+        };
 
         for (mut texture, location, parent_entity) in lands.iter_mut() {
-            if tile_map.map.contains_key(&location.ulam) {
+            if tile_map.map.contains_key(&location.ulam)
+                && tile_map_from_e.contains_key(&location.ulam)
+            {
                 let tile_data = tile_map.map.get(&location.ulam).unwrap();
                 let building_sprite_index = *texture_map.0.get(&tile_data.value).unwrap() as usize;
 
@@ -878,20 +1036,32 @@ pub fn update_tile_textures(
                 }
 
                 // show correct color based on toggle
-                // if *showing_colors {
-                //     texture.color = tile_data.color;
-                // } else {
-                texture.color = Color::Rgba {
-                    red: 1.0,
-                    green: 1.0,
-                    blue: 1.0,
-                    alpha: 1.0,
-                };
-                //}
+                if *hiding_colors {
+                    texture.color = Color::Rgba {
+                        red: 1.0,
+                        green: 1.0,
+                        blue: 1.0,
+                        alpha: 1.0,
+                    };
+                } else {
+                    texture.color = tile_data.color;
+                    texture.index = 0;
+                }
 
                 //let base_sprite_index: usize = rng.gen_range(1..=11);
                 //let land_sprite_index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
                 //texture.index = land_sprite_index; //*texture_map.0.get(&base_sprite_index).unwrap() as usize;
+
+                // if (there is some change) {
+
+                // }
+                //if building
+                for (building_location, building_entity) in buildings.iter() {
+                    if building_location.ulam == location.ulam {
+                        info!("despawning old building stuff");
+                        commands.entity(building_entity).despawn();
+                    }
+                }
 
                 commands
                     .entity(parent_entity)
@@ -900,25 +1070,54 @@ pub fn update_tile_textures(
                             building_sprite_index,
                             &texture_atlas_handle_building.0.clone(),
                             child_builder,
-                            tile_data.color,
+                            sanitize_building_color(tile_data.color),
                             locationcoord,
-                            Visibility::Visible, //visibility_building_toggle,
+                            visibility_building_toggle,
                         );
                     });
+
+                //info!("{:#?}", locationcoord);
             }
         }
+
         info!("updated textures");
-        toggle_buildings.send(ToggleBuildings);
-        toggle_colors.send(ToggleColors);
-        if *showing_text {
-            if *showing_value {
-                toggle_text.send(ToggleText(TileTextType::Value));
-            } else {
-                toggle_text.send(ToggleText(TileTextType::Height));
+        for (mut text, loc) in text_q.iter_mut() {
+            //let a = tile_map.map.get(&loc.ulam);
+
+            // match a {
+            //     Some(val) => {
+            //         if *hiding_text {
+            //         } else if *showing_value {
+            //             text.sections[0].value = val.cost.to_string();
+            //         } else {
+            //             text.sections[0].value = val.height.to_string();
+            //         }
+            //     }
+            //     None => {}
+            // }
+            if let Some(val) = tile_map.map.get(&loc.ulam) {
+                if !*hiding_text {
+                    if *showing_value {
+                        text.sections[0].value = val.cost.to_string();
+                    } else {
+                        text.sections[0].value = val.height.to_string();
+                    }
+                }
             }
-        } else {
-            toggle_text.send(ToggleText(TileTextType::Blank));
         }
+
+        info!("updated text");
+        // toggle_buildings.send(ToggleBuildings);
+        // toggle_colors.send(ToggleColors);
+        // if !*hiding_text {
+        //     if *showing_value {
+        //         toggle_text.send(ToggleText(TileTextType::Value));
+        //     } else {
+        //         toggle_text.send(ToggleText(TileTextType::Height));
+        //     }
+        // } else {
+        //     toggle_text.send(ToggleText(TileTextType::Blank));
+        // }
     }
 }
 
@@ -1034,12 +1233,13 @@ pub fn clear_selection_button(
             With<ClearSelectionButton>,
         ),
     >,
-    mut commands: Commands,
+    // mut commands: Commands,
     mut text_query: Query<&mut Text>,
-    mut selected_q: Query<Entity, (With<Selected>, Without<Land>, Without<BuildingStructure>)>,
-    mut selected_lands_q: Query<&mut Location>,
-    mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
-    mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
+    // mut selected_q: Query<Entity, (With<Selected>, Without<Land>, Without<BuildingStructure>)>,
+    // mut selected_lands_q: Query<&mut Location>,
+    // mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
+    // mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
+    mut clear_event: EventWriter<ClearEvent>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
@@ -1048,16 +1248,7 @@ pub fn clear_selection_button(
                 text.sections[0].value = "Clear".to_string();
                 *color = PRESSED_BUTTON.into();
                 border_color.0 = Color::GRAY;
-                for sentity in selected_q.iter_mut() {
-                    commands.entity(sentity).despawn();
-                }
-                for mut location in selected_lands_q.iter_mut() {
-                    location.selected = false;
-                }
-                for mut visibility in tile_selected_button_q.iter_mut() {
-                    *visibility = Visibility::Hidden;
-                }
-                update_ui_amount_event.send(UpdateUiAmount);
+                clear_event.send(ClearEvent);
             }
             Interaction::Hovered => {
                 text.sections[0].value = "Clear".to_string();
@@ -1070,6 +1261,29 @@ pub fn clear_selection_button(
                 border_color.0 = Color::BLACK;
             }
         }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn clear_selection(
+    mut selected_q: Query<Entity, (With<Selected>, Without<Land>, Without<BuildingStructure>)>,
+    mut selected_lands_q: Query<&mut Location>,
+    mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
+    mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
+    mut commands: Commands,
+    mut clear_event: EventReader<ClearEvent>,
+) {
+    for _e in clear_event.read() {
+        for sentity in selected_q.iter_mut() {
+            commands.entity(sentity).despawn();
+        }
+        for mut location in selected_lands_q.iter_mut() {
+            location.selected = false;
+        }
+        for mut visibility in tile_selected_button_q.iter_mut() {
+            *visibility = Visibility::Hidden;
+        }
+        update_ui_amount_event.send(UpdateUiAmount);
     }
 }
 

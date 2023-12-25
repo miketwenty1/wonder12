@@ -1,8 +1,9 @@
 use crate::comms::CommsPlugin;
 use crate::consty::{CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT};
 use crate::eventy::{
-    BuyBlockRequest, EdgeEvent, RequestTileUpdates, SelectTileEvent, SpriteSpawnEvent,
-    ToggleBuildings, ToggleColors, ToggleText, UpdateTileTextureEvent, UpdateUiAmount,
+    BuyBlockRequest, ClearEvent, ClearLastSelectedTile, EdgeEvent, RequestTileUpdates,
+    SelectTileEvent, SpriteSpawnEvent, ToggleBuildings, ToggleColors, ToggleText,
+    UpdateTileTextureEvent, UpdateUiAmount,
 };
 use crate::explore_scene::ExplorePlugin;
 use crate::keyboard::resources::KeyboardData;
@@ -19,7 +20,9 @@ use crate::structy::EdgeData;
 use bevy::asset::AssetMetaCheck;
 use bevy::{prelude::*, utils::HashMap};
 use chrono::{Duration, Utc};
-use resourcey::{CheckInvoiceChannel, RequestInvoiceChannel};
+use resourcey::{CheckInvoiceChannel, InitBlockCount, InitGameMap, RequestInvoiceChannel};
+use statey::InitLoadingBlocksState;
+use structy::RequestTileType;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 mod building_config;
@@ -41,17 +44,19 @@ pub fn main() {
     //game("localusertesting".to_string(), "localhost:8081".to_string());
 }
 #[wasm_bindgen]
-pub fn game12(username: String, server_url: String, ln_address: String) {
+pub fn game12(username: String, server_url: String, ln_address: String, block_init_count: u32) {
+    // this doesn't show
+    // info!(
+    //     "user: {}\nserver: {}, lnaddress: {}",
+    //     username, server_url, ln_address
+    // );
     let max_block_height: u32 = 840_000;
     let mut toggle_map = HashMap::new();
-    toggle_map.insert("hidebuildings".to_string(), true);
     toggle_map.insert("showbuildings".to_string(), false);
     toggle_map.insert("showcolors".to_string(), true);
-    toggle_map.insert("hidecolors".to_string(), false);
     toggle_map.insert("showvalues".to_string(), true);
     toggle_map.insert("showheights".to_string(), false);
     toggle_map.insert("showtext".to_string(), false);
-    toggle_map.insert("hidetext".to_string(), true);
 
     let mut numbers_map = HashMap::new();
 
@@ -78,10 +83,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         light_color: Color::hex("EEEEEE").unwrap(),
         text_color: Color::hex("FAFAFA").unwrap(),
     };
-    info!(
-        "user: {}\nserver: {}, lnaddress: {}",
-        username, server_url, ln_address
-    );
+
     let start_edge = Edge {
         top: EdgeData {
             pixel: CHUNK_PIXEL_SIZE / 2.0,
@@ -119,7 +121,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
             index: 0,
         })
         .insert_resource(CurrentCartBlock {
-            ln_address: "".to_string(),
+            ln_address: ln_address.clone(),
             color: "".to_string(),
             message: "".to_string(),
         })
@@ -134,9 +136,11 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
             name: username,
             ln_address,
         })
+        .insert_resource(InitBlockCount(block_init_count))
         .insert_resource(UpdateGameTimetamp {
             ts: Utc::now() - Duration::days(10 * 365),
         })
+        .insert_resource(InitGameMap { height: 0 })
         .init_resource::<InvoiceDataFromServer>()
         .init_resource::<InvoiceCheckFromServer>()
         //.add_plugins(DefaultPlugins)
@@ -157,6 +161,7 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .add_state::<CommsApiState>()
         .add_state::<DisplayBuyUiState>()
         .add_state::<KeyboardState>()
+        .add_state::<InitLoadingBlocksState>()
         .add_plugins(CommsPlugin)
         .add_plugins(OverlayUiPlugin)
         .add_plugins(ExplorePlugin)
@@ -173,6 +178,8 @@ pub fn game12(username: String, server_url: String, ln_address: String) {
         .add_event::<UpdateUiAmount>()
         .add_event::<BuyBlockRequest>()
         .add_event::<RequestTileUpdates>()
+        .add_event::<ClearEvent>()
+        .add_event::<ClearLastSelectedTile>()
         .add_systems(Startup, setup) //setupcoords
         //.add_systems(PostStartup, api_get_server_tiles)
         .run();
@@ -184,7 +191,7 @@ fn setup(
     mut request_tiles_event: EventWriter<RequestTileUpdates>,
 ) {
     commands.spawn(Camera2dBundle::default());
-    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
+    let (tx_tiledata, rx_tiledata) = async_channel::bounded(4);
     commands.insert_resource(TileDataChannel {
         tx: tx_tiledata,
         rx: rx_tiledata,
@@ -199,7 +206,7 @@ fn setup(
         tx: tx_tiledata,
         rx: rx_tiledata,
     });
-    request_tiles_event.send(RequestTileUpdates);
+    request_tiles_event.send(RequestTileUpdates(RequestTileType::Height));
     ui_state.set(ExploreState::On);
 }
 

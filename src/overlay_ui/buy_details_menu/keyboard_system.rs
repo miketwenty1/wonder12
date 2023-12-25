@@ -24,6 +24,7 @@ pub fn write_keyboard_target(
     target: ResMut<KeyboardTarget>,
     mut block_new_data: ResMut<CurrentCartBlock>,
     colors: Res<ColorPalette>,
+    //user: Res<User>,
 ) {
     if keyboard_text.is_changed() {
         let mut clear_configbox = false;

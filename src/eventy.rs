@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::structy::{EdgeType, TileTextType};
+use crate::{
+    resourcey::TileData,
+    structy::{EdgeType, RequestTileType, TileTextType},
+};
 
 #[derive(Event)]
 pub struct SpriteSpawnEvent;
@@ -16,7 +19,7 @@ pub struct EdgeEvent {
 pub struct SelectTileEvent(pub i32, pub i32);
 
 #[derive(Event, Debug)]
-pub struct UpdateTileTextureEvent;
+pub struct UpdateTileTextureEvent(pub Vec<TileData>);
 
 #[derive(Event, Debug)]
 pub struct ToggleBuildings;
@@ -34,4 +37,10 @@ pub struct UpdateUiAmount;
 pub struct BuyBlockRequest;
 
 #[derive(Event, Debug)]
-pub struct RequestTileUpdates;
+pub struct RequestTileUpdates(pub RequestTileType);
+
+#[derive(Event, Debug)]
+pub struct ClearEvent;
+
+#[derive(Event, Debug)]
+pub struct ClearLastSelectedTile;

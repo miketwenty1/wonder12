@@ -15,4 +15,6 @@ pub struct GameBlocksDataFromDB {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct GameBlocksDataFromDBMod {
     pub blocks: Vec<GameBlocksDataFromDB>,
+    pub ts_checkpoint: Option<DateTime<Utc>>,
+    pub height_checkpoint: Option<u32>,
 }

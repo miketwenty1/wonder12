@@ -22,8 +22,8 @@ pub fn spawn(
                 ..Default::default()
             },
             transform: Transform {
-                translation: Vec3::new(6., 8., 4.),
-                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+                translation: Vec3::new(-9., -8., 4.),
+                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 2.0),
                 ..Default::default()
             },
             visibility: visibility_toggle,
@@ -42,8 +42,8 @@ pub fn spawn(
                 ..Default::default()
             },
             transform: Transform {
-                translation: Vec3::new(-12., 12., 4.),
-                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+                translation: Vec3::new(7.5, 6.5, 4.),
+                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 2.0),
                 ..Default::default()
             },
             visibility: visibility_toggle,
@@ -59,8 +59,8 @@ pub fn spawn(
             texture_atlas: texture.clone(),
             sprite: TextureAtlasSprite::new(animation_indices.first),
             transform: Transform {
-                translation: Vec3::new(6.5, -6.5, 5.),
-                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+                translation: Vec3::new(4.5, -6.5, 5.),
+                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 3.0),
                 ..Default::default()
             },
             visibility: visibility_toggle,
@@ -76,13 +76,18 @@ pub fn spawn(
         SpriteSheetBundle {
             texture_atlas: texture.clone(),
             sprite: TextureAtlasSprite {
-                color,
+                color: Color::Rgba {
+                    red: 1.0,
+                    green: 1.0,
+                    blue: 1.0,
+                    alpha: 1.0,
+                },
                 index: 20,
                 ..Default::default()
             },
             transform: Transform {
-                translation: Vec3::new(-6.5, -10.0, 5.),
-                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+                translation: Vec3::new(-4.0, 4.5, 5.),
+                scale: Vec3::new(1.0 / TILE_SCALE / 1.6, 1.0 / TILE_SCALE / 1.6, 3.0),
                 ..Default::default()
             },
             visibility: visibility_toggle,
@@ -98,7 +103,7 @@ pub fn spawn(
         builder,
         Color::rgba(1.0, 1.0, 1.0, 1.0),
         locationcoord,
-        3,
+        4,
         visibility_toggle,
     );
 }

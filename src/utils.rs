@@ -25,7 +25,7 @@ pub fn convert_color_to_hexstring(value: Color) -> String {
 }
 
 pub fn is_valid_email_format_string(email: &str) -> bool {
-    let email_regex = Regex::new(r"(?i)^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$").unwrap();
+    let email_regex = Regex::new(r"(?i)^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,9})+$").unwrap();
     email_regex.is_match(email)
 }
 

@@ -6,7 +6,7 @@ use crate::structy::EdgeData;
 use crate::structy::TileResource;
 use chrono::{DateTime, Utc};
 
-#[derive(Resource, Clone)]
+#[derive(Resource, Clone, PartialEq, Debug)]
 pub struct TileData {
     pub ln_address: String,
     pub username: String,
@@ -21,7 +21,7 @@ pub struct TileData {
     pub event_date: DateTime<Utc>,
 }
 
-#[derive(Resource, Clone)]
+#[derive(Resource, Clone, PartialEq)]
 pub struct TileMap {
     pub map: HashMap<u32, TileData>,
 }
@@ -145,6 +145,14 @@ pub struct InvoiceCheckFromServer {
 pub struct UpdateGameTimetamp {
     pub ts: DateTime<Utc>,
 }
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct InitGameMap {
+    pub height: u32,
+}
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct InitBlockCount(pub u32);
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct ColorPalette {

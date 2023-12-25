@@ -8,6 +8,7 @@ pub mod level3;
 pub mod level4;
 pub mod road;
 pub mod select_tile;
+pub mod utils;
 
 pub fn spawn_tile_level(
     building_sprite_index: usize,
@@ -15,7 +16,7 @@ pub fn spawn_tile_level(
     builder: &mut ChildBuilder,
     color_for_sprites: Color,
     locationcoord: Location,
-    visibility_toggle: Visibility,
+    building_visibility_toggle: Visibility,
 ) {
     match building_sprite_index {
         1 => {
@@ -24,7 +25,7 @@ pub fn spawn_tile_level(
                 builder,
                 color_for_sprites,
                 locationcoord,
-                visibility_toggle,
+                building_visibility_toggle,
             );
         }
         2 => {
@@ -33,7 +34,7 @@ pub fn spawn_tile_level(
                 builder,
                 color_for_sprites,
                 locationcoord,
-                visibility_toggle,
+                building_visibility_toggle,
             );
         }
         3 => {
@@ -42,7 +43,7 @@ pub fn spawn_tile_level(
                 builder,
                 color_for_sprites,
                 locationcoord,
-                visibility_toggle,
+                building_visibility_toggle,
             );
         }
         4 => {
@@ -51,7 +52,7 @@ pub fn spawn_tile_level(
                 builder,
                 color_for_sprites,
                 locationcoord,
-                visibility_toggle,
+                building_visibility_toggle,
             );
         }
         100 => {

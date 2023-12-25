@@ -2,24 +2,18 @@ use bevy::{prelude::*, tasks::IoTaskPool};
 use serde::Deserialize;
 
 use crate::{
-    eventy::{BuyBlockRequest, RequestTileUpdates},
+    eventy::{BuyBlockRequest, ClearEvent, RequestTileUpdates},
     resourcey::{
         CheckInvoiceChannel, InvoiceCheckFromServer, InvoiceDataFromServer, RequestInvoiceChannel,
         TileCartVec, User,
     },
     statey::{CommsApiState, DisplayBuyUiState, ExploreState},
-    structy::{GameInvoiceData, InvoiceGameBlock},
+    structy::{GameInvoiceData, InvoiceGameBlock, RequestTileType},
     utils::convert_color_to_hexstring,
     ServerURL,
 };
 
 use super::api_timer::ApiPollingTimer;
-
-// #[derive(Resource, Clone)]
-// pub struct RequestInvoiceChannel {
-//     pub tx: Sender<String>,
-//     pub rx: Receiver<String>,
-// }
 
 #[derive(Debug, Clone, Deserialize, Default)]
 pub enum InvoiceStatus {
@@ -29,22 +23,6 @@ pub enum InvoiceStatus {
     Expired,
     Error,
 }
-
-// impl InvoiceStatus {
-//     fn as_str(&self) -> &'static str {
-//         match self {
-//             InvoiceStatus::Pending => "pending",
-//             InvoiceStatus::Completed => "completed",
-//             InvoiceStatus::Expired => "expired",
-//             InvoiceStatus::Error => "error",
-//         }
-//     }
-// }
-
-// #[derive(Debug, Clone, Deserialize)]
-// pub struct InvoiceCheckData {
-//     status: InvoiceStatus,
-// }
 
 #[allow(unused_must_use)]
 pub fn api_request_invoice(
@@ -184,6 +162,7 @@ pub fn api_receive_invoice_check(
     mut qr_set_state: ResMut<NextState<DisplayBuyUiState>>,
     mut event: EventWriter<RequestTileUpdates>,
     mut invoice_data: ResMut<InvoiceDataFromServer>,
+    mut clear_event: EventWriter<ClearEvent>,
 ) {
     if api_timer.timer.finished() {
         let api_res = channel.rx.try_recv();
@@ -201,10 +180,11 @@ pub fn api_receive_invoice_check(
                             }
                             "completed" => {
                                 info!("completed invoice");
-                                event.send(RequestTileUpdates);
+                                event.send(RequestTileUpdates(RequestTileType::Ts));
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
+                                clear_event.send(ClearEvent);
                                 *invoice_data = InvoiceDataFromServer {
                                     ..Default::default()
                                 };

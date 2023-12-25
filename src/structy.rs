@@ -14,7 +14,7 @@ pub struct EdgeData {
     pub pixel: f32,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum TileResource {
     Wheat,
     // Brick,
@@ -55,4 +55,10 @@ pub struct GameInvoiceData {
     pub blocks: Vec<InvoiceGameBlock>,
     pub username: String,
     pub refund_address: String,
+}
+
+#[derive(Clone, Debug)]
+pub enum RequestTileType {
+    Height,
+    Ts,
 }

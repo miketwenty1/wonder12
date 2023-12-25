@@ -17,7 +17,7 @@ use crate::{
     statey::ExploreState,
 };
 
-use super::UiOverlay;
+use super::BuyDetailsMenu;
 
 #[derive(Component)]
 pub struct ButtonBack;
@@ -73,7 +73,7 @@ pub fn spawn_layout(
                 background_color: BackgroundColor(colors.node_color),
                 ..default()
             },
-            UiOverlay,
+            BuyDetailsMenu,
         ))
         .with_children(|builder| {
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //

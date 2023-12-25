@@ -245,13 +245,13 @@ pub fn new_ln_address_button_system(
             //With<EditabledTextBox>,
         ),
     >,
-    //mut text_query: Query<&mut Text, With<NewBlockLnAddressText>>,
+    mut text_query: Query<&mut Text, With<NewBlockLnAddressText>>,
     //keyboard_text: Res<KeyboardData>,
     mut target: ResMut<KeyboardTarget>,
     mut keyboard: ResMut<KeyboardData>,
-    // text_query: Query<&Text, With<NewBlockLnAddressText>>,
     block_new_data: Res<CurrentCartBlock>,
     colors: Res<ColorPalette>,
+    user: Res<User>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
@@ -267,7 +267,12 @@ pub fn new_ln_address_button_system(
                 *color = colors.accent_color.into();
             }
             Interaction::None => {
-                //text.sections[0].value = button_text;
+                for mut text in text_query.iter_mut() {
+                    if user.ln_address.len() > 4 {
+                        text.sections[0].value = user.ln_address.to_string();
+                        text.sections[0].style.color = colors.text_color;
+                    }
+                }
                 *color = colors.button_color.into();
             }
         }

@@ -7,6 +7,9 @@ pub struct AnimationTimer(pub Timer);
 pub struct UiNode;
 
 #[derive(Component)]
+pub struct UiOverlayingExplorerButton;
+
+#[derive(Component)]
 pub struct UiTileSelectedButton;
 
 #[derive(Component)]
@@ -213,3 +216,15 @@ pub struct BuyMenuButton;
 
 #[derive(Component)]
 pub struct ClipboardBtn;
+
+#[derive(Component)]
+pub struct CancelQrButton;
+
+#[derive(Component)]
+pub struct ExpirationQrText;
+
+#[derive(Component)]
+pub struct InitLoadingNode;
+
+#[derive(Component)]
+pub struct InitLoadingText;

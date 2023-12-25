@@ -15,10 +15,10 @@ pub fn buildings_visibility_event(
 ) {
     for _t in toggle.read() {
         for mut building_visi in buildings_q.iter_mut() {
-            if *toggle_map.0.get("hidebuildings").unwrap() {
-                *building_visi = Visibility::Visible;
-            } else {
+            if *toggle_map.0.get("showbuildings").unwrap() {
                 *building_visi = Visibility::Hidden;
+            } else {
+                *building_visi = Visibility::Visible;
             }
         }
     }
@@ -33,7 +33,7 @@ pub fn land_color_event(
 ) {
     for _t in toggle.read() {
         for (mut texture, loc) in land_q.iter_mut() {
-            if *toggle_map.0.get("hidecolors").unwrap() {
+            if !*toggle_map.0.get("showcolors").unwrap() {
                 let a = tile_res.map.get(&loc.ulam);
                 if let Some(val) = a {
                     texture.color = val.color;
