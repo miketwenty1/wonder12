@@ -14,16 +14,15 @@ use crate::{
         Toggle2Btn, Toggle2BtnText, Toggle3Btn, Toggle3BtnText, Toggle4Btn, Toggle4BtnText,
         ToggleButton, ToggleParent, UiOverlayingExplorerButton, UiToggle,
     },
-    consty::{HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON},
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
-    resourcey::ToggleMap,
+    resourcey::{ColorPalette, ToggleMap},
     structy::TileTextType,
 };
 
 pub fn setup_toggle(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    //toggle_map: Res<ToggleMap>,
+    colors: Res<ColorPalette>,
 ) {
     commands
         .spawn((
@@ -47,15 +46,15 @@ pub fn setup_toggle(
                         style: Style {
                             width: Val::Px(TOGGLE_PARENT_BTN_WIDTH),
                             height: Val::Px(TOGGLE_PARENT_BTN_HEIGHT),
-                            border: UiRect::all(Val::Px(5.0)),
+                            border: UiRect::all(Val::Px(2.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
                             // vertically center child text
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(Color::WHITE),
-                        background_color: NORMAL_BUTTON.into(),
+                        border_color: BorderColor(colors.text_color),
+                        background_color: colors.button_color.into(),
                         visibility: Visibility::Visible,
                         ..default()
                     },
@@ -68,7 +67,7 @@ pub fn setup_toggle(
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                             font_size: TOGGLE_FONT_PARENT_SIZE,
-                            color: Color::rgb(0.9, 0.9, 0.9),
+                            color: colors.text_color,
                         },
                     ));
                 });
@@ -85,8 +84,8 @@ pub fn setup_toggle(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: NORMAL_BUTTON.into(),
+                        border_color: BorderColor(colors.node_color),
+                        background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
                         ..default()
                     },
@@ -102,7 +101,7 @@ pub fn setup_toggle(
                             TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: TOGGLE_FONT_CHILD_SIZE,
-                                color: Color::rgb(0.9, 0.9, 0.9),
+                                color: colors.text_color,
                             },
                         ),
                         Toggle1BtnText,
@@ -121,8 +120,8 @@ pub fn setup_toggle(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: NORMAL_BUTTON.into(),
+                        border_color: BorderColor(colors.node_color),
+                        background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
                         ..default()
                     },
@@ -138,7 +137,7 @@ pub fn setup_toggle(
                             TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: TOGGLE_FONT_CHILD_SIZE,
-                                color: Color::rgb(0.9, 0.9, 0.9),
+                                color: colors.text_color,
                             },
                         ),
                         Toggle2BtnText,
@@ -158,8 +157,8 @@ pub fn setup_toggle(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: NORMAL_BUTTON.into(),
+                        border_color: BorderColor(colors.node_color),
+                        background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
                         ..default()
                     },
@@ -175,7 +174,7 @@ pub fn setup_toggle(
                             TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: TOGGLE_FONT_CHILD_SIZE,
-                                color: Color::rgb(0.9, 0.9, 0.9),
+                                color: colors.text_color,
                             },
                         ),
                         Toggle3BtnText,
@@ -194,8 +193,8 @@ pub fn setup_toggle(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: NORMAL_BUTTON.into(),
+                        border_color: BorderColor(colors.node_color),
+                        background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
                         ..default()
                     },
@@ -211,7 +210,7 @@ pub fn setup_toggle(
                             TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: TOGGLE_FONT_CHILD_SIZE,
-                                color: Color::rgb(0.9, 0.9, 0.9),
+                                color: colors.text_color,
                             },
                         ),
                         HideTextText,
@@ -242,22 +241,10 @@ pub fn toggle_button_system(
         Query<&mut Visibility, With<Toggle2Btn>>,
         Query<&mut Visibility, With<Toggle3Btn>>,
         Query<&mut Visibility, With<Toggle4Btn>>,
-        // Query<&mut Visibility, With<ShowValues>>,
-        // Query<&mut Visibility, With<ShowHeights>>,
-        // Query<&mut Visibility, With<ShowText>>,
-        // Query<&mut Visibility, With<HideText>>,
     )>,
-    //mut toggle_subbtn_query: Query<&mut Visibility, (With<ToggleParent>, Without<ToggleParent>)>,
-    // mut toggle_subbtn_query_hide_buildings: Query<&mut Visibility, With<HideBuilding>>,
-    // mut toggle_subbtn_query_show_buildings: Query<&mut Visibility, With<ShowBuilding>>,
-    // mut toggle_subbtn_query_show_colors: Query<&mut Visibility, With<ShowColors>>,
-    // mut toggle_subbtn_query_hide_colors: Query<&mut Visibility, With<HideColors>>,
-    // mut toggle_subbtn_query_show_values: Query<&mut Visibility, With<ShowValues>>,
-    // mut toggle_subbtn_query_show_heights: Query<&mut Visibility, With<ShowHeights>>,
-    // mut toggle_subbtn_query_show_text: Query<&mut Visibility, With<ShowText>>,
-    // mut toggle_subbtn_query_hide_text: Query<&mut Visibility, With<HideText>>,
+
     mut toggle_visible: Local<bool>,
-    //toggle_map: Res<ToggleMap>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         //let mut text = text_query.get_mut(children[0]).unwrap();
@@ -265,7 +252,7 @@ pub fn toggle_button_system(
             Interaction::Pressed => {
                 mouse.clear_just_pressed(MouseButton::Left);
                 //text.sections[0].value = button_text;
-                *color = PRESSED_BUTTON.into();
+                *color = colors.light_color.into();
                 //game_state.set(DisplayBuyUiState::On);
                 if *toggle_visible {
                     for mut btn_vis in param_set.p0().iter_mut() {
@@ -303,11 +290,11 @@ pub fn toggle_button_system(
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }
@@ -324,6 +311,7 @@ pub fn toggle_button_sub_system_toggle1(
     //mut toggle_subbtn_query: Query<&mut Visibility, With<Toggle1Btn>>,
     mut toggle_map: ResMut<ToggleMap>,
     mut toggle: EventWriter<ToggleBuildings>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
@@ -346,15 +334,15 @@ pub fn toggle_button_sub_system_toggle1(
                         info!("wut bccc1");
                     }
                 };
-                *color = PRESSED_BUTTON.into();
+                *color = colors.light_color.into();
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }
@@ -371,6 +359,7 @@ pub fn toggle_button_sub_system_toggle2(
     //mut toggle_subbtn_query: Query<&mut Visibility, With<Toggle1Btn>>,
     mut toggle_map: ResMut<ToggleMap>,
     mut toggle: EventWriter<ToggleColors>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
@@ -393,15 +382,15 @@ pub fn toggle_button_sub_system_toggle2(
                         info!("wut bccc2");
                     }
                 };
-                *color = PRESSED_BUTTON.into();
+                *color = colors.light_color.into();
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }
@@ -418,6 +407,7 @@ pub fn toggle_button_sub_system_toggle3(
     //mut toggle_subbtn_query: Query<&mut Visibility, With<Toggle1Btn>>,
     mut toggle_map: ResMut<ToggleMap>,
     mut tile_text_type: EventWriter<ToggleText>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
@@ -445,15 +435,15 @@ pub fn toggle_button_sub_system_toggle3(
                 };
                 text4.sections[0].value = "Hide Text".to_string();
                 *toggle_map.0.get_mut("showtext").unwrap() = false;
-                *color = PRESSED_BUTTON.into();
+                *color = colors.light_color.into();
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }
@@ -469,6 +459,7 @@ pub fn toggle_button_sub_system_toggle4(
     //mut toggle_subbtn_query: Query<&mut Visibility, With<Toggle1Btn>>,
     mut toggle_map: ResMut<ToggleMap>,
     mut tile_text_type: EventWriter<ToggleText>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
@@ -495,15 +486,15 @@ pub fn toggle_button_sub_system_toggle4(
                         info!("wut bccc4");
                     }
                 };
-                *color = PRESSED_BUTTON.into();
+                *color = colors.light_color.into();
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = HOVERED_BUTTON.into();
+                *color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = NORMAL_BUTTON.into();
+                *color = colors.button_color.into();
             }
         }
     }

@@ -2,7 +2,8 @@ use bevy::{prelude::*, tasks::IoTaskPool};
 use serde::Deserialize;
 
 use crate::{
-    eventy::{BuyBlockRequest, ClearEvent, RequestTileUpdates},
+    eventy::{BuyBlockRequest, ClearSelectionEvent, RequestTileUpdates},
+    overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
         CheckInvoiceChannel, InvoiceCheckFromServer, InvoiceDataFromServer, RequestInvoiceChannel,
         TileCartVec, User,
@@ -162,7 +163,8 @@ pub fn api_receive_invoice_check(
     mut qr_set_state: ResMut<NextState<DisplayBuyUiState>>,
     mut event: EventWriter<RequestTileUpdates>,
     mut invoice_data: ResMut<InvoiceDataFromServer>,
-    mut clear_event: EventWriter<ClearEvent>,
+    mut clear_event: EventWriter<ClearSelectionEvent>,
+    mut toast: EventWriter<ToastEvent>,
 ) {
     if api_timer.timer.finished() {
         let api_res = channel.rx.try_recv();
@@ -184,7 +186,11 @@ pub fn api_receive_invoice_check(
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
-                                clear_event.send(ClearEvent);
+                                clear_event.send(ClearSelectionEvent);
+                                toast.send(ToastEvent {
+                                    ttype: ToastType::Good,
+                                    message: "Payment Completed!".to_string(),
+                                });
                                 *invoice_data = InvoiceDataFromServer {
                                     ..Default::default()
                                 };
@@ -194,6 +200,10 @@ pub fn api_receive_invoice_check(
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
+                                toast.send(ToastEvent {
+                                    ttype: ToastType::Bad,
+                                    message: "Payment Expired!".to_string(),
+                                });
                                 *invoice_data = InvoiceDataFromServer {
                                     ..Default::default()
                                 };
@@ -203,17 +213,29 @@ pub fn api_receive_invoice_check(
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
+                                toast.send(ToastEvent {
+                                    ttype: ToastType::Bad,
+                                    message: "Error002".to_string(),
+                                });
                             }
                             _ => {
                                 info!("Something very bizaare happened picka2");
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
+                                toast.send(ToastEvent {
+                                    ttype: ToastType::Bad,
+                                    message: "Error001".to_string(),
+                                });
                             }
                         }
                         *invoice_check_res = o;
                     }
                     Err(e) => {
+                        toast.send(ToastEvent {
+                            ttype: ToastType::Bad,
+                            message: e.to_string(),
+                        });
                         info!("requesting check invoice fail: {}", e);
                     }
                 };
@@ -221,6 +243,10 @@ pub fn api_receive_invoice_check(
             }
             Err(e) => {
                 info!("response to check invoice: {}", e);
+                toast.send(ToastEvent {
+                    ttype: ToastType::Bad,
+                    message: e.to_string(),
+                });
                 e.to_string()
             }
         };

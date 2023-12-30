@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::CommsApiState;
+use crate::{statey::CommsApiBlockLoadState, CommsApiState};
 
 use self::{
     api_timer::{tick_api_receive_timer, ApiPollingTimer},
@@ -25,7 +25,7 @@ impl Plugin for CommsPlugin {
             .add_systems(
                 Update,
                 (tick_api_receive_timer, api_receive_server_tiles)
-                    .run_if(in_state(CommsApiState::LoadBlockData)),
+                    .run_if(in_state(CommsApiBlockLoadState::LoadBlockData)),
             )
             .add_systems(
                 Update,

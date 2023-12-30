@@ -108,7 +108,7 @@ pub struct User {
 #[derive(Resource, Clone)]
 pub struct ToggleMap(pub HashMap<String, bool>);
 
-#[derive(Resource, Clone)]
+#[derive(Resource, Clone, PartialEq)]
 pub enum TargetType {
     Nothing,
     NewLnAddress,
@@ -116,7 +116,7 @@ pub enum TargetType {
     NewMessage,
 }
 
-#[derive(Resource, Clone)]
+#[derive(Resource, Clone, PartialEq)]
 pub struct KeyboardTarget(pub TargetType);
 
 // #[derive(Resource, Clone)]
@@ -157,10 +157,13 @@ pub struct InitBlockCount(pub u32);
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct ColorPalette {
     pub node_color: Color,
+    pub lite_button_color: Color,
     pub button_color: Color,
     pub accent_color: Color,
     pub light_color: Color,
     pub text_color: Color,
+    pub red_color: Color,
+    pub green_color: Color,
 }
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]

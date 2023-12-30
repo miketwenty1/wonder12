@@ -66,7 +66,6 @@ pub fn cancel_qr_button_system(
     mut comms_state: ResMut<NextState<CommsApiState>>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
-        //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
                 *color = colors.light_color.into();
@@ -95,12 +94,13 @@ pub fn clean_up_qr(mut invoice_date: ResMut<InvoiceDataFromServer>) {
 pub fn expiration_text(
     mut text_query: Query<&mut Text, With<ExpirationQrText>>,
     invoice_res: Res<InvoiceDataFromServer>,
+    colors: Res<ColorPalette>,
 ) {
     for mut text in text_query.iter_mut() {
         let time_left = (invoice_res.expires - Utc::now()).num_seconds();
         text.sections[0].value = format!("Expires in: {}", time_left);
         if time_left < 10 {
-            text.sections[0].style.color = Color::RED
+            text.sections[0].style.color = colors.red_color
         } else if time_left < 20 {
             text.sections[0].style.color = Color::YELLOW
         }

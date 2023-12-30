@@ -1,7 +1,7 @@
 use crate::comms::CommsPlugin;
 use crate::consty::{CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT};
 use crate::eventy::{
-    BuyBlockRequest, ClearEvent, ClearLastSelectedTile, EdgeEvent, RequestTileUpdates,
+    BuyBlockRequest, ClearLastSelectedTile, ClearSelectionEvent, EdgeEvent, RequestTileUpdates,
     SelectTileEvent, SpriteSpawnEvent, ToggleBuildings, ToggleColors, ToggleText,
     UpdateTileTextureEvent, UpdateUiAmount,
 };
@@ -21,7 +21,7 @@ use bevy::asset::AssetMetaCheck;
 use bevy::{prelude::*, utils::HashMap};
 use chrono::{Duration, Utc};
 use resourcey::{CheckInvoiceChannel, InitBlockCount, InitGameMap, RequestInvoiceChannel};
-use statey::InitLoadingBlocksState;
+use statey::{CommsApiBlockLoadState, InitLoadingBlocksState, ToastState};
 use structy::RequestTileType;
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -79,9 +79,12 @@ pub fn game12(username: String, server_url: String, ln_address: String, block_in
     let color_palette = ColorPalette {
         node_color: Color::hex("222831").unwrap(),
         button_color: Color::hex("393E46").unwrap(),
+        lite_button_color: Color::hex("6A7382").unwrap(),
         accent_color: Color::hex("00ADB5").unwrap(),
         light_color: Color::hex("EEEEEE").unwrap(),
         text_color: Color::hex("FAFAFA").unwrap(),
+        red_color: Color::hex("B50800").unwrap(),
+        green_color: Color::DARK_GREEN,
     };
 
     let start_edge = Edge {
@@ -159,9 +162,11 @@ pub fn game12(username: String, server_url: String, ln_address: String, block_in
         )
         .add_state::<ExploreState>()
         .add_state::<CommsApiState>()
+        .add_state::<CommsApiBlockLoadState>()
         .add_state::<DisplayBuyUiState>()
         .add_state::<KeyboardState>()
         .add_state::<InitLoadingBlocksState>()
+        .add_state::<ToastState>()
         .add_plugins(CommsPlugin)
         .add_plugins(OverlayUiPlugin)
         .add_plugins(ExplorePlugin)
@@ -178,7 +183,7 @@ pub fn game12(username: String, server_url: String, ln_address: String, block_in
         .add_event::<UpdateUiAmount>()
         .add_event::<BuyBlockRequest>()
         .add_event::<RequestTileUpdates>()
-        .add_event::<ClearEvent>()
+        .add_event::<ClearSelectionEvent>()
         .add_event::<ClearLastSelectedTile>()
         .add_systems(Startup, setup) //setupcoords
         //.add_systems(PostStartup, api_get_server_tiles)

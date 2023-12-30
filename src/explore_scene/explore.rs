@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::{
-    input::mouse::{MouseMotion, MouseWheel},
+    input::mouse::MouseMotion,
     prelude::*,
     render::texture::{ImageLoaderSettings, ImageSampler},
     text::Text2dBounds,
@@ -19,25 +19,28 @@ use crate::{
     },
     consty::{
         CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT, DESPAWN_TILE_THRESHOLD,
-        HOVERED_BUTTON, MAX_VELOCITY, MOVE_VELOCITY_FACTOR, NORMAL_BUTTON, PRESSED_BUTTON,
-        TILE_PIXEL_SIZE, TILE_SCALE, TOTAL_TILE_SCALE_SIZE, ZOOM_IN_MAX, ZOOM_OUT_MAX,
+        MAX_SELECTION_SIZE, MOVE_VELOCITY_FACTOR, TILE_PIXEL_SIZE, TILE_SCALE,
+        TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
-        ClearEvent, ClearLastSelectedTile, EdgeEvent, SelectTileEvent, SpriteSpawnEvent,
+        ClearLastSelectedTile, ClearSelectionEvent, EdgeEvent, SelectTileEvent, SpriteSpawnEvent,
         UpdateTileTextureEvent, UpdateUiAmount,
     },
+    overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
-        ChunkManager, ColorPalette, Edge, InitBlockCount, LastSelectedTile, MaxBlockHeight,
-        SpriteIndexBuilding, SpriteSheetBgRes, SpriteSheetBuildingRes, TileData, TileMap,
-        ToggleMap,
+        ChunkManager, ColorPalette, Edge, InitBlockCount, MaxBlockHeight, SpriteIndexBuilding,
+        SpriteSheetBgRes, SpriteSheetBuildingRes, TileData, TileMap, ToggleMap,
     },
     statey::{DisplayBuyUiState, InitLoadingBlocksState},
     structy::{EdgeType, SpawnDiffData},
 };
 
-// pub fn setup_explorer(mut clear_event: EventWriter<ClearEvent>) {
-//     clear_event.send(ClearEvent);
-// }
+pub fn reset_mouse(mut mouse: ResMut<Input<MouseButton>>, mut motion: ResMut<Events<MouseMotion>>) {
+    mouse.clear();
+    mouse.clear_just_pressed(MouseButton::Left);
+    mouse.clear_just_released(MouseButton::Left);
+    motion.clear();
+}
 
 pub fn init_explorer(
     mut commands: Commands,
@@ -114,8 +117,8 @@ pub fn init_explorer(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: NORMAL_BUTTON.into(),
+                        border_color: BorderColor(colors.button_color),
+                        background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
                         ..default()
                     },
@@ -129,7 +132,7 @@ pub fn init_explorer(
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                             font_size: 30.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
+                            color: colors.text_color,
                         },
                     ));
                 });
@@ -147,8 +150,8 @@ pub fn init_explorer(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: NORMAL_BUTTON.into(),
+                        border_color: BorderColor(colors.node_color),
+                        background_color: colors.button_color.into(),
                         ..default()
                     },
                     ZoomOutButton,
@@ -160,7 +163,7 @@ pub fn init_explorer(
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                             font_size: 40.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
+                            color: colors.text_color,
                         },
                     ));
                 });
@@ -177,8 +180,8 @@ pub fn init_explorer(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: NORMAL_BUTTON.into(),
+                        border_color: BorderColor(colors.node_color),
+                        background_color: colors.button_color.into(),
                         ..default()
                     },
                     ZoomInButton,
@@ -190,7 +193,7 @@ pub fn init_explorer(
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                             font_size: 40.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
+                            color: colors.text_color,
                         },
                     ));
                 });
@@ -208,7 +211,7 @@ pub fn init_explorer(
                             ..default()
                         },
                         border_color: BorderColor(Color::BLACK),
-                        background_color: NORMAL_BUTTON.into(),
+                        background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
                         ..default()
                     },
@@ -222,13 +225,13 @@ pub fn init_explorer(
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                             font_size: 30.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
+                            color: colors.text_color,
                         },
                     ));
                 });
         });
 
-    // this is the same text as above but outlined
+    // this is the same text as below but outlined
     commands
         .spawn((
             NodeBundle {
@@ -328,156 +331,6 @@ pub fn init_explorer(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn desktop_movement_camera_system(
-    mut mouse_motion_events: EventReader<MouseMotion>,
-    mouse: Res<Input<MouseButton>>,
-    mut q_camera: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
-    mut q_camera_simple: Query<(&Camera, &GlobalTransform), With<Camera>>,
-    time: Res<Time>,
-    mut edge: ResMut<Edge>,
-    mut edge_event: EventWriter<EdgeEvent>,
-    q_window: Query<&Window, With<PrimaryWindow>>,
-    mut select_tile_event: EventWriter<SelectTileEvent>,
-    keys: Res<Input<KeyCode>>,
-    max_height: Res<MaxBlockHeight>,
-    mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
-    //mut last_selected_tile: ResMut<LastSelectedTile>,
-    //location_query: Query<&Location>,
-) {
-    for event in mouse_motion_events.read() {
-        if mouse.pressed(MouseButton::Middle) || mouse.pressed(MouseButton::Left) {
-            for (mut cam_transform, cam_ortho) in q_camera.iter_mut() {
-                // if around edge limits push back
-                let mut direction = if edge.bottom.tile + 10_000 > max_height.0.try_into().unwrap()
-                {
-                    Vec3::new(-event.delta.x, 100.0, 0.0)
-                } else if edge.top.tile + 10_000 > max_height.0.try_into().unwrap() {
-                    Vec3::new(-event.delta.x, -100.0, 0.0)
-                } else if edge.left.tile + 10_000 > max_height.0.try_into().unwrap() {
-                    Vec3::new(100.0, event.delta.y, 0.0)
-                } else if edge.right.tile + 10_000 > max_height.0.try_into().unwrap() {
-                    Vec3::new(-100.0, event.delta.y, 0.0)
-                } else {
-                    Vec3::new(-event.delta.x, event.delta.y, 0.0)
-                };
-
-                if direction.x.abs() > 0.1 || direction.y.abs() > 0.1 {
-                    clear_last_selected.send(ClearLastSelectedTile);
-                }
-
-                // hopefully to help with jumpiness
-                if direction.x.abs() > MAX_VELOCITY {
-                    if direction.x > 0.0 {
-                        direction.x = MAX_VELOCITY;
-                    } else {
-                        direction.x = -MAX_VELOCITY;
-                    }
-                }
-                if direction.y.abs() > MAX_VELOCITY {
-                    if direction.y > 0.0 {
-                        direction.y = MAX_VELOCITY;
-                    } else {
-                        direction.y = -MAX_VELOCITY;
-                    }
-                }
-                cam_transform.translation += direction
-                    * time.delta_seconds()
-                    * TILE_SCALE
-                    * cam_ortho.scale
-                    * MOVE_VELOCITY_FACTOR
-                    * 1.0;
-                set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
-            }
-        }
-    }
-    if keys.pressed(KeyCode::W)
-        || keys.pressed(KeyCode::A)
-        || keys.pressed(KeyCode::S)
-        || keys.pressed(KeyCode::D)
-        || keys.pressed(KeyCode::Up)
-        || keys.pressed(KeyCode::Left)
-        || keys.pressed(KeyCode::Down)
-        || keys.pressed(KeyCode::Right)
-    {
-        for (mut cam_transform, cam_ortho) in q_camera.iter_mut() {
-            let y: f32 = if keys.pressed(KeyCode::W) || keys.pressed(KeyCode::Up) {
-                15.0
-            } else if keys.pressed(KeyCode::S) || keys.pressed(KeyCode::Down) {
-                -15.0
-            } else {
-                0.0
-            };
-            let x: f32 = if keys.pressed(KeyCode::A) || keys.pressed(KeyCode::Left) {
-                -15.0
-            } else if keys.pressed(KeyCode::D) || keys.pressed(KeyCode::Right) {
-                15.0
-            } else {
-                0.0
-            };
-
-            // if around edge limits push back
-
-            let direction = if ulam::value_of_xy(0, edge.bottom.tile) + 1_000 > max_height.0 {
-                Vec3::new(x, 100.0, 0.0)
-            } else if ulam::value_of_xy(0, edge.top.tile) + 1_000 > max_height.0 {
-                Vec3::new(x, -100.0, 0.0)
-            } else if ulam::value_of_xy(edge.left.tile, 0) + 1_000 > max_height.0 {
-                Vec3::new(100.0, y, 0.0)
-            } else if ulam::value_of_xy(edge.right.tile, 0) + 1_000 > max_height.0 {
-                Vec3::new(-100.0, y, 0.0)
-            } else {
-                Vec3::new(x, y, 0.0)
-            };
-
-            // info!(
-            //     "bottom tile {}, maxheight {}, direction {:?}",
-            //     edge.bottom.tile, max_height.0, direction
-            // );
-            if direction.x.abs() > 0.1 || direction.y.abs() > 0.1 {
-                clear_last_selected.send(ClearLastSelectedTile);
-            }
-
-            cam_transform.translation += direction
-                * time.delta_seconds()
-                * TILE_SCALE
-                * cam_ortho.scale
-                * MOVE_VELOCITY_FACTOR
-                * 1.0;
-            set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
-        }
-    }
-
-    if mouse.just_pressed(MouseButton::Left) {
-        for (camera, camera_transform) in q_camera_simple.iter_mut() {
-            let window = q_window.single();
-            if let Some(world_position) = window
-                .cursor_position()
-                .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
-                .map(|ray| ray.origin.truncate())
-            {
-                //mycoords.0 = world_position;
-                let x = if world_position.x >= 0.0 {
-                    ((world_position.x + TOTAL_TILE_SCALE_SIZE / 2. - 1.) / TOTAL_TILE_SCALE_SIZE)
-                        as i32
-                } else {
-                    ((world_position.x - TOTAL_TILE_SCALE_SIZE / 2. + 1.) / TOTAL_TILE_SCALE_SIZE)
-                        as i32
-                };
-
-                let y = if world_position.y >= 0.0 {
-                    ((world_position.y + TOTAL_TILE_SCALE_SIZE / 2. - 1.) / TOTAL_TILE_SCALE_SIZE)
-                        as i32
-                } else {
-                    ((world_position.y - TOTAL_TILE_SCALE_SIZE / 2. + 1.) / TOTAL_TILE_SCALE_SIZE)
-                        as i32
-                };
-                select_tile_event.send(SelectTileEvent(x, y));
-            }
-        }
-    }
-}
-
-#[allow(clippy::too_many_arguments)]
 pub fn touch_event_system(
     touches: Res<Touches>,
     mut camera: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
@@ -535,137 +388,7 @@ pub fn touch_event_system(
     }
 }
 
-#[allow(clippy::type_complexity)]
-pub fn zoom_out_button_system(
-    mut mouse: ResMut<Input<MouseButton>>,
-    mut mouse_wheel_events: EventReader<MouseWheel>,
-    mut interaction_query: Query<
-        (
-            &Interaction,
-            &mut BackgroundColor,
-            &mut BorderColor,
-            &Children,
-        ),
-        (Changed<Interaction>, With<Button>, With<ZoomOutButton>),
-    >,
-    time: Res<Time>,
-    mut text_query: Query<&mut Text>,
-    mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
-    mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
-) {
-    let mut zoom_out = false;
-    let mut zoom_amount: f32 = 0.0;
-
-    for (interaction, mut color, mut border_color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                // for mobile keep eye on https://github.com/bevyengine/bevy/pull/10930
-                clear_last_selected.send(ClearLastSelectedTile);
-                mouse.clear_just_pressed(MouseButton::Left);
-                text.sections[0].value = "-".to_string();
-                *color = PRESSED_BUTTON.into();
-                border_color.0 = Color::GRAY;
-                zoom_out = true;
-                zoom_amount = 0.25;
-            }
-            Interaction::Hovered => {
-                text.sections[0].value = "-".to_string();
-                *color = HOVERED_BUTTON.into();
-                border_color.0 = Color::WHITE;
-            }
-            Interaction::None => {
-                text.sections[0].value = "-".to_string();
-                *color = NORMAL_BUTTON.into();
-                border_color.0 = Color::BLACK;
-            }
-        }
-    }
-
-    for mouse_wheel in mouse_wheel_events.read() {
-        if mouse_wheel.y < 0.0 {
-            zoom_out = true;
-            zoom_amount = 0.25 * time.delta_seconds() * 10.0;
-        }
-    }
-
-    if zoom_out {
-        for mut ortho in cam_query.iter_mut() {
-            ortho.scale += zoom_amount;
-            //info!("{}", ortho.scale);
-            if ortho.scale > ZOOM_OUT_MAX {
-                ortho.scale = ZOOM_OUT_MAX;
-            }
-        }
-    }
-}
-
-#[allow(clippy::type_complexity)]
-pub fn zoom_in_button_system(
-    mut mouse: ResMut<Input<MouseButton>>,
-    mut mouse_wheel_events: EventReader<MouseWheel>,
-    //mut touch: ResMut<Touches>, // need a clear method or a clear fn work around
-    mut interaction_query: Query<
-        (
-            &Interaction,
-            &mut BackgroundColor,
-            &mut BorderColor,
-            &Children,
-        ),
-        (Changed<Interaction>, With<Button>, With<ZoomInButton>),
-    >,
-    time: Res<Time>,
-    mut text_query: Query<&mut Text>,
-    mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
-    mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
-) {
-    let mut zoom_in = false;
-    let mut zoom_amount: f32 = 0.0;
-
-    for (interaction, mut color, mut border_color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                // for mobile keep eye on https://github.com/bevyengine/bevy/pull/10930
-                clear_last_selected.send(ClearLastSelectedTile);
-                mouse.clear_just_pressed(MouseButton::Left);
-                text.sections[0].value = "+".to_string();
-                *color = PRESSED_BUTTON.into();
-                border_color.0 = Color::GRAY;
-                zoom_in = true;
-                zoom_amount = 0.25;
-            }
-            Interaction::Hovered => {
-                text.sections[0].value = "+".to_string();
-                *color = HOVERED_BUTTON.into();
-                border_color.0 = Color::WHITE;
-            }
-            Interaction::None => {
-                text.sections[0].value = "+".to_string();
-                *color = NORMAL_BUTTON.into();
-                border_color.0 = Color::BLACK;
-            }
-        }
-    }
-
-    for mouse_wheel in mouse_wheel_events.read() {
-        if mouse_wheel.y > 0.0 {
-            zoom_in = true;
-            zoom_amount = 0.25 * time.delta_seconds() * 10.0;
-        }
-    }
-    if zoom_in {
-        for mut ortho in cam_query.iter_mut() {
-            ortho.scale -= zoom_amount;
-            if ortho.scale < ZOOM_IN_MAX {
-                ortho.scale = ZOOM_IN_MAX;
-            }
-            //info!("{}", ortho.scale);
-        }
-    }
-}
-
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 pub fn edge_system(
     mut commands: Commands,
     blocks: Query<(Entity, &Location), With<Land>>,
@@ -1141,83 +864,6 @@ pub fn animate_sprites(
     }
 }
 
-#[allow(clippy::type_complexity, clippy::too_many_arguments)]
-pub fn select_tile(
-    mut commands: Commands,
-    mut lands: Query<(&mut Location, Entity), (With<Land>, Without<BuildingStructure>)>,
-    //chunk_map: Res<ChunkManager>,
-    texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
-    mut event: EventReader<SelectTileEvent>,
-    mut selected_lands: Query<
-        (Entity, &Location),
-        (With<Selected>, Without<Land>, Without<BuildingStructure>),
-    >,
-    mut last_selected_tile: ResMut<LastSelectedTile>,
-    mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
-    mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
-) {
-    for e in event.read() {
-        //let event_val = ulam::value_of_xy(e.0, e.1);
-        for (mut location, parent_entity) in lands.iter_mut() {
-            if location.x == e.0 && location.y == e.1 {
-                if last_selected_tile.0 == e.0 && last_selected_tile.1 == e.1 && !location.selected
-                {
-                    // spawn
-                    //info!("spawn branch1");
-                    commands
-                        .entity(parent_entity)
-                        .with_children(|child_builder| {
-                            spawn_tile_level(
-                                100,
-                                &texture_atlas_handle_building.0.clone(),
-                                child_builder,
-                                Color::Rgba {
-                                    red: 1.,
-                                    green: 1.,
-                                    blue: 1.,
-                                    alpha: 1.,
-                                },
-                                *location,
-                                Visibility::Inherited,
-                            );
-                        });
-                    location.selected = true;
-
-                    for mut visibility in tile_selected_button_q.iter_mut() {
-                        *visibility = Visibility::Visible;
-                    }
-                } else if last_selected_tile.0 != e.0
-                    && last_selected_tile.1 != e.1
-                    && !location.selected
-                {
-                    //info!("last selected res set for {}, {}", e.0, e.1);
-                    *last_selected_tile = LastSelectedTile(e.0, e.1);
-                } else if location.selected {
-                    for (sentity, slocation) in selected_lands.iter_mut() {
-                        if slocation.x == e.0
-                            && slocation.y == e.1
-                            && slocation.x == location.x
-                            && slocation.y == location.y
-                        {
-                            //info!("despawn branch");
-                            commands.entity(sentity).despawn();
-                            location.selected = false;
-                        }
-                    }
-                    if selected_lands.iter_mut().len() <= 1 {
-                        for mut visibility in tile_selected_button_q.iter_mut() {
-                            *visibility = Visibility::Hidden;
-                        }
-                    };
-                } else {
-                    *last_selected_tile = LastSelectedTile(e.0, e.1);
-                }
-            }
-        }
-        update_ui_amount_event.send(UpdateUiAmount);
-    }
-}
-
 #[allow(clippy::type_complexity)]
 pub fn clear_selection_button(
     mut interaction_query: Query<
@@ -1239,26 +885,27 @@ pub fn clear_selection_button(
     // mut selected_lands_q: Query<&mut Location>,
     // mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
     // mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
-    mut clear_event: EventWriter<ClearEvent>,
+    mut clear_event: EventWriter<ClearSelectionEvent>,
+    colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
                 text.sections[0].value = "Clear".to_string();
-                *color = PRESSED_BUTTON.into();
-                border_color.0 = Color::GRAY;
-                clear_event.send(ClearEvent);
+                *color = colors.light_color.into();
+                border_color.0 = colors.light_color;
+                clear_event.send(ClearSelectionEvent);
             }
             Interaction::Hovered => {
                 text.sections[0].value = "Clear".to_string();
-                *color = HOVERED_BUTTON.into();
-                border_color.0 = Color::WHITE;
+                *color = colors.accent_color.into();
+                border_color.0 = colors.node_color;
             }
             Interaction::None => {
                 text.sections[0].value = "Clear".to_string();
-                *color = NORMAL_BUTTON.into();
-                border_color.0 = Color::BLACK;
+                *color = colors.button_color.into();
+                border_color.0 = colors.node_color;
             }
         }
     }
@@ -1271,7 +918,7 @@ pub fn clear_selection(
     mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
     mut commands: Commands,
-    mut clear_event: EventReader<ClearEvent>,
+    mut clear_event: EventReader<ClearSelectionEvent>,
 ) {
     for _e in clear_event.read() {
         for sentity in selected_q.iter_mut() {
@@ -1287,7 +934,7 @@ pub fn clear_selection(
     }
 }
 
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn buy_selection_button(
     mut interaction_query: Query<
         (
@@ -1301,26 +948,50 @@ pub fn buy_selection_button(
     //    mut commands: Commands,
     mut text_query: Query<&mut Text>,
     mut ui_state: ResMut<NextState<DisplayBuyUiState>>,
+    colors: Res<ColorPalette>,
+    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse_motion_events: EventReader<MouseMotion>,
+    selection: Query<&Selected>,
+    mut toast: EventWriter<ToastEvent>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
                 text.sections[0].value = "Buy".to_string();
-                *color = PRESSED_BUTTON.into();
-                border_color.0 = Color::GRAY;
+                *color = colors.green_color.into();
+                border_color.0 = colors.light_color;
+                // trying to kill jumpiness
+                mouse.clear();
+                mouse.clear_just_pressed(MouseButton::Left);
+                mouse.clear_just_released(MouseButton::Left);
+                mouse_motion_events.clear();
+                mouse_motion_events.read();
 
-                ui_state.set(DisplayBuyUiState::BlockDetail);
+                let count = selection.iter().count();
+                if count > MAX_SELECTION_SIZE {
+                    toast.send(ToastEvent {
+                        ttype: ToastType::Bad,
+                        message: "Please unselect some tiles, Maximum 100".to_string(),
+                    })
+                } else {
+                    ui_state.set(DisplayBuyUiState::BlockDetail);
+                }
             }
             Interaction::Hovered => {
                 text.sections[0].value = "Buy".to_string();
-                *color = HOVERED_BUTTON.into();
-                border_color.0 = Color::WHITE;
+                *color = colors.accent_color.into();
+                border_color.0 = colors.node_color;
+                mouse.clear();
+                mouse.clear_just_pressed(MouseButton::Left);
+                mouse.clear_just_released(MouseButton::Left);
+                mouse_motion_events.clear();
+                mouse_motion_events.read();
             }
             Interaction::None => {
                 text.sections[0].value = "Buy".to_string();
-                *color = NORMAL_BUTTON.into();
-                border_color.0 = Color::BLACK;
+                *color = colors.green_color.into();
+                border_color.0 = colors.node_color;
             }
         }
     }

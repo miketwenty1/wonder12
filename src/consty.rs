@@ -9,11 +9,7 @@ pub const CHUNK_TILE_SPAN_COUNT: i32 = (CHUNK_PIXEL_SIZE / TOTAL_TILE_SCALE_SIZE
 pub const DESPAWN_TILE_THRESHOLD: i32 = 51 + CHUNK_TILE_SPAN_COUNT * 4;
 pub const CAMERA_SANITY_FACTOR: f32 = 1.25;
 pub const MOVE_VELOCITY_FACTOR: f32 = 20.0;
-pub const MAX_VELOCITY: f32 = 25.0;
 
-pub const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-pub const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 pub const MINIMUM_BLOCK_AMOUNT: u32 = 128;
 
 pub const DEFAULT_NEW_LN_TEXT: &str = "Type in a lightning address!";
@@ -36,3 +32,5 @@ pub const DARKEST_BUILDING: Color = Color::Rgba {
     blue: 0.15,
     alpha: 1.0,
 };
+
+pub const MAX_SELECTION_SIZE: usize = 100;

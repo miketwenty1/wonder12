@@ -40,7 +40,7 @@ pub struct BuyBlockRequest;
 pub struct RequestTileUpdates(pub RequestTileType);
 
 #[derive(Event, Debug)]
-pub struct ClearEvent;
+pub struct ClearSelectionEvent;
 
 #[derive(Event, Debug)]
 pub struct ClearLastSelectedTile;

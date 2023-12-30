@@ -351,7 +351,7 @@ pub fn spawn_layout(
                         font.clone(),
                         "Buy".to_string(),
                         colors.node_color,
-                        colors.button_color,
+                        colors.green_color, //button color
                         colors.text_color,
                     );
                     setup_back_from_buy_menu_button(
@@ -1001,7 +1001,7 @@ fn setup_ln_addr_menu_button(
                     },
                     NewBlockLnAddressButton,
                     NewBlockDataButton,
-                    //EditabledTextBox,
+                    EditabledTextBox,
                 ))
                 .with_children(|parent2| {
                     parent2.spawn((

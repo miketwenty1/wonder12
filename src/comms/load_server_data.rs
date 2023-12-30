@@ -2,8 +2,9 @@ use super::api_timer::ApiPollingTimer;
 use super::server_structs::GameBlocksDataFromDBMod;
 use crate::eventy::RequestTileUpdates;
 use crate::resourcey::{InitGameMap, TileData, TileDataChannel, UpdateGameTimetamp};
+use crate::statey::CommsApiBlockLoadState;
 use crate::structy::{RequestTileType, TileResource};
-use crate::{CommsApiState, ServerURL, TileMap, UpdateTileTextureEvent};
+use crate::{ServerURL, TileMap, UpdateTileTextureEvent};
 use bevy::prelude::*;
 use bevy::tasks::IoTaskPool;
 use rand::Rng;
@@ -14,7 +15,7 @@ use rand::Rng;
 pub fn api_get_server_tiles(
     channel: Res<TileDataChannel>,
     api_server: Res<ServerURL>,
-    mut api_state: ResMut<NextState<CommsApiState>>,
+    mut api_load_block_state: ResMut<NextState<CommsApiBlockLoadState>>,
     gametime: Res<UpdateGameTimetamp>,
     init: Res<InitGameMap>,
     mut event: EventReader<RequestTileUpdates>,
@@ -56,7 +57,7 @@ pub fn api_get_server_tiles(
 
         //gametime.ts = Utc::now();
 
-        api_state.set(CommsApiState::LoadBlockData);
+        api_load_block_state.set(CommsApiBlockLoadState::LoadBlockData);
     }
 }
 
@@ -64,7 +65,7 @@ pub fn api_get_server_tiles(
 pub fn api_receive_server_tiles(
     channel: ResMut<TileDataChannel>,
     api_timer: Res<ApiPollingTimer>,
-    mut api_state: ResMut<NextState<CommsApiState>>,
+    mut api_state: ResMut<NextState<CommsApiBlockLoadState>>,
     mut tile_map: ResMut<TileMap>,
     mut update_tile_event: EventWriter<UpdateTileTextureEvent>,
     mut gametime: ResMut<UpdateGameTimetamp>,
@@ -168,10 +169,10 @@ pub fn api_receive_server_tiles(
                                 info!("requesting more time based tiles");
                                 get_more_tiles.send(RequestTileUpdates(RequestTileType::Ts));
                             } else {
-                                api_state.set(CommsApiState::Off);
+                                api_state.set(CommsApiBlockLoadState::Off);
                             }
                         } else {
-                            api_state.set(CommsApiState::Off);
+                            api_state.set(CommsApiBlockLoadState::Off);
                         }
                     }
                     Err(e) => {
@@ -183,7 +184,7 @@ pub fn api_receive_server_tiles(
             Err(e) => {
                 info!("receiving tiles: {}", e);
                 if channel.rx.is_empty() {
-                    api_state.set(CommsApiState::Off);
+                    api_state.set(CommsApiBlockLoadState::Off);
                 }
                 e.to_string()
             }

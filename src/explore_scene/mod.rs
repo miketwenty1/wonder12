@@ -3,8 +3,10 @@ pub mod cron_systems;
 pub mod explore;
 pub mod explorer_movement_systems;
 pub mod explorer_overlay_system;
+pub mod selection;
 pub mod toggle_ui;
 pub mod update_toggle_events;
+pub mod zoom;
 
 use bevy::prelude::*;
 
@@ -17,17 +19,18 @@ use self::{
     cron_systems::{cron_update_tiles, tick_update_tile_cron_timer, CronPollingTimer},
     explore::{
         animate_sprites, buy_selection_button, clear_selection, clear_selection_button,
-        desktop_movement_camera_system, edge_system, init_explorer, select_tile,
-        spawn_block_sprites, touch_event_system, update_tile_textures, zoom_in_button_system,
-        zoom_out_button_system,
+        edge_system, init_explorer, reset_mouse, spawn_block_sprites, touch_event_system,
+        update_tile_textures,
     },
-    explorer_movement_systems::clear_last_selected_tile,
+    explorer_movement_systems::{clear_last_selected_tile, desktop_movement_camera_system},
     explorer_overlay_system::{clear_last_selected_tile_ui_button, init_block_loading_text},
+    selection::{choose_tile, select_tile},
     toggle_ui::{
         setup_toggle, toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
         toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4, toggle_button_system,
     },
     update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
+    zoom::{zoom_in_button_system, zoom_out_button_system},
 };
 
 pub struct ExplorePlugin;
@@ -40,7 +43,7 @@ impl Plugin for ExplorePlugin {
                 OnEnter(ExploreState::On),
                 (
                     (init_explorer, setup_toggle, setup_amount_selected_text).run_if(run_once()),
-                    // setup_explorer,
+                    (reset_mouse, apply_deferred).chain(),
                 ),
             )
             .add_systems(
@@ -59,13 +62,14 @@ impl Plugin for ExplorePlugin {
                         zoom_in_button_system,
                         clear_selection_button,
                         buy_selection_button,
-                        touch_event_system,
                         toggle_button_system,
                         toggle_button_sub_system_toggle1,
                         toggle_button_sub_system_toggle2,
                         toggle_button_sub_system_toggle3,
                         toggle_button_sub_system_toggle4,
+                        choose_tile,
                         desktop_movement_camera_system,
+                        touch_event_system,
                     )
                         .chain(),
                     edge_system,
@@ -88,6 +92,7 @@ impl Plugin for ExplorePlugin {
                     cron_update_tiles,
                     tick_update_tile_cron_timer,
                 ),
-            ); //.add_systems(OnExit(ExploreState::On), despawn_screen::<UiOverlay>);
+            )
+            .add_systems(OnExit(ExploreState::On), reset_mouse);
     }
 }

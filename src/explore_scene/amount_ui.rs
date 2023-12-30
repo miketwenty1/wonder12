@@ -2,7 +2,9 @@ use bevy::prelude::*;
 use rand::Rng;
 
 use crate::{
-    componenty::{AmountSelectedNode, AmountSelectedText, Location, Selected},
+    componenty::{
+        AmountSelectedNode, AmountSelectedText, Location, Selected, UiTileSelectedButton,
+    },
     consty::MINIMUM_BLOCK_AMOUNT,
     eventy::UpdateUiAmount,
     resourcey::{TileCart, TileCartData, TileMap},
@@ -45,6 +47,10 @@ pub fn update_amount_selected_text(
     mut amount_selected_text: Query<&mut Text, With<AmountSelectedText>>,
     tile_map: ResMut<TileMap>,
     mut tile_cart: ResMut<TileCart>,
+    mut tile_selected_button_q: Query<
+        &mut Visibility,
+        (With<UiTileSelectedButton>, Without<AmountSelectedText>),
+    >,
 ) {
     for _e in event.read() {
         let mut total_cost: u32 = 0;
@@ -105,6 +111,10 @@ pub fn update_amount_selected_text(
         for mut text in amount_selected_text.iter_mut() {
             if total_cost == 0 {
                 text.sections[0].value = "".to_string();
+
+                for mut visibility in tile_selected_button_q.iter_mut() {
+                    *visibility = Visibility::Hidden;
+                }
             } else {
                 text.sections[0].value = format!("Total: {} sats", total_cost);
             }

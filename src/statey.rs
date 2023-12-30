@@ -5,10 +5,17 @@ pub enum CommsApiState {
     #[default]
     Off,
     //SetName,
-    LoadBlockData,
+    //LoadBlockData,
     ReceiveInvoice,
     //Buy,
     CheckInvoice,
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum CommsApiBlockLoadState {
+    #[default]
+    Off,
+    LoadBlockData,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -31,5 +38,12 @@ pub enum DisplayBuyUiState {
 pub enum InitLoadingBlocksState {
     Off,
     #[default]
+    On,
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum ToastState {
+    #[default]
+    Off,
     On,
 }
