@@ -624,6 +624,7 @@ pub fn resolve_target_cart_data(
         TargetType::NewColor => {
             let index = cart.index;
             cart.vec[index].new_color_text = keyboard.value.clone();
+            cart.vec[index].new_color = block_new_data.color;
             block_new_data.color_text = keyboard.value.to_string();
         }
         TargetType::NewMessage => {

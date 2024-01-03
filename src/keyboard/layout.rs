@@ -50,7 +50,7 @@ pub fn setup_keyboard(
                     ],
                     ..default()
                 },
-                //background_color: BackgroundColor(Color::rgb(0.3, 0.3, 0.3)),
+                background_color: BackgroundColor(colors.node_color),
                 //z_index: ZIndex::Global(20),
                 ..default()
             },
