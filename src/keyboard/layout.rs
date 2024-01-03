@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::resourcey::ColorPalette;
+use crate::resourcey::{ColorPalette, WinSize};
 
 use super::components::{Capitalizable, KeyBoard, KeyBoardButton, KeyType, KeyboardNode};
 
@@ -13,8 +13,16 @@ pub fn setup_keyboard(
     asset_server: Res<AssetServer>,
     placement_query: Query<Entity, With<KeyboardNode>>,
     colors: Res<ColorPalette>,
+    wsize: Res<WinSize>,
 ) {
     info!("keyboard setup!");
+    let font_size = if wsize.width < 420.0 { 26.0 } else { 32.0 };
+    let padding_size = if wsize.width < 420.0 { 0.5 } else { 1.0 };
+    let keyboard_row_justification = if wsize.width < 420.0 {
+        JustifyContent::Center
+    } else {
+        JustifyContent::SpaceEvenly
+    };
     for ent in placement_query.iter() {
         // let mut parent_node = commands.entity(ent);
         // parent_node.commands().spawn(bundle)
@@ -42,7 +50,7 @@ pub fn setup_keyboard(
                     ],
                     ..default()
                 },
-                background_color: BackgroundColor(Color::rgb(0.3, 0.3, 0.3)),
+                //background_color: BackgroundColor(Color::rgb(0.3, 0.3, 0.3)),
                 //z_index: ZIndex::Global(20),
                 ..default()
             },
@@ -61,7 +69,15 @@ pub fn setup_keyboard(
                     ..default()
                 })
                 .with_children(|builder| {
-                    spawn_keyboard_row(builder, font.clone(), key_chars[0], colors.button_color);
+                    spawn_keyboard_row(
+                        builder,
+                        font.clone(),
+                        key_chars[0],
+                        colors.button_color,
+                        font_size,
+                        padding_size,
+                        keyboard_row_justification,
+                    );
                 });
             builder
                 .spawn(NodeBundle {
@@ -74,7 +90,15 @@ pub fn setup_keyboard(
                     ..default()
                 })
                 .with_children(|builder| {
-                    spawn_keyboard_row(builder, font.clone(), key_chars[1], colors.button_color);
+                    spawn_keyboard_row(
+                        builder,
+                        font.clone(),
+                        key_chars[1],
+                        colors.button_color,
+                        font_size,
+                        padding_size,
+                        keyboard_row_justification,
+                    );
                 });
             builder
                 .spawn(NodeBundle {
@@ -87,7 +111,15 @@ pub fn setup_keyboard(
                     ..default()
                 })
                 .with_children(|builder| {
-                    spawn_keyboard_row(builder, font.clone(), key_chars[2], colors.button_color);
+                    spawn_keyboard_row(
+                        builder,
+                        font.clone(),
+                        key_chars[2],
+                        colors.button_color,
+                        font_size,
+                        padding_size,
+                        keyboard_row_justification,
+                    );
                 });
             builder
                 .spawn(NodeBundle {
@@ -100,7 +132,15 @@ pub fn setup_keyboard(
                     ..default()
                 })
                 .with_children(|builder| {
-                    spawn_keyboard_row(builder, font.clone(), key_chars[3], colors.button_color);
+                    spawn_keyboard_row(
+                        builder,
+                        font.clone(),
+                        key_chars[3],
+                        colors.button_color,
+                        font_size,
+                        padding_size,
+                        keyboard_row_justification,
+                    );
                 });
         });
 
@@ -113,21 +153,24 @@ fn spawn_keyboard_row(
     font: Handle<Font>,
     row_keys: &str,
     button_color: Color,
+    font_size: f32,
+    padding_size: f32,
+    keyboard_row_justification: JustifyContent,
 ) {
     builder
         .spawn(NodeBundle {
             style: Style {
-                width: Val::Percent(99.0),
-                height: Val::Percent(99.0),
+                width: Val::Percent(99.5),
+                height: Val::Percent(99.5),
                 flex_direction: FlexDirection::Row,
                 align_items: AlignItems::Center,
                 padding: UiRect {
-                    left: Val::Percent(1.),
-                    right: Val::Percent(1.),
-                    top: Val::Percent(0.1),
-                    bottom: Val::Percent(0.1),
+                    left: Val::Px(1.),
+                    right: Val::Px(1.),
+                    top: Val::Px(1.),
+                    bottom: Val::Px(1.),
                 },
-                justify_content: JustifyContent::SpaceEvenly,
+                justify_content: keyboard_row_justification,
                 // gap: Size {
                 //     width: Val::Px(0.0),
                 //     height: Val::Px(0.0),
@@ -139,12 +182,26 @@ fn spawn_keyboard_row(
         })
         .with_children(|builder| {
             for key in row_keys.chars() {
-                keyboard_button(builder, font.clone(), key, button_color);
+                keyboard_button(
+                    builder,
+                    font.clone(),
+                    key,
+                    button_color,
+                    font_size,
+                    padding_size,
+                );
             }
         });
 }
 
-fn keyboard_button(builder: &mut ChildBuilder, font: Handle<Font>, key: char, button_color: Color) {
+fn keyboard_button(
+    builder: &mut ChildBuilder,
+    font: Handle<Font>,
+    key: char,
+    button_color: Color,
+    font_size: f32,
+    padding_size: f32,
+) {
     let key_type: KeyType;
 
     if LETTER_SET.contains(key) {
@@ -164,7 +221,7 @@ fn keyboard_button(builder: &mut ChildBuilder, font: Handle<Font>, key: char, bu
                 height: Val::Percent(100.0),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
-                padding: UiRect::horizontal(Val::Px(3.0)),
+                padding: UiRect::horizontal(Val::Px(padding_size)),
                 ..default()
             },
             ..default()
@@ -196,7 +253,7 @@ fn keyboard_button(builder: &mut ChildBuilder, font: Handle<Font>, key: char, bu
                             key.to_string(),
                             TextStyle {
                                 font,
-                                font_size: 32.0,
+                                font_size,
                                 color: Color::rgb(0.9, 0.9, 0.9),
                             },
                         ))

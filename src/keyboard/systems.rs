@@ -16,14 +16,14 @@ pub fn physical_keyboard_system(
     mut keyboard_text: ResMut<KeyboardData>,
 ) {
     if keys.just_pressed(KeyCode::Back) {
-        keyboard_text.0.pop();
+        keyboard_text.value.pop();
     }
 
     for ev in char_evr.read() {
         let k = ev.char;
 
-        if ACCEPTABLE_CHARS.contains(k) && keyboard_text.0.len() < MAX_INPUT_LENGTH {
-            keyboard_text.0.push(k);
+        if ACCEPTABLE_CHARS.contains(k) && keyboard_text.value.len() < MAX_INPUT_LENGTH {
+            keyboard_text.value.push(k);
         } else {
             info!("no likey this character sorry")
         }
@@ -48,19 +48,19 @@ pub fn virtual_keyboard_system(
             Interaction::Pressed => {
                 match k {
                     '<' => {
-                        keyboard_text.0.pop();
+                        keyboard_text.value.pop();
                     }
                     '^' => {
                         c_toggle.0 = !c_toggle.0;
                         debug!("capitalize is now set to: {}", c_toggle.0);
                     }
                     k if ACCEPTABLE_CHARS.contains(k)
-                        && keyboard_text.0.len() < MAX_INPUT_LENGTH =>
+                        && keyboard_text.value.len() < MAX_INPUT_LENGTH =>
                     {
                         if c_toggle.0 {
-                            keyboard_text.0.push(k.to_ascii_uppercase());
+                            keyboard_text.value.push(k.to_ascii_uppercase());
                         } else {
-                            keyboard_text.0.push(k);
+                            keyboard_text.value.push(k);
                         }
                     }
                     _ => {
@@ -68,7 +68,7 @@ pub fn virtual_keyboard_system(
                     }
                 }
 
-                info!("new vkeydata {:?}", keyboard_text.0);
+                info!("new vkeydata {:?}", keyboard_text.value);
 
                 *color = colors.light_color.into();
             }

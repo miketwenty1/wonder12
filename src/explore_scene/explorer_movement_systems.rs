@@ -32,14 +32,13 @@ pub fn desktop_movement_camera_system(
     for event in mouse_motion_events.read() {
         if mouse.pressed(MouseButton::Middle) || mouse.pressed(MouseButton::Left) {
             for (mut cam_transform, cam_ortho) in q_camera.iter_mut() {
-                // if around edge limits push back
-                let direction = if edge.bottom.tile + 10_000 > max_height.0.try_into().unwrap() {
+                let direction = if ulam::value_of_xy(0, edge.bottom.tile) + 1_000 > max_height.0 {
                     Vec3::new(-event.delta.x, 100.0, 0.0)
-                } else if edge.top.tile + 10_000 > max_height.0.try_into().unwrap() {
+                } else if ulam::value_of_xy(0, edge.top.tile) + 1_000 > max_height.0 {
                     Vec3::new(-event.delta.x, -100.0, 0.0)
-                } else if edge.left.tile + 10_000 > max_height.0.try_into().unwrap() {
+                } else if ulam::value_of_xy(edge.left.tile, 0) + 1_000 > max_height.0 {
                     Vec3::new(100.0, event.delta.y, 0.0)
-                } else if edge.right.tile + 10_000 > max_height.0.try_into().unwrap() {
+                } else if ulam::value_of_xy(edge.right.tile, 0) + 1_000 > max_height.0 {
                     Vec3::new(-100.0, event.delta.y, 0.0)
                 } else {
                     Vec3::new(-event.delta.x, event.delta.y, 0.0)
@@ -49,12 +48,19 @@ pub fn desktop_movement_camera_system(
                     clear_last_selected.send(ClearLastSelectedTile);
                 }
 
-                cam_transform.translation += direction
-                    * time.delta_seconds()
-                    * TILE_SCALE
-                    * cam_ortho.scale
-                    * MOVE_VELOCITY_FACTOR
-                    * 1.0;
+                let timefactor = if time.delta_seconds() > 0.01 {
+                    0.01
+                } else {
+                    time.delta_seconds()
+                };
+
+                let total_distance =
+                    direction * timefactor * TILE_SCALE * cam_ortho.scale * MOVE_VELOCITY_FACTOR;
+
+                let clamped_length = total_distance.clamp_length_max(300.0);
+
+                cam_transform.translation += clamped_length;
+
                 set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
             }
         }
@@ -84,6 +90,7 @@ pub fn desktop_movement_camera_system(
                 0.0
             };
 
+            // push back on people trying to go too far
             let direction = if ulam::value_of_xy(0, edge.bottom.tile) + 1_000 > max_height.0 {
                 Vec3::new(x, 100.0, 0.0)
             } else if ulam::value_of_xy(0, edge.top.tile) + 1_000 > max_height.0 {

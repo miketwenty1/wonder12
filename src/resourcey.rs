@@ -39,6 +39,7 @@ pub struct TileCartData {
     pub new_ln_address: String,
     pub new_username: String,
     pub new_color: Color,
+    pub new_color_text: String,
     pub new_message: String,
 }
 
@@ -116,16 +117,14 @@ pub enum TargetType {
     NewMessage,
 }
 
-#[derive(Resource, Clone, PartialEq)]
-pub struct KeyboardTarget(pub TargetType);
-
 // #[derive(Resource, Clone)]
 // pub struct AmountSelected(pub u32);
 
-#[derive(Resource, Clone)]
+#[derive(Resource, Clone, Debug)]
 pub struct CurrentCartBlock {
     pub ln_address: String,
-    pub color: String,
+    pub color_text: String,
+    pub color: Color,
     pub message: String,
 }
 
@@ -168,3 +167,9 @@ pub struct ColorPalette {
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct MaxBlockHeight(pub u32);
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct WinSize {
+    pub width: f32,
+    pub height: f32,
+}

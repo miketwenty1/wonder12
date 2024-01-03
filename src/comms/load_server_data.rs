@@ -33,12 +33,19 @@ pub fn api_get_server_tiles(
                 let _task = pool.spawn(async move {
                     let api_response_text =
                         reqwest::get(format!("{}/comms/blockdelta_height/{}", server, height_str))
-                            .await
-                            .unwrap()
-                            .text()
-                            .await
-                            .unwrap();
-                    cc.try_send(api_response_text);
+                            .await;
+                    match api_response_text {
+                        Ok(o) => {
+                            let inner = o.text().await;
+                            match inner {
+                                Ok(o_inner) => {
+                                    cc.try_send(o_inner);
+                                }
+                                Err(e) => info!("inner error blockdelta_height {}", e),
+                            }
+                        }
+                        Err(e) => info!("error for blockdelta_height {}", e),
+                    }
                 });
             }
             RequestTileType::Ts => {
@@ -100,7 +107,7 @@ pub fn api_receive_server_tiles(
                                     //info!("==");
                                 } else {
                                     request_more_ts = true;
-                                    info!("receiving tiles");
+                                    info!("receiving tiles gamet{}, servert{}", gametime.ts, t);
                                 }
                                 gametime.ts = t;
                             }

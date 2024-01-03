@@ -6,7 +6,7 @@ use self::{
         back_button_system, buy_button_system, config_cart_button_system,
         leftright_cart_button_system, leftright_cart_button_system_set_new_text,
         new_color_button_system, new_ln_address_button_system, new_message_button_system,
-        set_default_text_for_empty_text, tab_key_system,
+        set_default_text_for_empty_text, show_color_button_system, tab_key_system,
     },
 };
 use crate::{despawn_screen, keyboard::resources::KeyboardData, DisplayBuyUiState};
@@ -38,15 +38,16 @@ impl Plugin for BuyDetailsMenuPlugin {
                     (
                         leftright_cart_button_system,
                         leftright_cart_button_system_set_new_text,
+                        new_message_button_system,
+                        new_color_button_system,
+                        set_default_text_for_empty_text,
                     )
                         .chain(),
+                    show_color_button_system,
+                    (write_keyboard_target).run_if(resource_changed::<KeyboardData>()),
                     config_cart_button_system,
                     new_ln_address_button_system,
-                    new_color_button_system,
-                    new_message_button_system,
-                    set_default_text_for_empty_text,
                     tab_key_system,
-                    (write_keyboard_target).run_if(resource_changed::<KeyboardData>()),
                 )
                     .run_if(in_state(DisplayBuyUiState::BlockDetail)),
             )

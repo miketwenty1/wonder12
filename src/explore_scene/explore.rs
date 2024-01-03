@@ -460,6 +460,7 @@ pub fn spawn_block_sprites(
         for x in spawn_diff.xstart..=spawn_diff.xend {
             for y in spawn_diff.ystart..=spawn_diff.yend {
                 let ulam_i = ulam::value_of_xy(x, y);
+
                 if max_height.0 >= ulam_i && !chunk_map.map.contains_key(&ulam_i) {
                     chunk_map.map.insert(ulam_i, true);
 

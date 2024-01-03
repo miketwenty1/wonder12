@@ -36,6 +36,7 @@ pub fn api_request_invoice(
     mut api_receive_state: ResMut<NextState<CommsApiState>>,
 ) {
     for _buy_block_data in button_event_reader.read() {
+        info!("{:#?}", tile_cart_vec.vec);
         if invoice_data.invoice.is_empty() {
             info!("requested invoice from buy button");
 
@@ -53,6 +54,12 @@ pub fn api_request_invoice(
                     message: tile.new_message.to_string(),
                     amount: tile.cost,
                 };
+                info!(
+                    "color before hex: {:?} after hex {:?}, and inside {:?}",
+                    tile.new_color,
+                    convert_color_to_hexstring(tile.new_color),
+                    invoice_block.color,
+                );
                 block_request_block_vec.push(invoice_block);
             }
 
@@ -135,7 +142,7 @@ pub fn api_check_invoice(
 ) {
     if api_timer.timer.finished() {
         info!("invoice res: {:#?}", invoice_res.invoice);
-        info!("check for invoice status");
+        //info!("check for invoice status");
 
         let pool = IoTaskPool::get();
         let cc = channel.tx.clone();
@@ -169,7 +176,7 @@ pub fn api_receive_invoice_check(
     if api_timer.timer.finished() {
         let api_res = channel.rx.try_recv();
 
-        info!("waiting to receive invoice check");
+        //info!("waiting to receive invoice check");
         match api_res {
             Ok(r) => {
                 // info!("received something from invoice check: {}", r);
@@ -232,21 +239,23 @@ pub fn api_receive_invoice_check(
                         *invoice_check_res = o;
                     }
                     Err(e) => {
-                        toast.send(ToastEvent {
-                            ttype: ToastType::Bad,
-                            message: e.to_string(),
-                        });
+                        // toast.send(ToastEvent {
+                        //     ttype: ToastType::Bad,
+                        //     message: e.to_string(),
+                        // });
+                        // was getting the error receiving from empty channel error and EOF error here so commenting out toast.
                         info!("requesting check invoice fail: {}", e);
                     }
                 };
                 r
             }
             Err(e) => {
+                //was getting the error receiving from empty channel error here so commenting out toast.
                 info!("response to check invoice: {}", e);
-                toast.send(ToastEvent {
-                    ttype: ToastType::Bad,
-                    message: e.to_string(),
-                });
+                // toast.send(ToastEvent {
+                //     ttype: ToastType::Bad,
+                //     message: e.to_string(),
+                // });
                 e.to_string()
             }
         };

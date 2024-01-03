@@ -11,16 +11,18 @@ use crate::keyboard::{KeyboardPlugin, KeyboardState};
 use crate::overlay_ui::OverlayUiPlugin;
 use crate::resourcey::{
     ChunkManager, ColorPalette, CurrentCartBlock, Edge, InvoiceCheckFromServer,
-    InvoiceDataFromServer, KeyboardTarget, LastSelectedTile, MaxBlockHeight, ServerURL,
-    SpriteIndexBuilding, TargetType, TileCart, TileCartVec, TileDataChannel, TileMap, ToggleMap,
-    UpdateGameTimetamp, User,
+    InvoiceDataFromServer, LastSelectedTile, MaxBlockHeight, ServerURL, SpriteIndexBuilding,
+    TargetType, TileCart, TileCartVec, TileDataChannel, TileMap, ToggleMap, UpdateGameTimetamp,
+    User,
 };
 use crate::statey::{CommsApiState, DisplayBuyUiState, ExploreState};
 use crate::structy::EdgeData;
 use bevy::asset::AssetMetaCheck;
+use bevy::render::camera;
+use bevy::window::PrimaryWindow;
 use bevy::{prelude::*, utils::HashMap};
 use chrono::{Duration, Utc};
-use resourcey::{CheckInvoiceChannel, InitBlockCount, InitGameMap, RequestInvoiceChannel};
+use resourcey::{CheckInvoiceChannel, InitBlockCount, InitGameMap, RequestInvoiceChannel, WinSize};
 use statey::{CommsApiBlockLoadState, InitLoadingBlocksState, ToastState};
 use structy::RequestTileType;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -44,13 +46,22 @@ pub fn main() {
     //game("localusertesting".to_string(), "localhost:8081".to_string());
 }
 #[wasm_bindgen]
-pub fn game12(username: String, server_url: String, ln_address: String, block_init_count: u32) {
+pub fn game12(
+    username: String,
+    server_url: String,
+    ln_address: String,
+    block_init_count: u32,
+    max_height: u32,
+    viewport_width: f32,
+    viewport_height: f32,
+) {
     // this doesn't show
     // info!(
     //     "user: {}\nserver: {}, lnaddress: {}",
     //     username, server_url, ln_address
     // );
-    let max_block_height: u32 = 840_000;
+
+    //let max_block_height: u32 = max_height;
     let mut toggle_map = HashMap::new();
     toggle_map.insert("showbuildings".to_string(), false);
     toggle_map.insert("showcolors".to_string(), true);
@@ -109,7 +120,7 @@ pub fn game12(username: String, server_url: String, ln_address: String, block_in
     App::new()
         .insert_resource(start_edge)
         .insert_resource(color_palette)
-        .insert_resource(MaxBlockHeight(max_block_height))
+        .insert_resource(MaxBlockHeight(max_height))
         .insert_resource(ChunkManager {
             map: HashMap::new(),
         })
@@ -125,7 +136,8 @@ pub fn game12(username: String, server_url: String, ln_address: String, block_in
         })
         .insert_resource(CurrentCartBlock {
             ln_address: ln_address.clone(),
-            color: "".to_string(),
+            color_text: "".to_string(),
+            color: Color::DARK_GRAY, // this is just a place holder shouldn't be used.
             message: "".to_string(),
         })
         .insert_resource(LastSelectedTile(1_000_000, 1_000_000))
@@ -133,8 +145,11 @@ pub fn game12(username: String, server_url: String, ln_address: String, block_in
         .insert_resource(ServerURL(server_url))
         .insert_resource(SpriteIndexBuilding(numbers_map))
         .insert_resource(ToggleMap(toggle_map))
-        .insert_resource(KeyboardData("".to_string()))
-        .insert_resource(KeyboardTarget(TargetType::Nothing))
+        .insert_resource(KeyboardData {
+            value: "".to_string(),
+            target: TargetType::Nothing,
+        })
+        //.insert_resource(KeyboardTarget(TargetType::Nothing))
         .insert_resource(User {
             name: username,
             ln_address,
@@ -146,6 +161,10 @@ pub fn game12(username: String, server_url: String, ln_address: String, block_in
         .insert_resource(InitGameMap { height: 0 })
         .init_resource::<InvoiceDataFromServer>()
         .init_resource::<InvoiceCheckFromServer>()
+        .insert_resource(WinSize {
+            width: viewport_width,
+            height: viewport_height,
+        })
         //.add_plugins(DefaultPlugins)
         .add_plugins(
             DefaultPlugins
@@ -186,6 +205,7 @@ pub fn game12(username: String, server_url: String, ln_address: String, block_in
         .add_event::<ClearSelectionEvent>()
         .add_event::<ClearLastSelectedTile>()
         .add_systems(Startup, setup) //setupcoords
+        //.add_systems(PostStartup, setup2) //setupcoords
         //.add_systems(PostStartup, api_get_server_tiles)
         .run();
 }
@@ -194,8 +214,15 @@ fn setup(
     mut commands: Commands,
     mut ui_state: ResMut<NextState<ExploreState>>,
     mut request_tiles_event: EventWriter<RequestTileUpdates>,
+    //q_window: Query<&Window, With<PrimaryWindow>>,
 ) {
+    //commands.spawn(Camera2dBundle::default());
     commands.spawn(Camera2dBundle::default());
+
+    // let window = q_window.single();
+    // wsize.height = window.resolution.physical_height(); // .height(); //.resolution.height();
+    // wsize.width = window.width(); //window.resolution.width();
+
     let (tx_tiledata, rx_tiledata) = async_channel::bounded(4);
     commands.insert_resource(TileDataChannel {
         tx: tx_tiledata,
@@ -214,6 +241,21 @@ fn setup(
     request_tiles_event.send(RequestTileUpdates(RequestTileType::Height));
     ui_state.set(ExploreState::On);
 }
+
+// fn setup2(mut wsize: ResMut<WinSize>, camera: Query<&Camera, With<Camera2d>>) {
+//     let camera = camera.single();
+//     let viewport_position_o = &camera.logical_viewport_size();
+//     match viewport_position_o {
+//         Some(s) => {
+//             wsize.width = s.x;
+//             wsize.height = s.y;
+//             info!("logical viewport is {},{}", s.x, s.y);
+//         }
+//         None => {
+//             info!("None!");
+//         }
+//     }
+// }
 
 fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
     for entity in &to_despawn {

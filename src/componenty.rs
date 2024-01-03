@@ -228,3 +228,6 @@ pub struct InitLoadingNode;
 
 #[derive(Component)]
 pub struct InitLoadingText;
+
+#[derive(Component)]
+pub struct BtnShowingColor;

@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use rand::Rng;
 
 use crate::{
     componenty::{
@@ -8,6 +7,7 @@ use crate::{
     consty::MINIMUM_BLOCK_AMOUNT,
     eventy::UpdateUiAmount,
     resourcey::{TileCart, TileCartData, TileMap},
+    utils::get_random_color,
 };
 
 pub fn setup_amount_selected_text(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -57,16 +57,7 @@ pub fn update_amount_selected_text(
         tile_cart.map.clear();
         for land in selected_lands.iter() {
             let a = tile_map.map.get(&land.ulam);
-            let mut rng = rand::thread_rng();
-            let r: f32 = rng.gen_range(0.0..1.0);
-            let g: f32 = rng.gen_range(0.0..1.0);
-            let b: f32 = rng.gen_range(0.0..1.0);
-            let new_color = Color::Rgba {
-                red: r,
-                green: g,
-                blue: b,
-                alpha: 1.0,
-            };
+
             if let Some(val) = a {
                 total_cost += val.cost;
                 tile_cart.map.insert(
@@ -82,7 +73,8 @@ pub fn update_amount_selected_text(
                         height: val.height,
                         new_ln_address: "".to_string(),
                         new_username: "".to_string(),
-                        new_color,
+                        new_color: get_random_color(),
+                        new_color_text: "".to_string(),
                         new_message: "".to_string(),
                     },
                 );
@@ -102,7 +94,8 @@ pub fn update_amount_selected_text(
                         height: land.ulam,
                         new_ln_address: "".to_string(),
                         new_username: "".to_string(),
-                        new_color,
+                        new_color: get_random_color(),
+                        new_color_text: "".to_string(),
                         new_message: "".to_string(),
                     },
                 );
