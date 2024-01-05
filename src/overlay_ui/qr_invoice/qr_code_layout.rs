@@ -1,6 +1,7 @@
 use bevy::{
     prelude::*,
     render::{
+        render_asset::RenderAssetPersistencePolicy,
         render_resource::{Extent3d, TextureDimension, TextureFormat},
         texture::BevyDefault,
     },
@@ -52,7 +53,13 @@ pub fn spawn_qr(
 
             let img_format = TextureFormat::bevy_default();
 
-            let bevy_image = Image::new(extent, dimensions, data, img_format);
+            let bevy_image = Image::new(
+                extent,
+                dimensions,
+                data,
+                img_format,
+                RenderAssetPersistencePolicy::Unload,
+            );
 
             let texture = images.add(bevy_image);
             Some(texture)

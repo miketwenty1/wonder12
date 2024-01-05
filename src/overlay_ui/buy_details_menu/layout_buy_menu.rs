@@ -13,8 +13,11 @@ use crate::{
         DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
         DEFAULT_NO_PICK_COLOR,
     },
+    eventy::KeyboardSpawnEvent,
     keyboard::{components::KeyboardNode, KeyboardState},
-    resourcey::{ColorPalette, CurrentCartBlock, TileCart, TileCartData, TileCartVec, WinSize},
+    resourcey::{
+        ColorPalette, CurrentCartBlock, TileCart, TileCartData, TileCartVec, User, WinSize,
+    },
     statey::ExploreState,
 };
 
@@ -28,14 +31,18 @@ pub fn spawn_layout(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut explore_state: ResMut<NextState<ExploreState>>,
+    mut keyboard_state: ResMut<NextState<KeyboardState>>,
     tile_cart: Res<TileCart>,
     mut current_cart_item: ResMut<CurrentCartBlock>,
     mut tile_cart_vec: ResMut<TileCartVec>,
     colors: Res<ColorPalette>,
     win: Res<WinSize>,
+    mut keyboard_event: EventWriter<KeyboardSpawnEvent>,
+    user: Res<User>,
 ) {
     //info!("current_cart_item {:#?}", current_cart_item);
     explore_state.set(ExploreState::Paused);
+    keyboard_state.set(KeyboardState::Off);
 
     // set the Cart data and sort it in the vec.
     let mut a: Vec<TileCartData> = tile_cart.map.values().cloned().collect();
@@ -62,6 +69,11 @@ pub fn spawn_layout(
         (win.width / 2.0) - 1.0
     } else {
         210.0
+    };
+    let lightning_text = if user.ln_address.len() > 4 {
+        &user.ln_address
+    } else {
+        DEFAULT_NEW_LN_TEXT
     };
     info!("spawning width of {}", w_size);
     commands
@@ -237,7 +249,7 @@ pub fn spawn_layout(
                     setup_ln_addr_menu_button(
                         builder,
                         font.clone(),
-                        DEFAULT_NEW_LN_TEXT.to_string(),
+                        lightning_text.to_string(),
                         colors.accent_color,
                         colors.button_color,
                         font_size_text,
@@ -416,11 +428,19 @@ pub fn spawn_layout(
                 KeyboardNode,
             ));
         });
+    keyboard_event.send(KeyboardSpawnEvent);
 }
 
-pub fn set_keyboard(mut buy_state: ResMut<NextState<KeyboardState>>) {
-    buy_state.set(KeyboardState::On);
-}
+// pub fn set_keyboard(
+//     mut state: ResMut<NextState<KeyboardState>>,
+//     mut keyboard_event: EventReader<KeyboardSpawnEvent>,
+// ) {
+//     for _e in keyboard_event.read() {
+//         info!("BEFORE: event received keyboard state is {:?}", state);
+//         state.set(KeyboardState::On);
+//         info!("NOW: event received keyboard state is {:?}", state);
+//     }
+// }
 
 fn spawn_new_total_cart_cost(
     builder: &mut ChildBuilder,

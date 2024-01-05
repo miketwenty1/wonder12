@@ -1,9 +1,9 @@
 use self::{
     cleanup_buy_menu::cleanup_keyboard_system,
     keyboard_system::write_keyboard_target,
-    layout_buy_menu::{set_keyboard, spawn_layout},
+    layout_buy_menu::spawn_layout,
     systems_buyui::{
-        back_button_system, buy_button_system, config_cart_button_system,
+        back_button_system, buy_button_system, config_cart_button_system, highlight_box_system,
         leftright_cart_button_system, leftright_cart_button_system_set_new_text,
         new_color_button_system, new_ln_address_button_system, new_message_button_system,
         set_default_text_for_empty_text, show_color_button_system, tab_key_system,
@@ -28,7 +28,7 @@ impl Plugin for BuyDetailsMenuPlugin {
             // OnEnter State Systems
             .add_systems(
                 OnEnter(DisplayBuyUiState::BlockDetail),
-                (spawn_layout, set_keyboard).chain(),
+                (spawn_layout, apply_deferred).chain(),
             )
             .add_systems(
                 Update,
@@ -40,14 +40,16 @@ impl Plugin for BuyDetailsMenuPlugin {
                         leftright_cart_button_system_set_new_text,
                         new_message_button_system,
                         new_color_button_system,
+                        new_ln_address_button_system,
                         set_default_text_for_empty_text,
                     )
                         .chain(),
+                    tab_key_system,
+                    highlight_box_system,
                     show_color_button_system,
                     (write_keyboard_target).run_if(resource_changed::<KeyboardData>()),
                     config_cart_button_system,
-                    new_ln_address_button_system,
-                    tab_key_system,
+                    //set_keyboard,
                 )
                     .run_if(in_state(DisplayBuyUiState::BlockDetail)),
             )

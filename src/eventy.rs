@@ -44,3 +44,6 @@ pub struct ClearSelectionEvent;
 
 #[derive(Event, Debug)]
 pub struct ClearLastSelectedTile;
+
+#[derive(Event, Debug)]
+pub struct KeyboardSpawnEvent;

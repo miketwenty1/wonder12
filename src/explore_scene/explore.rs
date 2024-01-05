@@ -35,7 +35,10 @@ use crate::{
     structy::{EdgeType, SpawnDiffData},
 };
 
-pub fn reset_mouse(mut mouse: ResMut<Input<MouseButton>>, mut motion: ResMut<Events<MouseMotion>>) {
+pub fn reset_mouse(
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
+    mut motion: ResMut<Events<MouseMotion>>,
+) {
     mouse.clear();
     mouse.clear_just_pressed(MouseButton::Left);
     mouse.clear_just_released(MouseButton::Left);
@@ -368,8 +371,14 @@ pub fn touch_event_system(
 
             let direction = Vec3::new(-touch.delta().x, touch.delta().y, 0.0);
 
+            let timefactor = if time.delta_seconds() > 0.01 {
+                0.01
+            } else {
+                time.delta_seconds()
+            };
+
             cam_transform.translation +=
-                direction * time.delta_seconds() * cam_ortho.scale * MOVE_VELOCITY_FACTOR * 5.0;
+                direction * timefactor * cam_ortho.scale * MOVE_VELOCITY_FACTOR * 5.0;
 
             set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
 
@@ -593,7 +602,7 @@ pub fn spawn_block_sprites(
                                         //format!("{}", locationcoord.ulam),
                                         slightly_smaller_text_style.clone(),
                                     )],
-                                    alignment: TextAlignment::Left,
+                                    justify: JustifyText::Left,
                                     ..Default::default()
                                 },
                                 text_2d_bounds: Text2dBounds { ..default() },
@@ -950,7 +959,7 @@ pub fn buy_selection_button(
     mut text_query: Query<&mut Text>,
     mut ui_state: ResMut<NextState<DisplayBuyUiState>>,
     colors: Res<ColorPalette>,
-    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut mouse_motion_events: EventReader<MouseMotion>,
     selection: Query<&Selected>,
     mut toast: EventWriter<ToastEvent>,
@@ -974,7 +983,7 @@ pub fn buy_selection_button(
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
                         message: "Please unselect some tiles, Maximum 100".to_string(),
-                    })
+                    });
                 } else {
                     ui_state.set(DisplayBuyUiState::BlockDetail);
                 }

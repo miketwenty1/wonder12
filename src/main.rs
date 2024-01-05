@@ -21,6 +21,7 @@ use bevy::asset::AssetMetaCheck;
 
 use bevy::{prelude::*, utils::HashMap};
 use chrono::{Duration, Utc};
+use eventy::KeyboardSpawnEvent;
 use resourcey::{CheckInvoiceChannel, InitBlockCount, InitGameMap, RequestInvoiceChannel, WinSize};
 use statey::{CommsApiBlockLoadState, InitLoadingBlocksState, ToastState};
 use structy::RequestTileType;
@@ -44,6 +45,7 @@ mod utils;
 pub fn main() {
     //game("localusertesting".to_string(), "localhost:8081".to_string());
 }
+#[allow(clippy::too_many_arguments)]
 #[wasm_bindgen]
 pub fn game12(
     username: String,
@@ -51,8 +53,10 @@ pub fn game12(
     ln_address: String,
     block_init_count: u32,
     max_height: u32,
-    viewport_width: f32,
-    viewport_height: f32,
+    viewport_width: u32,
+    viewport_height: u32,
+    res_width: u32,
+    res_height: u32,
 ) {
     // this doesn't show
     // info!(
@@ -161,16 +165,17 @@ pub fn game12(
         .init_resource::<InvoiceDataFromServer>()
         .init_resource::<InvoiceCheckFromServer>()
         .insert_resource(WinSize {
-            width: viewport_width,
-            height: viewport_height,
+            width: viewport_width as f32,
+            height: viewport_height as f32,
         })
         //.add_plugins(DefaultPlugins)
         .add_plugins(
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        //resolution: [width as f32, height as f32].into(),
-                        fit_canvas_to_parent: true,
+                        resolution: [viewport_width as f32, viewport_height as f32].into(),
+                        //canvas: Some("bevy".to_string()),
+                        //mode: WindowMode::BorderlessFullscreen,
                         title: "SatoshiSettlers".to_string(),
                         ..default()
                     }),
@@ -178,13 +183,13 @@ pub fn game12(
                 })
                 .set(ImagePlugin::default_nearest()), //default_nearest()),
         )
-        .add_state::<ExploreState>()
-        .add_state::<CommsApiState>()
-        .add_state::<CommsApiBlockLoadState>()
-        .add_state::<DisplayBuyUiState>()
-        .add_state::<KeyboardState>()
-        .add_state::<InitLoadingBlocksState>()
-        .add_state::<ToastState>()
+        .init_state::<ExploreState>()
+        .init_state::<CommsApiState>()
+        .init_state::<CommsApiBlockLoadState>()
+        .init_state::<DisplayBuyUiState>()
+        .init_state::<KeyboardState>()
+        .init_state::<InitLoadingBlocksState>()
+        .init_state::<ToastState>()
         .add_plugins(CommsPlugin)
         .add_plugins(OverlayUiPlugin)
         .add_plugins(ExplorePlugin)
@@ -203,6 +208,7 @@ pub fn game12(
         .add_event::<RequestTileUpdates>()
         .add_event::<ClearSelectionEvent>()
         .add_event::<ClearLastSelectedTile>()
+        .add_event::<KeyboardSpawnEvent>()
         .add_systems(Startup, setup) //setupcoords
         //.add_systems(PostStartup, setup2) //setupcoords
         //.add_systems(PostStartup, api_get_server_tiles)

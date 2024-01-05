@@ -20,12 +20,12 @@ pub fn clear_last_selected_tile(
 #[allow(clippy::too_many_arguments)]
 pub fn desktop_movement_camera_system(
     mut mouse_motion_events: EventReader<MouseMotion>,
-    mouse: Res<Input<MouseButton>>,
+    mouse: Res<ButtonInput<MouseButton>>,
     mut q_camera: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
     time: Res<Time>,
     mut edge: ResMut<Edge>,
     mut edge_event: EventWriter<EdgeEvent>,
-    keys: Res<Input<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
     max_height: Res<MaxBlockHeight>,
     mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
 ) {
@@ -65,26 +65,26 @@ pub fn desktop_movement_camera_system(
             }
         }
     }
-    if keys.pressed(KeyCode::W)
-        || keys.pressed(KeyCode::A)
-        || keys.pressed(KeyCode::S)
-        || keys.pressed(KeyCode::D)
-        || keys.pressed(KeyCode::Up)
-        || keys.pressed(KeyCode::Left)
-        || keys.pressed(KeyCode::Down)
-        || keys.pressed(KeyCode::Right)
+    if keys.pressed(KeyCode::KeyW)
+        || keys.pressed(KeyCode::KeyA)
+        || keys.pressed(KeyCode::KeyS)
+        || keys.pressed(KeyCode::KeyD)
+        || keys.pressed(KeyCode::ArrowUp)
+        || keys.pressed(KeyCode::ArrowLeft)
+        || keys.pressed(KeyCode::ArrowDown)
+        || keys.pressed(KeyCode::ArrowRight)
     {
         for (mut cam_transform, cam_ortho) in q_camera.iter_mut() {
-            let y: f32 = if keys.pressed(KeyCode::W) || keys.pressed(KeyCode::Up) {
+            let y: f32 = if keys.pressed(KeyCode::KeyW) || keys.pressed(KeyCode::ArrowUp) {
                 15.0
-            } else if keys.pressed(KeyCode::S) || keys.pressed(KeyCode::Down) {
+            } else if keys.pressed(KeyCode::KeyS) || keys.pressed(KeyCode::ArrowDown) {
                 -15.0
             } else {
                 0.0
             };
-            let x: f32 = if keys.pressed(KeyCode::A) || keys.pressed(KeyCode::Left) {
+            let x: f32 = if keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft) {
                 -15.0
-            } else if keys.pressed(KeyCode::D) || keys.pressed(KeyCode::Right) {
+            } else if keys.pressed(KeyCode::KeyD) || keys.pressed(KeyCode::ArrowRight) {
                 15.0
             } else {
                 0.0

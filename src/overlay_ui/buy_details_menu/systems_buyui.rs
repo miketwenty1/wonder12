@@ -242,42 +242,46 @@ pub fn config_cart_button_system(
 #[allow(clippy::type_complexity)]
 pub fn new_ln_address_button_system(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
+        &Interaction,
         (
             Changed<Interaction>,
             With<NewBlockLnAddressButton>,
             //With<EditabledTextBox>,
         ),
     >,
-    mut text_query: Query<&mut Text, With<NewBlockLnAddressText>>,
+    //mut text_query: Query<&mut Text, With<NewBlockLnAddressText>>,
     //keyboard_text: Res<KeyboardData>,
     mut keyboard: ResMut<KeyboardData>,
     mut block_new_data: ResMut<CurrentCartBlock>,
     mut tile_cart: ResMut<TileCartVec>,
-    colors: Res<ColorPalette>,
-    user: Res<User>,
+    //colors: Res<ColorPalette>,
+    //user: Res<User>,
 ) {
-    for (interaction, mut color) in &mut interaction_query {
+    for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 //text.sections[0].value = button_text;
-                *color = colors.lite_button_color.into();
+                //*color = colors.lite_button_color.into();
                 resolve_target_cart_data(&keyboard, &mut block_new_data, &mut tile_cart);
                 keyboard.target = TargetType::NewLnAddress;
                 keyboard.value = block_new_data.ln_address.to_string();
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = colors.accent_color.into();
+                //*color = colors.accent_color.into();
             }
             Interaction::None => {
-                for mut text in text_query.iter_mut() {
-                    if user.ln_address.len() > 4 {
-                        text.sections[0].value = user.ln_address.to_string();
-                        text.sections[0].style.color = colors.text_color;
-                    }
-                }
-                *color = colors.button_color.into();
+                // for mut text in text_query.iter_mut() {
+                //     if user.ln_address.len() > 4 {
+                //         text.sections[0].value = user.ln_address.to_string();
+                //         text.sections[0].style.color = colors.text_color;
+                //     }
+                // }
+                // if keyboard.target == TargetType::NewLnAddress {
+                //     *color = colors.lite_button_color.into();
+                // } else {
+                //     *color = colors.button_color.into();
+                // }
             }
         }
     }
@@ -286,7 +290,7 @@ pub fn new_ln_address_button_system(
 #[allow(clippy::type_complexity)]
 pub fn new_color_button_system(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
+        &Interaction,
         (
             Changed<Interaction>,
             With<NewBlockColorButton>,
@@ -298,12 +302,12 @@ pub fn new_color_button_system(
     mut keyboard: ResMut<KeyboardData>,
     mut block_new_data: ResMut<CurrentCartBlock>,
     mut tile_cart: ResMut<TileCartVec>,
-    colors: Res<ColorPalette>,
+    //colors: Res<ColorPalette>,
 ) {
-    for (interaction, mut color) in &mut interaction_query {
+    for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                *color = colors.lite_button_color.into();
+                //*color = colors.lite_button_color.into();
                 resolve_target_cart_data(&keyboard, &mut block_new_data, &mut tile_cart);
                 keyboard.target = TargetType::NewColor;
                 keyboard.value = block_new_data.color_text.to_string();
@@ -311,11 +315,15 @@ pub fn new_color_button_system(
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = colors.accent_color.into();
+                //*color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = colors.button_color.into();
+                // if keyboard.target == TargetType::NewColor {
+                //     *color = colors.lite_button_color.into();
+                // } else {
+                //     *color = colors.button_color.into();
+                // }
             }
         }
     }
@@ -324,7 +332,7 @@ pub fn new_color_button_system(
 #[allow(clippy::type_complexity)]
 pub fn new_message_button_system(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
+        &Interaction,
         (
             Changed<Interaction>,
             With<NewBlockMessageButton>,
@@ -335,25 +343,29 @@ pub fn new_message_button_system(
     //keyboard_text: Res<KeyboardData>,
     mut keyboard: ResMut<KeyboardData>,
     //text_query: Query<&Text, With<NewBlockMessageText>>,
-    colors: Res<ColorPalette>,
+    //colors: Res<ColorPalette>,
     mut block_new_data: ResMut<CurrentCartBlock>,
     mut tile_cart: ResMut<TileCartVec>,
 ) {
-    for (interaction, mut color) in &mut interaction_query {
+    for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                *color = colors.lite_button_color.into();
+                //*color = colors.lite_button_color.into();
                 resolve_target_cart_data(&keyboard, &mut block_new_data, &mut tile_cart);
                 keyboard.target = TargetType::NewMessage;
                 keyboard.value = block_new_data.message.to_string();
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
-                *color = colors.accent_color.into();
+                //*color = colors.accent_color.into();
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = colors.button_color.into();
+                // if keyboard.target == TargetType::NewMessage {
+                //     *color = colors.lite_button_color.into();
+                // } else {
+                //     *color = colors.button_color.into();
+                // }
             }
         }
     }
@@ -416,7 +428,7 @@ pub fn buy_button_system(
     mut user: ResMut<User>,
     colors: Res<ColorPalette>,
     mut toast: EventWriter<ToastEvent>,
-    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut keyboard: ResMut<KeyboardData>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
@@ -444,7 +456,7 @@ pub fn buy_button_system(
                         toast.send(ToastEvent {
                             ttype: ToastType::Bad,
                             message: "Please specify valid Lightning Address".to_string(),
-                        })
+                        });
                     }
                 }
 
@@ -489,7 +501,7 @@ pub fn back_button_system(
     mut explore_state: ResMut<NextState<ExploreState>>,
     mut keyboard_state: ResMut<NextState<KeyboardState>>,
     colors: Res<ColorPalette>,
-    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut keyboard: ResMut<KeyboardData>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
@@ -498,13 +510,13 @@ pub fn back_button_system(
             Interaction::Pressed => {
                 *color = colors.light_color.into();
                 //text.sections[0].value = button_text;
-                overlay_state.set(DisplayBuyUiState::Off);
                 explore_state.set(ExploreState::On);
                 keyboard_state.set(KeyboardState::Off);
                 // help with jumpiness when leaving this screen - hopefully
                 mouse.clear();
                 keyboard.target = TargetType::Nothing;
                 keyboard.value = "".to_string();
+                overlay_state.set(DisplayBuyUiState::Off);
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
@@ -520,10 +532,77 @@ pub fn back_button_system(
 
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn tab_key_system(
-    keys: Res<Input<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
+    // text_box_q: Query<
+    //     (
+    //         &mut Interaction,
+    //         Option<&NewBlockLnAddressButton>,
+    //         Option<&NewBlockColorButton>,
+    //         Option<&NewBlockMessageButton>,
+    //     ),
+    //     With<EditabledTextBox>,
+    // >,
+    mut keyboard: ResMut<KeyboardData>,
+    mut block_new_data: ResMut<CurrentCartBlock>,
+    mut tile_cart: ResMut<TileCartVec>,
+) {
+    if keys.just_pressed(KeyCode::Tab) {
+        resolve_target_cart_data(&keyboard, &mut block_new_data, &mut tile_cart);
+        match keyboard.target {
+            TargetType::NewLnAddress => {
+                keyboard.value = block_new_data.color_text.to_string();
+                keyboard.target = TargetType::NewColor;
+            }
+            TargetType::Nothing => {
+                keyboard.value = block_new_data.ln_address.to_string();
+                keyboard.target = TargetType::NewLnAddress;
+            }
+            TargetType::NewColor => {
+                keyboard.value = block_new_data.message.to_string();
+                keyboard.target = TargetType::NewMessage;
+            }
+            TargetType::NewMessage => {
+                keyboard.value = block_new_data.ln_address.to_string();
+                keyboard.target = TargetType::NewLnAddress;
+            }
+        }
+
+        // for (mut interaction, ln_box, color_box, msg_box) in text_box_q.iter_mut() {
+        //     match (ln_box, color_box, msg_box) {
+        //         (Some(_), _, _) => {
+        //             if tab_target == TargetType::NewLnAddress {
+        //                 *interaction = Interaction::Pressed;
+        //             } else {
+        //                 *interaction = Interaction::None;
+        //             }
+        //         }
+        //         (_, Some(_), _) => {
+        //             if tab_target == TargetType::NewColor {
+        //                 *interaction = Interaction::Pressed;
+        //             } else {
+        //                 *interaction = Interaction::None;
+        //             }
+        //         }
+        //         (_, _, Some(_)) => {
+        //             if tab_target == TargetType::NewMessage {
+        //                 *interaction = Interaction::Pressed;
+        //             } else {
+        //                 *interaction = Interaction::None;
+        //             }
+        //         }
+        //         (None, None, None) => {
+        //             info!("Error05 this shouldn't of happened, please report this");
+        //         }
+        //     }
+        // }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn highlight_box_system(
     mut text_box_q: Query<
         (
-            &mut Interaction,
+            &mut BackgroundColor,
             Option<&NewBlockLnAddressButton>,
             Option<&NewBlockColorButton>,
             Option<&NewBlockMessageButton>,
@@ -531,53 +610,37 @@ pub fn tab_key_system(
         With<EditabledTextBox>,
     >,
     keyboard: ResMut<KeyboardData>,
+    colors: Res<ColorPalette>,
 ) {
-    if keys.just_pressed(KeyCode::Tab) {
-        let tab_target = if keyboard.target == TargetType::NewLnAddress {
-            TargetType::NewColor
-        } else if keyboard.target == TargetType::NewColor {
-            //keyboard.0 = block_new_data.color.to_string();
-            TargetType::NewMessage
-        } else if keyboard.target == TargetType::NewMessage
-            || keyboard.target == TargetType::Nothing
-        {
-            //keyboard.0 = block_new_data.message.to_string();
-            TargetType::NewLnAddress
-        } else {
-            TargetType::Nothing
-        };
-
-        for (mut interaction, ln_box, color_box, msg_box) in text_box_q.iter_mut() {
-            match (ln_box, color_box, msg_box) {
-                (Some(_), _, _) => {
-                    if tab_target == TargetType::NewLnAddress {
-                        *interaction = Interaction::Pressed;
-                    } else {
-                        *interaction = Interaction::None;
-                    }
+    for (mut color, ln_box, color_box, msg_box) in text_box_q.iter_mut() {
+        match (ln_box, color_box, msg_box) {
+            (Some(_), _, _) => {
+                if keyboard.target == TargetType::NewLnAddress {
+                    *color = colors.lite_button_color.into();
+                } else {
+                    *color = colors.button_color.into();
                 }
-                (_, Some(_), _) => {
-                    if tab_target == TargetType::NewColor {
-                        *interaction = Interaction::Pressed;
-                    } else {
-                        *interaction = Interaction::None;
-                    }
+            }
+            (_, Some(_), _) => {
+                if keyboard.target == TargetType::NewColor {
+                    *color = colors.lite_button_color.into();
+                } else {
+                    *color = colors.button_color.into();
                 }
-                (_, _, Some(_)) => {
-                    if tab_target == TargetType::NewMessage {
-                        *interaction = Interaction::Pressed;
-                    } else {
-                        *interaction = Interaction::None;
-                    }
+            }
+            (_, _, Some(_)) => {
+                if keyboard.target == TargetType::NewMessage {
+                    *color = colors.lite_button_color.into();
+                } else {
+                    *color = colors.button_color.into();
                 }
-                (None, None, None) => {
-                    info!("Error05 this shouldn't of happened, please report this");
-                }
+            }
+            (None, None, None) => {
+                info!("Error05 this shouldn't of happened, please report this");
             }
         }
     }
 }
-
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn show_color_button_system(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), With<BtnShowingColor>>,

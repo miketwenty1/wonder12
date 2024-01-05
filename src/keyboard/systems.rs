@@ -12,15 +12,15 @@ const MAX_INPUT_LENGTH: usize = 200;
 #[allow(clippy::type_complexity)]
 pub fn physical_keyboard_system(
     mut char_evr: EventReader<ReceivedCharacter>,
-    keys: Res<Input<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
     mut keyboard_text: ResMut<KeyboardData>,
 ) {
-    if keys.just_pressed(KeyCode::Back) {
+    if keys.just_pressed(KeyCode::Backspace) {
         keyboard_text.value.pop();
     }
 
     for ev in char_evr.read() {
-        let k = ev.char;
+        let k = ev.char.to_string().chars().next().unwrap();
 
         if ACCEPTABLE_CHARS.contains(k) && keyboard_text.value.len() < MAX_INPUT_LENGTH {
             keyboard_text.value.push(k);

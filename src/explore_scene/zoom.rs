@@ -9,7 +9,7 @@ use crate::{
 
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn zoom_out_button_system(
-    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut mouse_wheel_events: EventReader<MouseWheel>,
     mut interaction_query: Query<
         (
@@ -75,7 +75,7 @@ pub fn zoom_out_button_system(
 
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn zoom_in_button_system(
-    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut mouse_wheel_events: EventReader<MouseWheel>,
     //mut touch: ResMut<Touches>, // need a clear method or a clear fn work around
     mut interaction_query: Query<

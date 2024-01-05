@@ -222,7 +222,7 @@ pub fn setup_toggle(
 
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn toggle_button_system(
-    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (
@@ -302,7 +302,7 @@ pub fn toggle_button_system(
 
 #[allow(clippy::type_complexity)]
 pub fn toggle_button_sub_system_toggle1(
-    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Toggle1Btn>),
@@ -350,7 +350,7 @@ pub fn toggle_button_sub_system_toggle1(
 
 #[allow(clippy::type_complexity)]
 pub fn toggle_button_sub_system_toggle2(
-    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Toggle2Btn>),
@@ -397,7 +397,7 @@ pub fn toggle_button_sub_system_toggle2(
 }
 #[allow(clippy::type_complexity)]
 pub fn toggle_button_sub_system_toggle3(
-    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Toggle3Btn>),
@@ -450,7 +450,7 @@ pub fn toggle_button_sub_system_toggle3(
 }
 #[allow(clippy::type_complexity)]
 pub fn toggle_button_sub_system_toggle4(
-    mut mouse: ResMut<Input<MouseButton>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Toggle4Btn>),

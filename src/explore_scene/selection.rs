@@ -10,7 +10,7 @@ use crate::{
 
 #[allow(clippy::too_many_arguments)]
 pub fn choose_tile(
-    mouse: Res<Input<MouseButton>>,
+    mouse: Res<ButtonInput<MouseButton>>,
     mut q_camera_simple: Query<(&Camera, &GlobalTransform), With<Camera>>,
 
     q_window: Query<&Window, With<PrimaryWindow>>,

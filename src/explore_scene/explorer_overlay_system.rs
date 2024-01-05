@@ -16,7 +16,9 @@ pub fn clear_last_selected_tile_ui_button(
 ) {
     for interaction in &mut interaction_query {
         match *interaction {
-            Interaction::Pressed => clear_last_selected_tile_event.send(ClearLastSelectedTile),
+            Interaction::Pressed => {
+                clear_last_selected_tile_event.send(ClearLastSelectedTile);
+            }
             Interaction::Hovered => {}
             Interaction::None => {}
         }
