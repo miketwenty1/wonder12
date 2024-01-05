@@ -58,7 +58,7 @@ pub fn spawn_qr(
                 dimensions,
                 data,
                 img_format,
-                RenderAssetPersistencePolicy::Unload,
+                RenderAssetPersistencePolicy::Keep,
             );
 
             let texture = images.add(bevy_image);

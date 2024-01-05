@@ -173,7 +173,7 @@ pub fn game12(
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        resolution: [viewport_width as f32, viewport_height as f32].into(),
+                        //resolution: [viewport_width as f32, viewport_height as f32].into(),
                         //canvas: Some("bevy".to_string()),
                         //mode: WindowMode::BorderlessFullscreen,
                         title: "SatoshiSettlers".to_string(),
