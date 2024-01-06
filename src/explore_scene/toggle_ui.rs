@@ -223,6 +223,7 @@ pub fn setup_toggle(
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn toggle_button_system(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
+    mut touches: ResMut<Touches>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (
@@ -251,6 +252,7 @@ pub fn toggle_button_system(
         match *interaction {
             Interaction::Pressed => {
                 mouse.clear_just_pressed(MouseButton::Left);
+                touches.clear();
                 //text.sections[0].value = button_text;
                 *color = colors.light_color.into();
                 //game_state.set(DisplayBuyUiState::On);
@@ -303,6 +305,7 @@ pub fn toggle_button_system(
 #[allow(clippy::type_complexity)]
 pub fn toggle_button_sub_system_toggle1(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
+    mut touches: ResMut<Touches>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Toggle1Btn>),
@@ -317,6 +320,7 @@ pub fn toggle_button_sub_system_toggle1(
         match *interaction {
             Interaction::Pressed => {
                 mouse.clear_just_pressed(MouseButton::Left);
+                touches.clear();
                 let mut text = text_query.get_single_mut().unwrap();
 
                 match text.sections[0].value.as_str() {
@@ -351,6 +355,7 @@ pub fn toggle_button_sub_system_toggle1(
 #[allow(clippy::type_complexity)]
 pub fn toggle_button_sub_system_toggle2(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
+    mut touches: ResMut<Touches>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Toggle2Btn>),
@@ -365,6 +370,7 @@ pub fn toggle_button_sub_system_toggle2(
         match *interaction {
             Interaction::Pressed => {
                 mouse.clear_just_pressed(MouseButton::Left);
+                touches.clear();
                 let mut text = text_query.get_single_mut().unwrap();
 
                 match text.sections[0].value.as_str() {
@@ -395,9 +401,10 @@ pub fn toggle_button_sub_system_toggle2(
         }
     }
 }
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn toggle_button_sub_system_toggle3(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
+    mut touches: ResMut<Touches>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Toggle3Btn>),
@@ -413,6 +420,7 @@ pub fn toggle_button_sub_system_toggle3(
         match *interaction {
             Interaction::Pressed => {
                 mouse.clear_just_pressed(MouseButton::Left);
+                touches.clear();
                 let mut text3 = text_query3.get_single_mut().unwrap();
                 let mut text4 = text_query4.get_single_mut().unwrap();
 
@@ -451,6 +459,7 @@ pub fn toggle_button_sub_system_toggle3(
 #[allow(clippy::type_complexity)]
 pub fn toggle_button_sub_system_toggle4(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
+    mut touches: ResMut<Touches>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Toggle4Btn>),
@@ -465,6 +474,7 @@ pub fn toggle_button_sub_system_toggle4(
         match *interaction {
             Interaction::Pressed => {
                 mouse.clear_just_pressed(MouseButton::Left);
+                touches.clear();
                 let mut text = text_query.get_single_mut().unwrap();
 
                 match text.sections[0].value.as_str() {

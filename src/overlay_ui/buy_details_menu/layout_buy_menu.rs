@@ -222,7 +222,7 @@ pub fn spawn_layout(
                         //height: Val::Px(100.0),
                         display: Display::Grid,
                         justify_items: JustifyItems::Center,
-                        margin: UiRect::all(Val::Px(5.0)),
+                        padding: UiRect::all(Val::Px(2.0)),
                         //padding: UiRect::all(Val::Px(2.0)),
                         grid_template_columns: vec![GridTrack::auto(), GridTrack::auto()],
                         grid_template_rows: vec![

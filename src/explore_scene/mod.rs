@@ -30,7 +30,7 @@ use self::{
         toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4, toggle_button_system,
     },
     update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
-    zoom::{zoom_in_button_system, zoom_out_button_system},
+    zoom::{pinch_out_button_system, zoom_in_button_system, zoom_out_button_system},
 };
 
 pub struct ExplorePlugin;
@@ -70,6 +70,7 @@ impl Plugin for ExplorePlugin {
                         choose_tile,
                         desktop_movement_camera_system,
                         touch_event_system,
+                        pinch_out_button_system,
                     )
                         .chain(),
                     edge_system,

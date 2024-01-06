@@ -26,6 +26,8 @@ use resourcey::{CheckInvoiceChannel, InitBlockCount, InitGameMap, RequestInvoice
 use statey::{CommsApiBlockLoadState, InitLoadingBlocksState, ToastState};
 use structy::RequestTileType;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsCast;
+use web_sys::HtmlCanvasElement;
 
 mod building_config;
 mod comms;
@@ -55,8 +57,6 @@ pub fn game12(
     max_height: u32,
     viewport_width: u32,
     viewport_height: u32,
-    res_width: u32,
-    res_height: u32,
 ) {
     // this doesn't show
     // info!(
@@ -221,6 +221,7 @@ fn setup(
     mut request_tiles_event: EventWriter<RequestTileUpdates>,
     //q_window: Query<&Window, With<PrimaryWindow>>,
 ) {
+    fit_canvas_to_parent();
     //commands.spawn(Camera2dBundle::default());
     commands.spawn(Camera2dBundle::default());
 
@@ -266,4 +267,19 @@ fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands
     for entity in &to_despawn {
         commands.entity(entity).despawn_recursive();
     }
+}
+
+fn fit_canvas_to_parent() {
+    let canvas: HtmlCanvasElement = web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .query_selector("canvas")
+        .unwrap()
+        .unwrap()
+        .unchecked_into();
+    let style = canvas.style();
+    style.set_property("width", "100%").unwrap();
+    style.set_property("height", "100%").unwrap();
+    //style.set_property(property, value)
 }

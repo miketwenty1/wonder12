@@ -960,6 +960,8 @@ pub fn buy_selection_button(
     mut ui_state: ResMut<NextState<DisplayBuyUiState>>,
     colors: Res<ColorPalette>,
     mut mouse: ResMut<ButtonInput<MouseButton>>,
+    mut touch: EventReader<TouchInput>,
+    mut touches: ResMut<Touches>,
     mut mouse_motion_events: EventReader<MouseMotion>,
     selection: Query<&Selected>,
     mut toast: EventWriter<ToastEvent>,
@@ -973,10 +975,9 @@ pub fn buy_selection_button(
                 border_color.0 = colors.light_color;
                 // trying to kill jumpiness
                 mouse.clear();
-                mouse.clear_just_pressed(MouseButton::Left);
-                mouse.clear_just_released(MouseButton::Left);
                 mouse_motion_events.clear();
-                mouse_motion_events.read();
+                touch.clear();
+                touches.clear();
 
                 let count = selection.iter().count();
                 if count > MAX_SELECTION_SIZE {
@@ -992,11 +993,11 @@ pub fn buy_selection_button(
                 text.sections[0].value = "Buy".to_string();
                 *color = colors.accent_color.into();
                 border_color.0 = colors.node_color;
-                mouse.clear();
-                mouse.clear_just_pressed(MouseButton::Left);
-                mouse.clear_just_released(MouseButton::Left);
-                mouse_motion_events.clear();
-                mouse_motion_events.read();
+                // mouse.clear();
+                // mouse.clear_just_pressed(MouseButton::Left);
+                // mouse.clear_just_released(MouseButton::Left);
+                // mouse_motion_events.clear();
+                // mouse_motion_events.read();
             }
             Interaction::None => {
                 text.sections[0].value = "Buy".to_string();

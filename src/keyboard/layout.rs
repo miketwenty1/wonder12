@@ -26,7 +26,7 @@ pub fn setup_keyboard(
     for _e in event.read() {
         info!("keyboard setup!");
         state.set(KeyboardState::On);
-        let font_size = if wsize.width < 420.0 { 26.0 } else { 32.0 };
+        let font_size = if wsize.width < 420.0 { 22.0 } else { 32.0 };
         let padding_size = 1.0; //if wsize.width < 420.0 { 0.5 } else { 1.0 };
         let row_height = 40.0; //if wsize.height < 900.0 { 0.5 } else { 1.0 };
         let keyboard_row_justification = if wsize.width < 420.0 {
