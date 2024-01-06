@@ -173,3 +173,9 @@ pub struct WinSize {
     pub width: f32,
     pub height: f32,
 }
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct MultiTouchInfo {
+    //pub status: bool,
+    pub distance: f32,
+}

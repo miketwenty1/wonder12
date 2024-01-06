@@ -22,7 +22,10 @@ use bevy::asset::AssetMetaCheck;
 use bevy::{prelude::*, utils::HashMap};
 use chrono::{Duration, Utc};
 use eventy::KeyboardSpawnEvent;
-use resourcey::{CheckInvoiceChannel, InitBlockCount, InitGameMap, RequestInvoiceChannel, WinSize};
+use resourcey::{
+    CheckInvoiceChannel, InitBlockCount, InitGameMap, MultiTouchInfo, RequestInvoiceChannel,
+    WinSize,
+};
 use statey::{CommsApiBlockLoadState, InitLoadingBlocksState, ToastState};
 use structy::RequestTileType;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -167,6 +170,10 @@ pub fn game12(
         .insert_resource(WinSize {
             width: viewport_width as f32,
             height: viewport_height as f32,
+        })
+        .insert_resource(MultiTouchInfo {
+            //status: false,
+            distance: 0.0,
         })
         //.add_plugins(DefaultPlugins)
         .add_plugins(

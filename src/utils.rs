@@ -1,4 +1,4 @@
-use bevy::{log::info, render::color::Color};
+use bevy::{log::info, math::Vec2, render::color::Color};
 use rand::Rng;
 use regex::Regex;
 
@@ -71,4 +71,10 @@ pub fn get_random_color() -> Color {
         blue: b,
         alpha: 1.0,
     }
+}
+
+pub fn distance_between_vecs(a: &Vec2, b: &Vec2) -> f32 {
+    let dx = b.x - a.x;
+    let dy = b.y - a.y;
+    (dx.powi(2) + dy.powi(2)).sqrt()
 }
