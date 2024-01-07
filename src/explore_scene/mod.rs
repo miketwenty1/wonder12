@@ -1,10 +1,11 @@
 pub mod amount_ui;
 pub mod cron_systems;
 pub mod explore;
-pub mod explorer_movement_systems;
 pub mod explorer_overlay_system;
+pub mod mouse_movement_systems;
 pub mod selection;
 pub mod toggle_ui;
+pub mod touch_movement_systems;
 pub mod update_toggle_events;
 pub mod zoom;
 
@@ -19,16 +20,16 @@ use self::{
     cron_systems::{cron_update_tiles, tick_update_tile_cron_timer, CronPollingTimer},
     explore::{
         animate_sprites, buy_selection_button, clear_selection, clear_selection_button,
-        edge_system, init_explorer, reset_mouse, spawn_block_sprites, touch_event_system,
-        update_tile_textures,
+        edge_system, init_explorer, reset_mouse, spawn_block_sprites, update_tile_textures,
     },
-    explorer_movement_systems::{clear_last_selected_tile, desktop_movement_camera_system},
     explorer_overlay_system::{clear_last_selected_tile_ui_button, init_block_loading_text},
+    mouse_movement_systems::{clear_last_selected_tile, desktop_movement_camera_system},
     selection::{choose_tile, select_tile},
     toggle_ui::{
         setup_toggle, toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
         toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4, toggle_button_system,
     },
+    touch_movement_systems::touch_event_system,
     update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
     zoom::{pinch_system, zoom_in_button_system, zoom_out_button_system},
 };

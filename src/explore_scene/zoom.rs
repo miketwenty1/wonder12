@@ -150,44 +150,56 @@ pub fn zoom_in_button_system(
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn pinch_system(
     touches: Res<Touches>,
-    // mut touch_e: EventReader<TouchInput>,
-    // time: Res<Time>,
+    mut touch_e: EventReader<TouchInput>,
+    time: Res<Time>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
-    //mut multitouch: ResMut<MultiTouchInfo>,
     mut multitouch_distance: Local<f32>,
 ) {
     let mut zoom_amount: f32 = 0.0;
 
-    if touches.iter().count() == 2 {
-        let first = touches.first_pressed_position().unwrap();
+    for _e in touch_e.read() {
+        if touches.iter().count() == 2 {
+            let first = touches
+                .first_pressed_position()
+                .unwrap_or(Vec2 { x: 0.0, y: 0.0 });
 
-        for touch in touches.iter() {
-            if touch.position() != first {
-                let diff = touch.position() - first;
-                let diff2 = distance_between_vecs(&touch.position(), &first);
-                info!("diff-dist1: {}, diff-dist2 {}", diff, diff2);
-                if *multitouch_distance == 0.0 {
-                    *multitouch_distance = diff2;
-                } else if *multitouch_distance > diff2 {
-                    zoom_amount = 0.25;
+            for touch in touches.iter() {
+                if touch.position() != first {
+                    let diff2 = distance_between_vecs(&touch.position(), &first);
+                    if diff2 > 110.0 {
+                        if (*multitouch_distance - diff2).abs() > 2.0 {
+                            if *multitouch_distance == 0.0 {
+                            } else if *multitouch_distance > diff2 {
+                                zoom_amount = 0.25;
+                                info!("zooming out");
+                            } else {
+                                zoom_amount = -0.25;
+                                info!("zooming in");
+                            }
+                        }
+
+                        *multitouch_distance = diff2;
+                    }
+                }
+            }
+
+            if zoom_amount != 0.0 {
+                let time_adjusted = if time.delta_seconds() > 0.01 {
+                    0.01
                 } else {
-                    zoom_amount = -0.25;
+                    time.delta_seconds()
+                };
+                for mut ortho in cam_query.iter_mut() {
+                    ortho.scale += zoom_amount * time_adjusted * 30.0;
+                    if ortho.scale > ZOOM_OUT_MAX {
+                        ortho.scale = ZOOM_OUT_MAX;
+                    } else if ortho.scale < ZOOM_IN_MAX {
+                        ortho.scale = ZOOM_IN_MAX;
+                    }
                 }
             }
+        } else {
+            *multitouch_distance = 0.0;
         }
-
-        if zoom_amount > 0.0 {
-            for mut ortho in cam_query.iter_mut() {
-                ortho.scale += zoom_amount;
-                //info!("{}", ortho.scale);
-                if ortho.scale > ZOOM_OUT_MAX {
-                    ortho.scale = ZOOM_OUT_MAX;
-                } else if ortho.scale < ZOOM_IN_MAX {
-                    ortho.scale = ZOOM_IN_MAX;
-                }
-            }
-        }
-    } else {
-        *multitouch_distance = 0.0;
     }
 }
