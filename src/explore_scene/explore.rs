@@ -5,7 +5,6 @@ use bevy::{
     prelude::*,
     render::texture::{ImageLoaderSettings, ImageSampler},
     text::Text2dBounds,
-    window::PrimaryWindow,
 };
 use rand::Rng;
 use ulam::Quad;
@@ -19,12 +18,10 @@ use crate::{
     },
     consty::{
         CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT, DESPAWN_TILE_THRESHOLD,
-        MAX_SELECTION_SIZE, MOVE_VELOCITY_FACTOR, TILE_PIXEL_SIZE, TILE_SCALE,
-        TOTAL_TILE_SCALE_SIZE,
+        MAX_SELECTION_SIZE, TILE_PIXEL_SIZE, TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
-        ClearLastSelectedTile, ClearSelectionEvent, EdgeEvent, SelectTileEvent, SpriteSpawnEvent,
-        UpdateTileTextureEvent, UpdateUiAmount,
+        ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
     },
     overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{

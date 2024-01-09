@@ -14,7 +14,7 @@ edition = "2021"
 # ] }
 
 [dependencies]
-bevy = { git = "https://github.com/nicopap/bevy.git", branch = "fix-about-to-wait-redraw", default-features = false, features = [
+bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main", default-features = false, features = [
     "bevy_winit",
     "bevy_ui",
     "png",
@@ -42,7 +42,7 @@ reqwest = { version = "0.11", features = ["json"] }
 chrono = { version = "0.4", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
-all-colors = "0.0.5"
+all-colors = "0.0.6"
 regex = "1.10.2"
 qrcode-generator = "4.1"
 image = "0.24"

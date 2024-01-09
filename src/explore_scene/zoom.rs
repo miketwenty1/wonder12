@@ -1,13 +1,9 @@
-use bevy::{
-    input::{mouse::MouseWheel, touch::TouchPhase},
-    prelude::*,
-};
+use bevy::{input::mouse::MouseWheel, prelude::*};
 
 use crate::{
     componenty::{ZoomInButton, ZoomOutButton},
     consty::{ZOOM_IN_MAX, ZOOM_OUT_MAX},
-    eventy::ClearLastSelectedTile,
-    resourcey::{ColorPalette, MultiTouchInfo},
+    resourcey::ColorPalette,
     utils::distance_between_vecs,
 };
 
