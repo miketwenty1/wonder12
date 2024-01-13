@@ -100,10 +100,10 @@ pub fn api_receive_invoice(
     // mut qr_state: ResMut<NextState<RequestInvoice>>,
     // mut server_event: EventWriter<ServerInvoiceIn>,
     mut invoice_data: ResMut<InvoiceDataFromServer>,
+    mut toast: EventWriter<ToastEvent>,
 ) {
     if api_timer.timer.finished() {
         let api_res = channel.rx.try_recv();
-
         info!("waiting to receive invoice");
         match api_res {
             Ok(r) => {
@@ -119,6 +119,10 @@ pub fn api_receive_invoice(
                     }
                     Err(e) => {
                         info!("response to invoice creation - fail: {}", e);
+                        toast.send(ToastEvent {
+                            ttype: ToastType::Bad,
+                            message: "Could not validate your lightning address".to_string(),
+                        });
                         api_name_set_state.set(CommsApiState::Off);
                     }
                 };

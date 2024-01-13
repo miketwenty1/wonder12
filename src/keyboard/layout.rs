@@ -279,10 +279,18 @@ fn keyboard_button(
                         .id();
 
                     if key_type == KeyType::Letter {
-                        parent.add_command(bevy::ecs::system::Insert {
-                            entity: ent_text,
-                            bundle: Capitalizable,
+                        //let a = parent;
+                        // parent.add_command(|world: &mut World| {
+                        //     world.entity_mut(ent_text).insert(Capitalizable)
+                        // });
+
+                        parent.add_command(move |world: &mut World| {
+                            world.entity_mut(ent_text).insert(Capitalizable);
                         });
+                        // parent.add_command(bevy::ecs::system::Insert {
+                        //     entity: ent_text,
+                        //     bundle: Capitalizable,
+                        // });
                     }
                 });
         });

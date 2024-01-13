@@ -13,13 +13,16 @@ edition = "2021"
 #     "webgl2",
 # ] }
 
+# [dependencies]
+# bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main", default-features = false, features = [
+#     "bevy_winit",
+#     "bevy_ui",
+#     "png",
+#     "webgl2",
+# ] }
+
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main", default-features = false, features = [
-    "bevy_winit",
-    "bevy_ui",
-    "png",
-    "webgl2",
-] }
+bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 
 # bevy = { version = "0.12.1", default-features = false, features = [
 #     "bevy_winit",
