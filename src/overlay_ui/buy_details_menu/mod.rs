@@ -47,7 +47,7 @@ impl Plugin for BuyDetailsMenuPlugin {
                     tab_key_system,
                     highlight_box_system,
                     show_color_button_system,
-                    (write_keyboard_target).run_if(resource_changed::<KeyboardData>()),
+                    (write_keyboard_target).run_if(resource_changed::<KeyboardData>),
                     config_cart_button_system,
                     //set_keyboard,
                 )

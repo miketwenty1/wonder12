@@ -19,12 +19,13 @@ use crate::statey::{CommsApiState, DisplayBuyUiState, ExploreState};
 use crate::structy::EdgeData;
 use bevy::asset::AssetMetaCheck;
 
+// use bevy::window::WindowResolution;
 use bevy::{prelude::*, utils::HashMap};
 use chrono::{Duration, Utc};
-use eventy::KeyboardSpawnEvent;
+use eventy::{HideBackupCopyBtn, KeyboardSpawnEvent, ShowBackupCopyBtn};
 use resourcey::{
-    CheckInvoiceChannel, InitBlockCount, InitGameMap, MultiTouchInfo, RequestInvoiceChannel,
-    WinSize,
+    CheckInvoiceChannel, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone,
+    MultiTouchInfo, RequestInvoiceChannel, WinSize,
 };
 use statey::{CommsApiBlockLoadState, InitLoadingBlocksState, ToastState};
 use structy::RequestTileType;
@@ -60,6 +61,10 @@ pub fn game12(
     max_height: u32,
     viewport_width: u32,
     viewport_height: u32,
+    _screen_width: u32,
+    _screen_height: u32,
+    _device_pixel_ratio: f32,
+    is_iphone: bool,
 ) {
     // this doesn't show
     // info!(
@@ -123,6 +128,49 @@ pub fn game12(
         },
     };
 
+    // let window = if viewport_width as f32 * device_pixel_ratio > 4096.0
+    //     || viewport_height as f32 * device_pixel_ratio > 4096.0
+    // {
+    //     if viewport_width as f32 * 2.0 > 4096.0 || viewport_height as f32 * 2.0 > 4096.0 {
+    //         Window {
+    //             resolution: WindowResolution::new(viewport_width as f32, viewport_height as f32)
+    //                 .with_scale_factor_override(1.0),
+    //             title: "SatoshiSettlers".to_string(),
+    //             ..default()
+    //         }
+    //     } else {
+    //         Window {
+    //             resolution: WindowResolution::new(viewport_width as f32, viewport_height as f32)
+    //                 .with_scale_factor_override(2.0),
+    //             title: "SatoshiSettlers".to_string(),
+    //             ..default()
+    //         }
+    //     }
+    // } else {
+    //     Window {
+    //         title: "SatoshiSettlers".to_string(),
+    //         ..default()
+    //     }
+    // };
+    // let window = if device_pixel_ratio == 3.5 {
+    //     Window {
+    //         resolution: WindowResolution::new(viewport_width as f32, viewport_height as f32)
+    //             .with_scale_factor_override(2.0),
+    //         title: "SatoshiSettlers".to_string(),
+    //         ..default()
+    //     }
+    // } else {
+    //     Window {
+    //         title: "SatoshiSettlers".to_string(),
+    //         ..default()
+    //     }
+    // };
+
+    let window = Window {
+        title: "SatoshiSettlers".to_string(),
+        ..default()
+    };
+
     App::new()
         .insert_resource(start_edge)
         .insert_resource(color_palette)
@@ -175,17 +223,13 @@ pub fn game12(
             //status: false,
             distance: 0.0,
         })
+        .insert_resource(ConfigAllCartBlocks(false))
+        .insert_resource(IsIphone(is_iphone))
         //.add_plugins(DefaultPlugins)
         .add_plugins(
             DefaultPlugins
                 .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        //resolution: [viewport_width as f32, viewport_height as f32].into(),
-                        //canvas: Some("bevy".to_string()),
-                        //mode: WindowMode::BorderlessFullscreen,
-                        title: "SatoshiSettlers".to_string(),
-                        ..default()
-                    }),
+                    primary_window: Some(window),
                     ..default()
                 })
                 .set(ImagePlugin::default_nearest()), //default_nearest()),
@@ -216,6 +260,8 @@ pub fn game12(
         .add_event::<ClearSelectionEvent>()
         .add_event::<ClearLastSelectedTile>()
         .add_event::<KeyboardSpawnEvent>()
+        .add_event::<HideBackupCopyBtn>()
+        .add_event::<ShowBackupCopyBtn>()
         .add_systems(Startup, setup) //setupcoords
         //.add_systems(PostStartup, setup2) //setupcoords
         //.add_systems(PostStartup, api_get_server_tiles)

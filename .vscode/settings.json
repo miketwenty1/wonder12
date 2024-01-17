@@ -1,5 +1,3 @@
 {
     "rust-analyzer.cargo.target": "wasm32-unknown-unknown",
-    "crates.localCargoIndexHash": "",
-    "crates.useLocalCargoIndex": false
 }

@@ -13,14 +13,6 @@ edition = "2021"
 #     "webgl2",
 # ] }
 
-# [dependencies]
-# bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main", default-features = false, features = [
-#     "bevy_winit",
-#     "bevy_ui",
-#     "png",
-#     "webgl2",
-# ] }
-
 [dependencies]
 bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 
@@ -51,9 +43,7 @@ qrcode-generator = "4.1"
 image = "0.24"
 wasm-bindgen-futures = "0.4"
 
-[dependencies.web-sys]
-version = "0.3"
-features = [
+web-sys = { version = "0.3.64", features = [
     "CssStyleDeclaration",
     "Document",
     "HtmlCanvasElement",
@@ -61,7 +51,14 @@ features = [
     "Window",
     "Navigator",
     "Permissions",
-]
+    #"UserActivation",
+] }
+
+# [patch.crates-io]
+# winit = { git = "https://github.com/rust-windowing/winit.git", rev = "798c205cef1aa0c92eb43bef537583ce5b1ad1fb" }
+# web-sys = { git = "https://github.com/rustwasm/wasm-bindgen.git", branch = "main", features = [
+#     "UserActivation",
+# ] }
 
 
 [workspace]

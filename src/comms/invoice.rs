@@ -2,11 +2,14 @@ use bevy::{prelude::*, tasks::IoTaskPool};
 use serde::Deserialize;
 
 use crate::{
-    eventy::{BuyBlockRequest, ClearSelectionEvent, RequestTileUpdates},
+    eventy::{
+        BuyBlockRequest, ClearSelectionEvent, HideBackupCopyBtn, RequestTileUpdates,
+        ShowBackupCopyBtn,
+    },
     overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
-        CheckInvoiceChannel, InvoiceCheckFromServer, InvoiceDataFromServer, RequestInvoiceChannel,
-        TileCartVec, User,
+        CheckInvoiceChannel, InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone,
+        RequestInvoiceChannel, TileCartVec, User,
     },
     statey::{CommsApiState, DisplayBuyUiState, ExploreState},
     structy::{GameInvoiceData, InvoiceGameBlock, RequestTileType},
@@ -15,6 +18,9 @@ use crate::{
 };
 
 use super::api_timer::ApiPollingTimer;
+
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::wasm_bindgen;
 
 #[derive(Debug, Clone, Deserialize, Default)]
 pub enum InvoiceStatus {
@@ -71,18 +77,35 @@ pub fn api_request_invoice(
             let url = format!("{}/comms/invoice/blocks", server);
             info!("url: {}", url);
             let _task = pool.spawn(async move {
-                let api_response_text = reqwest::Client::new()
+                let api_response_text_r = reqwest::Client::new()
                     .post(url)
                     .header("Content-Type", "application/json")
                     .json(&b)
                     .send()
-                    .await
-                    .unwrap()
-                    .text()
-                    .await
-                    .unwrap();
+                    .await;
 
-                cc.try_send(api_response_text);
+                match api_response_text_r {
+                    Ok(o) => {
+                        let api_response_text_rr = o.text().await;
+
+                        match api_response_text_rr {
+                            Ok(o) => {
+                                cc.try_send(o);
+                            }
+                            Err(e) => {
+                                info!("error with req inv {:#?}", e);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        info!("error with requesting invoice: {:#?}", e);
+                    }
+                }
+
+                // .unwrap()
+                // .text()
+                // .await
+                // .unwrap();
             });
             api_receive_state.set(CommsApiState::ReceiveInvoice);
         } else {
@@ -176,6 +199,8 @@ pub fn api_receive_invoice_check(
     mut invoice_data: ResMut<InvoiceDataFromServer>,
     mut clear_event: EventWriter<ClearSelectionEvent>,
     mut toast: EventWriter<ToastEvent>,
+    mut bkp_clipboard_btn: EventWriter<HideBackupCopyBtn>,
+    iphone: Res<IsIphone>,
 ) {
     if api_timer.timer.finished() {
         let api_res = channel.rx.try_recv();
@@ -198,6 +223,10 @@ pub fn api_receive_invoice_check(
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
                                 clear_event.send(ClearSelectionEvent);
+                                if iphone.0 {
+                                    bkp_clipboard_btn.send(HideBackupCopyBtn);
+                                }
+
                                 toast.send(ToastEvent {
                                     ttype: ToastType::Good,
                                     message: "Payment Completed!".to_string(),
@@ -211,6 +240,9 @@ pub fn api_receive_invoice_check(
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
+                                if iphone.0 {
+                                    bkp_clipboard_btn.send(HideBackupCopyBtn);
+                                }
                                 toast.send(ToastEvent {
                                     ttype: ToastType::Bad,
                                     message: "Payment Expired!".to_string(),
@@ -263,5 +295,103 @@ pub fn api_receive_invoice_check(
                 e.to_string()
             }
         };
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn show_backup_copy_btn(
+    mut event: EventReader<ShowBackupCopyBtn>,
+    invoice: Res<InvoiceDataFromServer>,
+) {
+    for _e in event.read() {
+        let invoice = &invoice.invoice;
+        let window: web_sys::Window = web_sys::window().expect("window");
+        let document_text = window.document().unwrap().get_element_by_id("textToCopy");
+        let document_btn = window.document().unwrap().get_element_by_id("copyButton");
+
+        // let _task = spawn_local(async move {
+        match document_text {
+            Some(o) => {
+                let vall = o.dyn_into::<web_sys::HtmlElement>();
+                match vall {
+                    Ok(o) => {
+                        info!("worked for html element {:#?}", o);
+                        o.set_inner_text(invoice);
+
+                        match document_btn {
+                            Some(o) => {
+                                info!("btn found");
+
+                                let btn_val = o.dyn_into::<web_sys::HtmlElement>();
+
+                                match btn_val {
+                                    Ok(o) => {
+                                        info!("messed up");
+                                        let st = o.style().set_property("visibility", "visible");
+
+                                        match st {
+                                            Ok(_) => {
+                                                info!("style set it seems");
+                                            }
+                                            Err(e) => {
+                                                info!("error for style {:#?}", e);
+                                            }
+                                        }
+                                    }
+                                    Err(e) => {
+                                        info!("messed up {:#?}", e);
+                                    }
+                                }
+                            }
+                            None => {
+                                info!("btn not found wtf");
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        info!("error {:#?}", e);
+                    }
+                }
+            }
+            None => {
+                info!("no p found");
+            }
+        };
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn hide_backup_copy_btn(mut event: EventReader<HideBackupCopyBtn>) {
+    for _e in event.read() {
+        let window: web_sys::Window = web_sys::window().expect("window");
+        let document_btn = window.document().unwrap().get_element_by_id("copyButton");
+
+        match document_btn {
+            Some(o) => {
+                let btn_val = o.dyn_into::<web_sys::HtmlElement>();
+
+                match btn_val {
+                    Ok(o) => {
+                        info!("messed up");
+                        let st = o.style().set_property("visibility", "hidden");
+
+                        match st {
+                            Ok(_) => {
+                                info!("style set it seems to hidden");
+                            }
+                            Err(e) => {
+                                info!("error for style {:#?}", e);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        info!("messed up {:#?}", e);
+                    }
+                }
+            }
+            None => {
+                info!("iOS style copy button failure");
+            }
+        }
     }
 }

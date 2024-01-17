@@ -47,3 +47,13 @@ pub struct ClearLastSelectedTile;
 
 #[derive(Event, Debug)]
 pub struct KeyboardSpawnEvent;
+
+// #[derive(Debug, Clone)]
+// pub struct InvoiceString {
+//     pub invoice: String,
+// }
+#[derive(Event, Debug, Clone)]
+pub struct HideBackupCopyBtn;
+
+#[derive(Event, Debug)]
+pub struct ShowBackupCopyBtn;

@@ -15,7 +15,9 @@ use crate::{
     eventy::BuyBlockRequest,
     keyboard::{resources::KeyboardData, KeyboardState},
     overlay_ui::toast::{ToastEvent, ToastType},
-    resourcey::{ColorPalette, CurrentCartBlock, TargetType, TileCartVec, User},
+    resourcey::{
+        ColorPalette, ConfigAllCartBlocks, CurrentCartBlock, TargetType, TileCartVec, User,
+    },
     statey::ExploreState,
     utils::is_valid_email_format_string,
     DisplayBuyUiState,
@@ -186,10 +188,8 @@ pub fn config_cart_button_system(
     >,
     mut cart: ResMut<TileCartVec>,
     mut config_text: Query<&mut Text, With<AllCartConfigText>>,
+    mut cart_config: ResMut<ConfigAllCartBlocks>,
     mut cart_item: ResMut<CurrentCartBlock>,
-    mut config: Local<bool>,
-    // editable_textbox_q: Query<Entity, With<CouldBeEditabledTextBox>>,
-    // mut commands: Commands,
     colors: Res<ColorPalette>,
     keyboard: Res<KeyboardData>,
 ) {
@@ -199,9 +199,9 @@ pub fn config_cart_button_system(
             Interaction::Pressed => {
                 *color = colors.light_color.into();
                 resolve_target_cart_data(&keyboard, &mut cart_item, &mut cart);
-                *config = !*config;
+                cart_config.0 = !cart_config.0;
                 for mut text in config_text.iter_mut() {
-                    if *config {
+                    if cart_config.0 {
                         text.sections[0].value = "X".to_string();
                         for block in cart.vec.iter_mut() {
                             block.new_color_text = cart_item.color_text.to_string();

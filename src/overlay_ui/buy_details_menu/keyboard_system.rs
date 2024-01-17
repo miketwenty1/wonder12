@@ -5,7 +5,7 @@ use crate::{
         AllCartConfigText, NewBlockColorText, NewBlockLnAddressText, NewBlockMessageText,
     },
     keyboard::resources::KeyboardData,
-    resourcey::{ColorPalette, CurrentCartBlock, TargetType},
+    resourcey::{ColorPalette, ConfigAllCartBlocks, CurrentCartBlock, TargetType},
 };
 
 #[allow(clippy::type_complexity)]
@@ -16,6 +16,7 @@ pub fn write_keyboard_target(
         Query<&mut Text, With<NewBlockMessageText>>,
         Query<&mut Text, With<AllCartConfigText>>,
     )>,
+    mut cart_config: ResMut<ConfigAllCartBlocks>,
     keyboard: ResMut<KeyboardData>,
     mut block_new_data: ResMut<CurrentCartBlock>,
     colors: Res<ColorPalette>,
@@ -55,6 +56,7 @@ pub fn write_keyboard_target(
         if clear_configbox {
             for mut text in text_query.p3().iter_mut() {
                 text.sections[0].value = "".to_string();
+                cart_config.0 = false;
             }
         }
     }

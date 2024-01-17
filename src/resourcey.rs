@@ -179,3 +179,9 @@ pub struct MultiTouchInfo {
     //pub status: bool,
     pub distance: f32,
 }
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct ConfigAllCartBlocks(pub bool);
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct IsIphone(pub bool);
