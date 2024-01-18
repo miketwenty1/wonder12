@@ -1,6 +1,7 @@
 use super::api_timer::ApiPollingTimer;
 use super::server_structs::GameBlocksDataFromDBMod;
 use crate::eventy::RequestTileUpdates;
+use crate::overlay_ui::toast::{ToastEvent, ToastType};
 use crate::resourcey::{InitGameMap, TileData, TileDataChannel, UpdateGameTimetamp};
 use crate::statey::CommsApiBlockLoadState;
 use crate::structy::{RequestTileType, TileResource};
@@ -50,14 +51,28 @@ pub fn api_get_server_tiles(
             }
             RequestTileType::Ts => {
                 let _task = pool.spawn(async move {
-                    let api_response_text =
-                        reqwest::get(format!("{}/comms/blockdelta_ts/{}", server, ts_str))
-                            .await
-                            .unwrap()
-                            .text()
-                            .await
-                            .unwrap();
-                    cc.try_send(api_response_text);
+                    let api_response_r =
+                        reqwest::get(format!("{}/comms/blockdelta_ts/{}", server, ts_str)).await;
+
+                    match api_response_r {
+                        Ok(o) => {
+                            let api_response_text_r = o.text().await;
+
+                            match api_response_text_r {
+                                Ok(o) => {
+                                    cc.try_send(o);
+                                }
+                                Err(e) => {
+                                    info!("error for request tile ts {:#?}", e);
+                                    cc.try_send(e.to_string());
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            info!("error for request tile ts {:#?}", e);
+                            cc.try_send(e.to_string());
+                        }
+                    }
                 });
             }
         }
@@ -78,6 +93,7 @@ pub fn api_receive_server_tiles(
     mut gametime: ResMut<UpdateGameTimetamp>,
     mut gameinit: ResMut<InitGameMap>,
     mut get_more_tiles: EventWriter<RequestTileUpdates>,
+    mut toast: EventWriter<ToastEvent>,
 ) {
     if api_timer.timer.finished() && !channel.rx.is_empty() {
         //info!("checking for tiles response");
@@ -183,6 +199,12 @@ pub fn api_receive_server_tiles(
                         }
                     }
                     Err(e) => {
+                        if !e.to_string().contains("EOF") {
+                            toast.send(ToastEvent {
+                                ttype: ToastType::Bad,
+                                message: e.to_string(),
+                            });
+                        }
                         info!("tile receive fail: {}", e);
                     }
                 };
@@ -190,6 +212,12 @@ pub fn api_receive_server_tiles(
             }
             Err(e) => {
                 info!("receiving tiles: {}", e);
+                if !e.to_string().contains("EOF") {
+                    toast.send(ToastEvent {
+                        ttype: ToastType::Bad,
+                        message: e.to_string(),
+                    });
+                }
                 if channel.rx.is_empty() {
                     api_state.set(CommsApiBlockLoadState::Off);
                 }

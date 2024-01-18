@@ -101,11 +101,6 @@ pub fn api_request_invoice(
                         info!("error with requesting invoice: {:#?}", e);
                     }
                 }
-
-                // .unwrap()
-                // .text()
-                // .await
-                // .unwrap();
             });
             api_receive_state.set(CommsApiState::ReceiveInvoice);
         } else {
@@ -149,11 +144,17 @@ pub fn api_receive_invoice(
                         api_name_set_state.set(CommsApiState::Off);
                     }
                 };
-                r
+                //r
             }
             Err(e) => {
+                if !e.to_string().contains("EOF") {
+                    toast.send(ToastEvent {
+                        ttype: ToastType::Bad,
+                        message: e.to_string(),
+                    });
+                }
                 info!("response to invoice creation: {}", e);
-                e.to_string()
+                //e.to_string()
             }
         };
     }
@@ -176,13 +177,26 @@ pub fn api_check_invoice(
         let server = api_server.0.to_owned();
         let code = invoice_res.code.to_owned();
         let _task = pool.spawn(async move {
-            let api_response_text = reqwest::get(format!("{}/comms/checkinvoice/{}", server, code))
-                .await
-                .unwrap()
-                .text()
-                .await
-                .unwrap();
-            cc.try_send(api_response_text);
+            let api_response_r =
+                reqwest::get(format!("{}/comms/checkinvoice/{}", server, code)).await;
+            match api_response_r {
+                Ok(o) => {
+                    let api_response_text_r = o.text().await;
+                    match api_response_text_r {
+                        Ok(o) => {
+                            cc.try_send(o);
+                        }
+                        Err(e) => {
+                            info!("failed to parse to check invoice to text {:#?}", e);
+                            cc.try_send(e.to_string());
+                        }
+                    }
+                }
+                Err(e) => {
+                    info!("failed to receive a check invoice {:#?}", e);
+                    cc.try_send(e.to_string());
+                }
+            }
         });
     }
 }
@@ -208,7 +222,6 @@ pub fn api_receive_invoice_check(
         //info!("waiting to receive invoice check");
         match api_res {
             Ok(r) => {
-                // info!("received something from invoice check: {}", r);
                 let r_result = serde_json::from_str::<InvoiceCheckFromServer>(&r);
                 match r_result {
                     Ok(o) => {
@@ -275,24 +288,27 @@ pub fn api_receive_invoice_check(
                         *invoice_check_res = o;
                     }
                     Err(e) => {
-                        // toast.send(ToastEvent {
-                        //     ttype: ToastType::Bad,
-                        //     message: e.to_string(),
-                        // });
-                        // was getting the error receiving from empty channel error and EOF error here so commenting out toast.
+                        if !e.to_string().contains("EOF") {
+                            toast.send(ToastEvent {
+                                ttype: ToastType::Bad,
+                                message: e.to_string(),
+                            });
+                        }
                         info!("requesting check invoice fail: {}", e);
                     }
                 };
-                r
+                //r
             }
             Err(e) => {
-                //was getting the error receiving from empty channel error here so commenting out toast.
+                if !e.to_string().contains("EOF") {
+                    toast.send(ToastEvent {
+                        ttype: ToastType::Bad,
+                        message: e.to_string(),
+                    });
+                }
                 info!("response to check invoice: {}", e);
-                // toast.send(ToastEvent {
-                //     ttype: ToastType::Bad,
-                //     message: e.to_string(),
-                // });
-                e.to_string()
+
+                //e.to_string()
             }
         };
     }

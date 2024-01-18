@@ -6,13 +6,13 @@ use crate::{
 };
 
 use super::{
-    components::{Capitalizable, KeyBoard, KeyBoardButton, KeyType, KeyboardNode},
+    components::{Changeable, KeyBoard, KeyBoardButton, KeyboardNode},
     KeyboardState,
 };
 
-const NUMBER_SET: &str = "1234567890";
-const FUNCTION_SET: &str = "<^ ";
-const LETTER_SET: &str = "abcdefghijklmnopqrstuvwxyz";
+// const NUMBER_SET: &str = "1234567890";
+// const FUNCTION_SET: &str = "⌫⬆ ";
+// const LETTER_SET: &str = "abcdefghijklmnopqrstuvwxyz";
 
 pub fn setup_keyboard(
     mut commands: Commands,
@@ -38,7 +38,14 @@ pub fn setup_keyboard(
             info!("is there a place for keyboard?");
             // let mut parent_node = commands.entity(ent);
             // parent_node.commands().spawn(bundle)
-            let key_chars = ["@1234567890<", "qwertyuiop", "^asdfghjkl", "zxcvbnm ."];
+            let key_chars = [
+                ("@1234567890-=⌫", "@!#$%[]&*()_+⌫"),
+                ("qwertyuiop", "QWERTYUIOP"),
+                ("⬆asdfghjkl:'", "⬆ASDFGHJKL;\""),
+                ("zxcvbnm,.?", "ZXCVBNM<>?"),
+                (" ", " "),
+            ];
+
             let font = asset_server.load("fonts/FiraSans-Bold.ttf");
             let mut keyboardcmds = commands.spawn((
                 NodeBundle {
@@ -54,6 +61,7 @@ pub fn setup_keyboard(
                         //     height: Val::Px(0.0),
                         // },
                         grid_template_rows: vec![
+                            GridTrack::auto(),
                             GridTrack::auto(),
                             GridTrack::auto(),
                             GridTrack::auto(),
@@ -159,6 +167,28 @@ pub fn setup_keyboard(
                             keyboard_row_justification,
                         );
                     });
+                builder
+                    .spawn(NodeBundle {
+                        style: Style {
+                            display: Display::Grid,
+                            justify_items: JustifyItems::Center,
+                            padding: UiRect::all(Val::Px(0.0)),
+                            height: Val::Px(row_height),
+                            ..default()
+                        },
+                        ..default()
+                    })
+                    .with_children(|builder| {
+                        spawn_keyboard_row(
+                            builder,
+                            font.clone(),
+                            key_chars[4],
+                            colors.button_color,
+                            font_size,
+                            padding_size,
+                            keyboard_row_justification,
+                        );
+                    });
             });
 
             keyboardcmds.set_parent(ent);
@@ -170,7 +200,7 @@ pub fn setup_keyboard(
 fn spawn_keyboard_row(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
-    row_keys: &str,
+    row_keys: (&str, &str),
     button_color: Color,
     font_size: f32,
     padding_size: f32,
@@ -200,16 +230,20 @@ fn spawn_keyboard_row(
             ..Default::default()
         })
         .with_children(|builder| {
-            for key in row_keys.chars() {
+            for (key, alt_key) in row_keys.0.chars().zip(row_keys.1.chars()) {
                 keyboard_button(
                     builder,
                     font.clone(),
                     key,
+                    alt_key,
                     button_color,
                     font_size,
                     padding_size,
                 );
             }
+            // for (key, alt_key) in row_keys.iter() {
+
+            // }
         });
 }
 
@@ -217,21 +251,22 @@ fn keyboard_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     key: char,
+    alt_key: char,
     button_color: Color,
     font_size: f32,
     padding_size: f32,
 ) {
-    let key_type: KeyType;
+    // let key_type: KeyType;
 
-    if LETTER_SET.contains(key) {
-        key_type = KeyType::Letter;
-    } else if NUMBER_SET.contains(key) {
-        key_type = KeyType::Number;
-    } else if FUNCTION_SET.contains(key) {
-        key_type = KeyType::Function;
-    } else {
-        key_type = KeyType::Letter; //console_log!("a key is not defined as a type")
-    }
+    // if LETTER_SET.contains(key) {
+    //     key_type = KeyType::Letter;
+    // } else if NUMBER_SET.contains(key) {
+    //     key_type = KeyType::Number;
+    // } else if FUNCTION_SET.contains(key) {
+    //     key_type = KeyType::Function;
+    // } else {
+    //     key_type = KeyType::Letter; //console_log!("a key is not defined as a type")
+    // }
 
     builder
         .spawn(NodeBundle {
@@ -263,35 +298,37 @@ fn keyboard_button(
                         background_color: button_color.into(),
                         ..default()
                     },
-                    KeyBoardButton(key),
-                    key_type.clone(),
+                    KeyBoardButton(key, alt_key),
+                    //key_type.clone(),
                 ))
                 .with_children(|parent| {
                     let ent_text = parent
-                        .spawn(TextBundle::from_section(
-                            key.to_string(),
-                            TextStyle {
-                                font,
-                                font_size,
-                                color: Color::rgb(0.9, 0.9, 0.9),
-                            },
+                        .spawn((
+                            TextBundle::from_section(
+                                key.to_string(),
+                                TextStyle {
+                                    font,
+                                    font_size,
+                                    color: Color::rgb(0.9, 0.9, 0.9),
+                                },
+                            ),
+                            KeyBoardButton(key, alt_key),
                         ))
                         .id();
+                    parent.add_command(move |world: &mut World| {
+                        world.entity_mut(ent_text).insert(Changeable);
+                    });
+                    // if key_type == KeyType::Letter {
+                    //let a = parent;
+                    // parent.add_command(|world: &mut World| {
+                    //     world.entity_mut(ent_text).insert(Capitalizable)
+                    // });
 
-                    if key_type == KeyType::Letter {
-                        //let a = parent;
-                        // parent.add_command(|world: &mut World| {
-                        //     world.entity_mut(ent_text).insert(Capitalizable)
-                        // });
-
-                        parent.add_command(move |world: &mut World| {
-                            world.entity_mut(ent_text).insert(Capitalizable);
-                        });
-                        // parent.add_command(bevy::ecs::system::Insert {
-                        //     entity: ent_text,
-                        //     bundle: Capitalizable,
-                        // });
-                    }
+                    // parent.add_command(bevy::ecs::system::Insert {
+                    //     entity: ent_text,
+                    //     bundle: Capitalizable,
+                    // });
+                    // }
                 });
         });
 }
