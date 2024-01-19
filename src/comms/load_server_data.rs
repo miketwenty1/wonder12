@@ -9,6 +9,7 @@ use crate::{ServerURL, TileMap, UpdateTileTextureEvent};
 use bevy::prelude::*;
 use bevy::tasks::IoTaskPool;
 use rand::Rng;
+use wasm_bindgen_futures::spawn_local;
 
 //pub fn load_server_data(mut commands: Commands, mut tile_map: ResMut<TileMap>) {}
 //SetTileDataChannel
@@ -26,12 +27,12 @@ pub fn api_get_server_tiles(
         let ts_str = gametime.ts.to_string();
         let height_str = init.height.to_string();
         //for event in player_move_event_reader.read() {
-        let pool = IoTaskPool::get();
+        //let pool = IoTaskPool::get();
         let cc = channel.tx.clone();
         let server = api_server.0.to_owned();
         match e.0 {
             RequestTileType::Height => {
-                let _task = pool.spawn(async move {
+                spawn_local(async move {
                     let api_response_text =
                         reqwest::get(format!("{}/comms/blockdelta_height/{}", server, height_str))
                             .await;
@@ -50,7 +51,7 @@ pub fn api_get_server_tiles(
                 });
             }
             RequestTileType::Ts => {
-                let _task = pool.spawn(async move {
+                spawn_local(async move {
                     let api_response_r =
                         reqwest::get(format!("{}/comms/blockdelta_ts/{}", server, ts_str)).await;
 
