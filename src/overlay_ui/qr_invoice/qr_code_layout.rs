@@ -256,15 +256,15 @@ pub fn spawn_qr(
                         ));
                     });
             });
-            inner_builder.with_children(|builder| {
-                builder.spawn(TextBundle::from_section(
-                    "Copy Button doesn't work on iOS",
-                    TextStyle {
-                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                        font_size: 12.0,
-                        color: colors.text_color,
-                    },
-                ));
-            });
+            // inner_builder.with_children(|builder| {
+            //     builder.spawn(TextBundle::from_section(
+            //         "Copy Button doesn't work on iOS",
+            //         TextStyle {
+            //             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+            //             font_size: 12.0,
+            //             color: colors.text_color,
+            //         },
+            //     ));
+            // });
         });
 }
