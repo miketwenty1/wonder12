@@ -64,7 +64,7 @@ pub fn touch_event_system(
 
                 //*last_selected_tile = LastSelectedTile(x, y);
             }
-            if direction.x.abs() > 0.1 || direction.y.abs() > 0.1 {
+            if direction.x.abs() > 4.0 || direction.y.abs() > 4.0 {
                 clear_last_selected.send(ClearLastSelectedTile);
             }
             //info!("touch World coords: {}/{}", x, y);

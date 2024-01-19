@@ -106,14 +106,12 @@ pub fn delete_virtual_key_system(
         if key.0 == '⌫' {
             if *interaction == Interaction::Pressed {
                 timer1.init = true;
-                info!("delete init timer on");
                 if timer1.on && timer2.timer.just_finished() {
                     keyboard_text.value.pop();
                 }
             } else {
                 timer1.init = false;
                 timer1.on = false;
-                info!("delete init timer off");
             }
         }
     }
@@ -128,14 +126,12 @@ pub fn delete_physical_key_system(
 ) {
     if keys.pressed(KeyCode::Backspace) {
         timer1.init = true;
-        info!("delete init timer on");
         if timer1.on && timer2.timer.just_finished() {
             keyboard_text.value.pop();
         }
     } else {
         timer1.init = false;
         timer1.on = false;
-        info!("delete init timer off");
     }
 }
 

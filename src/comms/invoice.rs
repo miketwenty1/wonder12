@@ -147,7 +147,7 @@ pub fn api_receive_invoice(
                 //r
             }
             Err(e) => {
-                if !e.to_string().contains("EOF") {
+                if !e.to_string().contains("EOF") || !e.to_string().contains("empty channel") {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
                         message: e.to_string(),
@@ -288,7 +288,9 @@ pub fn api_receive_invoice_check(
                         *invoice_check_res = o;
                     }
                     Err(e) => {
-                        if !e.to_string().contains("EOF") {
+                        if !e.to_string().contains("EOF")
+                            || !e.to_string().contains("empty channel")
+                        {
                             toast.send(ToastEvent {
                                 ttype: ToastType::Bad,
                                 message: e.to_string(),
@@ -300,7 +302,7 @@ pub fn api_receive_invoice_check(
                 //r
             }
             Err(e) => {
-                if !e.to_string().contains("EOF") {
+                if !e.to_string().contains("EOF") || !e.to_string().contains("empty channel") {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
                         message: e.to_string(),
