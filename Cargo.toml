@@ -51,6 +51,8 @@ web-sys = { version = "0.3.64", features = [
     "Window",
     "Navigator",
     "Permissions",
+    'CustomEvent',
+    'CustomEventInit',
     #"UserActivation",
 ] }
 

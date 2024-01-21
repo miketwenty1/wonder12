@@ -5,9 +5,10 @@ use crate::overlay_ui::toast::{ToastEvent, ToastType};
 use crate::resourcey::{InitGameMap, TileData, TileDataChannel, UpdateGameTimetamp};
 use crate::statey::CommsApiBlockLoadState;
 use crate::structy::{RequestTileType, TileResource};
+use crate::utils::logout_user;
 use crate::{ServerURL, TileMap, UpdateTileTextureEvent};
 use bevy::prelude::*;
-use bevy::tasks::IoTaskPool;
+//use bevy::tasks::IoTaskPool;
 use rand::Rng;
 use wasm_bindgen_futures::spawn_local;
 
@@ -200,8 +201,10 @@ pub fn api_receive_server_tiles(
                         }
                     }
                     Err(e) => {
-                        if !e.to_string().contains("EOF")
-                            || !e.to_string().contains("empty channel")
+                        if e.to_string().contains("logout") {
+                            logout_user("receive server tiles 1");
+                        } else if !e.to_string().contains("EOF")
+                            && !e.to_string().contains("empty channel")
                         {
                             toast.send(ToastEvent {
                                 ttype: ToastType::Bad,
@@ -215,7 +218,10 @@ pub fn api_receive_server_tiles(
             }
             Err(e) => {
                 info!("receiving tiles: {}", e);
-                if !e.to_string().contains("EOF") || !e.to_string().contains("empty channel") {
+                if e.to_string().contains("logout") {
+                    logout_user("receive server tiles 2");
+                } else if !e.to_string().contains("EOF") && !e.to_string().contains("empty channel")
+                {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
                         message: e.to_string(),

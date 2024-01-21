@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Debug)]
 pub enum EdgeType {
@@ -61,4 +62,9 @@ pub struct GameInvoiceData {
 pub enum RequestTileType {
     Height,
     Ts,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct ErrorMessage {
+    pub error: Value,
 }

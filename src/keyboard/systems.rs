@@ -14,7 +14,7 @@ use super::{
 // const ACCEPTABLE_CHARS: &str =
 //     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 const ACCEPTABLE_CHARS: &str =
-    "1234567890=⌫!#$%*&'@()[]+-_,.:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz⬆\" ";
+    "1234567890=⌫!#$%*&'@()[]+-_,.:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz⇧⬆\" ";
 const MAX_INPUT_LENGTH: usize = 200;
 #[allow(clippy::type_complexity)]
 pub fn physical_keyboard_system(
@@ -59,6 +59,11 @@ pub fn virtual_keyboard_system(
                 match k {
                     '⌫' => {
                         keyboard_text.value.pop();
+                    }
+                    '⇧' => {
+                        c_toggle.0 = !c_toggle.0;
+                        debug!("capitalize/alt text is now set to: {}", c_toggle.0);
+                        event.send(ToggleKeyboardEvent);
                     }
                     '⬆' => {
                         c_toggle.0 = !c_toggle.0;

@@ -12,8 +12,8 @@ use crate::{
         RequestInvoiceChannel, TileCartVec, User,
     },
     statey::{CommsApiState, DisplayBuyUiState, ExploreState},
-    structy::{GameInvoiceData, InvoiceGameBlock, RequestTileType},
-    utils::convert_color_to_hexstring,
+    structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock, RequestTileType},
+    utils::{convert_color_to_hexstring, extract_number, logout_user},
     ServerURL,
 };
 
@@ -125,6 +125,7 @@ pub fn api_receive_invoice(
         info!("waiting to receive invoice");
         match api_res {
             Ok(r) => {
+                let og_r = r.clone();
                 info!("response to requesting invoice: {:#?}", r);
                 let r_result = serde_json::from_str::<InvoiceDataFromServer>(&r);
                 match r_result {
@@ -136,18 +137,45 @@ pub fn api_receive_invoice(
                         // qr_state.set(DisplayInvoiceQr::On);
                     }
                     Err(e) => {
+                        info!("{}", e);
+                        if og_r.to_string().contains("invalid LN address") {
+                            toast.send(ToastEvent {
+                                ttype: ToastType::Bad,
+                                message: "Could not validate your lightning address".to_string(),
+                            });
+                        } else if og_r.to_string().contains("amount for") {
+                            let value =
+                                serde_json::from_str::<ErrorMessage>(&og_r).unwrap_or_default();
+                            let invalid_height =
+                                extract_number(&value.error.to_string()).unwrap_or_default();
+
+                            info!("{}", e);
+                            toast.send(ToastEvent {
+                                ttype: ToastType::Bad,
+                                message: format!(
+                                    "Block {} has has changed since you selected it! Reselect it or clear it!",
+                                    invalid_height
+                                ),
+                            });
+                        } else {
+                            info!("{}", e);
+                            toast.send(ToastEvent {
+                                ttype: ToastType::Bad,
+                                message: "Weird error happened maybe try logging out".to_string(),
+                            });
+                        }
                         info!("response to invoice creation - fail: {}", e);
-                        toast.send(ToastEvent {
-                            ttype: ToastType::Bad,
-                            message: "Could not validate your lightning address".to_string(),
-                        });
+
                         api_name_set_state.set(CommsApiState::Off);
                     }
                 };
                 //r
             }
             Err(e) => {
-                if !e.to_string().contains("EOF") || !e.to_string().contains("empty channel") {
+                if e.to_string().contains("logout") {
+                    logout_user("receive invoice");
+                } else if !e.to_string().contains("EOF") && !e.to_string().contains("empty channel")
+                {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
                         message: e.to_string(),
@@ -288,8 +316,10 @@ pub fn api_receive_invoice_check(
                         *invoice_check_res = o;
                     }
                     Err(e) => {
-                        if !e.to_string().contains("EOF")
-                            || !e.to_string().contains("empty channel")
+                        if e.to_string().contains("logout") {
+                            logout_user("invoice check 1");
+                        } else if !e.to_string().contains("EOF")
+                            && !e.to_string().contains("empty channel")
                         {
                             toast.send(ToastEvent {
                                 ttype: ToastType::Bad,
@@ -302,7 +332,10 @@ pub fn api_receive_invoice_check(
                 //r
             }
             Err(e) => {
-                if !e.to_string().contains("EOF") || !e.to_string().contains("empty channel") {
+                if e.to_string().contains("logout") {
+                    logout_user("invoice check 2");
+                } else if !e.to_string().contains("EOF") && !e.to_string().contains("empty channel")
+                {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
                         message: e.to_string(),

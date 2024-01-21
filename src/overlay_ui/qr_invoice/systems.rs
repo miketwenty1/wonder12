@@ -39,6 +39,7 @@ extern "C" {
 
     #[wasm_bindgen(js_namespace = document)]
     fn query_selector(selector: &str) -> Option<web_sys::Element>;
+
 }
 
 #[allow(clippy::type_complexity, clippy::let_unit_value)]

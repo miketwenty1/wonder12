@@ -11,7 +11,7 @@ use super::{
 };
 
 // const NUMBER_SET: &str = "1234567890";
-// const FUNCTION_SET: &str = "⌫⬆ ";
+// const FUNCTION_SET: &str = "⌫⇧⬆ ";
 // const LETTER_SET: &str = "abcdefghijklmnopqrstuvwxyz";
 
 pub fn setup_keyboard(
@@ -41,7 +41,7 @@ pub fn setup_keyboard(
             let key_chars = [
                 ("@1234567890-=⌫", "@!#$%[]&*()_+⌫"),
                 ("qwertyuiop", "QWERTYUIOP"),
-                ("⬆asdfghjkl:'", "⬆ASDFGHJKL;\""),
+                ("⇧asdfghjkl:'", "⬆ASDFGHJKL;\""),
                 ("zxcvbnm,.?", "ZXCVBNM<>?"),
                 (" ", " "),
             ];
