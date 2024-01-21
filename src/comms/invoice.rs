@@ -130,11 +130,28 @@ pub fn api_receive_invoice(
                 let r_result = serde_json::from_str::<InvoiceDataFromServer>(&r);
                 match r_result {
                     Ok(server_data) => {
+                        let invoice = server_data.invoice.clone();
                         *invoice_data = server_data;
+
                         qr_state.set(DisplayBuyUiState::Qr);
                         api_name_set_state.set(CommsApiState::CheckInvoice);
                         // server_event.send(ServerInvoiceIn);
                         // qr_state.set(DisplayInvoiceQr::On);
+
+                        // trigger browser extension to pay
+                        let mut event_init = web_sys::CustomEventInit::new();
+                        event_init.detail(&JsValue::from_str(&invoice));
+                        let event =
+                            web_sys::CustomEvent::new_with_event_init_dict("weblnpay", &event_init);
+
+                        if let Ok(o) = event {
+                            if let Some(window) = web_sys::window() {
+                                let _ = window.dispatch_event(&o);
+                                info!("webln browser extension attempted");
+                            } else {
+                                info!("no attempt made for webln");
+                            }
+                        }
                     }
                     Err(e) => {
                         info!("{}", e);
