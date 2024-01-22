@@ -124,10 +124,9 @@ pub fn api_receive_invoice(
         let api_res = channel.rx.try_recv();
         info!("waiting to receive invoice");
         match api_res {
-            Ok(r) => {
-                let og_r = r.clone();
-                info!("response to requesting invoice: {:#?}", r);
-                let r_result = serde_json::from_str::<InvoiceDataFromServer>(&r);
+            Ok(og_r) => {
+                info!("response to requesting invoice: {:#?}", og_r);
+                let r_result = serde_json::from_str::<InvoiceDataFromServer>(&og_r);
                 match r_result {
                     Ok(server_data) => {
                         let invoice = server_data.invoice.clone();
@@ -189,10 +188,7 @@ pub fn api_receive_invoice(
                 //r
             }
             Err(e) => {
-                if e.to_string().contains("logout") {
-                    logout_user("receive invoice");
-                } else if !e.to_string().contains("EOF") && !e.to_string().contains("empty channel")
-                {
+                if !e.to_string().contains("EOF") && !e.to_string().contains("empty channel") {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
                         message: e.to_string(),
@@ -266,8 +262,8 @@ pub fn api_receive_invoice_check(
 
         //info!("waiting to receive invoice check");
         match api_res {
-            Ok(r) => {
-                let r_result = serde_json::from_str::<InvoiceCheckFromServer>(&r);
+            Ok(og_r) => {
+                let r_result = serde_json::from_str::<InvoiceCheckFromServer>(&og_r);
                 match r_result {
                     Ok(o) => {
                         match o.status.as_str() {
@@ -333,7 +329,7 @@ pub fn api_receive_invoice_check(
                         *invoice_check_res = o;
                     }
                     Err(e) => {
-                        if e.to_string().contains("logout") {
+                        if og_r.to_string().contains("logout") {
                             logout_user("invoice check 1");
                         } else if !e.to_string().contains("EOF")
                             && !e.to_string().contains("empty channel")
@@ -349,10 +345,7 @@ pub fn api_receive_invoice_check(
                 //r
             }
             Err(e) => {
-                if e.to_string().contains("logout") {
-                    logout_user("invoice check 2");
-                } else if !e.to_string().contains("EOF") && !e.to_string().contains("empty channel")
-                {
+                if !e.to_string().contains("EOF") && !e.to_string().contains("empty channel") {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
                         message: e.to_string(),

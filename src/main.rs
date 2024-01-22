@@ -210,7 +210,7 @@ pub fn game12(
         })
         .insert_resource(InitBlockCount(block_init_count))
         .insert_resource(UpdateGameTimetamp {
-            ts: Utc::now() - Duration::days(10 * 365),
+            ts: Utc::now() - Duration::minutes(1),
         })
         .insert_resource(InitGameMap { height: 0 })
         .init_resource::<InvoiceDataFromServer>()

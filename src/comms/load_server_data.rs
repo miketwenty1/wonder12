@@ -33,6 +33,7 @@ pub fn api_get_server_tiles(
         let server = api_server.0.to_owned();
         match e.0 {
             RequestTileType::Height => {
+                info!("get height tiles sending {}", height_str);
                 spawn_local(async move {
                     let api_response_text =
                         reqwest::get(format!("{}/comms/blockdelta_height/{}", server, height_str))
@@ -52,6 +53,7 @@ pub fn api_get_server_tiles(
                 });
             }
             RequestTileType::Ts => {
+                info!("get ts tiles sending {}", ts_str);
                 spawn_local(async move {
                     let api_response_r =
                         reqwest::get(format!("{}/comms/blockdelta_ts/{}", server, ts_str)).await;
@@ -105,10 +107,10 @@ pub fn api_receive_server_tiles(
         let mut request_more_ts = false;
         let mut request_more_height = false;
         match api_res {
-            Ok(r) => {
+            Ok(og_r) => {
                 let mut new_tile_vec = Vec::new();
                 //info!("api_receive_server_tiles: {}", r);
-                let r_invoice_result = serde_json::from_str::<GameBlocksDataFromDBMod>(&r);
+                let r_invoice_result = serde_json::from_str::<GameBlocksDataFromDBMod>(&og_r);
 
                 //info!("from the server: {:#?}", r_invoice_result);
                 match r_invoice_result {
@@ -119,9 +121,9 @@ pub fn api_receive_server_tiles(
                                 height_checkpoint: None,
                                 blocks: _,
                             } => {
-                                //info!("found timestamp checkpoint {}", t);
+                                info!("received timestamp checkpoint {}", t);
 
-                                if gametime.ts == t {
+                                if gametime.ts >= t {
                                     //info!("==");
                                 } else {
                                     request_more_ts = true;
@@ -134,7 +136,7 @@ pub fn api_receive_server_tiles(
                                 height_checkpoint: Some(h),
                                 blocks: _,
                             } => {
-                                //info!("found height checkpoint {}", h);
+                                info!("received height checkpoint {}", h);
 
                                 if gameinit.height == h {
                                     //info!("==");
@@ -201,7 +203,7 @@ pub fn api_receive_server_tiles(
                         }
                     }
                     Err(e) => {
-                        if e.to_string().contains("logout") {
+                        if og_r.to_string().contains("logout") {
                             logout_user("receive server tiles 1");
                         } else if !e.to_string().contains("EOF")
                             && !e.to_string().contains("empty channel")
@@ -214,14 +216,11 @@ pub fn api_receive_server_tiles(
                         info!("tile receive fail: {}", e);
                     }
                 };
-                r
+                og_r
             }
             Err(e) => {
                 info!("receiving tiles: {}", e);
-                if e.to_string().contains("logout") {
-                    logout_user("receive server tiles 2");
-                } else if !e.to_string().contains("EOF") && !e.to_string().contains("empty channel")
-                {
+                if !e.to_string().contains("EOF") && !e.to_string().contains("empty channel") {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
                         message: e.to_string(),
