@@ -57,3 +57,6 @@ pub struct HideBackupCopyBtn;
 
 #[derive(Event, Debug)]
 pub struct ShowBackupCopyBtn;
+
+#[derive(Event, Debug)]
+pub struct RequestInventoryEvent;

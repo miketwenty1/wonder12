@@ -208,10 +208,17 @@ pub fn api_receive_server_tiles(
                         } else if !e.to_string().contains("EOF")
                             && !e.to_string().contains("empty channel")
                         {
-                            toast.send(ToastEvent {
-                                ttype: ToastType::Bad,
-                                message: e.to_string(),
-                            });
+                            if e.to_string().contains("line 1 column 1") {
+                                toast.send(ToastEvent {
+                                    ttype: ToastType::Bad,
+                                    message: "Seems you lost connection to the server".to_string(),
+                                });
+                            } else {
+                                toast.send(ToastEvent {
+                                    ttype: ToastType::Bad,
+                                    message: format!("error: {}", e),
+                                });
+                            }
                         }
                         info!("tile receive fail: {}", e);
                     }

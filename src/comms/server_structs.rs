@@ -18,3 +18,10 @@ pub struct GameBlocksDataFromDBMod {
     pub ts_checkpoint: Option<DateTime<Utc>>,
     pub height_checkpoint: Option<u32>,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct UserGameBlocks {
+    pub height: i32,
+    pub amount: i32,
+    pub color: String,
+}

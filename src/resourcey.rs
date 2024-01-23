@@ -2,6 +2,7 @@ use async_channel::{Receiver, Sender};
 use bevy::{prelude::*, utils::HashMap};
 use serde::Deserialize;
 
+use crate::comms::server_structs::UserGameBlocks;
 use crate::structy::EdgeData;
 use crate::structy::TileResource;
 use chrono::{DateTime, Utc};
@@ -98,6 +99,12 @@ pub struct CheckInvoiceChannel {
 }
 
 #[derive(Resource, Clone)]
+pub struct UserBlockInventory {
+    pub tx: Sender<String>,
+    pub rx: Receiver<String>,
+}
+
+#[derive(Resource, Clone)]
 pub struct ServerURL(pub String);
 
 #[derive(Resource, Clone)]
@@ -185,3 +192,8 @@ pub struct ConfigAllCartBlocks(pub bool);
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct IsIphone(pub bool);
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct InventoryBlocks {
+    pub ownedblocks: Vec<UserGameBlocks>,
+}

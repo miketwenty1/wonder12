@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{statey::CommsApiBlockLoadState, CommsApiState};
+use crate::{
+    statey::{CommsApiBlockLoadState, CommsApiInventoryState},
+    CommsApiState,
+};
 
 use self::{
     api_timer::{tick_api_receive_timer, ApiPollingTimer},
@@ -9,14 +12,15 @@ use self::{
         hide_backup_copy_btn, show_backup_copy_btn,
     },
     load_server_data::{api_get_server_tiles, api_receive_server_tiles},
+    user_inventory_blocks::{api_get_inventory_blocks, api_receive_inventory_blocks},
 };
 
 mod api_timer;
 mod invoice;
 pub mod load_server_data;
-mod server_structs;
+pub mod server_structs;
 mod setup;
-
+mod user_inventory_blocks;
 pub struct CommsPlugin;
 
 impl Plugin for CommsPlugin {
@@ -27,6 +31,11 @@ impl Plugin for CommsPlugin {
                 Update,
                 (tick_api_receive_timer, api_receive_server_tiles)
                     .run_if(in_state(CommsApiBlockLoadState::LoadBlockData)),
+            )
+            .add_systems(
+                Update,
+                (tick_api_receive_timer, api_receive_inventory_blocks)
+                    .run_if(in_state(CommsApiInventoryState::On)),
             )
             .add_systems(
                 Update,
@@ -46,6 +55,7 @@ impl Plugin for CommsPlugin {
                 Update,
                 (
                     api_get_server_tiles,
+                    api_get_inventory_blocks,
                     api_request_invoice,
                     hide_backup_copy_btn,
                     show_backup_copy_btn,

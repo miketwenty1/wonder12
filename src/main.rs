@@ -22,12 +22,13 @@ use bevy::asset::AssetMetaCheck;
 // use bevy::window::WindowResolution;
 use bevy::{prelude::*, utils::HashMap};
 use chrono::{Duration, Utc};
-use eventy::{HideBackupCopyBtn, KeyboardSpawnEvent, ShowBackupCopyBtn};
+use eventy::{HideBackupCopyBtn, KeyboardSpawnEvent, RequestInventoryEvent, ShowBackupCopyBtn};
+use overlay_ui::inventory::state::InventoryUiState;
 use resourcey::{
-    CheckInvoiceChannel, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone,
-    MultiTouchInfo, RequestInvoiceChannel, WinSize,
+    CheckInvoiceChannel, ConfigAllCartBlocks, InitBlockCount, InitGameMap, InventoryBlocks,
+    IsIphone, MultiTouchInfo, RequestInvoiceChannel, UserBlockInventory, WinSize,
 };
-use statey::{CommsApiBlockLoadState, InitLoadingBlocksState, ToastState};
+use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
 use structy::RequestTileType;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
@@ -225,6 +226,9 @@ pub fn game12(
         })
         .insert_resource(ConfigAllCartBlocks(false))
         .insert_resource(IsIphone(is_iphone))
+        .insert_resource(InventoryBlocks {
+            ownedblocks: vec![],
+        })
         //.add_plugins(DefaultPlugins)
         .add_plugins(
             DefaultPlugins
@@ -237,10 +241,12 @@ pub fn game12(
         .init_state::<ExploreState>()
         .init_state::<CommsApiState>()
         .init_state::<CommsApiBlockLoadState>()
+        .init_state::<CommsApiInventoryState>()
         .init_state::<DisplayBuyUiState>()
         .init_state::<KeyboardState>()
         .init_state::<InitLoadingBlocksState>()
         .init_state::<ToastState>()
+        .init_state::<InventoryUiState>()
         .add_plugins(CommsPlugin)
         .add_plugins(OverlayUiPlugin)
         .add_plugins(ExplorePlugin)
@@ -262,6 +268,7 @@ pub fn game12(
         .add_event::<KeyboardSpawnEvent>()
         .add_event::<HideBackupCopyBtn>()
         .add_event::<ShowBackupCopyBtn>()
+        .add_event::<RequestInventoryEvent>()
         .add_systems(Startup, setup) //setupcoords
         //.add_systems(PostStartup, setup2) //setupcoords
         //.add_systems(PostStartup, api_get_server_tiles)
@@ -272,6 +279,7 @@ fn setup(
     mut commands: Commands,
     mut ui_state: ResMut<NextState<ExploreState>>,
     mut request_tiles_event: EventWriter<RequestTileUpdates>,
+    mut request_inventory_event: EventWriter<RequestInventoryEvent>,
     //q_window: Query<&Window, With<PrimaryWindow>>,
 ) {
     fit_canvas_to_parent();
@@ -297,7 +305,13 @@ fn setup(
         tx: tx_tiledata,
         rx: rx_tiledata,
     });
+    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
+    commands.insert_resource(UserBlockInventory {
+        tx: tx_tiledata,
+        rx: rx_tiledata,
+    });
     request_tiles_event.send(RequestTileUpdates(RequestTileType::Height));
+    request_inventory_event.send(RequestInventoryEvent);
     ui_state.set(ExploreState::On);
 }
 

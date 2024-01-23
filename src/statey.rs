@@ -19,6 +19,13 @@ pub enum CommsApiBlockLoadState {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum CommsApiInventoryState {
+    #[default]
+    Off,
+    On,
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum ExploreState {
     On,
     #[default]
