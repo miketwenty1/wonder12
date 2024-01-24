@@ -2,7 +2,7 @@ use async_channel::{Receiver, Sender};
 use bevy::{prelude::*, utils::HashMap};
 use serde::Deserialize;
 
-use crate::comms::server_structs::UserGameBlocks;
+use crate::comms::server_structs::UserGameBlock;
 use crate::structy::EdgeData;
 use crate::structy::TileResource;
 use chrono::{DateTime, Utc};
@@ -195,5 +195,5 @@ pub struct IsIphone(pub bool);
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct InventoryBlocks {
-    pub ownedblocks: Vec<UserGameBlocks>,
+    pub ownedblocks: Vec<UserGameBlock>,
 }

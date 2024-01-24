@@ -20,8 +20,8 @@ pub struct GameBlocksDataFromDBMod {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct UserGameBlocks {
-    pub height: i32,
-    pub amount: i32,
+pub struct UserGameBlock {
+    pub height: u32,
+    pub amount: u32,
     pub color: String,
 }

@@ -6,7 +6,10 @@ use crate::{
         BuyBlockRequest, ClearSelectionEvent, HideBackupCopyBtn, RequestTileUpdates,
         ShowBackupCopyBtn,
     },
-    overlay_ui::toast::{ToastEvent, ToastType},
+    overlay_ui::{
+        inventory::event::AddInventoryRow,
+        toast::{ToastEvent, ToastType},
+    },
     resourcey::{
         CheckInvoiceChannel, InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone,
         RequestInvoiceChannel, TileCartVec, User,
@@ -256,6 +259,7 @@ pub fn api_receive_invoice_check(
     mut toast: EventWriter<ToastEvent>,
     mut bkp_clipboard_btn: EventWriter<HideBackupCopyBtn>,
     iphone: Res<IsIphone>,
+    mut inv_event: EventWriter<AddInventoryRow>,
 ) {
     if api_timer.timer.finished() {
         let api_res = channel.rx.try_recv();
@@ -273,6 +277,7 @@ pub fn api_receive_invoice_check(
                             "completed" => {
                                 info!("completed invoice");
                                 event.send(RequestTileUpdates(RequestTileType::Ts));
+                                inv_event.send(AddInventoryRow);
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
