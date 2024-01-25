@@ -5,7 +5,7 @@ use crate::{
     componenty::{BuildingStructure, Land, Location, Selected, UiTileSelectedButton},
     consty::TOTAL_TILE_SCALE_SIZE,
     eventy::{SelectTileEvent, UpdateUiAmount},
-    resourcey::{LastSelectedTile, SpriteSheetBuildingRes},
+    resourcey::{LastSelectedTile, SpriteSheetSelect},
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -53,8 +53,7 @@ pub fn choose_tile(
 pub fn select_tile(
     mut commands: Commands,
     mut lands: Query<(&mut Location, Entity), (With<Land>, Without<BuildingStructure>)>,
-    //chunk_map: Res<ChunkManager>,
-    texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
+    texture_atlas: Res<SpriteSheetSelect>,
     mut event: EventReader<SelectTileEvent>,
     mut selected_lands: Query<
         (Entity, &Location),
@@ -70,14 +69,13 @@ pub fn select_tile(
             if location.x == e.0 && location.y == e.1 {
                 if last_selected_tile.0 == e.0 && last_selected_tile.1 == e.1 && !location.selected
                 {
-                    // spawn
-                    //info!("spawn branch1");
                     commands
                         .entity(parent_entity)
                         .with_children(|child_builder| {
                             spawn_tile_level(
                                 100,
-                                &texture_atlas_handle_building.0.clone(),
+                                &texture_atlas.layout,
+                                &texture_atlas.texture,
                                 child_builder,
                                 Color::Rgba {
                                     red: 1.,

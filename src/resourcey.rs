@@ -71,11 +71,26 @@ pub struct Edge {
     pub right: EdgeData,
 }
 
-#[derive(Resource, Deref, DerefMut, Clone)]
-pub struct SpriteSheetBuildingRes(pub Handle<TextureAtlas>);
+// #[derive(Resource, Deref, DerefMut, Clone)]
+// pub struct SpriteSheetBuildingRes(pub Handle<TextureAtlas>);
 
-#[derive(Resource, Deref, DerefMut, Clone)]
-pub struct SpriteSheetBgRes(pub Handle<TextureAtlas>);
+#[derive(Resource, Clone)]
+pub struct SpriteSheetBuilding {
+    pub layout: Handle<TextureAtlasLayout>,
+    pub texture: Handle<Image>,
+}
+
+#[derive(Resource, Clone)]
+pub struct SpriteSheetBg {
+    pub layout: Handle<TextureAtlasLayout>,
+    pub texture: Handle<Image>,
+}
+
+#[derive(Resource, Clone)]
+pub struct SpriteSheetSelect {
+    pub layout: Handle<TextureAtlasLayout>,
+    pub texture: Handle<Image>,
+}
 
 #[derive(Resource, Clone, Copy)]
 pub struct LastSelectedTile(pub i32, pub i32);

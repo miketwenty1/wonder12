@@ -47,14 +47,13 @@ pub struct Land;
 
 #[derive(Component, Clone, Copy)]
 pub enum BuildingStructure {
-    //Empty,
+    Camp,
     Hut,
-    DirtRoad,
-    //DirtRoadCorner,
-    //DirtRoad2,
-    //DirtRoadCorner2,
+    Shack,
+    House,
+    Castle,
+    Road,
     FirePit,
-    Hut2,
     Waterwell,
 }
 

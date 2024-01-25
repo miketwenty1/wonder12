@@ -4,30 +4,26 @@ use crate::componenty::{AnimationIndices, AnimationTimer, Location, Selected};
 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn(
-    texture: &Handle<TextureAtlas>,
+    texture: &Handle<Image>,
+    layout: &Handle<TextureAtlasLayout>,
     builder: &mut ChildBuilder,
-    _color: Color,
     locationcoord: Location,
 ) {
-    let animation_indices = AnimationIndices {
-        first: 11,
-        last: 18,
-    };
+    let animation_indices = AnimationIndices { first: 0, last: 7 };
     //info!("spawn select");
     builder.spawn((
         SpriteSheetBundle {
-            texture_atlas: texture.clone(),
-            // sprite: TextureAtlasSprite {
-            //     color,
-            //     index: 9,
-            //     ..Default::default()
-            // },
-            sprite: TextureAtlasSprite::new(animation_indices.first),
+            atlas: TextureAtlas {
+                layout: layout.clone(),
+                index: animation_indices.first,
+            },
+
             transform: Transform {
                 translation: Vec3::new(0., 0., 10.),
                 scale: Vec3::new(1.0, 1.0, 1.0),
                 ..Default::default()
             },
+            texture: texture.clone(),
             ..Default::default()
         },
         Selected,

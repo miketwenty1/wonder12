@@ -27,22 +27,22 @@ pub fn buildings_visibility_event(
 #[allow(clippy::too_many_arguments)]
 pub fn land_color_event(
     mut toggle: EventReader<ToggleColors>,
-    mut land_q: Query<(&mut TextureAtlasSprite, &Location), With<Land>>,
+    mut land_q: Query<(&mut TextureAtlas, &mut Sprite, &Location), With<Land>>,
     toggle_map: Res<ToggleMap>,
     tile_res: Res<TileMap>,
 ) {
     for _t in toggle.read() {
-        for (mut texture, loc) in land_q.iter_mut() {
+        for (mut texture, mut sprite, loc) in land_q.iter_mut() {
             if !*toggle_map.0.get("showcolors").unwrap() {
                 let a = tile_res.map.get(&loc.ulam);
                 if let Some(val) = a {
-                    texture.color = val.color;
+                    sprite.color = val.color;
                     texture.index = 0;
                 }
             } else {
                 let a = tile_res.map.get(&loc.ulam);
                 if let Some(_val) = a {
-                    texture.color = Color::Rgba {
+                    sprite.color = Color::Rgba {
                         red: 1.0,
                         green: 1.0,
                         blue: 1.0,

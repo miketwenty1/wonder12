@@ -1,83 +1,41 @@
 use bevy::prelude::*;
+use rand::Rng;
 
-use crate::{
-    componenty::{AnimationIndices, AnimationTimer, BuildingStructure, Location},
-    consty::TILE_SCALE,
-};
+use crate::componenty::Location;
+
+use super::building_templates::{hut::spawn_hut, road::spawn_road};
 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn(
-    texture: &Handle<TextureAtlas>,
+    texture: &Handle<Image>,
+    layout: &Handle<TextureAtlasLayout>,
     builder: &mut ChildBuilder,
     color: Color,
     locationcoord: Location,
     visibility_toggle: Visibility,
 ) {
-    builder.spawn((
-        SpriteSheetBundle {
-            texture_atlas: texture.clone(),
-            sprite: TextureAtlasSprite {
-                color,
-                index: 1,
-                ..Default::default()
-            },
-            transform: Transform {
-                translation: Vec3::new(5., 0., 4.),
-                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
-                ..Default::default()
-            },
-            visibility: visibility_toggle,
-            ..Default::default()
-        },
-        BuildingStructure::Hut,
-        locationcoord,
-    ));
+    let mut rng = rand::thread_rng();
+    let x: f32 = rng.gen_range(-10.0..10.0);
+    let y: f32 = rng.gen_range(-10.0..10.0);
 
-    builder.spawn((
-        SpriteSheetBundle {
-            texture_atlas: texture.clone(),
-            sprite: TextureAtlasSprite {
-                color,
-                index: 1,
-                ..Default::default()
-            },
-            transform: Transform {
-                translation: Vec3::new(-5., -5., 4.),
-                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
-                ..Default::default()
-            },
-            visibility: visibility_toggle,
-            ..Default::default()
-        },
-        BuildingStructure::Hut,
+    spawn_hut(
+        texture,
+        layout,
+        builder,
+        color,
         locationcoord,
-    ));
+        visibility_toggle,
+        Vec3::new(x, y, 3.0),
+        Some(0.85),
+    );
 
-    let animation_indices = AnimationIndices { first: 8, last: 10 };
-    builder.spawn((
-        SpriteSheetBundle {
-            texture_atlas: texture.clone(),
-            sprite: TextureAtlasSprite::new(animation_indices.first),
-            transform: Transform {
-                translation: Vec3::new(4.5, -6.5, 5.),
-                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
-                ..Default::default()
-            },
-            visibility: visibility_toggle,
-            ..Default::default()
-        },
-        animation_indices,
-        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-        BuildingStructure::FirePit,
-        locationcoord,
-    ));
-
-    crate::building_config::road::spawn(
-        &texture.clone(),
+    spawn_road(
+        texture,
+        layout,
         builder,
         Color::rgba(1.0, 1.0, 1.0, 1.0),
         locationcoord,
-        2,
+        1,
         visibility_toggle,
     );
 }

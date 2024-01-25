@@ -3,7 +3,7 @@ use rand::Rng;
 
 use crate::componenty::Location;
 
-use super::building_templates::{hut::spawn_hut, road::spawn_road};
+use super::building_templates::{house::spawn_house, road::spawn_road, waterwell::spawn_waterwell};
 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn(
@@ -15,10 +15,10 @@ pub fn spawn(
     visibility_toggle: Visibility,
 ) {
     let mut rng = rand::thread_rng();
-    let x: f32 = rng.gen_range(1.0..10.0);
-    let y: f32 = rng.gen_range(-10.0..10.0);
+    let x: f32 = rng.gen_range(-3.0..3.0);
+    let y: f32 = rng.gen_range(4.0..6.0);
 
-    spawn_hut(
+    spawn_house(
         texture,
         layout,
         builder,
@@ -26,29 +26,30 @@ pub fn spawn(
         locationcoord,
         visibility_toggle,
         Vec3::new(x, y, 3.0),
-        Some(0.85),
+        Some(1.5),
     );
 
-    let x: f32 = rng.gen_range(-10.0..-1.0);
-    let y: f32 = rng.gen_range(-10.0..10.0);
-
-    spawn_hut(
+    let x: f32 = rng.gen_range(-7.0..7.0);
+    let y: f32 = rng.gen_range(-8.0..-5.0);
+    spawn_waterwell(
         texture,
         layout,
         builder,
         color,
         locationcoord,
         visibility_toggle,
-        Vec3::new(x, y, 3.0),
-        Some(0.85),
+        Vec3::new(x, y, 4.0),
+        Some(0.75),
+        1,
     );
+
     spawn_road(
         texture,
         layout,
         builder,
         Color::rgba(1.0, 1.0, 1.0, 1.0),
         locationcoord,
-        1,
+        5,
         visibility_toggle,
     );
 }

@@ -1,11 +1,6 @@
 use std::collections::HashMap;
 
-use bevy::{
-    input::mouse::MouseMotion,
-    prelude::*,
-    render::texture::{ImageLoaderSettings, ImageSampler},
-    text::Text2dBounds,
-};
+use bevy::{input::mouse::MouseMotion, prelude::*, text::Text2dBounds};
 use rand::Rng;
 use ulam::Quad;
 
@@ -18,7 +13,7 @@ use crate::{
     },
     consty::{
         CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT, DESPAWN_TILE_THRESHOLD,
-        MAX_SELECTION_SIZE, TILE_PIXEL_SIZE, TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
+        MAX_SELECTION_SIZE, TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
         ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
@@ -26,7 +21,7 @@ use crate::{
     overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
         ChunkManager, ColorPalette, Edge, InitBlockCount, MaxBlockHeight, SpriteIndexBuilding,
-        SpriteSheetBgRes, SpriteSheetBuildingRes, TileData, TileMap, ToggleMap,
+        SpriteSheetBg, SpriteSheetBuilding, TileData, TileMap, ToggleMap,
     },
     statey::{DisplayBuyUiState, InitLoadingBlocksState},
     structy::{EdgeType, SpawnDiffData},
@@ -45,7 +40,6 @@ pub fn reset_mouse(
 pub fn init_explorer(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
     inires: Res<InitBlockCount>,
     colors: Res<ColorPalette>,
@@ -53,41 +47,9 @@ pub fn init_explorer(
 ) {
     // ui camera
     info!("initblockcount: {}", inires.0);
-    let texture_handle_bg: Handle<Image> = asset_server.load_with_settings(
-        "spritesheet/grassdirtbg.png",
-        |settings: &mut ImageLoaderSettings| {
-            settings.sampler = ImageSampler::linear();
-        },
-    );
-    let texture_atlas_bg = TextureAtlas::from_grid(
-        texture_handle_bg,
-        Vec2::new(TILE_PIXEL_SIZE, TILE_PIXEL_SIZE),
-        12,
-        1,
-        Some(Vec2::new(2.0, 2.0)),
-        Some(Vec2::new(1.0, 1.0)),
-    );
-    let texture_handle_buildings: Handle<Image> = asset_server.load_with_settings(
-        "spritesheet/buildings.png",
-        |settings: &mut ImageLoaderSettings| {
-            settings.sampler = ImageSampler::linear();
-        },
-    );
-    let texture_atlas_building = TextureAtlas::from_grid(
-        texture_handle_buildings,
-        Vec2::new(32.0, 32.0),
-        21,
-        1,
-        Some(Vec2::new(2.0, 2.0)),
-        Some(Vec2::new(1.0, 1.0)),
-    );
-    let texture_atlas_handle_bg = texture_atlases.add(texture_atlas_bg);
-    let texture_atlas_handle_building = texture_atlases.add(texture_atlas_building);
 
-    commands.insert_resource(SpriteSheetBgRes(texture_atlas_handle_bg.clone()));
-    commands.insert_resource(SpriteSheetBuildingRes(
-        texture_atlas_handle_building.clone(),
-    ));
+    // let texture_atlas_handle_bg = texture_atlases.add(texture_atlas_bg);
+    // let texture_atlas_handle_building = texture_atlases.add(texture_atlas_building);
 
     commands
         .spawn((
@@ -364,9 +326,8 @@ pub fn spawn_block_sprites(
     texture_map: Res<SpriteIndexBuilding>,
     mut sprite_spawn_event: EventReader<SpriteSpawnEvent>,
     mut commands: Commands,
-    texture_atlas_handle_bg: Res<SpriteSheetBgRes>,
-    texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
-    //mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    texture_atlas_handle_bg: Res<SpriteSheetBg>,
+    texture_atlas_handle_building: Res<SpriteSheetBuilding>,
     edge: Res<Edge>,
     mut chunk_map: ResMut<ChunkManager>,
     tile_map: Res<TileMap>,
@@ -462,10 +423,12 @@ pub fn spawn_block_sprites(
 
                     let mut cmd = commands.spawn((
                         SpriteSheetBundle {
-                            texture_atlas: texture_atlas_handle_bg.0.clone(), //textureatlashandle.clone(),
-                            sprite: TextureAtlasSprite {
-                                color: color_for_tile,
+                            atlas: TextureAtlas {
+                                layout: texture_atlas_handle_bg.layout.clone(),
                                 index: land_sprite_index,
+                            },
+                            sprite: Sprite {
+                                color: color_for_tile,
                                 ..Default::default()
                             },
 
@@ -478,6 +441,7 @@ pub fn spawn_block_sprites(
                                 scale: Vec3::new(TILE_SCALE, TILE_SCALE, 1.0),
                                 ..Default::default()
                             },
+                            texture: texture_atlas_handle_bg.texture.clone(),
                             ..Default::default()
                         },
                         locationcoord,
@@ -556,7 +520,8 @@ pub fn spawn_block_sprites(
                     cmd.with_children(|builder| {
                         spawn_tile_level(
                             building_sprite_index,
-                            &texture_atlas_handle_building.0.clone(),
+                            &texture_atlas_handle_building.layout,
+                            &texture_atlas_handle_building.texture,
                             builder,
                             building_color,
                             locationcoord,
@@ -645,14 +610,14 @@ pub fn set_camera_tile_bounds(
 pub fn update_tile_textures(
     mut commands: Commands,
     mut lands: Query<
-        (&mut TextureAtlasSprite, &Location, Entity),
+        (&mut TextureAtlas, &mut Sprite, &Location, Entity),
         (With<Land>, Without<BuildingStructure>),
     >,
     buildings: Query<(&Location, Entity), (Without<Land>, With<BuildingStructure>)>,
     mut event: EventReader<UpdateTileTextureEvent>,
     tile_map: Res<TileMap>,
     texture_map: Res<SpriteIndexBuilding>,
-    texture_atlas_handle_building: Res<SpriteSheetBuildingRes>,
+    texture_atlas_handle_building: Res<SpriteSheetBuilding>,
     toggle_map: Res<ToggleMap>,
     mut text_q: Query<(&mut Text, &Location), With<TileText>>,
     // mut toggle_buildings: EventWriter<ToggleBuildings>,
@@ -676,7 +641,7 @@ pub fn update_tile_textures(
             Visibility::Visible
         };
 
-        for (mut texture, location, parent_entity) in lands.iter_mut() {
+        for (mut texture, mut sprite, location, parent_entity) in lands.iter_mut() {
             if tile_map.map.contains_key(&location.ulam)
                 && tile_map_from_e.contains_key(&location.ulam)
             {
@@ -703,14 +668,14 @@ pub fn update_tile_textures(
 
                 // show correct color based on toggle
                 if *hiding_colors {
-                    texture.color = Color::Rgba {
+                    sprite.color = Color::Rgba {
                         red: 1.0,
                         green: 1.0,
                         blue: 1.0,
                         alpha: 1.0,
                     };
                 } else {
-                    texture.color = tile_data.color;
+                    sprite.color = tile_data.color;
                     texture.index = 0;
                 }
 
@@ -734,7 +699,8 @@ pub fn update_tile_textures(
                     .with_children(|child_builder| {
                         spawn_tile_level(
                             building_sprite_index,
-                            &texture_atlas_handle_building.0.clone(),
+                            &texture_atlas_handle_building.layout,
+                            &texture_atlas_handle_building.texture,
                             child_builder,
                             sanitize_building_color(tile_data.color),
                             locationcoord,
@@ -789,11 +755,7 @@ pub fn update_tile_textures(
 
 pub fn animate_sprites(
     time: Res<Time>,
-    mut query: Query<(
-        &AnimationIndices,
-        &mut AnimationTimer,
-        &mut TextureAtlasSprite,
-    )>,
+    mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
 ) {
     for (indices, mut timer, mut sprite) in &mut query {
         timer.tick(time.delta());

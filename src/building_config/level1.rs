@@ -1,44 +1,31 @@
 use bevy::prelude::*;
+use rand::Rng;
 
-use crate::{
-    componenty::{BuildingStructure, Location},
-    consty::TILE_SCALE,
-};
+use crate::componenty::Location;
+
+use super::building_templates::camp::spawn_camp;
 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn(
-    texture: &Handle<TextureAtlas>,
+    texture: &Handle<Image>,
+    layout: &Handle<TextureAtlasLayout>,
     builder: &mut ChildBuilder,
     color: Color,
     locationcoord: Location,
     visibility_toggle: Visibility,
 ) {
-    builder.spawn((
-        SpriteSheetBundle {
-            texture_atlas: texture.clone(),
-            sprite: TextureAtlasSprite {
-                color,
-                index: 1,
-                ..Default::default()
-            },
-            transform: Transform {
-                translation: Vec3::new(5., 0., 4.),
-                scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
-                ..Default::default()
-            },
-            visibility: visibility_toggle,
-            ..Default::default()
-        },
-        BuildingStructure::Hut,
-        locationcoord,
-    ));
+    let mut rng = rand::thread_rng();
+    let x: f32 = rng.gen_range(-12.0..12.0);
+    let y: f32 = rng.gen_range(-12.0..12.0);
 
-    crate::building_config::road::spawn(
-        &texture.clone(),
+    spawn_camp(
+        texture,
+        layout,
         builder,
-        Color::rgba(1.0, 1.0, 1.0, 1.0),
+        color,
         locationcoord,
-        0,
         visibility_toggle,
+        Vec3::new(x, y, 3.0),
+        Some(0.75),
     );
 }

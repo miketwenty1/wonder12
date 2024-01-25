@@ -4,12 +4,13 @@ use crate::componenty::{BuildingStructure, Location};
 
 const RADIAN_90: f32 = 1.5707961;
 #[allow(clippy::too_many_arguments)]
-pub fn spawn(
-    texture: &Handle<TextureAtlas>,
+pub fn spawn_road(
+    texture: &Handle<Image>,
+    layout: &Handle<TextureAtlasLayout>,
     builder: &mut ChildBuilder,
     color: Color,
     locationcoord: Location,
-    road_offset: usize,
+    offset: usize,
     visibility: Visibility,
 ) {
     //info!("roadbuilding");
@@ -27,10 +28,12 @@ pub fn spawn(
     };
     builder.spawn((
         SpriteSheetBundle {
-            texture_atlas: texture.clone(),
-            sprite: TextureAtlasSprite {
+            atlas: TextureAtlas {
+                layout: layout.clone(),
+                index: road.0 + offset,
+            },
+            sprite: Sprite {
                 color,
-                index: road.0 + road_offset,
                 ..Default::default()
             },
             transform: Transform {
@@ -39,10 +42,11 @@ pub fn spawn(
                 rotation: Quat::from_rotation_z(road.1),
                 ..Default::default()
             },
+            texture: texture.clone(),
             visibility,
             ..Default::default()
         },
-        BuildingStructure::DirtRoad,
+        BuildingStructure::Road,
         locationcoord,
     ));
 }

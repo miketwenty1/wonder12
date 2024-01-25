@@ -28,6 +28,7 @@ use resourcey::{
     CheckInvoiceChannel, ConfigAllCartBlocks, InitBlockCount, InitGameMap, InventoryBlocks,
     IsIphone, MultiTouchInfo, RequestInvoiceChannel, UserBlockInventory, WinSize,
 };
+use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
 use structy::RequestTileType;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -44,9 +45,9 @@ mod componenty;
 mod consty;
 mod eventy;
 mod resourcey;
+mod spritesheetfns;
 mod statey;
 mod structy;
-
 mod utils;
 
 pub fn main() {
@@ -67,13 +68,6 @@ pub fn game12(
     _device_pixel_ratio: f32,
     is_iphone: bool,
 ) {
-    // this doesn't show
-    // info!(
-    //     "user: {}\nserver: {}, lnaddress: {}",
-    //     username, server_url, ln_address
-    // );
-
-    //let max_block_height: u32 = max_height;
     let mut toggle_map = HashMap::new();
     toggle_map.insert("showbuildings".to_string(), false);
     toggle_map.insert("showcolors".to_string(), true);
@@ -88,16 +82,16 @@ pub fn game12(
     numbers_map.insert(256, 2);
     numbers_map.insert(512, 3);
     numbers_map.insert(1024, 4);
-    numbers_map.insert(2048, 4);
-    numbers_map.insert(4096, 4);
-    numbers_map.insert(8192, 4);
-    numbers_map.insert(16384, 4);
-    numbers_map.insert(32768, 4);
-    numbers_map.insert(65536, 4);
-    numbers_map.insert(131072, 4);
-    numbers_map.insert(262144, 4);
-    numbers_map.insert(524288, 4);
-    numbers_map.insert(1048576, 4);
+    numbers_map.insert(2048, 5);
+    numbers_map.insert(4096, 6);
+    numbers_map.insert(8192, 7);
+    numbers_map.insert(16384, 8);
+    numbers_map.insert(32768, 9);
+    numbers_map.insert(65536, 10);
+    numbers_map.insert(131072, 10);
+    numbers_map.insert(262144, 10);
+    numbers_map.insert(524288, 10);
+    numbers_map.insert(1048576, 10);
 
     let color_palette = ColorPalette {
         node_color: Color::hex("222831").unwrap(),
@@ -128,44 +122,6 @@ pub fn game12(
             tile: CHUNK_TILE_SPAN_COUNT,
         },
     };
-
-    // let window = if viewport_width as f32 * device_pixel_ratio > 4096.0
-    //     || viewport_height as f32 * device_pixel_ratio > 4096.0
-    // {
-    //     if viewport_width as f32 * 2.0 > 4096.0 || viewport_height as f32 * 2.0 > 4096.0 {
-    //         Window {
-    //             resolution: WindowResolution::new(viewport_width as f32, viewport_height as f32)
-    //                 .with_scale_factor_override(1.0),
-    //             title: "SatoshiSettlers".to_string(),
-    //             ..default()
-    //         }
-    //     } else {
-    //         Window {
-    //             resolution: WindowResolution::new(viewport_width as f32, viewport_height as f32)
-    //                 .with_scale_factor_override(2.0),
-    //             title: "SatoshiSettlers".to_string(),
-    //             ..default()
-    //         }
-    //     }
-    // } else {
-    //     Window {
-    //         title: "SatoshiSettlers".to_string(),
-    //         ..default()
-    //     }
-    // };
-    // let window = if device_pixel_ratio == 3.5 {
-    //     Window {
-    //         resolution: WindowResolution::new(viewport_width as f32, viewport_height as f32)
-    //             .with_scale_factor_override(2.0),
-    //         title: "SatoshiSettlers".to_string(),
-    //         ..default()
-    //     }
-    // } else {
-    //     Window {
-    //         title: "SatoshiSettlers".to_string(),
-    //         ..default()
-    //     }
-    // };
 
     let window = Window {
         title: "SatoshiSettlers".to_string(),
@@ -269,9 +225,8 @@ pub fn game12(
         .add_event::<HideBackupCopyBtn>()
         .add_event::<ShowBackupCopyBtn>()
         .add_event::<RequestInventoryEvent>()
-        .add_systems(Startup, setup) //setupcoords
-        //.add_systems(PostStartup, setup2) //setupcoords
-        //.add_systems(PostStartup, api_get_server_tiles)
+        // .add_systems(Startup, load_textures)
+        .add_systems(Startup, (setup_spritesheets, setup).chain())
         .run();
 }
 
@@ -280,15 +235,9 @@ fn setup(
     mut ui_state: ResMut<NextState<ExploreState>>,
     mut request_tiles_event: EventWriter<RequestTileUpdates>,
     mut request_inventory_event: EventWriter<RequestInventoryEvent>,
-    //q_window: Query<&Window, With<PrimaryWindow>>,
 ) {
     fit_canvas_to_parent();
-    //commands.spawn(Camera2dBundle::default());
     commands.spawn(Camera2dBundle::default());
-
-    // let window = q_window.single();
-    // wsize.height = window.resolution.physical_height(); // .height(); //.resolution.height();
-    // wsize.width = window.width(); //window.resolution.width();
 
     let (tx_tiledata, rx_tiledata) = async_channel::bounded(4);
     commands.insert_resource(TileDataChannel {
@@ -314,21 +263,6 @@ fn setup(
     request_inventory_event.send(RequestInventoryEvent);
     ui_state.set(ExploreState::On);
 }
-
-// fn setup2(mut wsize: ResMut<WinSize>, camera: Query<&Camera, With<Camera2d>>) {
-//     let camera = camera.single();
-//     let viewport_position_o = &camera.logical_viewport_size();
-//     match viewport_position_o {
-//         Some(s) => {
-//             wsize.width = s.x;
-//             wsize.height = s.y;
-//             info!("logical viewport is {},{}", s.x, s.y);
-//         }
-//         None => {
-//             info!("None!");
-//         }
-//     }
-// }
 
 fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
     for entity in &to_despawn {
