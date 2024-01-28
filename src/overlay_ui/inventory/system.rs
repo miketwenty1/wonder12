@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 
 use crate::{
-    comms::server_structs::UserGameBlock,
-    resourcey::{ColorPalette, TileCartVec},
-    utils::convert_color_to_hexstring,
+    eventy::DespawnInventoryHeights,
+    resourcey::{ColorPalette, UserInventoryBlocks},
 };
 
 use super::{
@@ -12,42 +11,35 @@ use super::{
     layout::spawn_inventory_row_c,
 };
 
+#[allow(clippy::too_many_arguments)]
 pub fn inventory_adder_system(
     mut commands: Commands,
     mut inventory_ent: Query<(Entity, &mut Visibility), With<InventoryNode>>,
     mut event: EventReader<AddInventoryRow>,
     asset_server: Res<AssetServer>,
     colors: Res<ColorPalette>,
-    tile_cart_vec: Res<TileCartVec>,
+    //tile_cart_vec: Res<TileCartVec>,
     mut inner_inv: Query<(Entity, &InnerInventoryNode)>,
+    mut inventory: ResMut<UserInventoryBlocks>,
 ) {
-    for _e in event.read() {
+    for inventory_event in event.read() {
         info!("inv event trig");
         for (ent, mut visi) in inventory_ent.iter_mut() {
             info!("entity found");
             *visi = Visibility::Visible;
             let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-            for tile in &tile_cart_vec.vec {
-                let user_game_block = UserGameBlock {
-                    height: tile.height,
-                    amount: tile.value,
-                    color: convert_color_to_hexstring(tile.new_color),
-                };
-
+            for tile in &inventory_event.0 {
+                inventory.ownedblocks.insert(tile.height, tile.clone());
                 // despawn old if exist
                 for (ent, node) in inner_inv.iter_mut() {
-                    if node.0 == user_game_block.height {
+                    if node.0 == tile.height {
                         commands.entity(ent).despawn_recursive();
                     }
                 }
 
                 // spawn new inv row
-                let child = spawn_inventory_row_c(
-                    &mut commands,
-                    &user_game_block,
-                    font.clone(),
-                    colors.clone(),
-                );
+                let child =
+                    spawn_inventory_row_c(&mut commands, tile, font.clone(), colors.clone());
 
                 commands.entity(ent).add_child(child);
             }
@@ -55,4 +47,22 @@ pub fn inventory_adder_system(
     }
 }
 
-pub fn inventory_interaction() {}
+pub fn inventory_remover_system(
+    mut event: EventReader<DespawnInventoryHeights>,
+    mut commands: Commands,
+    mut inner_inv: Query<(Entity, &InnerInventoryNode)>,
+    mut inventory: ResMut<UserInventoryBlocks>,
+) {
+    for heights in event.read() {
+        info!("despawn heights {:#?}", heights);
+
+        for height in &heights.0 {
+            for (ent, node) in inner_inv.iter_mut() {
+                if &node.0 == height {
+                    commands.entity(ent).despawn_recursive();
+                }
+            }
+            inventory.ownedblocks.remove(height);
+        }
+    }
+}

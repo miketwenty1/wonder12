@@ -7,8 +7,8 @@ pub fn convert_color_to_hexstring(c: Color) -> String {
     let r = (c.r().clamp(0.0, 1.0) * 255.0).round() as u8;
     let g = (c.g().clamp(0.0, 1.0) * 255.0).round() as u8;
     let b = (c.b().clamp(0.0, 1.0) * 255.0).round() as u8;
-    info!("color c: {:?}", c);
-    info!("r-{}, g-{}, b-{}", r, g, b);
+    //info!("color c: {:?}", c);
+    //info!("r-{}, g-{}, b-{}", r, g, b);
     // Format into a hexadecimal string
     format!("{:02X}{:02X}{:02X}", r, g, b)
 }

@@ -2,8 +2,9 @@ use super::api_timer::ApiPollingTimer;
 use crate::eventy::RequestInventoryEvent;
 use crate::overlay_ui::inventory::state::InventoryUiState;
 use crate::overlay_ui::toast::{ToastEvent, ToastType};
-use crate::resourcey::{InventoryBlocks, UserBlockInventory};
+use crate::resourcey::{UserBlockInventoryChannel, UserInventoryBlocks};
 use crate::statey::CommsApiInventoryState;
+use crate::structy::UserInventoryBlocksFromServer;
 use crate::utils::logout_user;
 use crate::ServerURL;
 use bevy::prelude::*;
@@ -11,7 +12,7 @@ use bevy::tasks::IoTaskPool;
 
 #[allow(unused_must_use)]
 pub fn api_get_inventory_blocks(
-    channel: Res<UserBlockInventory>,
+    channel: Res<UserBlockInventoryChannel>,
     api_server: Res<ServerURL>,
     mut event: EventReader<RequestInventoryEvent>,
     mut api_inventory_state: ResMut<NextState<CommsApiInventoryState>>,
@@ -47,8 +48,8 @@ pub fn api_get_inventory_blocks(
 
 #[allow(clippy::too_many_arguments)]
 pub fn api_receive_inventory_blocks(
-    channel: Res<UserBlockInventory>,
-    mut data_res: ResMut<InventoryBlocks>,
+    channel: Res<UserBlockInventoryChannel>,
+    mut data_res_map: ResMut<UserInventoryBlocks>,
     api_timer: Res<ApiPollingTimer>,
     mut api_inventory_state: ResMut<NextState<CommsApiInventoryState>>,
     mut toast: EventWriter<ToastEvent>,
@@ -60,11 +61,12 @@ pub fn api_receive_inventory_blocks(
         //info!("waiting to receive invoice check");
         match api_res {
             Ok(og_r) => {
-                let r_result = serde_json::from_str::<InventoryBlocks>(&og_r);
+                let r_result = serde_json::from_str::<UserInventoryBlocksFromServer>(&og_r);
                 match r_result {
                     Ok(o) => {
                         info!("receiving inventory: {:#?}", o);
-                        *data_res = o;
+
+                        data_res_map.ownedblocks = o.map();
                         api_inventory_state.set(CommsApiInventoryState::Off);
                         inventory_ui_state.set(InventoryUiState::On);
                     }

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::{
     componenty::{BuildingStructure, Land, Location, TileText},
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
-    resourcey::{TileMap, ToggleMap},
+    resourcey::{ToggleMap, WorldOwnedTileMap},
     structy::TileTextType,
 };
 
@@ -29,7 +29,7 @@ pub fn land_color_event(
     mut toggle: EventReader<ToggleColors>,
     mut land_q: Query<(&mut TextureAtlas, &mut Sprite, &Location), With<Land>>,
     toggle_map: Res<ToggleMap>,
-    tile_res: Res<TileMap>,
+    tile_res: Res<WorldOwnedTileMap>,
 ) {
     for _t in toggle.read() {
         for (mut texture, mut sprite, loc) in land_q.iter_mut() {
@@ -59,7 +59,7 @@ pub fn land_color_event(
 pub fn change_tile_text_event(
     mut toggle: EventReader<ToggleText>,
     mut text_q: Query<(&mut Text, &Location), With<TileText>>,
-    tile_res: Res<TileMap>,
+    tile_res: Res<WorldOwnedTileMap>,
 ) {
     for t in toggle.read() {
         for (mut text, loc) in text_q.iter_mut() {

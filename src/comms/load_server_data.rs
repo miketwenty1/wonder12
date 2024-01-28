@@ -1,18 +1,21 @@
 use super::api_timer::ApiPollingTimer;
 use super::server_structs::GameBlocksDataFromDBMod;
-use crate::eventy::RequestTileUpdates;
+use crate::comms::server_structs::UserGameBlock;
+use crate::eventy::{DespawnInventoryHeights, RequestTileUpdates};
+use crate::overlay_ui::inventory::event::AddInventoryRow;
 use crate::overlay_ui::toast::{ToastEvent, ToastType};
-use crate::resourcey::{InitGameMap, TileData, TileDataChannel, UpdateGameTimetamp};
+use crate::resourcey::{
+    InitGameMap, TileData, TileDataChannel, UpdateGameTimetamp, UserInventoryBlocks,
+};
 use crate::statey::CommsApiBlockLoadState;
 use crate::structy::{RequestTileType, TileResource};
-use crate::utils::logout_user;
-use crate::{ServerURL, TileMap, UpdateTileTextureEvent};
+use crate::utils::{convert_color_to_hexstring, logout_user};
+use crate::{ServerURL, UpdateTileTextureEvent, WorldOwnedTileMap};
 use bevy::prelude::*;
 //use bevy::tasks::IoTaskPool;
 use rand::Rng;
 use wasm_bindgen_futures::spawn_local;
 
-//pub fn load_server_data(mut commands: Commands, mut tile_map: ResMut<TileMap>) {}
 //SetTileDataChannel
 #[allow(unused_must_use)]
 pub fn api_get_server_tiles(
@@ -92,12 +95,15 @@ pub fn api_receive_server_tiles(
     channel: ResMut<TileDataChannel>,
     api_timer: Res<ApiPollingTimer>,
     mut api_state: ResMut<NextState<CommsApiBlockLoadState>>,
-    mut tile_map: ResMut<TileMap>,
+    mut tile_map: ResMut<WorldOwnedTileMap>,
     mut update_tile_event: EventWriter<UpdateTileTextureEvent>,
     mut gametime: ResMut<UpdateGameTimetamp>,
     mut gameinit: ResMut<InitGameMap>,
     mut get_more_tiles: EventWriter<RequestTileUpdates>,
     mut toast: EventWriter<ToastEvent>,
+    mut despawn_inventory: EventWriter<DespawnInventoryHeights>,
+    mut spawn_inventory: EventWriter<AddInventoryRow>,
+    inventory: Res<UserInventoryBlocks>,
 ) {
     if api_timer.timer.finished() && !channel.rx.is_empty() {
         //info!("checking for tiles response");
@@ -106,14 +112,19 @@ pub fn api_receive_server_tiles(
         let mut send_update = false;
         let mut request_more_ts = false;
         let mut request_more_height = false;
+        // inventory remove vec
+        let mut remove_inventory_holder: Vec<u32> = Vec::new();
+        let mut add_inventory_holder: Vec<UserGameBlock> = Vec::new();
         match api_res {
             Ok(og_r) => {
                 let mut new_tile_vec = Vec::new();
-                //info!("api_receive_server_tiles: {}", r);
-                let r_invoice_result = serde_json::from_str::<GameBlocksDataFromDBMod>(&og_r);
+                // for getting a vec of the inventory items needing to be despawned out of inventory of a user.
+                // if a tile comes in and the previous owner is the user.. (AND the new owner isn't the user) add to vec.
 
-                //info!("from the server: {:#?}", r_invoice_result);
-                match r_invoice_result {
+                //info!("api_receive_server_tiles: {}", r);
+                let r_block_result = serde_json::from_str::<GameBlocksDataFromDBMod>(&og_r);
+
+                match r_block_result {
                     Ok(server_block_data) => {
                         match server_block_data {
                             GameBlocksDataFromDBMod {
@@ -164,6 +175,40 @@ pub fn api_receive_server_tiles(
                                 land_index: rng.gen_range(1..=11),
                                 event_date: block_data.event_date,
                             };
+
+                            // // // // inventory update code
+
+                            let user_inv_map = &inventory.ownedblocks;
+                            let inv_o = user_inv_map.get(&new_td.height);
+                            if let Some(_s) = inv_o {
+                                let inv_amount = user_inv_map.get(&new_td.height).unwrap().amount;
+
+                                // shouldnt need this!!!
+                                // let checker_inv_value = if inv_amount == 0 { 128 } else { inv_amount * 2 };
+                                info!(
+                                    "PRE!!! {}, invamount: {}, checkamount: {}",
+                                    new_td.height, inv_amount, new_td.value
+                                );
+                                //let aa = new_td.clone();
+                                #[allow(clippy::comparison_chain)]
+                                if user_inv_map.contains_key(&new_td.height) {
+                                    if inv_amount < new_td.value {
+                                        info!("need to DEL this from inventory: {}, invamount: {}, checkamount: {}", new_td.height, inv_amount, new_td.value);
+                                        remove_inventory_holder.push(new_td.height);
+                                    } else if inv_amount > new_td.value {
+                                        info!("need to ADD this from inventory: {}, invamount: {}, checkamount: {}", new_td.height, inv_amount, new_td.value);
+                                        add_inventory_holder.push(UserGameBlock {
+                                            height: new_td.height,
+                                            amount: new_td.value,
+                                            color: convert_color_to_hexstring(new_td.color),
+                                        });
+                                    } else {
+                                        info!("block came in and matches inv amount");
+                                    }
+                                }
+                            }
+
+                            //update_inventory(new_td);
                             let tile_check = tile_map.map.get(&(block_data.height as u32));
                             match tile_check {
                                 Some(s) => {
@@ -172,8 +217,6 @@ pub fn api_receive_server_tiles(
                                         new_insert_update = true;
                                         send_update = true;
                                         new_tile_vec.push(new_td.clone());
-
-                                        //info!("old: {:#?} new: {:#?}", s, new_td);
                                     }
                                 }
                                 None => {
@@ -186,6 +229,16 @@ pub fn api_receive_server_tiles(
                                 tile_map.map.insert(block_data.height as u32, new_td);
                             }
                         }
+                        // // // inventory update code
+                        if !remove_inventory_holder.is_empty() {
+                            despawn_inventory
+                                .send(DespawnInventoryHeights(remove_inventory_holder));
+                        }
+                        if !add_inventory_holder.is_empty() {
+                            spawn_inventory.send(AddInventoryRow(add_inventory_holder));
+                        }
+                        // // // inventory update code
+
                         if send_update {
                             update_tile_event.send(UpdateTileTextureEvent(new_tile_vec));
 

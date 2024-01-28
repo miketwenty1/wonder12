@@ -60,3 +60,9 @@ pub struct ShowBackupCopyBtn;
 
 #[derive(Event, Debug)]
 pub struct RequestInventoryEvent;
+
+#[derive(Event, Debug)]
+pub struct UpdateTilesAfterPurchase;
+
+#[derive(Event, Debug)]
+pub struct DespawnInventoryHeights(pub Vec<u32>);

@@ -18,7 +18,7 @@ pub fn spawn(
 ) {
     let mut rng = rand::thread_rng();
     let x: f32 = rng.gen_range(0.0..5.0);
-    let y: f32 = rng.gen_range(1.0..4.0);
+    let y: f32 = rng.gen_range(2.0..4.0);
 
     spawn_shack(
         texture,
@@ -32,7 +32,7 @@ pub fn spawn(
     );
 
     let x: f32 = rng.gen_range(2.0..7.0);
-    let y: f32 = rng.gen_range(-7.0..-3.0);
+    let y: f32 = rng.gen_range(-9.0..-6.0);
 
     spawn_firepit(
         texture,

@@ -2,9 +2,10 @@ use bevy::{prelude::*, tasks::IoTaskPool};
 use serde::Deserialize;
 
 use crate::{
+    comms::server_structs::UserGameBlock,
     eventy::{
-        BuyBlockRequest, ClearSelectionEvent, HideBackupCopyBtn, RequestTileUpdates,
-        ShowBackupCopyBtn,
+        BuyBlockRequest, ClearSelectionEvent, HideBackupCopyBtn, ShowBackupCopyBtn,
+        UpdateTilesAfterPurchase,
     },
     overlay_ui::{
         inventory::event::AddInventoryRow,
@@ -15,7 +16,7 @@ use crate::{
         RequestInvoiceChannel, TileCartVec, User,
     },
     statey::{CommsApiState, DisplayBuyUiState, ExploreState},
-    structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock, RequestTileType},
+    structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},
     utils::{convert_color_to_hexstring, extract_number, logout_user},
     ServerURL,
 };
@@ -45,7 +46,7 @@ pub fn api_request_invoice(
     mut api_receive_state: ResMut<NextState<CommsApiState>>,
 ) {
     for _buy_block_data in button_event_reader.read() {
-        info!("{:#?}", tile_cart_vec.vec);
+        //info!("{:#?}", tile_cart_vec.vec);
         if invoice_data.invoice.is_empty() {
             info!("requested invoice from buy button");
 
@@ -213,8 +214,8 @@ pub fn api_check_invoice(
     //mut details_button_event_reader: EventReader<BlockDetailClick>,
 ) {
     if api_timer.timer.finished() {
-        info!("invoice res: {:#?}", invoice_res.invoice);
-        //info!("check for invoice status");
+        //info!("invoice res: {:#?}", invoice_res.invoice);
+        info!("check for invoice status");
 
         let pool = IoTaskPool::get();
         let cc = channel.tx.clone();
@@ -253,13 +254,15 @@ pub fn api_receive_invoice_check(
     mut api_name_set_state: ResMut<NextState<CommsApiState>>,
     mut game_set_state: ResMut<NextState<ExploreState>>,
     mut qr_set_state: ResMut<NextState<DisplayBuyUiState>>,
-    mut event: EventWriter<RequestTileUpdates>,
+    //mut event: EventWriter<RequestTileUpdates>,
     mut invoice_data: ResMut<InvoiceDataFromServer>,
     mut clear_event: EventWriter<ClearSelectionEvent>,
     mut toast: EventWriter<ToastEvent>,
     mut bkp_clipboard_btn: EventWriter<HideBackupCopyBtn>,
     iphone: Res<IsIphone>,
     mut inv_event: EventWriter<AddInventoryRow>,
+    mut update_tiles_e: EventWriter<UpdateTilesAfterPurchase>,
+    tile_cart_vec: Res<TileCartVec>,
 ) {
     if api_timer.timer.finished() {
         let api_res = channel.rx.try_recv();
@@ -276,8 +279,18 @@ pub fn api_receive_invoice_check(
                             }
                             "completed" => {
                                 info!("completed invoice");
-                                event.send(RequestTileUpdates(RequestTileType::Ts));
-                                inv_event.send(AddInventoryRow);
+                                //event.send(RequestTileUpdates(RequestTileType::Ts));
+                                update_tiles_e.send(UpdateTilesAfterPurchase);
+                                let mut inv = Vec::new();
+                                for tile in &tile_cart_vec.vec {
+                                    let user_game_block = UserGameBlock {
+                                        height: tile.height,
+                                        amount: tile.cost,
+                                        color: convert_color_to_hexstring(tile.new_color),
+                                    };
+                                    inv.push(user_game_block);
+                                }
+                                inv_event.send(AddInventoryRow(inv));
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);

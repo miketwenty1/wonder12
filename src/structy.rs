@@ -1,5 +1,8 @@
+use bevy::utils::hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+
+use crate::comms::server_structs::UserGameBlock;
 
 #[derive(Debug)]
 pub enum EdgeType {
@@ -67,4 +70,18 @@ pub enum RequestTileType {
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct ErrorMessage {
     pub error: Value,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct UserInventoryBlocksFromServer {
+    pub ownedblocks: Vec<UserGameBlock>,
+}
+
+impl UserInventoryBlocksFromServer {
+    pub fn map(&self) -> HashMap<u32, UserGameBlock> {
+        self.ownedblocks
+            .iter()
+            .map(|block| (block.height, block.clone()))
+            .collect()
+    }
 }

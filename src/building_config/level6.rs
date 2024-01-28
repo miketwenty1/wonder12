@@ -43,7 +43,7 @@ pub fn spawn(
         Some(0.85),
     );
     let x: f32 = rng.gen_range(1.0..5.0);
-    let y: f32 = rng.gen_range(-5.0..-3.0);
+    let y: f32 = rng.gen_range(-7.0..-4.0);
 
     spawn_firepit(
         texture,

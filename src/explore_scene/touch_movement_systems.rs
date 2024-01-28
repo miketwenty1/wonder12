@@ -3,7 +3,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use crate::{
     consty::{MOVE_VELOCITY_FACTOR, TOTAL_TILE_SCALE_SIZE},
     eventy::{ClearLastSelectedTile, EdgeEvent, SelectTileEvent},
-    resourcey::Edge,
+    resourcey::{Edge, MaxBlockHeight},
 };
 
 use super::explore::set_camera_tile_bounds;
@@ -18,6 +18,7 @@ pub fn touch_event_system(
     q_window: Query<&Window, With<PrimaryWindow>>,
     mut select_tile_event: EventWriter<SelectTileEvent>,
     mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
+    max_height: Res<MaxBlockHeight>,
     //mut last_selected_tile: ResMut<LastSelectedTile>,
     //location_query: Query<&Location>,
 ) {
@@ -50,6 +51,19 @@ pub fn touch_event_system(
                 0.01
             } else {
                 time.delta_seconds()
+            };
+
+            // push back, change direction if detected past edge (left and up work the same as desktop but right and down need to be tweaked)
+            let direction = if ulam::value_of_xy(0, edge.bottom.tile) + 1_000 > max_height.0 {
+                Vec3::new(0., 100.0, 0.0)
+            } else if ulam::value_of_xy(0, edge.top.tile) + 1_000 > max_height.0 {
+                Vec3::new(x as f32, -100.0, 0.0)
+            } else if ulam::value_of_xy(edge.left.tile, 0) + 1_000 > max_height.0 {
+                Vec3::new(100.0, y as f32, 0.0)
+            } else if ulam::value_of_xy(edge.right.tile, 0) + 1_000 > max_height.0 {
+                Vec3::new(-100.0, 0.0, 0.0)
+            } else {
+                direction
             };
 
             cam_transform.translation +=

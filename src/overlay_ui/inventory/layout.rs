@@ -3,14 +3,14 @@ use bevy::prelude::*;
 use crate::{
     comms::server_structs::UserGameBlock,
     overlay_ui::inventory::component::{InnerInventoryNode, InventoryColorBox},
-    resourcey::{ColorPalette, InventoryBlocks},
+    resourcey::{ColorPalette, UserInventoryBlocks},
 };
 
 use super::component::{InventoryHeight, InventoryNode};
 
 pub fn spawn_layout(
     mut commands: Commands,
-    inventory_blocks: Res<InventoryBlocks>,
+    inventory_blocks: Res<UserInventoryBlocks>,
     asset_server: Res<AssetServer>,
     colors: Res<ColorPalette>,
 ) {
@@ -61,7 +61,7 @@ pub fn spawn_layout(
     });
 
     parent.with_children(|builder| {
-        for block in &inventory_blocks.ownedblocks {
+        for block in inventory_blocks.ownedblocks.values() {
             spawn_inventory_row(builder, block, font.clone(), colors.clone());
         }
     });

@@ -6,7 +6,7 @@ use crate::{
     },
     consty::MINIMUM_BLOCK_AMOUNT,
     eventy::UpdateUiAmount,
-    resourcey::{TileCart, TileCartData, TileMap},
+    resourcey::{TileCart, TileCartData, WorldOwnedTileMap},
     utils::get_random_color,
 };
 
@@ -45,7 +45,7 @@ pub fn update_amount_selected_text(
     mut event: EventReader<UpdateUiAmount>,
     selected_lands: Query<&Location, With<Selected>>,
     mut amount_selected_text: Query<&mut Text, With<AmountSelectedText>>,
-    tile_map: ResMut<TileMap>,
+    tile_map: ResMut<WorldOwnedTileMap>,
     mut tile_cart: ResMut<TileCart>,
     mut tile_selected_button_q: Query<
         &mut Visibility,

@@ -15,8 +15,8 @@ pub fn spawn(
     visibility_toggle: Visibility,
 ) {
     let mut rng = rand::thread_rng();
-    let x: f32 = rng.gen_range(-3.0..3.0);
-    let y: f32 = rng.gen_range(4.0..6.0);
+    let x: f32 = rng.gen_range(-4.0..4.0);
+    let y: f32 = rng.gen_range(5.0..7.0);
 
     spawn_house(
         texture,
@@ -29,8 +29,8 @@ pub fn spawn(
         Some(1.5),
     );
 
-    let x: f32 = rng.gen_range(-7.0..7.0);
-    let y: f32 = rng.gen_range(-8.0..-5.0);
+    let x: f32 = rng.gen_range(-9.0..9.0);
+    let y: f32 = rng.gen_range(-9.0..-6.0);
     spawn_waterwell(
         texture,
         layout,

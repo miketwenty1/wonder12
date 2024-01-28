@@ -23,7 +23,7 @@ pub struct TileData {
 }
 
 #[derive(Resource, Clone, PartialEq)]
-pub struct TileMap {
+pub struct WorldOwnedTileMap {
     pub map: HashMap<u32, TileData>,
 }
 
@@ -114,7 +114,7 @@ pub struct CheckInvoiceChannel {
 }
 
 #[derive(Resource, Clone)]
-pub struct UserBlockInventory {
+pub struct UserBlockInventoryChannel {
     pub tx: Sender<String>,
     pub rx: Receiver<String>,
 }
@@ -209,6 +209,11 @@ pub struct ConfigAllCartBlocks(pub bool);
 pub struct IsIphone(pub bool);
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct InventoryBlocks {
-    pub ownedblocks: Vec<UserGameBlock>,
+pub struct UserInventoryBlocks {
+    pub ownedblocks: HashMap<u32, UserGameBlock>,
 }
+
+// #[derive(Resource, Clone, Debug, Default, Deserialize)]
+// pub struct UserInventoryBlocksFromServer {
+//     pub ownedblocks: Vec<UserGameBlock>,
+// }

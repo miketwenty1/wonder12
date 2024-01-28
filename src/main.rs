@@ -12,8 +12,8 @@ use crate::overlay_ui::OverlayUiPlugin;
 use crate::resourcey::{
     ChunkManager, ColorPalette, CurrentCartBlock, Edge, InvoiceCheckFromServer,
     InvoiceDataFromServer, LastSelectedTile, MaxBlockHeight, ServerURL, SpriteIndexBuilding,
-    TargetType, TileCart, TileCartVec, TileDataChannel, TileMap, ToggleMap, UpdateGameTimetamp,
-    User,
+    TargetType, TileCart, TileCartVec, TileDataChannel, ToggleMap, UpdateGameTimetamp, User,
+    WorldOwnedTileMap,
 };
 use crate::statey::{CommsApiState, DisplayBuyUiState, ExploreState};
 use crate::structy::EdgeData;
@@ -22,11 +22,14 @@ use bevy::asset::AssetMetaCheck;
 // use bevy::window::WindowResolution;
 use bevy::{prelude::*, utils::HashMap};
 use chrono::{Duration, Utc};
-use eventy::{HideBackupCopyBtn, KeyboardSpawnEvent, RequestInventoryEvent, ShowBackupCopyBtn};
+use eventy::{
+    DespawnInventoryHeights, HideBackupCopyBtn, KeyboardSpawnEvent, RequestInventoryEvent,
+    ShowBackupCopyBtn, UpdateTilesAfterPurchase,
+};
 use overlay_ui::inventory::state::InventoryUiState;
 use resourcey::{
-    CheckInvoiceChannel, ConfigAllCartBlocks, InitBlockCount, InitGameMap, InventoryBlocks,
-    IsIphone, MultiTouchInfo, RequestInvoiceChannel, UserBlockInventory, WinSize,
+    CheckInvoiceChannel, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone,
+    MultiTouchInfo, RequestInvoiceChannel, UserBlockInventoryChannel, UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
@@ -70,7 +73,7 @@ pub fn game12(
 ) {
     let mut toggle_map = HashMap::new();
     toggle_map.insert("showbuildings".to_string(), false);
-    toggle_map.insert("showcolors".to_string(), true);
+    toggle_map.insert("showcolors".to_string(), false);
     toggle_map.insert("showvalues".to_string(), true);
     toggle_map.insert("showheights".to_string(), false);
     toggle_map.insert("showtext".to_string(), false);
@@ -135,7 +138,7 @@ pub fn game12(
         .insert_resource(ChunkManager {
             map: HashMap::new(),
         })
-        .insert_resource(TileMap {
+        .insert_resource(WorldOwnedTileMap {
             map: HashMap::new(),
         })
         .insert_resource(TileCart {
@@ -167,7 +170,7 @@ pub fn game12(
         })
         .insert_resource(InitBlockCount(block_init_count))
         .insert_resource(UpdateGameTimetamp {
-            ts: Utc::now() - Duration::minutes(1),
+            ts: Utc::now() - Duration::minutes(5),
         })
         .insert_resource(InitGameMap { height: 0 })
         .init_resource::<InvoiceDataFromServer>()
@@ -182,8 +185,8 @@ pub fn game12(
         })
         .insert_resource(ConfigAllCartBlocks(false))
         .insert_resource(IsIphone(is_iphone))
-        .insert_resource(InventoryBlocks {
-            ownedblocks: vec![],
+        .insert_resource(UserInventoryBlocks {
+            ownedblocks: HashMap::new(),
         })
         //.add_plugins(DefaultPlugins)
         .add_plugins(
@@ -225,6 +228,8 @@ pub fn game12(
         .add_event::<HideBackupCopyBtn>()
         .add_event::<ShowBackupCopyBtn>()
         .add_event::<RequestInventoryEvent>()
+        .add_event::<UpdateTilesAfterPurchase>()
+        .add_event::<DespawnInventoryHeights>()
         // .add_systems(Startup, load_textures)
         .add_systems(Startup, (setup_spritesheets, setup).chain())
         .run();
@@ -255,7 +260,7 @@ fn setup(
         rx: rx_tiledata,
     });
     let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
-    commands.insert_resource(UserBlockInventory {
+    commands.insert_resource(UserBlockInventoryChannel {
         tx: tx_tiledata,
         rx: rx_tiledata,
     });

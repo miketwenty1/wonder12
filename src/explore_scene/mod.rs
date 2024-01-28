@@ -6,6 +6,7 @@ pub mod mouse_movement_systems;
 pub mod selection;
 pub mod toggle_ui;
 pub mod touch_movement_systems;
+pub mod update_after_purchase;
 pub mod update_toggle_events;
 pub mod zoom;
 
@@ -30,6 +31,7 @@ use self::{
         toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4, toggle_button_system,
     },
     touch_movement_systems::touch_event_system,
+    update_after_purchase::update_tiles_after_purchase,
     update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
     zoom::{pinch_system, zoom_in_button_system, zoom_out_button_system},
 };
@@ -93,6 +95,7 @@ impl Plugin for ExplorePlugin {
                     animate_sprites,
                     cron_update_tiles,
                     tick_update_tile_cron_timer,
+                    update_tiles_after_purchase,
                 ),
             )
             .add_systems(OnExit(ExploreState::On), reset_mouse);

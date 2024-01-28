@@ -21,7 +21,7 @@ use crate::{
     overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
         ChunkManager, ColorPalette, Edge, InitBlockCount, MaxBlockHeight, SpriteIndexBuilding,
-        SpriteSheetBg, SpriteSheetBuilding, TileData, TileMap, ToggleMap,
+        SpriteSheetBg, SpriteSheetBuilding, TileData, ToggleMap, WorldOwnedTileMap,
     },
     statey::{DisplayBuyUiState, InitLoadingBlocksState},
     structy::{EdgeType, SpawnDiffData},
@@ -330,7 +330,7 @@ pub fn spawn_block_sprites(
     texture_atlas_handle_building: Res<SpriteSheetBuilding>,
     edge: Res<Edge>,
     mut chunk_map: ResMut<ChunkManager>,
-    tile_map: Res<TileMap>,
+    tile_map: Res<WorldOwnedTileMap>,
     toggle_map: Res<ToggleMap>,
     max_height: Res<MaxBlockHeight>,
 ) {
@@ -606,6 +606,9 @@ pub fn set_camera_tile_bounds(
     }
 }
 
+// this function is weird because the event takes in UpdateTileTextureEvent but then only
+// uses it to check to see if the height is in the tilemap.
+// tilemap seems to be soruce of truth for what gets updated with this function
 #[allow(clippy::too_many_arguments, clippy::type_complexity)]
 pub fn update_tile_textures(
     mut commands: Commands,
@@ -615,7 +618,7 @@ pub fn update_tile_textures(
     >,
     buildings: Query<(&Location, Entity), (Without<Land>, With<BuildingStructure>)>,
     mut event: EventReader<UpdateTileTextureEvent>,
-    tile_map: Res<TileMap>,
+    tile_map: Res<WorldOwnedTileMap>,
     texture_map: Res<SpriteIndexBuilding>,
     texture_atlas_handle_building: Res<SpriteSheetBuilding>,
     toggle_map: Res<ToggleMap>,
@@ -625,6 +628,8 @@ pub fn update_tile_textures(
     // mut toggle_text: EventWriter<ToggleText>,
 ) {
     for tile_vec in event.read() {
+        info!("receving update texture event");
+
         let tiles = tile_vec.0.clone();
         let tile_map_from_e: HashMap<u32, TileData> =
             tiles.into_iter().map(|tile| (tile.height, tile)).collect();
@@ -640,12 +645,17 @@ pub fn update_tile_textures(
         } else {
             Visibility::Visible
         };
-
+        // info!("for loop");
+        // info!("EVENT MAP {:#?}", tile_map_from_e);
+        // info!("TILEMAP {:#?}", tile_map.map);
         for (mut texture, mut sprite, location, parent_entity) in lands.iter_mut() {
             if tile_map.map.contains_key(&location.ulam)
                 && tile_map_from_e.contains_key(&location.ulam)
             {
-                let tile_data = tile_map.map.get(&location.ulam).unwrap();
+                //info!("location.ulam: {}", location.ulam);
+                //let tile_data = tile_map.map.get(&location.ulam).unwrap(); // making it where the event is driving not the tile resource
+                let tile_data = tile_map_from_e.get(&location.ulam).unwrap();
+                // info!("{:#?}", tile_data);
                 let building_sprite_index = *texture_map.0.get(&tile_data.value).unwrap() as usize;
 
                 let c = ulam::calc_coord::calc_coord(tile_data.height);
@@ -689,7 +699,7 @@ pub fn update_tile_textures(
                 //if building
                 for (building_location, building_entity) in buildings.iter() {
                     if building_location.ulam == location.ulam {
-                        info!("despawning old building stuff");
+                        //info!("despawning old building stuff");
                         commands.entity(building_entity).despawn();
                     }
                 }
@@ -697,6 +707,7 @@ pub fn update_tile_textures(
                 commands
                     .entity(parent_entity)
                     .with_children(|child_builder| {
+                        //info!("spawning??!");
                         spawn_tile_level(
                             building_sprite_index,
                             &texture_atlas_handle_building.layout,

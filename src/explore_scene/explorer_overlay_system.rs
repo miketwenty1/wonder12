@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::{
     componenty::{InitLoadingText, UiOverlayingExplorerButton},
     eventy::ClearLastSelectedTile,
-    resourcey::{InitBlockCount, TileMap},
+    resourcey::{InitBlockCount, WorldOwnedTileMap},
     statey::InitLoadingBlocksState,
 };
 
@@ -27,7 +27,7 @@ pub fn clear_last_selected_tile_ui_button(
 
 pub fn init_block_loading_text(
     mut text_query: Query<&mut Text, With<InitLoadingText>>,
-    tilemap: Res<TileMap>,
+    tilemap: Res<WorldOwnedTileMap>,
     init: Res<InitBlockCount>,
     mut state: ResMut<NextState<InitLoadingBlocksState>>,
 ) {
