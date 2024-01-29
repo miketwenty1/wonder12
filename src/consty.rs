@@ -24,6 +24,7 @@ pub const DEFAULT_NO_PICK_COLOR: Color = Color::Rgba {
 };
 
 pub const ZOOM_IN_MAX: f32 = 0.25;
+pub const TEXT_ZOOM_OUT_MAX: f32 = 3.0;
 pub const ZOOM_OUT_MAX: f32 = 5.0;
 
 pub const DARKEST_BUILDING: Color = Color::Rgba {

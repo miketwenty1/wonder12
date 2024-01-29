@@ -1,9 +1,9 @@
 use bevy::{input::mouse::MouseWheel, prelude::*};
 
 use crate::{
-    componenty::{ZoomInButton, ZoomOutButton},
-    consty::{ZOOM_IN_MAX, ZOOM_OUT_MAX},
-    resourcey::ColorPalette,
+    componenty::{TileText, ZoomInButton, ZoomOutButton},
+    consty::{TEXT_ZOOM_OUT_MAX, ZOOM_IN_MAX, ZOOM_OUT_MAX},
+    resourcey::{ColorPalette, ToggleMap},
     utils::distance_between_vecs,
 };
 
@@ -95,6 +95,7 @@ pub fn zoom_in_button_system(
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
     //mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
     colors: Res<ColorPalette>,
+    mut text_q: Query<&mut Visibility, With<TileText>>,
 ) {
     let mut zoom_in = false;
     let mut zoom_amount: f32 = 0.0;
@@ -151,9 +152,8 @@ pub fn pinch_system(
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
     mut multitouch_distance: Local<f32>,
 ) {
-    let mut zoom_amount: f32 = 0.0;
-
     for _e in touch_e.read() {
+        let mut zoom_amount: f32 = 0.0;
         if touches.iter().count() == 2 {
             let first = touches
                 .first_pressed_position()
@@ -196,6 +196,30 @@ pub fn pinch_system(
             }
         } else {
             *multitouch_distance = 0.0;
+        }
+    }
+}
+
+pub fn cam_ortho_scale_text_visibility(
+    cam_query: Query<&OrthographicProjection, (With<Camera>, Changed<OrthographicProjection>)>,
+    mut text_q: Query<&mut Visibility, With<TileText>>,
+    toggle_map: Res<ToggleMap>,
+) {
+    let show_toggle = toggle_map.0.get("showtext").unwrap(); // true here means hide it, false means show it - no need to hide text if it's already hidden
+    let cam = cam_query.get_single();
+    if let Ok(ortho) = cam {
+        if *show_toggle || ortho.scale >= TEXT_ZOOM_OUT_MAX {
+            for mut text_visibility in text_q.iter_mut() {
+                if *text_visibility == Visibility::Visible {
+                    *text_visibility = Visibility::Hidden;
+                }
+            }
+        } else if ortho.scale < TEXT_ZOOM_OUT_MAX {
+            for mut text_visibility in text_q.iter_mut() {
+                if *text_visibility == Visibility::Hidden {
+                    *text_visibility = Visibility::Visible;
+                }
+            }
         }
     }
 }

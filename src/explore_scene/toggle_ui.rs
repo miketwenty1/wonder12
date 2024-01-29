@@ -133,7 +133,7 @@ pub fn setup_toggle(
                 .with_children(|parent| {
                     parent.spawn((
                         TextBundle::from_section(
-                            "Show Colors",
+                            "Hide Colors",
                             TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: TOGGLE_FONT_CHILD_SIZE,

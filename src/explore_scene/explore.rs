@@ -13,7 +13,7 @@ use crate::{
     },
     consty::{
         CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT, DESPAWN_TILE_THRESHOLD,
-        MAX_SELECTION_SIZE, TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
+        MAX_SELECTION_SIZE, TEXT_ZOOM_OUT_MAX, TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
         ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
@@ -333,6 +333,7 @@ pub fn spawn_block_sprites(
     tile_map: Res<WorldOwnedTileMap>,
     toggle_map: Res<ToggleMap>,
     max_height: Res<MaxBlockHeight>,
+    cam_query: Query<&OrthographicProjection, With<Camera>>,
 ) {
     for _event in sprite_spawn_event.read() {
         let font = asset_server.load("fonts/FiraSans-Bold.ttf");
@@ -341,6 +342,14 @@ pub fn spawn_block_sprites(
             font_size: 24.0,
             color: Color::WHITE,
         };
+
+        let zoom_level = cam_query.get_single().unwrap().scale;
+        let text_visibility =
+            if *toggle_map.0.get("showtext").unwrap() || zoom_level > TEXT_ZOOM_OUT_MAX {
+                Visibility::Hidden
+            } else {
+                Visibility::Visible
+            };
 
         let middle_y = (edge.top.tile + edge.bottom.tile) / 2;
         let middle_x = (edge.left.tile + edge.right.tile) / 2;
@@ -449,9 +458,8 @@ pub fn spawn_block_sprites(
                     ));
 
                     // SPAWN correct text for tile based on toggle
-                    let tile_text = if *toggle_map.0.get("showtext").unwrap() {
-                        "".to_string()
-                    } else if *toggle_map.0.get("showvalues").unwrap() {
+
+                    let tile_text = if *toggle_map.0.get("showvalues").unwrap() {
                         locationcoord.ulam.to_string()
                     } else if *toggle_map.0.get("showheights").unwrap() {
                         let a = value_from_tile;
@@ -471,25 +479,6 @@ pub fn spawn_block_sprites(
                         Visibility::Visible
                     };
 
-                    // if *toggle_map.0.get("hidecolors").unwrap() {
-                    //     let a = tile_res.map.get(&loc.ulam);
-                    //     if let Some(val) = a {
-                    //         texture.color = val.color;
-                    //         texture.index = 0;
-                    //     }
-                    // } else {
-                    //     let a = tile_res.map.get(&loc.ulam);
-                    //     if let Some(_val) = a {
-                    //         texture.color = Color::Rgba {
-                    //             red: 1.0,
-                    //             green: 1.0,
-                    //             blue: 1.0,
-                    //             alpha: 1.0,
-                    //         };
-                    //         texture.index = tile_res.map.get(&loc.ulam).unwrap().land_index;
-                    //     }
-                    // }
-
                     cmd.with_children(|builder| {
                         builder.spawn((
                             Text2dBundle {
@@ -508,6 +497,7 @@ pub fn spawn_block_sprites(
                                     scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
                                     ..Default::default()
                                 },
+                                visibility: text_visibility,
                                 ..default()
                             },
                             locationcoord,

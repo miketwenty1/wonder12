@@ -33,7 +33,10 @@ use self::{
     touch_movement_systems::touch_event_system,
     update_after_purchase::update_tiles_after_purchase,
     update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
-    zoom::{pinch_system, zoom_in_button_system, zoom_out_button_system},
+    zoom::{
+        cam_ortho_scale_text_visibility, pinch_system, zoom_in_button_system,
+        zoom_out_button_system,
+    },
 };
 
 pub struct ExplorePlugin;
@@ -96,6 +99,7 @@ impl Plugin for ExplorePlugin {
                     cron_update_tiles,
                     tick_update_tile_cron_timer,
                     update_tiles_after_purchase,
+                    cam_ortho_scale_text_visibility,
                 ),
             )
             .add_systems(OnExit(ExploreState::On), reset_mouse);

@@ -30,7 +30,10 @@ pub fn desktop_movement_camera_system(
     mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
 ) {
     for event in mouse_motion_events.read() {
-        if mouse.pressed(MouseButton::Middle) || mouse.pressed(MouseButton::Left) {
+        if mouse.pressed(MouseButton::Middle)
+            || mouse.pressed(MouseButton::Left)
+            || mouse.pressed(MouseButton::Right)
+        {
             for (mut cam_transform, cam_ortho) in q_camera.iter_mut() {
                 let direction = if ulam::value_of_xy(0, edge.bottom.tile) + 1_000 > max_height.0 {
                     Vec3::new(-event.delta.x, 100.0, 0.0)

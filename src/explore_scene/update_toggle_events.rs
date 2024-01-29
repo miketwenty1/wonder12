@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     componenty::{BuildingStructure, Land, Location, TileText},
+    consty::TEXT_ZOOM_OUT_MAX,
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
     resourcey::{ToggleMap, WorldOwnedTileMap},
     structy::TileTextType,
@@ -58,34 +59,53 @@ pub fn land_color_event(
 #[allow(clippy::too_many_arguments)]
 pub fn change_tile_text_event(
     mut toggle: EventReader<ToggleText>,
-    mut text_q: Query<(&mut Text, &Location), With<TileText>>,
+    mut text_q: Query<(&mut Text, &Location, &mut Visibility), With<TileText>>,
     tile_res: Res<WorldOwnedTileMap>,
+    cam_query: Query<&mut OrthographicProjection, With<Camera>>,
 ) {
     for t in toggle.read() {
-        for (mut text, loc) in text_q.iter_mut() {
+        let zoom_level = cam_query.get_single().unwrap().scale;
+
+        for (mut text, loc, mut visibility) in text_q.iter_mut() {
             let a = tile_res.map.get(&loc.ulam);
             if let Some(val) = a {
                 match t.0 {
                     TileTextType::Height => {
+                        if zoom_level < TEXT_ZOOM_OUT_MAX && *visibility == Visibility::Hidden {
+                            *visibility = Visibility::Visible;
+                        }
                         text.sections[0].value = val.height.to_string();
                     }
                     TileTextType::Value => {
+                        if zoom_level < TEXT_ZOOM_OUT_MAX && *visibility == Visibility::Hidden {
+                            *visibility = Visibility::Visible;
+                        }
                         text.sections[0].value = val.cost.to_string();
                     }
                     TileTextType::Blank => {
-                        text.sections[0].value = "".to_string();
+                        if *visibility == Visibility::Visible {
+                            *visibility = Visibility::Hidden;
+                        }
                     }
                 };
             } else {
                 match t.0 {
                     TileTextType::Height => {
+                        if zoom_level < TEXT_ZOOM_OUT_MAX && *visibility == Visibility::Hidden {
+                            *visibility = Visibility::Visible;
+                        }
                         text.sections[0].value = loc.ulam.to_string();
                     }
                     TileTextType::Value => {
+                        if zoom_level < TEXT_ZOOM_OUT_MAX && *visibility == Visibility::Visible {
+                            *visibility = Visibility::Hidden;
+                        }
                         text.sections[0].value = "".to_string();
                     }
                     TileTextType::Blank => {
-                        text.sections[0].value = "".to_string();
+                        if *visibility == Visibility::Visible {
+                            *visibility = Visibility::Hidden;
+                        }
                     }
                 };
             }
