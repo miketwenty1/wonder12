@@ -95,7 +95,6 @@ pub fn zoom_in_button_system(
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
     //mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
     colors: Res<ColorPalette>,
-    mut text_q: Query<&mut Visibility, With<TileText>>,
 ) {
     let mut zoom_in = false;
     let mut zoom_amount: f32 = 0.0;

@@ -345,7 +345,7 @@ pub fn spawn_block_sprites(
 
         let zoom_level = cam_query.get_single().unwrap().scale;
         let text_visibility =
-            if *toggle_map.0.get("showtext").unwrap() || zoom_level > TEXT_ZOOM_OUT_MAX {
+            if *toggle_map.0.get("showtext").unwrap() || zoom_level >= TEXT_ZOOM_OUT_MAX {
                 Visibility::Hidden
             } else {
                 Visibility::Visible
