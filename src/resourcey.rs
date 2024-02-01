@@ -1,10 +1,7 @@
-use async_channel::{Receiver, Sender};
 use bevy::{prelude::*, utils::HashMap};
-use serde::Deserialize;
 
-use crate::comms::server_structs::UserGameBlock;
 use crate::structy::EdgeData;
-use crate::structy::TileResource;
+
 use chrono::{DateTime, Utc};
 
 #[derive(Resource, Clone, PartialEq, Debug)]
@@ -13,7 +10,7 @@ pub struct TileData {
     pub username: String,
     pub color: Color,
     pub message: String,
-    pub resource: TileResource,
+    pub resource: i32,
     pub hash: String,
     pub value: u32,
     pub cost: u32,
@@ -56,9 +53,6 @@ pub struct TileCartVec {
 }
 
 #[derive(Resource, Clone)]
-pub struct SpriteIndexBuilding(pub HashMap<u32, u32>);
-
-#[derive(Resource, Clone)]
 pub struct ChunkManager {
     pub map: HashMap<u32, bool>,
 }
@@ -71,149 +65,8 @@ pub struct Edge {
     pub right: EdgeData,
 }
 
-// #[derive(Resource, Deref, DerefMut, Clone)]
-// pub struct SpriteSheetBuildingRes(pub Handle<TextureAtlas>);
-
-#[derive(Resource, Clone)]
-pub struct SpriteSheetBuilding {
-    pub layout: Handle<TextureAtlasLayout>,
-    pub texture: Handle<Image>,
-}
-
 #[derive(Resource, Clone)]
 pub struct SpriteSheetBg {
     pub layout: Handle<TextureAtlasLayout>,
     pub texture: Handle<Image>,
 }
-
-#[derive(Resource, Clone)]
-pub struct SpriteSheetSelect {
-    pub layout: Handle<TextureAtlasLayout>,
-    pub texture: Handle<Image>,
-}
-
-#[derive(Resource, Clone, Copy)]
-pub struct LastSelectedTile(pub i32, pub i32);
-
-#[derive(Resource, Clone)]
-pub struct TileDataChannel {
-    pub tx: Sender<String>,
-    pub rx: Receiver<String>,
-}
-
-#[derive(Resource, Clone)]
-pub struct RequestInvoiceChannel {
-    pub tx: Sender<String>,
-    pub rx: Receiver<String>,
-}
-
-#[derive(Resource, Clone)]
-pub struct CheckInvoiceChannel {
-    pub tx: Sender<String>,
-    pub rx: Receiver<String>,
-}
-
-#[derive(Resource, Clone)]
-pub struct UserBlockInventoryChannel {
-    pub tx: Sender<String>,
-    pub rx: Receiver<String>,
-}
-
-#[derive(Resource, Clone)]
-pub struct ServerURL(pub String);
-
-#[derive(Resource, Clone)]
-pub struct User {
-    pub ln_address: String,
-    pub name: String,
-}
-
-#[derive(Resource, Clone)]
-pub struct ToggleMap(pub HashMap<String, bool>);
-
-#[derive(Resource, Clone, PartialEq)]
-pub enum TargetType {
-    Nothing,
-    NewLnAddress,
-    NewColor,
-    NewMessage,
-}
-
-// #[derive(Resource, Clone)]
-// pub struct AmountSelected(pub u32);
-
-#[derive(Resource, Clone, Debug)]
-pub struct CurrentCartBlock {
-    pub ln_address: String,
-    pub color_text: String,
-    pub color: Color,
-    pub message: String,
-}
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct InvoiceDataFromServer {
-    pub invoice: String,
-    pub expires: DateTime<Utc>,
-    pub code: String,
-}
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct InvoiceCheckFromServer {
-    pub status: String,
-}
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct UpdateGameTimetamp {
-    pub ts: DateTime<Utc>,
-}
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct InitGameMap {
-    pub height: u32,
-}
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct InitBlockCount(pub u32);
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct ColorPalette {
-    pub node_color: Color,
-    pub lite_button_color: Color,
-    pub button_color: Color,
-    pub accent_color: Color,
-    pub light_color: Color,
-    pub text_color: Color,
-    pub red_color: Color,
-    pub green_color: Color,
-}
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct MaxBlockHeight(pub u32);
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct WinSize {
-    pub width: f32,
-    pub height: f32,
-}
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct MultiTouchInfo {
-    //pub status: bool,
-    pub distance: f32,
-}
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct ConfigAllCartBlocks(pub bool);
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct IsIphone(pub bool);
-
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct UserInventoryBlocks {
-    pub ownedblocks: HashMap<u32, UserGameBlock>,
-}
-
-// #[derive(Resource, Clone, Debug, Default, Deserialize)]
-// pub struct UserInventoryBlocksFromServer {
-//     pub ownedblocks: Vec<UserGameBlock>,
-// }
