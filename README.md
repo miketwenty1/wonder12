@@ -1,4 +1,4 @@
-# bevy example on main show casing issue
+# bevy example on main showcasing issue
 - This branch shows black background not the typical grey on the Brave browser.
 - `cargo run --target wasm32-unknown-unknown`
 
