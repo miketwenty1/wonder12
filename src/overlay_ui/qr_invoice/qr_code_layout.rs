@@ -1,7 +1,7 @@
 use bevy::{
     prelude::*,
     render::{
-        render_asset::RenderAssetPersistencePolicy,
+        render_asset::RenderAssetUsages,
         render_resource::{Extent3d, TextureDimension, TextureFormat},
         texture::BevyDefault,
     },
@@ -15,15 +15,6 @@ use crate::{
 };
 
 use super::QrInvoiceOverlay;
-
-// asset_server: Res<AssetServer>,
-// // mut explore_state: ResMut<NextState<ExploreState>>,
-// // tile_cart: Res<TileCart>,
-// // mut tile_cart_vec: ResMut<TileCartVec>,
-// qr_data: Res<Qr>,
-
-// #[derive(Component, Debug)]
-// pub struct UiQrOverlay;
 
 pub fn spawn_qr(
     mut commands: Commands,
@@ -58,7 +49,7 @@ pub fn spawn_qr(
                 dimensions,
                 data,
                 img_format,
-                RenderAssetPersistencePolicy::Keep,
+                RenderAssetUsages::MAIN_WORLD,
             );
 
             let texture = images.add(bevy_image);
