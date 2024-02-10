@@ -7,6 +7,7 @@ use crate::{
         CurrentBlockLnAddressText, CurrentBlockMessageText, CurrentBlockUsernameText,
         CurrentBlockValueText, EditabledTextBox, NewBlockColorButton, NewBlockColorText,
         NewBlockLnAddressButton, NewBlockLnAddressText, NewBlockMessageButton, NewBlockMessageText,
+        UiOverlayingExplorerButton,
     },
     consty::{
         DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
@@ -524,7 +525,7 @@ pub fn back_button_system(
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = colors.button_color.into();
+                *color = colors.red_color.into();
             }
         }
     }
@@ -566,35 +567,6 @@ pub fn tab_key_system(
                 keyboard.target = TargetType::NewLnAddress;
             }
         }
-
-        // for (mut interaction, ln_box, color_box, msg_box) in text_box_q.iter_mut() {
-        //     match (ln_box, color_box, msg_box) {
-        //         (Some(_), _, _) => {
-        //             if tab_target == TargetType::NewLnAddress {
-        //                 *interaction = Interaction::Pressed;
-        //             } else {
-        //                 *interaction = Interaction::None;
-        //             }
-        //         }
-        //         (_, Some(_), _) => {
-        //             if tab_target == TargetType::NewColor {
-        //                 *interaction = Interaction::Pressed;
-        //             } else {
-        //                 *interaction = Interaction::None;
-        //             }
-        //         }
-        //         (_, _, Some(_)) => {
-        //             if tab_target == TargetType::NewMessage {
-        //                 *interaction = Interaction::Pressed;
-        //             } else {
-        //                 *interaction = Interaction::None;
-        //             }
-        //         }
-        //         (None, None, None) => {
-        //             info!("Error05 this shouldn't of happened, please report this");
-        //         }
-        //     }
-        // }
     }
 }
 
@@ -645,12 +617,6 @@ pub fn highlight_box_system(
 pub fn show_color_button_system(
     mut interaction_query: Query<(&Interaction, &mut BackgroundColor), With<BtnShowingColor>>,
     mut block_new_data: ResMut<CurrentCartBlock>,
-    //text_query: Query<&mut Text, With<NewBlockColorText>>,
-    // mut overlay_state: ResMut<NextState<DisplayBuyUiState>>,
-    // mut explore_state: ResMut<NextState<ExploreState>>,
-    // mut keyboard_state: ResMut<NextState<KeyboardState>>,
-    // colors: Res<ColorPalette>,
-    // mut mouse: ResMut<Input<MouseButton>>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         //let text = &text_query.get_single().unwrap().sections[0].value;
@@ -706,4 +672,10 @@ pub fn resolve_cart_item_data(
     //block_new_data.ln_address = cart.vec[index].new_ln_address.to_string();
     block_new_data.color_text = cart.vec[index].new_color_text.to_string();
     block_new_data.message = cart.vec[index].new_message.to_string();
+}
+
+pub fn show_ui_buttons(mut ui_buttons: Query<&mut Visibility, With<UiOverlayingExplorerButton>>) {
+    for mut button in ui_buttons.iter_mut() {
+        *button = Visibility::Visible;
+    }
 }

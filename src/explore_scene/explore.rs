@@ -3,7 +3,11 @@ use std::collections::HashMap;
 use bevy::{input::mouse::MouseMotion, prelude::*, text::Text2dBounds};
 use rand::Rng;
 use ulam::Quad;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::spawn_local;
+use wasm_bindgen_futures::{js_sys, wasm_bindgen, JsFuture};
 
+use crate::resourcey::UpdateGameTimetamp;
 use crate::{
     building_config::{spawn_tile_level, utils::sanitize_building_color},
     componenty::{
@@ -27,6 +31,12 @@ use crate::{
     structy::{EdgeType, SpawnDiffData},
 };
 
+// async fn get_game_data() -> Result<String, JsValue> {
+//     let promise = retrieveLocalBrowserGameData();
+//     let result = JsFuture::from(promise).await?;
+//     Ok(result.as_string().unwrap_or_default())
+// }
+
 pub fn reset_mouse(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut motion: ResMut<Events<MouseMotion>>,
@@ -41,12 +51,12 @@ pub fn init_explorer(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
-    inires: Res<InitBlockCount>,
+    initblocks: Res<InitBlockCount>,
     colors: Res<ColorPalette>,
     mut loading_init_block_text: ResMut<NextState<InitLoadingBlocksState>>,
+    mut game_time: ResMut<UpdateGameTimetamp>,
 ) {
-    // ui camera
-    info!("initblockcount: {}", inires.0);
+    info!("initblockcount: {}", initblocks.0);
 
     // let texture_atlas_handle_bg = texture_atlases.add(texture_atlas_bg);
     // let texture_atlas_handle_building = texture_atlases.add(texture_atlas_building);
@@ -810,7 +820,7 @@ pub fn clear_selection_button(
             }
             Interaction::None => {
                 text.sections[0].value = "Clear".to_string();
-                *color = colors.button_color.into();
+                *color = colors.red_color.into();
                 border_color.0 = colors.node_color;
             }
         }
@@ -861,6 +871,7 @@ pub fn buy_selection_button(
     mut mouse_motion_events: EventReader<MouseMotion>,
     selection: Query<&Selected>,
     mut toast: EventWriter<ToastEvent>,
+    mut ui_buttons: Query<&mut Visibility, With<UiOverlayingExplorerButton>>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
@@ -882,6 +893,9 @@ pub fn buy_selection_button(
                         message: "Please unselect some tiles, Maximum 100".to_string(),
                     });
                 } else {
+                    for mut button in ui_buttons.iter_mut() {
+                        *button = Visibility::Hidden;
+                    }
                     ui_state.set(DisplayBuyUiState::BlockDetail);
                 }
             }

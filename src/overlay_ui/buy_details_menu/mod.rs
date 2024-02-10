@@ -6,7 +6,7 @@ use self::{
         back_button_system, buy_button_system, config_cart_button_system, highlight_box_system,
         leftright_cart_button_system, leftright_cart_button_system_set_new_text,
         new_color_button_system, new_ln_address_button_system, new_message_button_system,
-        set_default_text_for_empty_text, show_color_button_system, tab_key_system,
+        set_default_text_for_empty_text, show_color_button_system, show_ui_buttons, tab_key_system,
     },
 };
 use crate::{despawn_screen, keyboard::resources::KeyboardData, DisplayBuyUiState};
@@ -56,15 +56,7 @@ impl Plugin for BuyDetailsMenuPlugin {
             .add_systems(
                 OnExit(DisplayBuyUiState::BlockDetail),
                 (despawn_screen::<BuyDetailsMenu>, cleanup_keyboard_system),
-            );
-        // .add_systems(
-        //     OnExit(DisplayBuyUiState::Qr),
-        //     (despawn_screen::<UiQrOverlay>, cleanup_keyboard_system),
-        // )
-        //.add_systems(OnEnter(DisplayBuyUiState::Qr), spawn_qr)
-        // .add_systems(
-        //     Update,
-        //     (clipboard_button_system).run_if(in_state(DisplayBuyUiState::Qr)),
-        // );
+            )
+            .add_systems(OnEnter(DisplayBuyUiState::Off), show_ui_buttons);
     }
 }

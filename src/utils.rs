@@ -52,3 +52,11 @@ pub fn extract_number(input: &str) -> Option<i32> {
     re.find(input)
         .and_then(|match_| match_.as_str().parse::<i32>().ok())
 }
+
+pub fn derive_cost_from_value(v: u32) -> u32 {
+    if v == 0 {
+        128
+    } else {
+        v * 2
+    }
+}

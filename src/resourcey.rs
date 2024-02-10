@@ -1,13 +1,17 @@
 use async_channel::{Receiver, Sender};
 use bevy::{prelude::*, utils::HashMap};
 use serde::Deserialize;
+use serde::Serialize;
 
 use crate::comms::server_structs::UserGameBlock;
+use crate::comms::structy::TrimTile;
+use crate::comms::structy::TrimTileLocalBrowserStorage;
 use crate::structy::EdgeData;
 use crate::structy::TileResource;
+use crate::utils::convert_color_to_hexstring;
 use chrono::{DateTime, Utc};
 
-#[derive(Resource, Clone, PartialEq, Debug)]
+#[derive(Resource, Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct TileData {
     pub ln_address: String,
     pub username: String,
@@ -22,9 +26,34 @@ pub struct TileData {
     pub event_date: DateTime<Utc>,
 }
 
-#[derive(Resource, Clone, PartialEq)]
+#[derive(Resource, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WorldOwnedTileMap {
     pub map: HashMap<u32, TileData>,
+}
+
+impl WorldOwnedTileMap {
+    pub fn trim_for_browser_storage(&self) -> TrimTileLocalBrowserStorage {
+        let trimmed_map: HashMap<u32, TrimTile> = self
+            .map
+            .iter()
+            .map(|(&key, tile_data)| {
+                (
+                    key,
+                    TrimTile {
+                        c: convert_color_to_hexstring(tile_data.color), // Assuming a to_hex() method exists for Color
+                        v: tile_data.value,
+                        h: tile_data.hash.clone(),
+                        l: tile_data.ln_address.clone(),
+                        m: tile_data.message.clone(),
+                        u: tile_data.username.clone(),
+                        d: tile_data.event_date,
+                    },
+                )
+            })
+            .collect();
+
+        TrimTileLocalBrowserStorage { map: trimmed_map }
+    }
 }
 
 #[derive(Resource, Clone, Debug)]
@@ -120,6 +149,18 @@ pub struct UserBlockInventoryChannel {
 }
 
 #[derive(Resource, Clone)]
+pub struct BrowserMapLocalStorageChannel {
+    pub tx: Sender<String>,
+    pub rx: Receiver<String>,
+}
+
+#[derive(Resource, Clone)]
+pub struct BrowserCheckpointLocalStorageChannel {
+    pub tx: Sender<String>,
+    pub rx: Receiver<String>,
+}
+
+#[derive(Resource, Clone)]
 pub struct ServerURL(pub String);
 
 #[derive(Resource, Clone)]
@@ -162,7 +203,7 @@ pub struct InvoiceCheckFromServer {
     pub status: String,
 }
 
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
+#[derive(Resource, Clone, Debug, Default, Serialize, Deserialize)]
 pub struct UpdateGameTimetamp {
     pub ts: DateTime<Utc>,
 }

@@ -83,7 +83,7 @@ pub fn spawn_layout(
                     display: Display::Grid,
                     // width: Val::Percent(100.0),
                     height: Val::Percent(100.0),
-                    align_items: AlignItems::Stretch,
+                    align_items: AlignItems::Start,
                     justify_content: JustifyContent::Stretch,
                     align_content: AlignContent::Stretch,
                     justify_items: JustifyItems::Stretch,
@@ -114,32 +114,86 @@ pub fn spawn_layout(
         .with_children(|builder| {
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
             // TOTAL for cart
-            builder
-                .spawn(NodeBundle {
-                    style: Style {
-                        width: Val::Percent(100.0),
-                        flex_direction: FlexDirection::Row,
-                        align_content: AlignContent::Center,
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        justify_items: JustifyItems::Center,
+            let mut toprow = builder.spawn(NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
 
-                        //padding: UiRect::all(Val::Px(5.0)),
-                        ..Default::default()
-                    },
-                    background_color: BackgroundColor(colors.node_color),
-                    ..Default::default() // style: Style {
-                })
-                .with_children(|builder| {
-                    spawn_new_total_cart_cost(
-                        builder,
-                        font.clone(),
-                        &format!("Total: {} sats", cart_total),
-                        font_size_headings,
-                        colors.text_color,
-                        colors.node_color,
-                    );
+                    //align_content: AlignContent::Stretch,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::SpaceBetween,
+                    //justify_items: JustifyItems::Stretch,
+
+                    //padding: UiRect::all(Val::Px(5.0)),
+                    ..Default::default()
+                },
+                background_color: BackgroundColor(colors.node_color),
+                ..Default::default() // style: Style {
+            });
+            toprow.with_children(|builder| {
+                builder.spawn(NodeBundle {
+                    ..Default::default()
                 });
+            });
+            toprow.with_children(|builder| {
+                builder.spawn(NodeBundle {
+                    ..Default::default()
+                });
+            });
+            toprow.with_children(|builder| {
+                builder.spawn(NodeBundle {
+                    ..Default::default()
+                });
+            });
+            toprow.with_children(|builder| {
+                spawn_new_total_cart_cost(
+                    builder,
+                    font.clone(),
+                    &format!("Total: {} sats", cart_total),
+                    font_size_headings,
+                    colors.text_color,
+                    colors.node_color,
+                );
+            });
+            toprow.with_children(|builder| {
+                builder.spawn(NodeBundle {
+                    ..Default::default()
+                });
+            });
+            toprow.with_children(|builder| {
+                builder
+                    .spawn(NodeBundle { ..default() })
+                    .with_children(|innerbuilder| {
+                        innerbuilder
+                            .spawn((
+                                ButtonBundle {
+                                    style: Style {
+                                        width: Val::Px(30.0),
+                                        height: Val::Px(30.0),
+                                        justify_content: JustifyContent::Center,
+                                        align_items: AlignItems::Center,
+                                        align_content: AlignContent::Center,
+                                        justify_items: JustifyItems::Center,
+                                        ..default()
+                                    },
+                                    background_color: colors.red_color.into(),
+                                    ..default()
+                                },
+                                ButtonBack,
+                            ))
+                            .with_children(|ccbuilder| {
+                                ccbuilder.spawn(TextBundle::from_section(
+                                    "X",
+                                    TextStyle {
+                                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                        font_size: 30.0,
+                                        color: colors.text_color,
+                                    },
+                                ));
+                            });
+                    });
+            });
 
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
             // block height left and right
@@ -448,20 +502,20 @@ fn spawn_new_total_cart_cost(
     text: &str,
     font_size: f32,
     text_color: Color,
-    node_color: Color,
+    _node_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
             style: Style {
-                display: Display::Grid,
-                justify_items: JustifyItems::Start,
-                align_items: AlignItems::Start,
-                align_content: AlignContent::Start,
-                grid_column: GridPlacement::span(2),
+                // display: Display::Flex,
+                // justify_items: JustifyItems::Center,
+                // align_items: AlignItems::Center,
+                // align_content: AlignContent::Center,
+                // grid_column: GridPlacement::span(1),
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            background_color: BackgroundColor(node_color),
+            //background_color: BackgroundColor(node_color),
             ..default()
         })
         .with_children(|builder| {
@@ -1104,6 +1158,7 @@ fn setup_ln_addr_menu_button(
                 min_height: Val::Px(36.0),
                 max_height: Val::Px(36.0),
                 //padding: UiRect::all(Val::Px(2.0)),
+                margin: UiRect::bottom(Val::Px(12.0)),
                 ..default()
             },
             background_color: BackgroundColor(node_color),
@@ -1174,6 +1229,7 @@ fn setup_color_menu_button(
                 min_height: Val::Px(36.0),
                 max_height: Val::Px(36.0),
                 //padding: UiRect::all(Val::Px(2.0)),
+                margin: UiRect::bottom(Val::Px(12.0)),
                 ..default()
             },
             background_color: BackgroundColor(node_color),

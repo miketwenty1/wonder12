@@ -21,6 +21,8 @@ use bevy::asset::AssetMetaCheck;
 
 // use bevy::window::WindowResolution;
 use bevy::{prelude::*, utils::HashMap};
+use browser::event::ReadLocalBrowserStorage;
+use browser::BrowserPlugin;
 use chrono::{Duration, Utc};
 use eventy::{
     DespawnInventoryHeights, HideBackupCopyBtn, KeyboardSpawnEvent, RequestInventoryEvent,
@@ -28,8 +30,9 @@ use eventy::{
 };
 use overlay_ui::inventory::state::InventoryUiState;
 use resourcey::{
-    CheckInvoiceChannel, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone,
-    MultiTouchInfo, RequestInvoiceChannel, UserBlockInventoryChannel, UserInventoryBlocks, WinSize,
+    BrowserCheckpointLocalStorageChannel, BrowserMapLocalStorageChannel, CheckInvoiceChannel,
+    ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, MultiTouchInfo,
+    RequestInvoiceChannel, UserBlockInventoryChannel, UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
@@ -44,6 +47,7 @@ mod explore_scene;
 mod keyboard;
 mod overlay_ui;
 
+mod browser;
 mod componenty;
 mod consty;
 mod eventy;
@@ -206,10 +210,13 @@ pub fn game12(
         .init_state::<InitLoadingBlocksState>()
         .init_state::<ToastState>()
         .init_state::<InventoryUiState>()
-        .add_plugins(CommsPlugin)
-        .add_plugins(OverlayUiPlugin)
-        .add_plugins(ExplorePlugin)
-        .add_plugins(KeyboardPlugin)
+        .add_plugins((
+            CommsPlugin,
+            OverlayUiPlugin,
+            ExplorePlugin,
+            KeyboardPlugin,
+            BrowserPlugin,
+        ))
         // Only run the app when there is user input. This will significantly reduce CPU/GPU use.
         //.insert_resource(WinitSettings::desktop_app())
         .add_event::<EdgeEvent>()
@@ -240,6 +247,7 @@ fn setup(
     mut ui_state: ResMut<NextState<ExploreState>>,
     mut request_tiles_event: EventWriter<RequestTileUpdates>,
     mut request_inventory_event: EventWriter<RequestInventoryEvent>,
+    mut browser_check: EventWriter<ReadLocalBrowserStorage>,
 ) {
     fit_canvas_to_parent();
     commands.spawn(Camera2dBundle::default());
@@ -264,7 +272,20 @@ fn setup(
         tx: tx_tiledata,
         rx: rx_tiledata,
     });
-    request_tiles_event.send(RequestTileUpdates(RequestTileType::Height));
+
+    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
+    commands.insert_resource(BrowserMapLocalStorageChannel {
+        tx: tx_tiledata,
+        rx: rx_tiledata,
+    });
+    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
+    commands.insert_resource(BrowserCheckpointLocalStorageChannel {
+        tx: tx_tiledata,
+        rx: rx_tiledata,
+    });
+
+    // request_tiles_event.send(RequestTileUpdates(RequestTileType::Height));
+    browser_check.send(ReadLocalBrowserStorage);
     request_inventory_event.send(RequestInventoryEvent);
     ui_state.set(ExploreState::On);
 }

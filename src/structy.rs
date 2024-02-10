@@ -18,7 +18,7 @@ pub struct EdgeData {
     pub pixel: f32,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum TileResource {
     Wheat,
     // Brick,

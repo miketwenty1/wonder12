@@ -14,6 +14,7 @@ use crate::{ServerURL, UpdateTileTextureEvent, WorldOwnedTileMap};
 use bevy::prelude::*;
 //use bevy::tasks::IoTaskPool;
 use rand::Rng;
+use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 
 //SetTileDataChannel
@@ -126,7 +127,7 @@ pub fn api_receive_server_tiles(
 
                 match r_block_result {
                     Ok(server_block_data) => {
-                        match server_block_data {
+                        match server_block_data.clone() {
                             GameBlocksDataFromDBMod {
                                 ts_checkpoint: Some(t),
                                 height_checkpoint: None,
@@ -253,6 +254,7 @@ pub fn api_receive_server_tiles(
                             }
                         } else {
                             api_state.set(CommsApiBlockLoadState::Off);
+                            // todo ad
                         }
                     }
                     Err(e) => {
@@ -276,7 +278,7 @@ pub fn api_receive_server_tiles(
                         info!("tile receive fail: {}", e);
                     }
                 };
-                og_r
+                //og_r
             }
             Err(e) => {
                 info!("receiving tiles: {}", e);
@@ -289,7 +291,7 @@ pub fn api_receive_server_tiles(
                 if channel.rx.is_empty() {
                     api_state.set(CommsApiBlockLoadState::Off);
                 }
-                e.to_string()
+                //e.to_string()
             }
         };
     }
