@@ -3,11 +3,7 @@ use std::collections::HashMap;
 use bevy::{input::mouse::MouseMotion, prelude::*, text::Text2dBounds};
 use rand::Rng;
 use ulam::Quad;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::spawn_local;
-use wasm_bindgen_futures::{js_sys, wasm_bindgen, JsFuture};
 
-use crate::resourcey::UpdateGameTimetamp;
 use crate::{
     building_config::{spawn_tile_level, utils::sanitize_building_color},
     componenty::{
@@ -54,7 +50,6 @@ pub fn init_explorer(
     initblocks: Res<InitBlockCount>,
     colors: Res<ColorPalette>,
     mut loading_init_block_text: ResMut<NextState<InitLoadingBlocksState>>,
-    mut game_time: ResMut<UpdateGameTimetamp>,
 ) {
     info!("initblockcount: {}", initblocks.0);
 
@@ -795,12 +790,7 @@ pub fn clear_selection_button(
             With<ClearSelectionButton>,
         ),
     >,
-    // mut commands: Commands,
     mut text_query: Query<&mut Text>,
-    // mut selected_q: Query<Entity, (With<Selected>, Without<Land>, Without<BuildingStructure>)>,
-    // mut selected_lands_q: Query<&mut Location>,
-    // mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
-    // mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
     mut clear_event: EventWriter<ClearSelectionEvent>,
     colors: Res<ColorPalette>,
 ) {

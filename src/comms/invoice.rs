@@ -254,7 +254,6 @@ pub fn api_receive_invoice_check(
     mut api_name_set_state: ResMut<NextState<CommsApiState>>,
     mut game_set_state: ResMut<NextState<ExploreState>>,
     mut qr_set_state: ResMut<NextState<DisplayBuyUiState>>,
-    //mut event: EventWriter<RequestTileUpdates>,
     mut invoice_data: ResMut<InvoiceDataFromServer>,
     mut clear_event: EventWriter<ClearSelectionEvent>,
     mut toast: EventWriter<ToastEvent>,

@@ -1,20 +1,22 @@
 use super::api_timer::ApiPollingTimer;
 use super::server_structs::GameBlocksDataFromDBMod;
+use crate::browser::event::WriteLocalBrowserStorage;
 use crate::comms::server_structs::UserGameBlock;
 use crate::eventy::{DespawnInventoryHeights, RequestTileUpdates};
 use crate::overlay_ui::inventory::event::AddInventoryRow;
 use crate::overlay_ui::toast::{ToastEvent, ToastType};
 use crate::resourcey::{
-    InitGameMap, TileData, TileDataChannel, UpdateGameTimetamp, UserInventoryBlocks,
+    CheckpointTimetamp, InitGameMap, TileData, TileDataChannel, UpdateGameTimetamp,
+    UserInventoryBlocks,
 };
 use crate::statey::CommsApiBlockLoadState;
 use crate::structy::{RequestTileType, TileResource};
-use crate::utils::{convert_color_to_hexstring, logout_user};
+use crate::utils::{convert_color_to_hexstring, logout_user, to_millisecond_precision};
 use crate::{ServerURL, UpdateTileTextureEvent, WorldOwnedTileMap};
 use bevy::prelude::*;
+use chrono::Duration;
 //use bevy::tasks::IoTaskPool;
 use rand::Rng;
-use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 
 //SetTileDataChannel
@@ -99,12 +101,14 @@ pub fn api_receive_server_tiles(
     mut tile_map: ResMut<WorldOwnedTileMap>,
     mut update_tile_event: EventWriter<UpdateTileTextureEvent>,
     mut gametime: ResMut<UpdateGameTimetamp>,
+    mut checkpoint_time: ResMut<CheckpointTimetamp>,
     mut gameinit: ResMut<InitGameMap>,
     mut get_more_tiles: EventWriter<RequestTileUpdates>,
     mut toast: EventWriter<ToastEvent>,
     mut despawn_inventory: EventWriter<DespawnInventoryHeights>,
     mut spawn_inventory: EventWriter<AddInventoryRow>,
     inventory: Res<UserInventoryBlocks>,
+    mut browser_event: EventWriter<WriteLocalBrowserStorage>,
 ) {
     if api_timer.timer.finished() && !channel.rx.is_empty() {
         //info!("checking for tiles response");
@@ -141,7 +145,13 @@ pub fn api_receive_server_tiles(
                                     request_more_ts = true;
                                     info!("receiving tiles gamet{}, servert{}", gametime.ts, t);
                                 }
-                                gametime.ts = t;
+                                info!("!!!updating game ts to {}", t);
+                                //let aa = t;
+                                gametime.ts = to_millisecond_precision(t);
+                                if gametime.ts - Duration::minutes(15) > checkpoint_time.ts {
+                                    checkpoint_time.ts = gametime.ts;
+                                    browser_event.send(WriteLocalBrowserStorage);
+                                }
                             }
                             GameBlocksDataFromDBMod {
                                 ts_checkpoint: None,
@@ -254,7 +264,12 @@ pub fn api_receive_server_tiles(
                             }
                         } else {
                             api_state.set(CommsApiBlockLoadState::Off);
-                            // todo ad
+                            // if it's been 15 minutes past last gametime then let's update the browser local storage.
+                            // this prevents you from needing to update browser cache on every single tile update.
+                            info!("what is the gametime ts?: {}", gametime.ts);
+                            if gametime.ts - Duration::minutes(15) > checkpoint_time.ts {
+                                browser_event.send(WriteLocalBrowserStorage);
+                            }
                         }
                     }
                     Err(e) => {

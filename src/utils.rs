@@ -1,4 +1,5 @@
 use bevy::{log::info, math::Vec2, render::color::Color};
+use chrono::{DateTime, Duration, Timelike, Utc};
 use rand::Rng;
 use regex::Regex;
 
@@ -59,4 +60,26 @@ pub fn derive_cost_from_value(v: u32) -> u32 {
     } else {
         v * 2
     }
+}
+
+// pub fn get_ts_with_micro() -> DateTime<Utc> {
+//     // let format = "%Y-%m-%d %H:%M:%S.%6f %Z";
+//     // let datetime_utc = NaiveDateTime::parse_from_str(&o, format);
+//     let now = Utc::now();
+//     let micros_nanos = (now.nanosecond() / 1_000) * 1_000;
+//     let ts = now.with_nanosecond(micros_nanos).expect("Invalid DateTime");
+//     info!("returning {}", ts);
+//     ts
+// }
+pub fn to_millisecond_precision(dt: DateTime<Utc>) -> DateTime<Utc> {
+    // Get the total number of milliseconds in the current second
+    let milliseconds = dt.timestamp_subsec_millis();
+
+    // Calculate the difference in microseconds to subtract
+    let micros_to_subtract = dt.timestamp_subsec_micros() - (milliseconds * 1_000);
+
+    // Subtract the extra microseconds to align to milliseconds
+    let adjusted_dt = dt - Duration::microseconds(micros_to_subtract as i64);
+
+    adjusted_dt
 }

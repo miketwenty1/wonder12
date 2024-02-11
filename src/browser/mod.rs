@@ -1,12 +1,10 @@
-use bevy::prelude::*;
-
-use crate::statey::InitLoadingBlocksState;
-
 use self::{
     event::{ReadLocalBrowserStorage, WriteLocalBrowserStorage},
     localstorage::{readcheck_local_storage, request_local_storage, write_local_storage},
     resource::{tick_browser_receive_timer, BrowserPollingTimer},
+    state::BrowserStorageState,
 };
+use bevy::prelude::*;
 
 pub mod event;
 pub mod localstorage;
@@ -20,15 +18,16 @@ impl Plugin for BrowserPlugin {
         app.init_resource::<BrowserPollingTimer>()
             .add_event::<ReadLocalBrowserStorage>()
             .add_event::<WriteLocalBrowserStorage>()
-            //.add_systems(Startup, (setup_comm, ))
+            .add_systems(Update, write_local_storage)
             .add_systems(
                 Update,
                 (
-                    write_local_storage,
                     request_local_storage,
                     readcheck_local_storage,
                     tick_browser_receive_timer,
-                ),
+                )
+                    .run_if(in_state(BrowserStorageState::On)),
             );
     }
 }
+//(init_block_loading_text),

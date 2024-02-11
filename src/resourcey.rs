@@ -54,6 +54,13 @@ impl WorldOwnedTileMap {
 
         TrimTileLocalBrowserStorage { map: trimmed_map }
     }
+
+    pub fn to_tiledata_vec(&self) -> Vec<TileData>
+    where
+        TileData: Clone,
+    {
+        self.map.values().cloned().collect()
+    }
 }
 
 #[derive(Resource, Clone, Debug)]
@@ -205,6 +212,11 @@ pub struct InvoiceCheckFromServer {
 
 #[derive(Resource, Clone, Debug, Default, Serialize, Deserialize)]
 pub struct UpdateGameTimetamp {
+    pub ts: DateTime<Utc>,
+}
+
+#[derive(Resource, Clone, Debug, Default, Serialize, Deserialize)]
+pub struct CheckpointTimetamp {
     pub ts: DateTime<Utc>,
 }
 

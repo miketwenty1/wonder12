@@ -22,6 +22,7 @@ use bevy::asset::AssetMetaCheck;
 // use bevy::window::WindowResolution;
 use bevy::{prelude::*, utils::HashMap};
 use browser::event::ReadLocalBrowserStorage;
+use browser::state::BrowserStorageState;
 use browser::BrowserPlugin;
 use chrono::{Duration, Utc};
 use eventy::{
@@ -31,12 +32,11 @@ use eventy::{
 use overlay_ui::inventory::state::InventoryUiState;
 use resourcey::{
     BrowserCheckpointLocalStorageChannel, BrowserMapLocalStorageChannel, CheckInvoiceChannel,
-    ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, MultiTouchInfo,
+    CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, MultiTouchInfo,
     RequestInvoiceChannel, UserBlockInventoryChannel, UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
-use structy::RequestTileType;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlCanvasElement;
@@ -176,6 +176,7 @@ pub fn game12(
         .insert_resource(UpdateGameTimetamp {
             ts: Utc::now() - Duration::minutes(5),
         })
+        .insert_resource(CheckpointTimetamp { ts: Utc::now() })
         .insert_resource(InitGameMap { height: 0 })
         .init_resource::<InvoiceDataFromServer>()
         .init_resource::<InvoiceCheckFromServer>()
@@ -210,6 +211,7 @@ pub fn game12(
         .init_state::<InitLoadingBlocksState>()
         .init_state::<ToastState>()
         .init_state::<InventoryUiState>()
+        .init_state::<BrowserStorageState>()
         .add_plugins((
             CommsPlugin,
             OverlayUiPlugin,
@@ -245,10 +247,13 @@ pub fn game12(
 fn setup(
     mut commands: Commands,
     mut ui_state: ResMut<NextState<ExploreState>>,
-    mut request_tiles_event: EventWriter<RequestTileUpdates>,
     mut request_inventory_event: EventWriter<RequestInventoryEvent>,
     mut browser_check: EventWriter<ReadLocalBrowserStorage>,
 ) {
+    info!(
+        "this is the init value for game ts: {}",
+        Utc::now() - Duration::minutes(5)
+    );
     fit_canvas_to_parent();
     commands.spawn(Camera2dBundle::default());
 
