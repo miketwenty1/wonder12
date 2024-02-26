@@ -43,7 +43,7 @@ pub fn land_color_event(
             } else {
                 let a = tile_res.map.get(&loc.ulam);
                 if let Some(_val) = a {
-                    sprite.color = Color::Rgba {
+                    sprite.color = LegacyColor::Rgba {
                         red: 1.0,
                         green: 1.0,
                         blue: 1.0,
@@ -121,7 +121,7 @@ pub fn change_tile_text_event(
 //     } else {
 //         let a = tile_res.map.get(&loc.ulam);
 //         if let Some(_val) = a {
-//             texture.color = Color::Rgba {
+//             texture.color = LegacyColor::Rgba {
 //                 red: 1.0,
 //                 green: 1.0,
 //                 blue: 1.0,

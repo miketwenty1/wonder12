@@ -466,7 +466,7 @@ pub fn buy_button_system(
                 //         cart.vec[index].new_color = get_random_color();
                 //     } else {
                 //         let c = all_colors::get_color_hex(&text.sections[0].value);
-                //         cart.vec[index].new_color = Color::hex(c).unwrap();
+                //         cart.vec[index].new_color = LegacyColor::hex(c).unwrap();
                 //     }
                 // }
                 // for text in param_set.p2().iter() {
@@ -627,7 +627,7 @@ pub fn show_color_button_system(
             Interaction::None => {
                 if !block_new_data.color_text.is_empty() {
                     block_new_data.color =
-                        Color::hex(all_colors::get_color_hex(&block_new_data.color_text)).unwrap();
+                        LegacyColor::hex(all_colors::get_color_hex(&block_new_data.color_text)).unwrap();
 
                     *color = block_new_data.color.into();
                 }

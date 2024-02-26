@@ -1,30 +1,21 @@
 use bevy::{prelude::*, tasks::IoTaskPool};
-use serde::Deserialize;
 
 use crate::{
-    async_resource_comm_channels::{CheckInvoiceChannel, RequestInvoiceChannel},
-    comms::server_structs::UserGameBlock,
-    eventy::{
-        BuyBlockRequest, ClearSelectionEvent, HideBackupCopyBtn, ShowBackupCopyBtn,
+
+    async_resource_comm_channels::CheckInvoiceChannel, comms::server_structs::UserGameBlock, eventy::{
+        ClearSelectionEvent, HideBackupCopyBtn, 
         UpdateTilesAfterPurchase,
-    },
-    overlay_ui::{
+    }, overlay_ui::{
         inventory::event::AddInventoryRow,
         toast::{ToastEvent, ToastType},
-    },
-    resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, TileCartVec, User},
-    statey::{CommsApiState, DisplayBuyUiState, ExploreState},
-    structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},
-    utils::{convert_color_to_hexstring, extract_number, logout_user},
-    ServerURL,
+    }, resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, TileCartVec, }, statey::{CommsApiState, DisplayBuyUiState, ExploreState}, utils::{convert_color_to_hexstring, logout_user}, ServerURL
 };
 
 use super::api_timer::ApiPollingTimer;
 
-use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::wasm_bindgen;
 
-#[allow(unused_must_use)]
+
+#[allow(dead_code)]
 pub fn api_get_messages_for_block(
     channel: Res<CheckInvoiceChannel>,
     api_server: Res<ServerURL>,
@@ -48,24 +39,24 @@ pub fn api_get_messages_for_block(
                     let api_response_text_r = o.text().await;
                     match api_response_text_r {
                         Ok(o) => {
-                            cc.try_send(o);
+                            let _ = cc.try_send(o);
                         }
                         Err(e) => {
                             info!("failed to parse to check invoice to text {:#?}", e);
-                            cc.try_send(e.to_string());
+                            let _ = cc.try_send(e.to_string());
                         }
                     }
                 }
                 Err(e) => {
                     info!("failed to receive a check invoice {:#?}", e);
-                    cc.try_send(e.to_string());
+                    let _ = cc.try_send(e.to_string());
                 }
             }
         });
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, dead_code)]
 pub fn api_receive_messages_for_block(
     channel: ResMut<CheckInvoiceChannel>,
     mut invoice_check_res: ResMut<InvoiceCheckFromServer>,

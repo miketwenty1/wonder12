@@ -443,7 +443,7 @@ pub fn spawn_layout(
                         grid_template_rows: vec![GridTrack::auto()],
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::DARK_GREEN),
+                    background_color: BackgroundColor(LegacyColor::DARK_GREEN),
                     ..default()
                 })
                 .with_children(|builder| {
@@ -476,7 +476,7 @@ pub fn spawn_layout(
                         //padding: UiRect::all(Val::Px(1.0)),
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::BLUE),
+                    background_color: BackgroundColor(LegacyColor::BLUE),
                     ..default()
                 },
                 KeyboardNode,
@@ -501,8 +501,8 @@ fn spawn_new_total_cart_cost(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    text_color: Color,
-    _node_color: Color,
+    text_color: LegacyColor,
+    _node_color: LegacyColor,
 ) {
     builder
         .spawn(NodeBundle {
@@ -535,8 +535,8 @@ fn spawn_new_value_block_cost(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    text_color: Color,
-    node_color: Color,
+    text_color: LegacyColor,
+    node_color: LegacyColor,
 ) {
     builder
         .spawn(NodeBundle {
@@ -570,9 +570,9 @@ fn setup_config_for_all_blocks_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
-    node_color: Color,
-    text_color: Color,
-    button_color: Color,
+    node_color: LegacyColor,
+    text_color: LegacyColor,
+    button_color: LegacyColor,
 ) {
     builder
         .spawn(NodeBundle {
@@ -626,9 +626,9 @@ fn setup_buy_create_invoice_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
-    node_color: Color,
-    button_color: Color,
-    text_color: Color,
+    node_color: LegacyColor,
+    button_color: LegacyColor,
+    text_color: LegacyColor,
 ) {
     builder
         .spawn(NodeBundle {
@@ -677,9 +677,9 @@ fn setup_back_from_buy_menu_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
-    node_color: Color,
-    button_color: Color,
-    text_color: Color,
+    node_color: LegacyColor,
+    button_color: LegacyColor,
+    text_color: LegacyColor,
 ) {
     builder
         .spawn(NodeBundle {
@@ -729,7 +729,7 @@ fn spawn_block_text_bundle(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    color: Color,
+    color: LegacyColor,
 ) {
     builder.spawn((
         TextBundle::from_section(
@@ -749,8 +749,8 @@ fn spawn_nested_text_bundle_flex(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    node_color: Color,
-    text_color: Color,
+    node_color: LegacyColor,
+    text_color: LegacyColor,
 ) {
     builder
         .spawn(NodeBundle {
@@ -779,8 +779,8 @@ fn spawn_nested_text_bundle_flex(
 fn setup_left_block_menu_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
-    button_color: Color,
-    text_color: Color,
+    button_color: LegacyColor,
+    text_color: LegacyColor,
     button_text: String,
     visibility: Visibility,
 ) {
@@ -824,8 +824,8 @@ fn setup_right_block_menu_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
-    button_color: Color,
-    text_color: Color,
+    button_color: LegacyColor,
+    text_color: LegacyColor,
     visibility: Visibility,
 ) {
     builder
@@ -869,8 +869,8 @@ fn current_value_title(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    node_color: Color,
-    text_color: Color,
+    node_color: LegacyColor,
+    text_color: LegacyColor,
 ) {
     builder
         .spawn(NodeBundle {
@@ -905,8 +905,8 @@ fn current_value_left(
     value: String,
     event_date: String,
     font_size: f32,
-    node_color: Color,
-    text_color: Color,
+    node_color: LegacyColor,
+    text_color: LegacyColor,
 ) {
     builder
         .spawn(NodeBundle {
@@ -951,8 +951,8 @@ fn current_value_right(
     username: String,
     ln_address: String,
     font_size: f32,
-    text_color: Color,
-    node_color: Color,
+    text_color: LegacyColor,
+    node_color: LegacyColor,
 ) {
     builder
         .spawn(NodeBundle {
@@ -996,8 +996,8 @@ fn current_value_message(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    node_color: Color,
-    text_color: Color,
+    node_color: LegacyColor,
+    text_color: LegacyColor,
 ) {
     builder
         .spawn(NodeBundle {
@@ -1034,9 +1034,9 @@ fn new_value_title(
     font: Handle<Font>,
     text: &str,
     font_size: f32,
-    node_color: Color,
-    text_color: Color,
-    box_color: Color,
+    node_color: LegacyColor,
+    text_color: LegacyColor,
+    box_color: LegacyColor,
 ) {
     let mut row = builder.spawn(NodeBundle {
         style: Style {
@@ -1124,7 +1124,7 @@ fn new_value_title(
                             border: UiRect::all(Val::Px(1.0)),
                             ..default()
                         },
-                        border_color: BorderColor(Color::WHITE),
+                        border_color: BorderColor(LegacyColor::WHITE),
                         background_color: BackgroundColor(box_color), //node_color
                         ..default()
                     },
@@ -1138,8 +1138,8 @@ fn setup_ln_addr_menu_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
-    node_color: Color,
-    button_color: Color,
+    node_color: LegacyColor,
+    button_color: LegacyColor,
     font_size: f32,
     edit_box_width: f32,
 ) {
@@ -1209,8 +1209,8 @@ fn setup_color_menu_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
-    node_color: Color,
-    button_color: Color,
+    node_color: LegacyColor,
+    button_color: LegacyColor,
     font_size: f32,
     edit_box_width: f32,
 ) {
@@ -1281,8 +1281,8 @@ fn setup_message_menu_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
-    node_color: Color,
-    button_color: Color,
+    node_color: LegacyColor,
+    button_color: LegacyColor,
     font_size: f32,
 ) {
     builder

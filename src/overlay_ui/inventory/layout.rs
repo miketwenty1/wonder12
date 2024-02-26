@@ -113,8 +113,8 @@ pub fn spawn_inventory_row(
                     border: UiRect::all(Val::Px(1.0)),
                     ..default()
                 },
-                border_color: BorderColor(Color::WHITE),
-                background_color: BackgroundColor(Color::hex(&block.color).unwrap()), //node_color
+                border_color: BorderColor(LegacyColor::WHITE),
+                background_color: BackgroundColor(LegacyColor::hex(&block.color).unwrap()), //node_color
                 ..default()
             },
             InventoryColorBox,
@@ -171,8 +171,8 @@ pub fn spawn_inventory_row_c(
                     border: UiRect::all(Val::Px(1.0)),
                     ..default()
                 },
-                border_color: BorderColor(Color::WHITE),
-                background_color: BackgroundColor(Color::hex(&block.color).unwrap()), //node_color
+                border_color: BorderColor(LegacyColor::WHITE),
+                background_color: BackgroundColor(LegacyColor::hex(&block.color).unwrap()), //node_color
                 ..default()
             },
             InventoryColorBox,

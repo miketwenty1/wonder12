@@ -177,7 +177,7 @@ pub fn init_explorer(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(Color::BLACK),
+                        border_color: BorderColor(LegacyColor::BLACK),
                         background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
                         ..default()
@@ -228,7 +228,7 @@ pub fn init_explorer(
                         margin: UiRect::top(Val::Percent(29.9)),
                         ..default()
                     },
-                    // background_color: Color::PINK.into(),
+                    // background_color: LegacyColor::PINK.into(),
                     ..default()
                 })
                 .with_children(|childtext| {
@@ -275,7 +275,7 @@ pub fn init_explorer(
                         margin: UiRect::top(Val::Percent(30.0)),
                         ..default()
                     },
-                    // background_color: Color::PINK.into(),
+                    // background_color: LegacyColor::PINK.into(),
                     ..default()
                 })
                 .with_children(|childtext| {
@@ -345,7 +345,7 @@ pub fn spawn_block_sprites(
         let slightly_smaller_text_style = TextStyle {
             font,
             font_size: 24.0,
-            color: Color::WHITE,
+            color: LegacyColor::WHITE,
         };
 
         let zoom_level = cam_query.get_single().unwrap().scale;
@@ -413,7 +413,7 @@ pub fn spawn_block_sprites(
                         color_for_sprites = tile_map.map.get(&locationcoord.ulam).unwrap().color;
                         land_sprite_index =
                             tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
-                        color_for_tile = Color::Rgba {
+                        color_for_tile = LegacyColor::Rgba {
                             red: 1.,
                             green: 1.,
                             blue: 1.,
@@ -426,7 +426,7 @@ pub fn spawn_block_sprites(
                     } else {
                         land_sprite_index = rng.gen_range(1..=11);
                         building_sprite_index = 0;
-                        color_for_tile = Color::Rgba {
+                        color_for_tile = LegacyColor::Rgba {
                             red: 0.2,
                             green: 0.2,
                             blue: 0.2,
@@ -673,7 +673,7 @@ pub fn update_tile_textures(
 
                 // show correct color based on toggle
                 if *hiding_colors {
-                    sprite.color = Color::Rgba {
+                    sprite.color = LegacyColor::Rgba {
                         red: 1.0,
                         green: 1.0,
                         blue: 1.0,

@@ -176,7 +176,7 @@ pub fn api_receive_server_tiles(
                             let mut new_td = TileData {
                                 ln_address: block_data.refund_ln_addr,
                                 username: block_data.username,
-                                color: Color::hex(block_data.color).unwrap(),
+                                color: LegacyColor::hex(block_data.color).unwrap(),
                                 message: block_data.message,
                                 resource: TileResource::Wheat,
                                 value: block_data.amount as u32,

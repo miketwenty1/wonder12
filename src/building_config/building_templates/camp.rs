@@ -12,7 +12,7 @@ pub fn spawn_camp(
     texture: &Handle<Image>,
     layout: &Handle<TextureAtlasLayout>,
     builder: &mut ChildBuilder,
-    color: Color,
+    color: LegacyColor,
     locationcoord: Location,
     visibility_toggle: Visibility,
     translation: Vec3,

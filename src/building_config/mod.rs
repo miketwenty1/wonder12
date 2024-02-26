@@ -23,7 +23,7 @@ pub fn spawn_tile_level(
     layout: &Handle<TextureAtlasLayout>,
     texture: &Handle<Image>,
     builder: &mut ChildBuilder,
-    color_for_sprites: Color,
+    color_for_sprites: LegacyColor,
     locationcoord: Location,
     building_visibility_toggle: Visibility,
 ) {
