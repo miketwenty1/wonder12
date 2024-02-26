@@ -15,7 +15,7 @@ use super::{
 //     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 const ACCEPTABLE_CHARS: &str =
     "1234567890=⌫!#$%*&'@()[]+-_,.:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz⇧⬆\" ";
-const MAX_INPUT_LENGTH: usize = 200;
+const MAX_INPUT_LENGTH: usize = 140;
 #[allow(clippy::type_complexity)]
 pub fn physical_keyboard_system(
     mut char_evr: EventReader<ReceivedCharacter>,

@@ -16,12 +16,14 @@ use self::{
 };
 
 mod api_timer;
+mod block_messages;
 mod invoice;
 pub mod load_server_data;
 pub mod server_structs;
 mod setup;
 pub mod structy;
 mod user_inventory_blocks;
+
 pub struct CommsPlugin;
 
 impl Plugin for CommsPlugin {

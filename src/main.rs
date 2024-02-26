@@ -1,3 +1,8 @@
+use crate::async_resource_comm_channels::{
+    BlockMessagesStorageChannel, BrowserCheckpointLocalStorageChannel,
+    BrowserMapLocalStorageChannel, CheckInvoiceChannel, RequestInvoiceChannel, TileDataChannel,
+    UserBlockInventoryChannel,
+};
 use crate::comms::CommsPlugin;
 use crate::consty::{CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT};
 use crate::eventy::{
@@ -12,8 +17,7 @@ use crate::overlay_ui::OverlayUiPlugin;
 use crate::resourcey::{
     ChunkManager, ColorPalette, CurrentCartBlock, Edge, InvoiceCheckFromServer,
     InvoiceDataFromServer, LastSelectedTile, MaxBlockHeight, ServerURL, SpriteIndexBuilding,
-    TargetType, TileCart, TileCartVec, TileDataChannel, ToggleMap, UpdateGameTimetamp, User,
-    WorldOwnedTileMap,
+    TargetType, TileCart, TileCartVec, ToggleMap, UpdateGameTimetamp, User, WorldOwnedTileMap,
 };
 use crate::statey::{CommsApiState, DisplayBuyUiState, ExploreState};
 use crate::structy::EdgeData;
@@ -31,9 +35,8 @@ use eventy::{
 };
 use overlay_ui::inventory::state::InventoryUiState;
 use resourcey::{
-    BrowserCheckpointLocalStorageChannel, BrowserMapLocalStorageChannel, CheckInvoiceChannel,
     CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, MultiTouchInfo,
-    RequestInvoiceChannel, UserBlockInventoryChannel, UserInventoryBlocks, WinSize,
+    UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
@@ -47,6 +50,7 @@ mod explore_scene;
 mod keyboard;
 mod overlay_ui;
 
+mod async_resource_comm_channels;
 mod browser;
 mod componenty;
 mod consty;
@@ -257,37 +261,22 @@ fn setup(
     fit_canvas_to_parent();
     commands.spawn(Camera2dBundle::default());
 
-    let (tx_tiledata, rx_tiledata) = async_channel::bounded(4);
-    commands.insert_resource(TileDataChannel {
-        tx: tx_tiledata,
-        rx: rx_tiledata,
-    });
-    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
-    commands.insert_resource(RequestInvoiceChannel {
-        tx: tx_tiledata,
-        rx: rx_tiledata,
-    });
-    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
-    commands.insert_resource(CheckInvoiceChannel {
-        tx: tx_tiledata,
-        rx: rx_tiledata,
-    });
-    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
-    commands.insert_resource(UserBlockInventoryChannel {
-        tx: tx_tiledata,
-        rx: rx_tiledata,
-    });
+    let (tx, rx) = async_channel::bounded(4);
+    commands.insert_resource(TileDataChannel { tx, rx });
+    let (tx, rx) = async_channel::bounded(1);
+    commands.insert_resource(RequestInvoiceChannel { tx, rx });
+    let (tx, rx) = async_channel::bounded(1);
+    commands.insert_resource(CheckInvoiceChannel { tx, rx });
+    let (tx, rx) = async_channel::bounded(1);
+    commands.insert_resource(UserBlockInventoryChannel { tx, rx });
 
-    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
-    commands.insert_resource(BrowserMapLocalStorageChannel {
-        tx: tx_tiledata,
-        rx: rx_tiledata,
-    });
-    let (tx_tiledata, rx_tiledata) = async_channel::bounded(1);
-    commands.insert_resource(BrowserCheckpointLocalStorageChannel {
-        tx: tx_tiledata,
-        rx: rx_tiledata,
-    });
+    let (tx, rx) = async_channel::bounded(1);
+    commands.insert_resource(BrowserMapLocalStorageChannel { tx, rx });
+    let (tx, rx) = async_channel::bounded(1);
+    commands.insert_resource(BrowserCheckpointLocalStorageChannel { tx, rx });
+
+    let (tx, rx) = async_channel::bounded(10);
+    commands.insert_resource(BlockMessagesStorageChannel { tx, rx });
 
     // request_tiles_event.send(RequestTileUpdates(RequestTileType::Height));
     browser_check.send(ReadLocalBrowserStorage);

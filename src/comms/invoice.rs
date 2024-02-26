@@ -2,6 +2,7 @@ use bevy::{prelude::*, tasks::IoTaskPool};
 use serde::Deserialize;
 
 use crate::{
+    async_resource_comm_channels::{CheckInvoiceChannel, RequestInvoiceChannel},
     comms::server_structs::UserGameBlock,
     eventy::{
         BuyBlockRequest, ClearSelectionEvent, HideBackupCopyBtn, ShowBackupCopyBtn,
@@ -11,10 +12,7 @@ use crate::{
         inventory::event::AddInventoryRow,
         toast::{ToastEvent, ToastType},
     },
-    resourcey::{
-        CheckInvoiceChannel, InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone,
-        RequestInvoiceChannel, TileCartVec, User,
-    },
+    resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, TileCartVec, User},
     statey::{CommsApiState, DisplayBuyUiState, ExploreState},
     structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},
     utils::{convert_color_to_hexstring, extract_number, logout_user},

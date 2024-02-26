@@ -1,8 +1,9 @@
+use crate::async_resource_comm_channels::{
+    BrowserCheckpointLocalStorageChannel, BrowserMapLocalStorageChannel,
+};
 use crate::comms::structy::TrimTileLocalBrowserStorage;
 use crate::eventy::{RequestTileUpdates, UpdateTileTextureEvent};
-use crate::resourcey::{
-    BrowserCheckpointLocalStorageChannel, BrowserMapLocalStorageChannel, CheckpointTimetamp,
-};
+use crate::resourcey::CheckpointTimetamp;
 use crate::resourcey::{UpdateGameTimetamp, WorldOwnedTileMap};
 use crate::structy::RequestTileType;
 use bevy::prelude::*;

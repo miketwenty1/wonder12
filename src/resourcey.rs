@@ -1,4 +1,3 @@
-use async_channel::{Receiver, Sender};
 use bevy::{prelude::*, utils::HashMap};
 use serde::Deserialize;
 use serde::Serialize;
@@ -130,42 +129,6 @@ pub struct SpriteSheetSelect {
 
 #[derive(Resource, Clone, Copy)]
 pub struct LastSelectedTile(pub i32, pub i32);
-
-#[derive(Resource, Clone)]
-pub struct TileDataChannel {
-    pub tx: Sender<String>,
-    pub rx: Receiver<String>,
-}
-
-#[derive(Resource, Clone)]
-pub struct RequestInvoiceChannel {
-    pub tx: Sender<String>,
-    pub rx: Receiver<String>,
-}
-
-#[derive(Resource, Clone)]
-pub struct CheckInvoiceChannel {
-    pub tx: Sender<String>,
-    pub rx: Receiver<String>,
-}
-
-#[derive(Resource, Clone)]
-pub struct UserBlockInventoryChannel {
-    pub tx: Sender<String>,
-    pub rx: Receiver<String>,
-}
-
-#[derive(Resource, Clone)]
-pub struct BrowserMapLocalStorageChannel {
-    pub tx: Sender<String>,
-    pub rx: Receiver<String>,
-}
-
-#[derive(Resource, Clone)]
-pub struct BrowserCheckpointLocalStorageChannel {
-    pub tx: Sender<String>,
-    pub rx: Receiver<String>,
-}
 
 #[derive(Resource, Clone)]
 pub struct ServerURL(pub String);

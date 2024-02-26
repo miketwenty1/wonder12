@@ -1,8 +1,9 @@
 use super::api_timer::ApiPollingTimer;
+use crate::async_resource_comm_channels::UserBlockInventoryChannel;
 use crate::eventy::RequestInventoryEvent;
 use crate::overlay_ui::inventory::state::InventoryUiState;
 use crate::overlay_ui::toast::{ToastEvent, ToastType};
-use crate::resourcey::{UserBlockInventoryChannel, UserInventoryBlocks};
+use crate::resourcey::UserInventoryBlocks;
 use crate::statey::CommsApiInventoryState;
 use crate::structy::UserInventoryBlocksFromServer;
 use crate::utils::logout_user;
