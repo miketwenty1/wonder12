@@ -1,39 +1,33 @@
 use bevy::{prelude::*, tasks::IoTaskPool};
 
 use crate::{
-
-    async_resource_comm_channels::CheckInvoiceChannel, comms::server_structs::UserGameBlock, eventy::{
-        ClearSelectionEvent, HideBackupCopyBtn, 
-        UpdateTilesAfterPurchase,
-    }, overlay_ui::{
-        inventory::event::AddInventoryRow,
-        toast::{ToastEvent, ToastType},
-    }, resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, TileCartVec, }, statey::{CommsApiState, DisplayBuyUiState, ExploreState}, utils::{convert_color_to_hexstring, logout_user}, ServerURL
+    async_resource_comm_channels::BlockMessagesStorageChannel,
+    eventy::{BlockDetailMessage, MessageReceivedFromServer},
+    overlay_ui::toast::{ToastEvent, ToastType},
+    resourcey::{TileCartVec, UserPurchasedBlockMessage},
+    utils::logout_user,
+    ServerURL,
 };
 
-use super::api_timer::ApiPollingTimer;
-
-
+use super::{api_timer::ApiPollingTimer, structy::MessagesFromServer};
 
 #[allow(dead_code)]
 pub fn api_get_messages_for_block(
-    channel: Res<CheckInvoiceChannel>,
+    channel: Res<BlockMessagesStorageChannel>,
     api_server: Res<ServerURL>,
-    api_timer: Res<ApiPollingTimer>,
-    invoice_res: Res<InvoiceDataFromServer>,
-    //mut details_button_event_reader: EventReader<BlockDetailClick>,
+    mut message_reader: EventReader<BlockDetailMessage>,
 ) {
-    if api_timer.timer.finished() {
+    for eheight in message_reader.read() {
         //info!("invoice res: {:#?}", invoice_res.invoice);
         info!("check for invoice status");
 
         let pool = IoTaskPool::get();
         let cc = channel.tx.clone();
         let server = api_server.0.to_owned();
-        let code = invoice_res.code.to_owned();
+        let height = eheight.0;
         let _task = pool.spawn(async move {
             let api_response_r =
-                reqwest::get(format!("{}/comms/blockmessages/{}", server, code)).await;
+                reqwest::get(format!("{}/comms/blockmessages/{}", server, height)).await;
             match api_response_r {
                 Ok(o) => {
                     let api_response_text_r = o.text().await;
@@ -42,13 +36,13 @@ pub fn api_get_messages_for_block(
                             let _ = cc.try_send(o);
                         }
                         Err(e) => {
-                            info!("failed to parse to check invoice to text {:#?}", e);
+                            info!("failed to parse to message text: {:#?}", e);
                             let _ = cc.try_send(e.to_string());
                         }
                     }
                 }
                 Err(e) => {
-                    info!("failed to receive a check invoice {:#?}", e);
+                    info!("failed to send in channel message: {:#?}", e);
                     let _ = cc.try_send(e.to_string());
                 }
             }
@@ -58,20 +52,11 @@ pub fn api_get_messages_for_block(
 
 #[allow(clippy::too_many_arguments, dead_code)]
 pub fn api_receive_messages_for_block(
-    channel: ResMut<CheckInvoiceChannel>,
-    mut invoice_check_res: ResMut<InvoiceCheckFromServer>,
+    channel: Res<BlockMessagesStorageChannel>,
     api_timer: Res<ApiPollingTimer>,
-    mut api_name_set_state: ResMut<NextState<CommsApiState>>,
-    mut game_set_state: ResMut<NextState<ExploreState>>,
-    mut qr_set_state: ResMut<NextState<DisplayBuyUiState>>,
-    mut invoice_data: ResMut<InvoiceDataFromServer>,
-    mut clear_event: EventWriter<ClearSelectionEvent>,
     mut toast: EventWriter<ToastEvent>,
-    mut bkp_clipboard_btn: EventWriter<HideBackupCopyBtn>,
-    iphone: Res<IsIphone>,
-    mut inv_event: EventWriter<AddInventoryRow>,
-    mut update_tiles_e: EventWriter<UpdateTilesAfterPurchase>,
-    tile_cart_vec: Res<TileCartVec>,
+    mut tile_cart_vec: ResMut<TileCartVec>,
+    mut messages_received: EventWriter<MessageReceivedFromServer>,
 ) {
     if api_timer.timer.finished() {
         let api_res = channel.rx.try_recv();
@@ -79,85 +64,32 @@ pub fn api_receive_messages_for_block(
         //info!("waiting to receive invoice check");
         match api_res {
             Ok(og_r) => {
-                let r_result = serde_json::from_str::<InvoiceCheckFromServer>(&og_r);
+                let r_result = serde_json::from_str::<MessagesFromServer>(&og_r);
                 match r_result {
                     Ok(o) => {
-                        match o.status.as_str() {
-                            "pending" => {
-                                info!("pending invoice");
-                            }
-                            "completed" => {
-                                info!("completed invoice");
-                                //event.send(RequestTileUpdates(RequestTileType::Ts));
-                                update_tiles_e.send(UpdateTilesAfterPurchase);
-                                let mut inv = Vec::new();
-                                for tile in &tile_cart_vec.vec {
-                                    let user_game_block = UserGameBlock {
-                                        height: tile.height,
-                                        amount: tile.cost,
-                                        color: convert_color_to_hexstring(tile.new_color),
+                        info!("here are messages: {:#?}", o);
+                        messages_received.send(MessageReceivedFromServer(o.height));
+                        // the reason for using this index instead of the index inside the tile cart vec is to avoid
+                        // a hypotheical situation where the index and the height aren't the same due to a race
+                        // condition.. the user may toggle off the block that is being received
+                        for (index, tile) in tile_cart_vec.clone().vec.iter().enumerate() {
+                            if tile.height == o.height {
+                                let mut incoming_messages = vec![];
+                                for message in &o.messages {
+                                    let pmessage = UserPurchasedBlockMessage {
+                                        username: message.username.clone(),
+                                        value: message.amount as u32,
+                                        message: message.message.clone(),
                                     };
-                                    inv.push(user_game_block);
+                                    incoming_messages.push(pmessage);
                                 }
-                                inv_event.send(AddInventoryRow(inv));
-                                api_name_set_state.set(CommsApiState::Off);
-                                qr_set_state.set(DisplayBuyUiState::Off);
-                                game_set_state.set(ExploreState::On);
-                                clear_event.send(ClearSelectionEvent);
-                                if iphone.0 {
-                                    bkp_clipboard_btn.send(HideBackupCopyBtn);
-                                }
-
-                                toast.send(ToastEvent {
-                                    ttype: ToastType::Good,
-                                    message: "Payment Completed!".to_string(),
-                                });
-                                *invoice_data = InvoiceDataFromServer {
-                                    ..Default::default()
-                                };
-                            }
-                            "expired" => {
-                                info!("expired invoice");
-                                api_name_set_state.set(CommsApiState::Off);
-                                qr_set_state.set(DisplayBuyUiState::Off);
-                                game_set_state.set(ExploreState::On);
-                                if iphone.0 {
-                                    bkp_clipboard_btn.send(HideBackupCopyBtn);
-                                }
-                                toast.send(ToastEvent {
-                                    ttype: ToastType::Bad,
-                                    message: "Payment Expired!".to_string(),
-                                });
-                                *invoice_data = InvoiceDataFromServer {
-                                    ..Default::default()
-                                };
-                            }
-                            "error" => {
-                                info!("error invoice");
-                                api_name_set_state.set(CommsApiState::Off);
-                                qr_set_state.set(DisplayBuyUiState::Off);
-                                game_set_state.set(ExploreState::On);
-                                toast.send(ToastEvent {
-                                    ttype: ToastType::Bad,
-                                    message: "Error002".to_string(),
-                                });
-                            }
-                            _ => {
-                                info!("Something very bizaare happened picka2");
-                                api_name_set_state.set(CommsApiState::Off);
-                                qr_set_state.set(DisplayBuyUiState::Off);
-                                game_set_state.set(ExploreState::On);
-                                toast.send(ToastEvent {
-                                    ttype: ToastType::Bad,
-                                    message: "Error001".to_string(),
-                                });
+                                tile_cart_vec.vec[index].messages = Some(incoming_messages);
                             }
                         }
-                        *invoice_check_res = o;
                     }
                     Err(e) => {
                         if og_r.to_string().contains("logout") {
-                            logout_user("invoice check 1");
+                            logout_user("messages call");
                         } else if !e.to_string().contains("EOF")
                             && !e.to_string().contains("empty channel")
                         {
@@ -169,7 +101,6 @@ pub fn api_receive_messages_for_block(
                         info!("requesting check invoice fail: {}", e);
                     }
                 };
-                //r
             }
             Err(e) => {
                 if !e.to_string().contains("EOF") && !e.to_string().contains("empty channel") {
@@ -178,9 +109,9 @@ pub fn api_receive_messages_for_block(
                         message: e.to_string(),
                     });
                 }
-                info!("response to check invoice: {}", e);
-
-                //e.to_string()
+                if !e.to_string().contains("empty channel") {
+                    info!("response to message call: {}", e);
+                }
             }
         };
     }

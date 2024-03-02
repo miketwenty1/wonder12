@@ -55,3 +55,16 @@ impl TrimTileLocalBrowserStorage {
         WorldOwnedTileMap { map: tile_map }
     }
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct GameBlockMessagesFromDB {
+    pub username: String,
+    pub message: String,
+    pub amount: i32,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+pub struct MessagesFromServer {
+    pub height: u32,
+    pub messages: Vec<GameBlockMessagesFromDB>
+}

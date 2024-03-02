@@ -16,7 +16,7 @@ use crate::{
         MAX_SELECTION_SIZE, TEXT_ZOOM_OUT_MAX, TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
-        ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
+         ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount
     },
     overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
@@ -877,6 +877,7 @@ pub fn buy_selection_button(
                 touches.clear();
 
                 let count = selection.iter().count();
+                
                 if count > MAX_SELECTION_SIZE {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,

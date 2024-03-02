@@ -3,9 +3,8 @@ use bevy::prelude::*;
 use crate::{
     componenty::{
         AllCartConfigButton, AllCartConfigText, BlockCostText, BlockHeightCartText,
-        BtnShowingColor, BuyMenuButton, CartButton, CurrentBlockDateText,
-        CurrentBlockLnAddressText, CurrentBlockMessageText, CurrentBlockUsernameText,
-        CurrentBlockValueText, EditabledTextBox, NewBlockColorButton, NewBlockColorText,
+        BlockUiMessageItem, BtnShowingColor, BuyMenuButton, CartButton, CurrentBlockMessageNode,
+        EditabledTextBox, HideMessageBtn, NewBlockColorButton, NewBlockColorText,
         NewBlockLnAddressButton, NewBlockLnAddressText, NewBlockMessageButton, NewBlockMessageText,
         UiOverlayingExplorerButton,
     },
@@ -13,7 +12,7 @@ use crate::{
         DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
         DEFAULT_NO_PICK_COLOR,
     },
-    eventy::BuyBlockRequest,
+    eventy::{BlockDetailMessage, BuyBlockRequest, MessageReceivedFromServer},
     keyboard::{resources::KeyboardData, KeyboardState},
     overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
@@ -24,9 +23,46 @@ use crate::{
     DisplayBuyUiState,
 };
 
-use super::layout_buy_menu::ButtonBack;
+use super::layout_buy_menu::{spawn_messages, ButtonBack};
 
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
+pub fn update_messages_ui_system(
+    cart: Res<TileCartVec>,
+    colors: Res<ColorPalette>,
+    message_item_q: Query<(Entity, &Children), With<BlockUiMessageItem>>,
+    mut commands: Commands,
+    message_placement_q: Query<Entity, With<CurrentBlockMessageNode>>,
+    asset_server: Res<AssetServer>,
+    mut messages_received: EventReader<MessageReceivedFromServer>,
+) {
+    for block_height in messages_received.read() {
+        if block_height.0 == cart.vec[cart.index].height {
+            let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+            for message_item in message_item_q.iter() {
+                commands.entity(message_item.0).despawn_recursive();
+            }
+
+            match &cart.vec[cart.index].messages {
+                Some(s) => {
+                    for node in message_placement_q.iter() {
+                        commands.entity(node).with_children(|child_builder| {
+                            spawn_messages(
+                                child_builder,
+                                font.clone(),
+                                s.to_vec(),
+                                16.0,
+                                colors.clone(),
+                            );
+                        });
+                    }
+                }
+                None => {}
+            };
+        }
+    }
+}
+
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn leftright_cart_button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &CartButton),
@@ -36,21 +72,27 @@ pub fn leftright_cart_button_system(
     mut cart_item: ResMut<CurrentCartBlock>,
     mut param_set: ParamSet<(
         Query<&mut Text, With<BlockHeightCartText>>,
-        Query<&mut Text, With<CurrentBlockValueText>>,
-        Query<&mut Text, With<CurrentBlockDateText>>,
-        Query<&mut Text, With<CurrentBlockUsernameText>>,
-        Query<&mut Text, With<CurrentBlockLnAddressText>>,
-        Query<&mut Text, With<CurrentBlockMessageText>>,
+        // Query<&mut Text, With<CurrentBlockValueText>>,
+        // Query<&mut Text, With<CurrentBlockDateText>>,
+        // Query<&mut Text, With<CurrentBlockUsernameText>>,
+        // Query<&mut Text, With<CurrentBlockLnAddressText>>,
+        //Query<&mut Text, With<CurrentBlockMessageText>>,
         Query<&mut Text, With<BlockCostText>>,
     )>,
     colors: Res<ColorPalette>,
     mut keyboard: ResMut<KeyboardData>,
+    mut ask_for_messages: EventWriter<BlockDetailMessage>,
+    message_item_q: Query<(Entity, &Children), With<BlockUiMessageItem>>,
+    mut commands: Commands,
+    message_placement_q: Query<Entity, With<CurrentBlockMessageNode>>,
+    asset_server: Res<AssetServer>,
 ) {
     for (interaction, mut color, button_comp) in &mut interaction_query {
         //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
                 if cart.vec.len() > 1 {
+                    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
                     resolve_target_cart_data(&keyboard, &mut cart_item, &mut cart);
                     keyboard.target = TargetType::Nothing;
 
@@ -79,42 +121,72 @@ pub fn leftright_cart_button_system(
                     for mut text in param_set.p0().iter_mut() {
                         text.sections[0].value = format!("Block {}", cart.vec[cart.index].height);
                     }
-                    for mut text in param_set.p1().iter_mut() {
-                        text.sections[0].value =
-                            format!("Value: {} sats", cart.vec[cart.index].value);
-                    }
-                    for mut text in param_set.p2().iter_mut() {
-                        let datetime_string = cart.vec[cart.index]
-                            .event_date
-                            .map_or("".to_string(), |datetime| {
-                                datetime.date_naive().format("%Y-%m-%d").to_string()
-                            });
+                    // for mut text in param_set.p1().iter_mut() {
+                    //     text.sections[0].value =
+                    //         format!("Value: {} sats", cart.vec[cart.index].value);
+                    // }
+                    // for mut text in param_set.p2().iter_mut() {
+                    //     let datetime_string = cart.vec[cart.index]
+                    //         .event_date
+                    //         .map_or("".to_string(), |datetime| {
+                    //             datetime.date_naive().format("%Y-%m-%d").to_string()
+                    //         });
 
-                        text.sections[0].value = format!("Date: {}", datetime_string);
+                    //     text.sections[0].value = format!("Date: {}", datetime_string);
+                    // }
+                    // for mut text in param_set.p3().iter_mut() {
+                    //     text.sections[0].value =
+                    //         format!("Owner: {}", cart.vec[cart.index].username);
+                    // }
+                    // for mut text in param_set.p4().iter_mut() {
+                    //     text.sections[0].value = cart.vec[cart.index].ln_address.to_string();
+                    // }
+                    for message_item in message_item_q.iter() {
+                        commands.entity(message_item.0).despawn_recursive();
                     }
-                    for mut text in param_set.p3().iter_mut() {
-                        text.sections[0].value =
-                            format!("Owner: {}", cart.vec[cart.index].username);
+
+                    match &cart.vec[cart.index].messages {
+                        Some(s) => {
+                            for node in message_placement_q.iter() {
+                                commands.entity(node).with_children(|child_builder| {
+                                    spawn_messages(
+                                        child_builder,
+                                        font.clone(),
+                                        s.to_vec(),
+                                        16.0,
+                                        colors.clone(),
+                                    );
+                                });
+                            }
+                        }
+                        None => {}
+                    };
+
+                    match cart.vec[cart.index].value {
+                        0 => {
+                            // 0: show nothing, 128: show current owner
+                            // Since both cases are effectively no-ops in your example, they're combined here.
+                            // You may need to adjust this based on actual logic you want to implement for value 128.
+                            //info!("no messages to show");
+                        }
+                        128 => {
+                            //info!("current message to show"); eventually if it makes sense we can load the first message first
+                        }
+                        _ => {
+                            if let Some(messages) = &cart.vec[cart.index].messages {
+                                if messages.len() == 1 {
+                                    info!("querying for messages to show");
+                                    ask_for_messages
+                                        .send(BlockDetailMessage(cart.vec[cart.index].height));
+                                }
+                            }
+                        }
                     }
-                    for mut text in param_set.p4().iter_mut() {
-                        text.sections[0].value = cart.vec[cart.index].ln_address.to_string();
-                    }
-                    for mut text in param_set.p5().iter_mut() {
-                        text.sections[0].value = cart.vec[cart.index].message.to_string();
-                    }
-                    for mut text in param_set.p6().iter_mut() {
+
+                    for mut text in param_set.p1().iter_mut() {
                         text.sections[0].value =
                             format!("Cost: {} sats", cart.vec[cart.index].cost);
                     }
-
-                    // let a = all_colors::get_color_hex(&convert_color_to_hexstring(
-                    //     cart.vec[cart.index].new_color,
-                    // ));
-                    // if cart_item.color_text == DEFAULT_NEW_COLOR_TEXT {
-                    //     cart_item.color = get_random_color();
-                    // } else {
-                    //     cart_item.color = cart.vec[cart.index].new_color
-                    // }
 
                     cart_item.message = cart.vec[cart.index].new_message.to_string();
                     cart_item.color = cart.vec[cart.index].new_color;
@@ -161,22 +233,14 @@ pub fn leftright_cart_button_system_set_new_text(
                             text.sections[0].value =
                                 cart.vec[cart.index].new_color_text.to_string();
                         }
-
-                        //convert_color_to_hexstring(cart.vec[cart.index].new_color);
                     }
                     for mut text in message_new_text.iter_mut() {
                         text.sections[0].value = cart.vec[cart.index].new_message.to_string();
                     }
                 }
             }
-            Interaction::Hovered => {
-                //text.sections[0].value = button_text;
-                // *color = colors.accent_color.into();
-            }
-            Interaction::None => {
-                //text.sections[0].value = button_text;
-                // *color = colors.button_color.into();
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
@@ -195,7 +259,6 @@ pub fn config_cart_button_system(
     keyboard: Res<KeyboardData>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
-        //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
                 *color = colors.light_color.into();
@@ -206,34 +269,49 @@ pub fn config_cart_button_system(
                         text.sections[0].value = "X".to_string();
                         for block in cart.vec.iter_mut() {
                             block.new_color_text = cart_item.color_text.to_string();
-                            block.new_color = cart_item.color; //Color::hex(get_color_hex(&cart_item.color)).unwrap();
+                            block.new_color = cart_item.color;
                             block.new_message = cart_item.message.to_string();
                         }
-                        // for button_textbox in editable_textbox_q.iter() {
-                        //     commands.entity(button_textbox).remove::<EditabledTextBox>();
-                        // }
                     } else {
                         text.sections[0].value = " ".to_string();
-                        // for button_textbox in editable_textbox_q.iter() {
-                        //     commands.entity(button_textbox).insert(EditabledTextBox);
-                        // }
                     }
                 }
-
-                //     for mut text in color_new_text.iter_mut() {
-                //         text.sections[0].value =
-                //             convert_color_to_hexstring(cart.vec[cart.index].new_color);
-                //     }
-                //     for mut text in message_new_text.iter_mut() {
-                //         text.sections[0].value = cart.vec[cart.index].new_message.to_string();
-                //     }
             }
             Interaction::Hovered => {
-                //text.sections[0].value = button_text;
                 *color = colors.accent_color.into();
             }
             Interaction::None => {
-                //text.sections[0].value = button_text;
+                *color = colors.button_color.into();
+            }
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn hide_message_btn_system(
+    mut interaction_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<HideMessageBtn>),
+    >,
+    mut message_items: Query<&mut Visibility, With<CurrentBlockMessageNode>>,
+    colors: Res<ColorPalette>,
+) {
+    for (interaction, mut color) in &mut interaction_query {
+        match *interaction {
+            Interaction::Pressed => {
+                *color = colors.light_color.into();
+                for mut visi in message_items.iter_mut() {
+                    if *visi == Visibility::Hidden {
+                        *visi = Visibility::Visible;
+                    } else {
+                        *visi = Visibility::Hidden;
+                    }
+                }
+            }
+            Interaction::Hovered => {
+                *color = colors.accent_color.into();
+            }
+            Interaction::None => {
                 *color = colors.button_color.into();
             }
         }
@@ -244,46 +322,22 @@ pub fn config_cart_button_system(
 pub fn new_ln_address_button_system(
     mut interaction_query: Query<
         &Interaction,
-        (
-            Changed<Interaction>,
-            With<NewBlockLnAddressButton>,
-            //With<EditabledTextBox>,
-        ),
+        (Changed<Interaction>, With<NewBlockLnAddressButton>),
     >,
-    //mut text_query: Query<&mut Text, With<NewBlockLnAddressText>>,
-    //keyboard_text: Res<KeyboardData>,
+
     mut keyboard: ResMut<KeyboardData>,
     mut block_new_data: ResMut<CurrentCartBlock>,
     mut tile_cart: ResMut<TileCartVec>,
-    //colors: Res<ColorPalette>,
-    //user: Res<User>,
 ) {
     for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                //text.sections[0].value = button_text;
-                //*color = colors.lite_button_color.into();
                 resolve_target_cart_data(&keyboard, &mut block_new_data, &mut tile_cart);
                 keyboard.target = TargetType::NewLnAddress;
                 keyboard.value = block_new_data.ln_address.to_string();
             }
-            Interaction::Hovered => {
-                //text.sections[0].value = button_text;
-                //*color = colors.accent_color.into();
-            }
-            Interaction::None => {
-                // for mut text in text_query.iter_mut() {
-                //     if user.ln_address.len() > 4 {
-                //         text.sections[0].value = user.ln_address.to_string();
-                //         text.sections[0].style.color = colors.text_color;
-                //     }
-                // }
-                // if keyboard.target == TargetType::NewLnAddress {
-                //     *color = colors.lite_button_color.into();
-                // } else {
-                //     *color = colors.button_color.into();
-                // }
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
@@ -298,34 +352,20 @@ pub fn new_color_button_system(
             With<EditabledTextBox>,
         ),
     >,
-    //mut text_query: Query<&mut Text, With<NewBlockLnAddressText>>,
-    //keyboard_text: Res<KeyboardData>,
+
     mut keyboard: ResMut<KeyboardData>,
     mut block_new_data: ResMut<CurrentCartBlock>,
     mut tile_cart: ResMut<TileCartVec>,
-    //colors: Res<ColorPalette>,
 ) {
     for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                //*color = colors.lite_button_color.into();
                 resolve_target_cart_data(&keyboard, &mut block_new_data, &mut tile_cart);
                 keyboard.target = TargetType::NewColor;
                 keyboard.value = block_new_data.color_text.to_string();
-                //all_colors::get_color_hex(&block_new_data.color_text);
             }
-            Interaction::Hovered => {
-                //text.sections[0].value = button_text;
-                //*color = colors.accent_color.into();
-            }
-            Interaction::None => {
-                //text.sections[0].value = button_text;
-                // if keyboard.target == TargetType::NewColor {
-                //     *color = colors.lite_button_color.into();
-                // } else {
-                //     *color = colors.button_color.into();
-                // }
-            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
         }
     }
 }
@@ -460,24 +500,6 @@ pub fn buy_button_system(
                         });
                     }
                 }
-
-                // for text in param_set.p1().iter() {
-                //     if text.sections[0].value == DEFAULT_NEW_COLOR_TEXT {
-                //         cart.vec[index].new_color = get_random_color();
-                //     } else {
-                //         let c = all_colors::get_color_hex(&text.sections[0].value);
-                //         cart.vec[index].new_color = LegacyColor::hex(c).unwrap();
-                //     }
-                // }
-                // for text in param_set.p2().iter() {
-                //     if text.sections[0].value == DEFAULT_NEW_MESSAGE_TEXT {
-                //         cart.vec[index].new_message = "".to_string();
-                //     } else {
-                //         cart.vec[index].new_message = text.sections[0].value.to_string();
-                //     }
-                // }
-
-                //game_state.set(DisplayBuyUiState::On);
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
@@ -534,15 +556,6 @@ pub fn back_button_system(
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn tab_key_system(
     keys: Res<ButtonInput<KeyCode>>,
-    // text_box_q: Query<
-    //     (
-    //         &mut Interaction,
-    //         Option<&NewBlockLnAddressButton>,
-    //         Option<&NewBlockColorButton>,
-    //         Option<&NewBlockMessageButton>,
-    //     ),
-    //     With<EditabledTextBox>,
-    // >,
     mut keyboard: ResMut<KeyboardData>,
     mut block_new_data: ResMut<CurrentCartBlock>,
     mut tile_cart: ResMut<TileCartVec>,
@@ -627,7 +640,8 @@ pub fn show_color_button_system(
             Interaction::None => {
                 if !block_new_data.color_text.is_empty() {
                     block_new_data.color =
-                        LegacyColor::hex(all_colors::get_color_hex(&block_new_data.color_text)).unwrap();
+                        LegacyColor::hex(all_colors::get_color_hex(&block_new_data.color_text))
+                            .unwrap();
 
                     *color = block_new_data.color.into();
                 }

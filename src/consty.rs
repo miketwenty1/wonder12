@@ -13,7 +13,7 @@ pub const MOVE_VELOCITY_FACTOR: f32 = 20.0;
 pub const MINIMUM_BLOCK_AMOUNT: u32 = 128;
 
 pub const DEFAULT_NEW_LN_TEXT: &str = "Type in a lightning address!";
-pub const DEFAULT_NEW_COLOR_TEXT: &str = "Random LegacyColor, if not specified.";
+pub const DEFAULT_NEW_COLOR_TEXT: &str = "Random Color, if not specified.";
 pub const DEFAULT_NEW_MESSAGE_TEXT: &str = "Leave an optional message for others to see";
 
 pub const DEFAULT_NO_PICK_COLOR: LegacyColor = LegacyColor::Rgba {

@@ -30,8 +30,8 @@ use browser::state::BrowserStorageState;
 use browser::BrowserPlugin;
 use chrono::{Duration, Utc};
 use eventy::{
-    DespawnInventoryHeights, HideBackupCopyBtn, KeyboardSpawnEvent, RequestInventoryEvent,
-    ShowBackupCopyBtn, UpdateTilesAfterPurchase,
+    BlockDetailMessage, DespawnInventoryHeights, HideBackupCopyBtn, KeyboardSpawnEvent,
+    MessageReceivedFromServer, RequestInventoryEvent, ShowBackupCopyBtn, UpdateTilesAfterPurchase,
 };
 use overlay_ui::inventory::state::InventoryUiState;
 use resourcey::{
@@ -106,6 +106,7 @@ pub fn game12(
 
     let color_palette = ColorPalette {
         node_color: LegacyColor::hex("222831").unwrap(),
+        node_color_lighter: LegacyColor::hex("353d48").unwrap(),
         button_color: LegacyColor::hex("393E46").unwrap(),
         lite_button_color: LegacyColor::hex("6A7382").unwrap(),
         accent_color: LegacyColor::hex("00ADB5").unwrap(),
@@ -243,6 +244,8 @@ pub fn game12(
         .add_event::<RequestInventoryEvent>()
         .add_event::<UpdateTilesAfterPurchase>()
         .add_event::<DespawnInventoryHeights>()
+        .add_event::<BlockDetailMessage>()
+        .add_event::<MessageReceivedFromServer>()
         // .add_systems(Startup, load_textures)
         .add_systems(Startup, (setup_spritesheets, setup).chain())
         .run();
@@ -302,5 +305,4 @@ fn fit_canvas_to_parent() {
     let style = canvas.style();
     style.set_property("width", "100%").unwrap();
     style.set_property("height", "100%").unwrap();
-    //style.set_property(property, value)
 }

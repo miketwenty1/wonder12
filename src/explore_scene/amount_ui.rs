@@ -6,7 +6,7 @@ use crate::{
     },
     consty::MINIMUM_BLOCK_AMOUNT,
     eventy::UpdateUiAmount,
-    resourcey::{TileCart, TileCartData, WorldOwnedTileMap},
+    resourcey::{UserPurchasedBlockMessage, TileCart, TileCartData, WorldOwnedTileMap},
     utils::get_random_color,
 };
 
@@ -58,7 +58,11 @@ pub fn update_amount_selected_text(
         for land in selected_lands.iter() {
             let a = tile_map.map.get(&land.ulam);
 
+            // land exist and is owned by someone
             if let Some(val) = a {
+                let current_message = UserPurchasedBlockMessage { 
+                    username: val.username.clone(), value: val.value, message: val.message.clone() 
+                };
                 total_cost += val.cost;
                 tile_cart.map.insert(
                     land.ulam,
@@ -67,7 +71,7 @@ pub fn update_amount_selected_text(
                         ln_address: val.ln_address.clone(),
                         username: val.username.clone(),
                         color: Some(val.color),
-                        message: val.message.clone(),
+                        messages: vec![current_message].into(),
                         value: val.value,
                         cost: val.cost,
                         height: val.height,
@@ -78,9 +82,12 @@ pub fn update_amount_selected_text(
                         new_message: "".to_string(),
                     },
                 );
+            // this is a new land that hasn't been purchased yet
             } else {
                 //info!("{}", land.ulam);
                 total_cost += MINIMUM_BLOCK_AMOUNT;
+               
+
                 tile_cart.map.insert(
                     land.ulam,
                     TileCartData {
@@ -88,7 +95,7 @@ pub fn update_amount_selected_text(
                         ln_address: "".to_string(),
                         username: "".to_string(),
                         color: None,
-                        message: "".to_string(),
+                        messages: None,
                         value: 0,
                         cost: MINIMUM_BLOCK_AMOUNT,
                         height: land.ulam,

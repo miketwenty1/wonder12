@@ -66,3 +66,9 @@ pub struct UpdateTilesAfterPurchase;
 
 #[derive(Event, Debug)]
 pub struct DespawnInventoryHeights(pub Vec<u32>);
+
+#[derive(Event, Debug)]
+pub struct BlockDetailMessage(pub u32);
+
+#[derive(Event, Debug)]
+pub struct MessageReceivedFromServer(pub u32);

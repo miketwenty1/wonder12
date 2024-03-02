@@ -3,20 +3,20 @@ use bevy::prelude::*;
 use crate::{
     componenty::{
         AllCartConfigButton, AllCartConfigText, BlockCostText, BlockHeightCartText,
-        BtnShowingColor, BuyMenuButton, CartButton, CouldBeEditabledTextBox, CurrentBlockDateText,
-        CurrentBlockLnAddressText, CurrentBlockMessageText, CurrentBlockUsernameText,
-        CurrentBlockValueText, EditabledTextBox, NewBlockColorButton, NewBlockColorText,
-        NewBlockDataButton, NewBlockLnAddressButton, NewBlockLnAddressText, NewBlockMessageButton,
-        NewBlockMessageText,
+        BlockUiMessageItem, BtnShowingColor, BuyMenuButton, CartButton, CouldBeEditabledTextBox,
+        CurrentBlockMessageNode, EditabledTextBox, HideMessageBtn, NewBlockColorButton,
+        NewBlockColorText, NewBlockDataButton, NewBlockLnAddressButton, NewBlockLnAddressText,
+        NewBlockMessageButton, NewBlockMessageText,
     },
     consty::{
         DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
         DEFAULT_NO_PICK_COLOR,
     },
-    eventy::KeyboardSpawnEvent,
+    eventy::{BlockDetailMessage, KeyboardSpawnEvent},
     keyboard::{components::KeyboardNode, KeyboardState},
     resourcey::{
-        ColorPalette, CurrentCartBlock, TileCart, TileCartData, TileCartVec, User, WinSize,
+        ColorPalette, CurrentCartBlock, TileCart, TileCartData, TileCartVec, User,
+        UserPurchasedBlockMessage, WinSize,
     },
     statey::ExploreState,
 };
@@ -39,6 +39,7 @@ pub fn spawn_layout(
     win: Res<WinSize>,
     mut keyboard_event: EventWriter<KeyboardSpawnEvent>,
     user: Res<User>,
+    mut message_writer: EventWriter<BlockDetailMessage>,
 ) {
     //info!("current_cart_item {:#?}", current_cart_item);
     explore_state.set(ExploreState::Paused);
@@ -51,7 +52,11 @@ pub fn spawn_layout(
     tile_cart_vec.index = 0;
     let cart_total: u32 = tile_cart_vec.vec.iter().map(|tile| tile.cost).sum();
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-    // Top-level grid (app frame)
+    let first_cart_block = tile_cart_vec.vec.first().unwrap();
+    // if there might be messages (i.e. value > 128, meaning more than just the current potential message then we'll query db)
+    if first_cart_block.value > 128 {
+        message_writer.send(BlockDetailMessage(first_cart_block.height));
+    }
 
     // setting init color to show on buy screen square
     current_cart_item.color = tile_cart_vec.vec[0].new_color;
@@ -378,57 +383,42 @@ pub fn spawn_layout(
                         justify_items: JustifyItems::Center,
                         margin: UiRect::all(Val::Px(5.0)),
                         padding: UiRect::all(Val::Px(2.0)),
-                        grid_template_columns: vec![GridTrack::auto(), GridTrack::auto()],
-                        grid_template_rows: vec![
-                            GridTrack::auto(),
-                            GridTrack::auto(),
-                            GridTrack::auto(),
-                        ],
+                        grid_template_columns: vec![GridTrack::auto()],
+                        grid_template_rows: vec![GridTrack::auto()],
                         ..default()
                     },
                     background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
                 .with_children(|builder| {
-                    current_value_title(
+                    current_message_title(
                         builder,
                         font.clone(),
-                        "Current Data",
+                        "Block Log",
                         20.0,
                         colors.node_color,
                         colors.text_color,
                     );
-                    let datetime_string = tile_cart_vec.vec[0]
-                        .event_date
-                        .map_or("".to_string(), |datetime| {
-                            datetime.date_naive().format("%Y-%m-%d").to_string()
-                        });
-                    current_value_left(
-                        builder,
-                        font.clone(),
-                        (tile_cart_vec.vec[0].value).to_string(),
-                        datetime_string,
-                        16.0,
-                        colors.node_color,
-                        colors.text_color,
-                    );
-                    current_value_right(
-                        builder,
-                        font.clone(),
-                        tile_cart_vec.vec[0].username.to_string(),
-                        tile_cart_vec.vec[0].ln_address.to_string(),
-                        16.0,
-                        colors.text_color,
-                        colors.node_color,
-                    );
-                    current_value_message(
-                        builder,
-                        font.clone(),
-                        &tile_cart_vec.vec[0].message.to_string(),
-                        16.0,
-                        colors.node_color,
-                        colors.text_color,
-                    );
+                    builder.spawn((
+                        NodeBundle {
+                            style: Style {
+                                display: Display::Grid,
+                                justify_items: JustifyItems::Center,
+                                margin: UiRect::all(Val::Px(5.0)),
+                                padding: UiRect::all(Val::Px(2.0)),
+                                grid_template_columns: vec![
+                                    GridTrack::auto(),
+                                    GridTrack::auto(),
+                                    GridTrack::auto(),
+                                ],
+                                // purposely leaving this commented out because i'll be adding various amounts of rows.
+                                //grid_template_rows: vec![GridTrack::auto()],
+                                ..default()
+                            },
+                            ..default()
+                        },
+                        CurrentBlockMessageNode,
+                    ));
                 });
 
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
@@ -864,10 +854,10 @@ fn setup_right_block_menu_button(
         });
 }
 
-fn current_value_title(
+fn current_message_title(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
-    text: &str,
+    _text: &str,
     font_size: f32,
     node_color: LegacyColor,
     text_color: LegacyColor,
@@ -880,7 +870,7 @@ fn current_value_title(
                 align_items: AlignItems::Center,
                 align_content: AlignContent::Center,
                 justify_content: JustifyContent::Center,
-                grid_column: GridPlacement::span(2),
+                //grid_column: GridPlacement::span(3),
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
@@ -888,145 +878,116 @@ fn current_value_title(
             ..default()
         })
         .with_children(|builder| {
-            builder.spawn(TextBundle::from_section(
-                text,
-                TextStyle {
-                    font,
-                    font_size,
-                    color: text_color,
+            builder
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            border: UiRect::all(Val::Px(1.0)),
+                            ..default()
+                        },
+                        border_color: BorderColor(LegacyColor::WHITE),
+                        background_color: BackgroundColor(node_color), //node_color
+                        ..default()
+                    },
+                    HideMessageBtn,
+                ))
+                .with_children(|innerbuilder| {
+                    innerbuilder.spawn((TextBundle::from_section(
+                        "Msg Toggle",
+                        TextStyle {
+                            font: font.clone(),
+                            font_size,
+                            color: text_color,
+                        },
+                    ),));
+                });
+
+            // builder.spawn(TextBundle::from_section(
+            //     text,
+            //     TextStyle {
+            //         font: font.clone(),
+            //         font_size,
+            //         color: text_color,
+            //     },
+            // ));
+        });
+}
+
+pub fn spawn_messages(
+    builder: &mut ChildBuilder,
+    font: Handle<Font>,
+    messages: Vec<UserPurchasedBlockMessage>,
+    font_size: f32,
+    colors: ColorPalette,
+) {
+    for message in messages {
+        builder
+            .spawn((
+                NodeBundle {
+                    style: Style {
+                        margin: UiRect::all(Val::Px(3.0)),
+                        ..default()
+                    },
+                    background_color: BackgroundColor(colors.node_color),
+                    ..default()
                 },
-            ));
-        });
-}
-
-fn current_value_left(
-    builder: &mut ChildBuilder,
-    font: Handle<Font>,
-    value: String,
-    event_date: String,
-    font_size: f32,
-    node_color: LegacyColor,
-    text_color: LegacyColor,
-) {
-    builder
-        .spawn(NodeBundle {
-            style: Style {
-                display: Display::Flex,
-                flex_direction: FlexDirection::Column,
-                padding: UiRect::all(Val::Px(1.0)),
-                ..default()
-            },
-            background_color: BackgroundColor(node_color),
-            ..default()
-        })
-        .with_children(|builder| {
-            builder.spawn((
-                TextBundle::from_section(
-                    format!("Value: {} sats", value),
+                BlockUiMessageItem,
+            ))
+            .with_children(|innerc| {
+                innerc.spawn(TextBundle::from_section(
+                    message.value.to_string(),
+                    TextStyle {
+                        font: font.clone(),
+                        font_size: 18.0,
+                        color: colors.accent_color,
+                    },
+                ));
+            });
+        builder
+            .spawn((
+                NodeBundle {
+                    style: Style {
+                        margin: UiRect::all(Val::Px(3.0)),
+                        ..default()
+                    },
+                    background_color: BackgroundColor(colors.node_color),
+                    ..default()
+                },
+                BlockUiMessageItem,
+            ))
+            .with_children(|innerc| {
+                innerc.spawn(TextBundle::from_section(
+                    message.username,
                     TextStyle {
                         font: font.clone(),
                         font_size,
-                        color: text_color,
+                        color: colors.text_color,
                     },
-                ),
-                CurrentBlockValueText,
-            ));
-            builder.spawn((
-                TextBundle::from_section(
-                    format!("Date: {}", event_date),
-                    TextStyle {
-                        font,
-                        font_size,
-                        color: text_color,
+                ));
+            });
+        builder
+            .spawn((
+                NodeBundle {
+                    style: Style {
+                        margin: UiRect::all(Val::Px(3.0)),
+                        ..default()
                     },
-                ),
-                CurrentBlockDateText,
-            ));
-        });
-}
-
-fn current_value_right(
-    builder: &mut ChildBuilder,
-    font: Handle<Font>,
-    username: String,
-    ln_address: String,
-    font_size: f32,
-    text_color: LegacyColor,
-    node_color: LegacyColor,
-) {
-    builder
-        .spawn(NodeBundle {
-            style: Style {
-                display: Display::Flex,
-                flex_direction: FlexDirection::Column,
-                padding: UiRect::all(Val::Px(1.0)),
-                ..default()
-            },
-            background_color: BackgroundColor(node_color),
-            ..default()
-        })
-        .with_children(|builder| {
-            builder.spawn((
-                TextBundle::from_section(
-                    format!("Owner: {}", username),
+                    background_color: BackgroundColor(colors.node_color),
+                    ..default()
+                },
+                BlockUiMessageItem,
+            ))
+            .with_children(|innerc| {
+                innerc.spawn(TextBundle::from_section(
+                    message.message,
                     TextStyle {
                         font: font.clone(),
                         font_size,
-                        color: text_color,
+                        color: colors.text_color,
                     },
-                ),
-                CurrentBlockUsernameText,
-            ));
-            builder.spawn((
-                TextBundle::from_section(
-                    ln_address.to_string(),
-                    TextStyle {
-                        font,
-                        font_size,
-                        color: text_color,
-                    },
-                ),
-                CurrentBlockLnAddressText,
-            ));
-        });
-}
-
-fn current_value_message(
-    builder: &mut ChildBuilder,
-    font: Handle<Font>,
-    text: &str,
-    font_size: f32,
-    node_color: LegacyColor,
-    text_color: LegacyColor,
-) {
-    builder
-        .spawn(NodeBundle {
-            style: Style {
-                display: Display::Grid,
-                justify_items: JustifyItems::Start,
-                align_items: AlignItems::Start,
-                align_content: AlignContent::Start,
-                grid_column: GridPlacement::span(2),
-                padding: UiRect::all(Val::Px(2.0)),
-                max_width: Val::Px(250.0),
-                ..default()
-            },
-            background_color: BackgroundColor(node_color),
-            ..default()
-        })
-        .with_children(|builder| {
-            builder.spawn((
-                TextBundle::from_section(
-                    text,
-                    TextStyle {
-                        font,
-                        font_size,
-                        color: text_color,
-                    },
-                ),
-                CurrentBlockMessageText,
-            ));
-        });
+                ));
+            });
+    }
 }
 
 fn new_value_title(

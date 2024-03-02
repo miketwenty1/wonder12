@@ -1,18 +1,15 @@
 use bevy::prelude::*;
 
 use crate::{
-    statey::{CommsApiBlockLoadState, CommsApiInventoryState},
+    statey::{CommsApiBlockLoadState, CommsApiInventoryState, DisplayBuyUiState},
     CommsApiState,
 };
 
 use self::{
-    api_timer::{tick_api_receive_timer, ApiPollingTimer},
-    invoice::{
+    api_timer::{tick_api_receive_timer, ApiPollingTimer}, block_messages::{api_get_messages_for_block, api_receive_messages_for_block}, invoice::{
         api_check_invoice, api_receive_invoice, api_receive_invoice_check, api_request_invoice,
         hide_backup_copy_btn, show_backup_copy_btn,
-    },
-    load_server_data::{api_get_server_tiles, api_receive_server_tiles},
-    user_inventory_blocks::{api_get_inventory_blocks, api_receive_inventory_blocks},
+    }, load_server_data::{api_get_server_tiles, api_receive_server_tiles}, user_inventory_blocks::{api_get_inventory_blocks, api_receive_inventory_blocks}
 };
 
 mod api_timer;
@@ -56,7 +53,13 @@ impl Plugin for CommsPlugin {
             )
             .add_systems(
                 Update,
+                (tick_api_receive_timer, api_receive_messages_for_block)
+                    .run_if(in_state(DisplayBuyUiState::BlockDetail)),
+            )
+            .add_systems(
+                Update,
                 (
+                    api_get_messages_for_block,
                     api_get_server_tiles,
                     api_get_inventory_blocks,
                     api_request_invoice,

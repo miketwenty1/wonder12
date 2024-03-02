@@ -171,8 +171,17 @@ pub struct CurrentBlockUsernameText;
 #[derive(Component)]
 pub struct CurrentBlockLnAddressText;
 
+// #[derive(Component)]
+// pub struct CurrentBlockMessageText;
+
 #[derive(Component)]
-pub struct CurrentBlockMessageText;
+pub struct CurrentBlockMessageNode;
+
+#[derive(Component)]
+pub struct BlockUiMessageItem;
+
+#[derive(Component)]
+pub struct HideMessageBtn;
 
 #[derive(Component)]
 pub struct NewBlockLnAddressButton;

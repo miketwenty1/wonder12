@@ -63,12 +63,19 @@ impl WorldOwnedTileMap {
 }
 
 #[derive(Resource, Clone, Debug)]
+pub struct UserPurchasedBlockMessage {
+    pub username: String,
+    pub value: u32,
+    pub message: String,
+}
+
+#[derive(Resource, Clone, Debug)]
 pub struct TileCartData {
     pub event_date: Option<DateTime<Utc>>,
     pub ln_address: String,
     pub username: String,
     pub color: Option<LegacyColor>,
-    pub message: String,
+    pub messages: Option<Vec<UserPurchasedBlockMessage>>,
     pub value: u32,
     pub cost: u32,
     pub height: u32,
@@ -84,7 +91,7 @@ pub struct TileCart {
     pub map: HashMap<u32, TileCartData>,
 }
 
-#[derive(Resource, Clone)]
+#[derive(Resource, Clone, Debug)]
 pub struct TileCartVec {
     pub vec: Vec<TileCartData>,
     pub index: usize,
@@ -194,6 +201,7 @@ pub struct InitBlockCount(pub u32);
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct ColorPalette {
     pub node_color: LegacyColor,
+    pub node_color_lighter: LegacyColor,
     pub lite_button_color: LegacyColor,
     pub button_color: LegacyColor,
     pub accent_color: LegacyColor,

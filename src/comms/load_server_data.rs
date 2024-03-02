@@ -59,7 +59,6 @@ pub fn api_get_server_tiles(
                 });
             }
             RequestTileType::Ts => {
-                info!("get ts tiles sending {}", ts_str);
                 spawn_local(async move {
                     let api_response_r =
                         reqwest::get(format!("{}/comms/blockdelta_ts/{}", server, ts_str)).await;
@@ -137,20 +136,21 @@ pub fn api_receive_server_tiles(
                                 height_checkpoint: None,
                                 blocks: _,
                             } => {
-                                info!("received timestamp checkpoint {}", t);
+                                //info!("received timestamp checkpoint {}", t);
 
-                                if gametime.ts >= t {
+                                if gametime.ts >= to_millisecond_precision(t) {
                                     //info!("==");
                                 } else {
                                     request_more_ts = true;
                                     info!("receiving tiles gamet{}, servert{}", gametime.ts, t);
                                 }
-                                info!("!!!updating game ts to {}", t);
+
                                 //let aa = t;
                                 gametime.ts = to_millisecond_precision(t);
                                 if gametime.ts - Duration::minutes(15) > checkpoint_time.ts {
                                     checkpoint_time.ts = gametime.ts;
                                     browser_event.send(WriteLocalBrowserStorage);
+                                    info!("!!!updating game ts to {}", t);
                                 }
                             }
                             GameBlocksDataFromDBMod {
@@ -194,12 +194,6 @@ pub fn api_receive_server_tiles(
                             if let Some(_s) = inv_o {
                                 let inv_amount = user_inv_map.get(&new_td.height).unwrap().amount;
 
-                                // shouldnt need this!!!
-                                // let checker_inv_value = if inv_amount == 0 { 128 } else { inv_amount * 2 };
-                                info!(
-                                    "PRE!!! {}, invamount: {}, checkamount: {}",
-                                    new_td.height, inv_amount, new_td.value
-                                );
                                 //let aa = new_td.clone();
                                 #[allow(clippy::comparison_chain)]
                                 if user_inv_map.contains_key(&new_td.height) {
@@ -266,8 +260,8 @@ pub fn api_receive_server_tiles(
                             api_state.set(CommsApiBlockLoadState::Off);
                             // if it's been 15 minutes past last gametime then let's update the browser local storage.
                             // this prevents you from needing to update browser cache on every single tile update.
-                            info!("what is the gametime ts?: {}", gametime.ts);
                             if gametime.ts - Duration::minutes(15) > checkpoint_time.ts {
+                                info!("what is the gametime ts?: {}", gametime.ts);
                                 browser_event.send(WriteLocalBrowserStorage);
                             }
                         }
