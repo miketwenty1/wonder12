@@ -293,18 +293,18 @@ pub fn hide_message_btn_system(
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<HideMessageBtn>),
     >,
-    mut message_items: Query<&mut Visibility, With<CurrentBlockMessageNode>>,
+    mut message_items: Query<&mut Style, With<CurrentBlockMessageNode>>,
     colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 *color = colors.light_color.into();
-                for mut visi in message_items.iter_mut() {
-                    if *visi == Visibility::Hidden {
-                        *visi = Visibility::Visible;
+                for mut style in message_items.iter_mut() {
+                    if style.display != Display::None {
+                        style.display = Display::None;
                     } else {
-                        *visi = Visibility::Hidden;
+                        style.display = Display::Grid;
                     }
                 }
             }

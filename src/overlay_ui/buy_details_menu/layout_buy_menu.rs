@@ -95,15 +95,14 @@ pub fn spawn_layout(
                     //align_items: AlignItems::Center,
                     grid_template_columns: vec![GridTrack::auto()],
                     grid_template_rows: vec![
-                        GridTrack::auto(), //min_content(),
-                        GridTrack::auto(),
-                        GridTrack::auto(), //min_content(),
-                        GridTrack::auto(),
-                        GridTrack::auto(), //min_content(),
-                        GridTrack::auto(),
-                        GridTrack::auto(),
-                        GridTrack::auto(),
-                        //GridTrack::flex(1.0),
+                        GridTrack::auto(), // total
+                        GridTrack::auto(), // <- block ->
+                        GridTrack::auto(), // cost
+                        GridTrack::auto(), // set new values
+                        GridTrack::auto(), // config box
+                        GridTrack::auto(), // current messages
+                        GridTrack::auto(), // buy / back
+                        GridTrack::auto(), // keyboard
                     ],
 
                     max_width: Val::Px(w_size), //Val::Px(800.0),
@@ -383,11 +382,15 @@ pub fn spawn_layout(
                         justify_items: JustifyItems::Center,
                         margin: UiRect::all(Val::Px(5.0)),
                         padding: UiRect::all(Val::Px(2.0)),
-                        grid_template_columns: vec![GridTrack::auto()],
-                        grid_template_rows: vec![GridTrack::auto()],
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        align_content: AlignContent::Center,
+                        // grid_template_columns: vec![GridTrack::auto()],
+                        // grid_template_rows: vec![GridTrack::auto()],
                         ..default()
                     },
-                    background_color: BackgroundColor(colors.node_color),
+                    //border_color: BorderColor(colors.accent_color),
+                    //colors.node_color),
                     ..default()
                 })
                 .with_children(|builder| {
@@ -399,13 +402,12 @@ pub fn spawn_layout(
                         colors.node_color,
                         colors.text_color,
                     );
-                    builder.spawn((
+                    let mut message_node = builder.spawn((
                         NodeBundle {
                             style: Style {
                                 display: Display::Grid,
                                 justify_items: JustifyItems::Center,
-                                margin: UiRect::all(Val::Px(5.0)),
-                                padding: UiRect::all(Val::Px(2.0)),
+                                padding: UiRect::all(Val::Px(6.0)),
                                 grid_template_columns: vec![
                                     GridTrack::auto(),
                                     GridTrack::auto(),
@@ -415,10 +417,26 @@ pub fn spawn_layout(
                                 //grid_template_rows: vec![GridTrack::auto()],
                                 ..default()
                             },
+                            background_color: BackgroundColor(colors.node_color_lighter),
+                            //background_color: BackgroundColor(LegacyColor::GREEN), //colors.node_color),
                             ..default()
                         },
                         CurrentBlockMessageNode,
                     ));
+                    message_node.with_children(|builder| {
+                        match &tile_cart_vec.vec[tile_cart_vec.index].messages {
+                            Some(s) => {
+                                spawn_messages(
+                                    builder,
+                                    font.clone(),
+                                    s.to_vec(),
+                                    16.0,
+                                    colors.clone(),
+                                );
+                            }
+                            None => {}
+                        };
+                    });
                 });
 
             // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // //
@@ -466,7 +484,7 @@ pub fn spawn_layout(
                         //padding: UiRect::all(Val::Px(1.0)),
                         ..default()
                     },
-                    background_color: BackgroundColor(LegacyColor::BLUE),
+                    //background_color: BackgroundColor(LegacyColor::BLUE),
                     ..default()
                 },
                 KeyboardNode,
@@ -901,15 +919,6 @@ fn current_message_title(
                         },
                     ),));
                 });
-
-            // builder.spawn(TextBundle::from_section(
-            //     text,
-            //     TextStyle {
-            //         font: font.clone(),
-            //         font_size,
-            //         color: text_color,
-            //     },
-            // ));
         });
 }
 
@@ -925,10 +934,17 @@ pub fn spawn_messages(
             .spawn((
                 NodeBundle {
                     style: Style {
-                        margin: UiRect::all(Val::Px(3.0)),
+                        display: Display::Grid,
+                        margin: UiRect {
+                            left: Val::Px(3.0),
+                            right: Val::Px(3.0),
+                            top: Val::Px(1.0),
+                            bottom: Val::Px(10.0),
+                        },
+                        align_items: AlignItems::Center,
                         ..default()
                     },
-                    background_color: BackgroundColor(colors.node_color),
+                    //background_color: BackgroundColor(colors.node_color),
                     ..default()
                 },
                 BlockUiMessageItem,
@@ -947,16 +963,23 @@ pub fn spawn_messages(
             .spawn((
                 NodeBundle {
                     style: Style {
-                        margin: UiRect::all(Val::Px(3.0)),
+                        display: Display::Grid,
+                        margin: UiRect {
+                            left: Val::Px(3.0),
+                            right: Val::Px(3.0),
+                            top: Val::Px(1.0),
+                            bottom: Val::Px(10.0),
+                        },
+                        align_items: AlignItems::Center,
                         ..default()
                     },
-                    background_color: BackgroundColor(colors.node_color),
+                    //background_color: BackgroundColor(colors.node_color),
                     ..default()
                 },
                 BlockUiMessageItem,
             ))
-            .with_children(|innerc| {
-                innerc.spawn(TextBundle::from_section(
+            .with_children(|innerca| {
+                innerca.spawn(TextBundle::from_section(
                     message.username,
                     TextStyle {
                         font: font.clone(),
@@ -969,7 +992,13 @@ pub fn spawn_messages(
             .spawn((
                 NodeBundle {
                     style: Style {
-                        margin: UiRect::all(Val::Px(3.0)),
+                        display: Display::Grid,
+                        margin: UiRect {
+                            left: Val::Px(3.0),
+                            right: Val::Px(3.0),
+                            top: Val::Px(1.0),
+                            bottom: Val::Px(10.0),
+                        },
                         ..default()
                     },
                     background_color: BackgroundColor(colors.node_color),
@@ -983,7 +1012,7 @@ pub fn spawn_messages(
                     TextStyle {
                         font: font.clone(),
                         font_size,
-                        color: colors.text_color,
+                        color: colors.accent_color,
                     },
                 ));
             });

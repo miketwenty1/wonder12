@@ -187,7 +187,8 @@ pub fn readcheck_local_storage(
                 }
             }
             Err(e) => {
-                info!("e: {}", e);
+                info!("probably don't have any browser storage, if this is a fresh session ignore this, otherwise: {}", e);
+                browser_state.set(BrowserStorageState::Off);
             }
         }
     }
