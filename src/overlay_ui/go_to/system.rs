@@ -60,7 +60,7 @@ pub fn go_button(
     >,
     //mut text_query: Query<&mut Text>,
     mut overlay_state: ResMut<NextState<GoToUiState>>,
-    mut explore_state: ResMut<NextState<ExploreState>>,
+    //mut explore_state: ResMut<NextState<ExploreState>>,
     mut keyboard_state: ResMut<NextState<KeyboardState>>,
     colors: Res<ColorPalette>,
     mut mouse: ResMut<ButtonInput<MouseButton>>,
