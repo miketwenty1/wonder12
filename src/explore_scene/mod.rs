@@ -2,10 +2,12 @@ pub mod amount_ui;
 pub mod cron_systems;
 pub mod explore;
 pub mod explorer_overlay_system;
+pub mod go_to_systems;
 pub mod mouse_movement_systems;
 pub mod selection;
-pub mod toggle_ui;
+pub mod side_ui;
 pub mod touch_movement_systems;
+pub mod travel;
 pub mod update_after_purchase;
 pub mod update_toggle_events;
 pub mod zoom;
@@ -24,13 +26,15 @@ use self::{
         edge_system, init_explorer, reset_mouse, spawn_block_sprites, update_tile_textures,
     },
     explorer_overlay_system::{clear_last_selected_tile_ui_button, init_block_loading_text},
+    go_to_systems::go_to_button_system,
     mouse_movement_systems::{clear_last_selected_tile, desktop_movement_camera_system},
     selection::{choose_tile, select_tile},
-    toggle_ui::{
-        setup_toggle, toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
+    side_ui::{
+        setup_side_ui, toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
         toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4, toggle_button_system,
     },
     touch_movement_systems::touch_event_system,
+    travel::travel_event,
     update_after_purchase::update_tiles_after_purchase,
     update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
     zoom::{
@@ -48,7 +52,7 @@ impl Plugin for ExplorePlugin {
             .add_systems(
                 OnEnter(ExploreState::On),
                 (
-                    (init_explorer, setup_toggle, setup_amount_selected_text).run_if(run_once()),
+                    (init_explorer, setup_side_ui, setup_amount_selected_text).run_if(run_once()),
                     (reset_mouse, apply_deferred).chain(),
                 ),
             )
@@ -88,6 +92,7 @@ impl Plugin for ExplorePlugin {
                     clear_selection,
                     clear_last_selected_tile,
                     clear_last_selected_tile_ui_button,
+                    go_to_button_system,
                 )
                     .run_if(in_state(ExploreState::On)),
             )
@@ -100,6 +105,7 @@ impl Plugin for ExplorePlugin {
                     tick_update_tile_cron_timer,
                     update_tiles_after_purchase,
                     cam_ortho_scale_text_visibility,
+                    travel_event,
                 ),
             )
             .add_systems(OnExit(ExploreState::On), reset_mouse);

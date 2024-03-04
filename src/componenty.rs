@@ -10,6 +10,9 @@ pub struct UiNode;
 pub struct UiOverlayingExplorerButton;
 
 #[derive(Component)]
+pub struct GoToBtn;
+
+#[derive(Component)]
 pub struct UiTileSelectedButton;
 
 #[derive(Component)]
@@ -58,7 +61,7 @@ pub enum BuildingStructure {
 }
 
 #[derive(Component)]
-pub struct UiToggle;
+pub struct UiSideNode;
 
 #[derive(Component)]
 pub struct ToggleParent;

@@ -1,223 +1,258 @@
 use bevy::prelude::*;
 
-const TOGGLE_FONT_PARENT_SIZE: f32 = 22.0;
-const TOGGLE_PARENT_BTN_WIDTH: f32 = 95.0;
-const TOGGLE_PARENT_BTN_HEIGHT: f32 = 60.0;
+const FONT_PARENT_SIZE: f32 = 22.0;
+const PARENT_BTN_WIDTH: f32 = 95.0;
+const PARENT_BTN_HEIGHT: f32 = 60.0;
 
-const TOGGLE_FONT_CHILD_SIZE: f32 = 20.0;
-const TOGGLE_CHILD_BTN_WIDTH: f32 = 90.0;
-const TOGGLE_CHILD_BTN_HEIGHT: f32 = 60.0;
+const FONT_CHILD_SIZE: f32 = 20.0;
+const CHILD_BTN_WIDTH: f32 = 90.0;
+const CHILD_BTN_HEIGHT: f32 = 60.0;
 
 use crate::{
     componenty::{
-        HideBuilding, HideText, HideTextText, ShowColors, ShowValues, Toggle1Btn, Toggle1BtnText,
-        Toggle2Btn, Toggle2BtnText, Toggle3Btn, Toggle3BtnText, Toggle4Btn, Toggle4BtnText,
-        ToggleButton, ToggleParent, UiOverlayingExplorerButton, UiToggle,
+        GoToBtn, HideBuilding, HideText, HideTextText, ShowColors, ShowValues, Toggle1Btn,
+        Toggle1BtnText, Toggle2Btn, Toggle2BtnText, Toggle3Btn, Toggle3BtnText, Toggle4Btn,
+        Toggle4BtnText, ToggleButton, ToggleParent, UiOverlayingExplorerButton, UiSideNode,
     },
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
-    resourcey::{ColorPalette, ToggleMap},
+    resourcey::{ColorPalette, ToggleMap, ToggleVisible},
     structy::TileTextType,
 };
 
-pub fn setup_toggle(
+pub fn setup_side_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     colors: Res<ColorPalette>,
 ) {
-    commands
-        .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::FlexEnd,
-                    justify_content: JustifyContent::Center,
-                    flex_direction: FlexDirection::Column,
-                    ..default()
-                },
+    let mut side_parent = commands.spawn((
+        NodeBundle {
+            style: Style {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                align_items: AlignItems::FlexEnd,
+                justify_content: JustifyContent::Center,
+                flex_direction: FlexDirection::Column,
                 ..default()
             },
-            UiToggle,
-        ))
-        .with_children(|parent| {
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(TOGGLE_PARENT_BTN_WIDTH),
-                            height: Val::Px(TOGGLE_PARENT_BTN_HEIGHT),
-                            border: UiRect::all(Val::Px(2.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(colors.text_color),
-                        background_color: colors.button_color.into(),
-                        visibility: Visibility::Visible,
+            ..default()
+        },
+        UiSideNode,
+    ));
+
+    // goto button
+    side_parent.with_children(|parent| {
+        parent
+            .spawn((
+                ButtonBundle {
+                    style: Style {
+                        width: Val::Px(PARENT_BTN_WIDTH),
+                        height: Val::Px(PARENT_BTN_HEIGHT),
+                        border: UiRect::all(Val::Px(2.0)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
                         ..default()
                     },
-                    ToggleParent,
-                    UiOverlayingExplorerButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Toggle",
+                    border_color: BorderColor(colors.text_color),
+                    background_color: colors.button_color.into(),
+                    visibility: Visibility::Visible,
+                    ..default()
+                },
+                GoToBtn,
+                UiOverlayingExplorerButton,
+            ))
+            .with_children(|parent| {
+                parent.spawn(TextBundle::from_section(
+                    "Go To",
+                    TextStyle {
+                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font_size: FONT_PARENT_SIZE,
+                        color: colors.text_color,
+                    },
+                ));
+            });
+    });
+    //toggle buttons
+    side_parent.with_children(|parent| {
+        parent
+            .spawn((
+                ButtonBundle {
+                    style: Style {
+                        width: Val::Px(PARENT_BTN_WIDTH),
+                        height: Val::Px(PARENT_BTN_HEIGHT),
+                        border: UiRect::all(Val::Px(2.0)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    border_color: BorderColor(colors.text_color),
+                    background_color: colors.button_color.into(),
+                    visibility: Visibility::Visible,
+                    ..default()
+                },
+                ToggleParent,
+                UiOverlayingExplorerButton,
+            ))
+            .with_children(|parent| {
+                parent.spawn(TextBundle::from_section(
+                    "Toggle",
+                    TextStyle {
+                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font_size: FONT_PARENT_SIZE,
+                        color: colors.text_color,
+                    },
+                ));
+            });
+        parent
+            .spawn((
+                ButtonBundle {
+                    style: Style {
+                        width: Val::Px(CHILD_BTN_WIDTH),
+                        height: Val::Px(CHILD_BTN_HEIGHT),
+                        border: UiRect::all(Val::Px(5.0)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    border_color: BorderColor(colors.node_color),
+                    background_color: colors.button_color.into(),
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                HideBuilding,
+                Toggle1Btn,
+                ToggleButton,
+                UiOverlayingExplorerButton,
+            ))
+            .with_children(|parent| {
+                parent.spawn((
+                    TextBundle::from_section(
+                        "Hide Buildings",
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: TOGGLE_FONT_PARENT_SIZE,
+                            font_size: FONT_CHILD_SIZE,
                             color: colors.text_color,
                         },
-                    ));
-                });
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(TOGGLE_CHILD_BTN_WIDTH),
-                            height: Val::Px(TOGGLE_CHILD_BTN_HEIGHT),
-                            border: UiRect::all(Val::Px(5.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(colors.node_color),
-                        background_color: colors.button_color.into(),
-                        visibility: Visibility::Hidden,
+                    ),
+                    Toggle1BtnText,
+                ));
+            });
+        parent
+            .spawn((
+                ButtonBundle {
+                    style: Style {
+                        width: Val::Px(CHILD_BTN_WIDTH),
+                        height: Val::Px(CHILD_BTN_HEIGHT),
+                        border: UiRect::all(Val::Px(5.0)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
                         ..default()
                     },
-                    HideBuilding,
-                    Toggle1Btn,
-                    ToggleButton,
-                    UiOverlayingExplorerButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn((
-                        TextBundle::from_section(
-                            "Hide Buildings",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: TOGGLE_FONT_CHILD_SIZE,
-                                color: colors.text_color,
-                            },
-                        ),
-                        Toggle1BtnText,
-                    ));
-                });
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(TOGGLE_CHILD_BTN_WIDTH),
-                            height: Val::Px(TOGGLE_CHILD_BTN_HEIGHT),
-                            border: UiRect::all(Val::Px(5.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
+                    border_color: BorderColor(colors.node_color),
+                    background_color: colors.button_color.into(),
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                ShowColors,
+                ToggleButton,
+                Toggle2Btn,
+                UiOverlayingExplorerButton,
+            ))
+            .with_children(|parent| {
+                parent.spawn((
+                    TextBundle::from_section(
+                        "Hide Colors",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: FONT_CHILD_SIZE,
+                            color: colors.text_color,
                         },
-                        border_color: BorderColor(colors.node_color),
-                        background_color: colors.button_color.into(),
-                        visibility: Visibility::Hidden,
-                        ..default()
-                    },
-                    ShowColors,
-                    ToggleButton,
-                    Toggle2Btn,
-                    UiOverlayingExplorerButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn((
-                        TextBundle::from_section(
-                            "Hide Colors",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: TOGGLE_FONT_CHILD_SIZE,
-                                color: colors.text_color,
-                            },
-                        ),
-                        Toggle2BtnText,
-                    ));
-                });
+                    ),
+                    Toggle2BtnText,
+                ));
+            });
 
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(TOGGLE_CHILD_BTN_WIDTH),
-                            height: Val::Px(TOGGLE_CHILD_BTN_HEIGHT),
-                            border: UiRect::all(Val::Px(5.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(colors.node_color),
-                        background_color: colors.button_color.into(),
-                        visibility: Visibility::Hidden,
+        parent
+            .spawn((
+                ButtonBundle {
+                    style: Style {
+                        width: Val::Px(CHILD_BTN_WIDTH),
+                        height: Val::Px(CHILD_BTN_HEIGHT),
+                        border: UiRect::all(Val::Px(5.0)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
                         ..default()
                     },
-                    ShowValues,
-                    ToggleButton,
-                    Toggle3Btn,
-                    UiOverlayingExplorerButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn((
-                        TextBundle::from_section(
-                            "Show Values",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: TOGGLE_FONT_CHILD_SIZE,
-                                color: colors.text_color,
-                            },
-                        ),
-                        Toggle3BtnText,
-                    ));
-                });
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(TOGGLE_CHILD_BTN_WIDTH),
-                            height: Val::Px(TOGGLE_CHILD_BTN_HEIGHT),
-                            border: UiRect::all(Val::Px(5.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
+                    border_color: BorderColor(colors.node_color),
+                    background_color: colors.button_color.into(),
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                ShowValues,
+                ToggleButton,
+                Toggle3Btn,
+                UiOverlayingExplorerButton,
+            ))
+            .with_children(|parent| {
+                parent.spawn((
+                    TextBundle::from_section(
+                        "Show Values",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: FONT_CHILD_SIZE,
+                            color: colors.text_color,
                         },
-                        border_color: BorderColor(colors.node_color),
-                        background_color: colors.button_color.into(),
-                        visibility: Visibility::Hidden,
+                    ),
+                    Toggle3BtnText,
+                ));
+            });
+        parent
+            .spawn((
+                ButtonBundle {
+                    style: Style {
+                        width: Val::Px(CHILD_BTN_WIDTH),
+                        height: Val::Px(CHILD_BTN_HEIGHT),
+                        border: UiRect::all(Val::Px(5.0)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
                         ..default()
                     },
-                    HideText,
-                    ToggleButton,
-                    Toggle4Btn,
-                    UiOverlayingExplorerButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn((
-                        TextBundle::from_section(
-                            "Hide Text",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: TOGGLE_FONT_CHILD_SIZE,
-                                color: colors.text_color,
-                            },
-                        ),
-                        HideTextText,
-                        Toggle4BtnText,
-                    ));
-                });
-        });
+                    border_color: BorderColor(colors.node_color),
+                    background_color: colors.button_color.into(),
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                HideText,
+                ToggleButton,
+                Toggle4Btn,
+                UiOverlayingExplorerButton,
+            ))
+            .with_children(|parent| {
+                parent.spawn((
+                    TextBundle::from_section(
+                        "Hide Text",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: FONT_CHILD_SIZE,
+                            color: colors.text_color,
+                        },
+                    ),
+                    HideTextText,
+                    Toggle4BtnText,
+                ));
+            });
+    });
 }
 
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
@@ -244,7 +279,8 @@ pub fn toggle_button_system(
         Query<&mut Visibility, With<Toggle4Btn>>,
     )>,
 
-    mut toggle_visible: Local<bool>,
+    //mut toggle_visible: Local<bool>,
+    mut toggle_visible: ResMut<ToggleVisible>,
     colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
@@ -256,7 +292,7 @@ pub fn toggle_button_system(
                 //text.sections[0].value = button_text;
                 *color = colors.light_color.into();
                 //game_state.set(DisplayBuyUiState::On);
-                if *toggle_visible {
+                if toggle_visible.0 {
                     for mut btn_vis in param_set.p0().iter_mut() {
                         *btn_vis = Visibility::Hidden;
                     }
@@ -269,7 +305,7 @@ pub fn toggle_button_system(
                     for mut btn_vis in param_set.p3().iter_mut() {
                         *btn_vis = Visibility::Hidden;
                     }
-                    *toggle_visible = false;
+                    toggle_visible.0 = false;
                 } else {
                     for mut btn_vis in param_set.p0().iter_mut() {
                         *btn_vis = Visibility::Visible;
@@ -287,7 +323,7 @@ pub fn toggle_button_system(
                         *btn_vis = Visibility::Visible;
                     }
 
-                    *toggle_visible = true;
+                    toggle_visible.0 = true;
                 }
             }
             Interaction::Hovered => {

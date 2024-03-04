@@ -52,6 +52,7 @@ pub fn write_keyboard_target(
                     block_new_data.message = keyboard.value.to_string();
                 }
             }
+            _ => {}
         }
         if clear_configbox {
             for mut text in text_query.p3().iter_mut() {

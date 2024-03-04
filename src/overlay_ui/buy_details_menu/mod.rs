@@ -17,7 +17,6 @@ pub mod cleanup_buy_menu;
 pub mod keyboard_system;
 pub mod layout_buy_menu;
 pub mod systems_buyui;
-
 pub struct BuyDetailsMenuPlugin;
 
 #[derive(Component, Debug)]

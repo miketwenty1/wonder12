@@ -48,6 +48,9 @@ pub struct ClearLastSelectedTile;
 #[derive(Event, Debug)]
 pub struct KeyboardSpawnEvent;
 
+#[derive(Event, Debug)]
+pub struct NumberKeyboardSpawnEvent;
+
 // #[derive(Debug, Clone)]
 // pub struct InvoiceString {
 //     pub invoice: String,
@@ -72,3 +75,6 @@ pub struct BlockDetailMessage(pub u32);
 
 #[derive(Event, Debug)]
 pub struct MessageReceivedFromServer(pub u32);
+
+#[derive(Event, Debug)]
+pub struct TravelHeight(pub u32);

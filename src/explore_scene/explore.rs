@@ -16,7 +16,7 @@ use crate::{
         MAX_SELECTION_SIZE, TEXT_ZOOM_OUT_MAX, TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
-         ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount
+        ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
     },
     overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
@@ -307,6 +307,7 @@ pub fn edge_system(
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
 ) {
     for edge_e in edge_event.read() {
+        info!("EDGE EVENT");
         for (block_entity, block_location) in blocks.iter() {
             if (block_location.y - edge_e.y).abs() > DESPAWN_TILE_THRESHOLD
                 || (block_location.x - edge_e.x).abs() > DESPAWN_TILE_THRESHOLD
@@ -358,8 +359,7 @@ pub fn spawn_block_sprites(
 
         let middle_y = (edge.top.tile + edge.bottom.tile) / 2;
         let middle_x = (edge.left.tile + edge.right.tile) / 2;
-
-        //info!("middle_y: {}, middle_x: {}", middle_y, middle_x);
+        //info!("middle x: {}, middle y: {}", middle_x, middle_y);
         let spawn_diff = SpawnDiffData {
             xstart: middle_x - CHUNK_TILE_SPAN_COUNT * 4,
             xend: middle_x + CHUNK_TILE_SPAN_COUNT * 4,
@@ -535,6 +535,7 @@ pub fn set_camera_tile_bounds(
     edge_event: &mut EventWriter<EdgeEvent>,
 ) {
     if camera_vec3.x < edge.left.pixel {
+        //info!("LEFT WRITER");
         edge.left.pixel -= CHUNK_PIXEL_SIZE;
         edge.left.tile -= CHUNK_TILE_SPAN_COUNT;
         edge.right.pixel -= CHUNK_PIXEL_SIZE;
@@ -547,6 +548,7 @@ pub fn set_camera_tile_bounds(
         });
     }
     if camera_vec3.x > edge.right.pixel {
+        //info!("RIGHT WRITER");
         //cam_transform.translation.x = edge.right.pixel;
         edge.right.pixel += CHUNK_PIXEL_SIZE;
         edge.right.tile += CHUNK_TILE_SPAN_COUNT;
@@ -565,6 +567,7 @@ pub fn set_camera_tile_bounds(
         }
     }
     if camera_vec3.y > edge.top.pixel {
+        //info!("TOP WRITER");
         //cam_transform.translation.y = edge.top.pixel;
         edge.top.pixel += CHUNK_PIXEL_SIZE;
         edge.top.tile += CHUNK_TILE_SPAN_COUNT;
@@ -583,6 +586,7 @@ pub fn set_camera_tile_bounds(
         }
     }
     if camera_vec3.y < edge.bottom.pixel {
+        //info!("BOTTOM WRITER");
         //cam_transform.translation.y = edge.bottom.pixel;
         edge.bottom.pixel -= CHUNK_PIXEL_SIZE;
         edge.bottom.tile -= CHUNK_TILE_SPAN_COUNT;
@@ -877,7 +881,7 @@ pub fn buy_selection_button(
                 touches.clear();
 
                 let count = selection.iter().count();
-                
+
                 if count > MAX_SELECTION_SIZE {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,

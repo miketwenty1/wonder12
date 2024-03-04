@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::resourcey::ColorPalette;
+use crate::resourcey::{ColorPalette, TargetType};
 
 use super::{
     components::{Changeable, KeyBoardButton},
@@ -15,7 +15,9 @@ use super::{
 //     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 const ACCEPTABLE_CHARS: &str =
     "1234567890=⌫!#$%*&'@()[]+-_,.:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz⇧⬆\" ";
+const ACCEPTABLE_NUMBER_CHARS: &str = "1234567890⌫";
 const MAX_INPUT_LENGTH: usize = 140;
+const MAX_INPUT_FOR_HEIGHT: usize = 7;
 #[allow(clippy::type_complexity)]
 pub fn physical_keyboard_system(
     mut char_evr: EventReader<ReceivedCharacter>,
@@ -29,7 +31,20 @@ pub fn physical_keyboard_system(
     for ev in char_evr.read() {
         let k = ev.char.to_string().chars().next().unwrap();
 
-        if ACCEPTABLE_CHARS.contains(k) && keyboard_text.value.len() < MAX_INPUT_LENGTH {
+        // for alphanumeric targets
+        #[allow(clippy::if_same_then_else)]
+        if ACCEPTABLE_CHARS.contains(k)
+            && keyboard_text.value.len() < MAX_INPUT_LENGTH
+            && (keyboard_text.target == TargetType::NewColor
+                || keyboard_text.target == TargetType::NewLnAddress
+                || keyboard_text.target == TargetType::NewMessage)
+        {
+            keyboard_text.value.push(k);
+            // for numbered only targets
+        } else if ACCEPTABLE_NUMBER_CHARS.contains(k)
+            && keyboard_text.value.len() < MAX_INPUT_FOR_HEIGHT
+            && keyboard_text.target == TargetType::GoTo
+        {
             keyboard_text.value.push(k);
         } else {
             info!("no likey this character sorry")
@@ -56,6 +71,20 @@ pub fn virtual_keyboard_system(
         let k = keyboard_button.0;
         match *interaction {
             Interaction::Pressed => {
+                let acceptable_chars = match keyboard_text.target {
+                    TargetType::GoTo => ACCEPTABLE_NUMBER_CHARS,
+                    TargetType::NewLnAddress | TargetType::NewMessage | TargetType::NewColor => {
+                        ACCEPTABLE_CHARS
+                    }
+                    _ => "",
+                };
+                let max_input_length = match keyboard_text.target {
+                    TargetType::GoTo => MAX_INPUT_FOR_HEIGHT,
+                    TargetType::NewLnAddress | TargetType::NewMessage | TargetType::NewColor => {
+                        MAX_INPUT_LENGTH
+                    }
+                    _ => 0,
+                };
                 match k {
                     '⌫' => {
                         keyboard_text.value.pop();
@@ -70,8 +99,8 @@ pub fn virtual_keyboard_system(
                         debug!("capitalize/alt text is now set to: {}", c_toggle.0);
                         event.send(ToggleKeyboardEvent);
                     }
-                    k if ACCEPTABLE_CHARS.contains(k)
-                        && keyboard_text.value.len() < MAX_INPUT_LENGTH =>
+                    k if acceptable_chars.contains(k)
+                        && keyboard_text.value.len() < max_input_length =>
                     {
                         if !c_toggle.0 {
                             keyboard_text.value.push(keyboard_button.0);

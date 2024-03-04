@@ -31,12 +31,14 @@ use browser::BrowserPlugin;
 use chrono::{Duration, Utc};
 use eventy::{
     BlockDetailMessage, DespawnInventoryHeights, HideBackupCopyBtn, KeyboardSpawnEvent,
-    MessageReceivedFromServer, RequestInventoryEvent, ShowBackupCopyBtn, UpdateTilesAfterPurchase,
+    MessageReceivedFromServer, NumberKeyboardSpawnEvent, RequestInventoryEvent, ShowBackupCopyBtn,
+    TravelHeight, UpdateTilesAfterPurchase,
 };
+use overlay_ui::go_to::state::GoToUiState;
 use overlay_ui::inventory::state::InventoryUiState;
 use resourcey::{
     CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, MultiTouchInfo,
-    UserInventoryBlocks, WinSize,
+    ToggleVisible, UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
@@ -168,6 +170,7 @@ pub fn game12(
         .insert_resource(ServerURL(server_url))
         .insert_resource(SpriteIndexBuilding(numbers_map))
         .insert_resource(ToggleMap(toggle_map))
+        .insert_resource(ToggleVisible(false))
         .insert_resource(KeyboardData {
             value: "".to_string(),
             target: TargetType::Nothing,
@@ -217,6 +220,7 @@ pub fn game12(
         .init_state::<ToastState>()
         .init_state::<InventoryUiState>()
         .init_state::<BrowserStorageState>()
+        .init_state::<GoToUiState>()
         .add_plugins((
             CommsPlugin,
             OverlayUiPlugin,
@@ -239,6 +243,7 @@ pub fn game12(
         .add_event::<ClearSelectionEvent>()
         .add_event::<ClearLastSelectedTile>()
         .add_event::<KeyboardSpawnEvent>()
+        .add_event::<NumberKeyboardSpawnEvent>()
         .add_event::<HideBackupCopyBtn>()
         .add_event::<ShowBackupCopyBtn>()
         .add_event::<RequestInventoryEvent>()
@@ -246,6 +251,7 @@ pub fn game12(
         .add_event::<DespawnInventoryHeights>()
         .add_event::<BlockDetailMessage>()
         .add_event::<MessageReceivedFromServer>()
+        .add_event::<TravelHeight>()
         // .add_systems(Startup, load_textures)
         .add_systems(Startup, (setup_spritesheets, setup).chain())
         .run();

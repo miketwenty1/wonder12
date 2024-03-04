@@ -155,6 +155,7 @@ pub enum TargetType {
     NewLnAddress,
     NewColor,
     NewMessage,
+    GoTo,
 }
 
 // #[derive(Resource, Clone)]
@@ -236,6 +237,9 @@ pub struct IsIphone(pub bool);
 pub struct UserInventoryBlocks {
     pub ownedblocks: HashMap<u32, UserGameBlock>,
 }
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct ToggleVisible(pub bool);
 
 // #[derive(Resource, Clone, Debug, Default, Deserialize)]
 // pub struct UserInventoryBlocksFromServer {

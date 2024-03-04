@@ -6,7 +6,7 @@ use crate::{
         BlockUiMessageItem, BtnShowingColor, BuyMenuButton, CartButton, CurrentBlockMessageNode,
         EditabledTextBox, HideMessageBtn, NewBlockColorButton, NewBlockColorText,
         NewBlockLnAddressButton, NewBlockLnAddressText, NewBlockMessageButton, NewBlockMessageText,
-        UiOverlayingExplorerButton,
+        ToggleButton, UiOverlayingExplorerButton,
     },
     consty::{
         DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
@@ -16,7 +16,8 @@ use crate::{
     keyboard::{resources::KeyboardData, KeyboardState},
     overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
-        ColorPalette, ConfigAllCartBlocks, CurrentCartBlock, TargetType, TileCartVec, User,
+        ColorPalette, ConfigAllCartBlocks, CurrentCartBlock, TargetType, TileCartVec,
+        ToggleVisible, User,
     },
     statey::ExploreState,
     utils::is_valid_email_format_string,
@@ -579,6 +580,7 @@ pub fn tab_key_system(
                 keyboard.value = block_new_data.ln_address.to_string();
                 keyboard.target = TargetType::NewLnAddress;
             }
+            _ => {}
         }
     }
 }
@@ -675,6 +677,7 @@ pub fn resolve_target_cart_data(
             cart.vec[index].new_message = keyboard.value.clone();
             block_new_data.message = keyboard.value.to_string();
         }
+        _ => {}
     }
 }
 
@@ -688,8 +691,21 @@ pub fn resolve_cart_item_data(
     block_new_data.message = cart.vec[index].new_message.to_string();
 }
 
-pub fn show_ui_buttons(mut ui_buttons: Query<&mut Visibility, With<UiOverlayingExplorerButton>>) {
-    for mut button in ui_buttons.iter_mut() {
+pub fn show_ui_buttons(
+    mut ui_buttons: Query<&mut Visibility, With<ToggleButton>>,
+    mut toggle_ui_buttons: Query<
+        &mut Visibility,
+        (With<UiOverlayingExplorerButton>, Without<ToggleButton>),
+    >,
+    toggle_visible: Res<ToggleVisible>,
+) {
+    for mut button in toggle_ui_buttons.iter_mut() {
         *button = Visibility::Visible;
+    }
+
+    if toggle_visible.0 {
+        for mut button in ui_buttons.iter_mut() {
+            *button = Visibility::Visible;
+        }
     }
 }

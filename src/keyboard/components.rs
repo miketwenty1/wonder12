@@ -23,3 +23,6 @@ pub struct KeyBoard;
 #[derive(Component, Debug)]
 //pub struct KeyBoardButton(char);
 pub struct KeyboardNode;
+
+#[derive(Component, Debug)]
+pub struct NumberKeyboardNode;

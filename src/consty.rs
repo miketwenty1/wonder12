@@ -15,6 +15,7 @@ pub const MINIMUM_BLOCK_AMOUNT: u32 = 128;
 pub const DEFAULT_NEW_LN_TEXT: &str = "Type in a lightning address!";
 pub const DEFAULT_NEW_COLOR_TEXT: &str = "Random Color, if not specified.";
 pub const DEFAULT_NEW_MESSAGE_TEXT: &str = "Leave an optional message for others to see";
+pub const DEFAULT_HEIGHT_INPUT_TEXT: &str = "Type in a block height like 420 or 696969";
 
 pub const DEFAULT_NO_PICK_COLOR: LegacyColor = LegacyColor::Rgba {
     red: 0.7,

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use self::{
     cleanup::cleanup_keyboard_system,
     event::ToggleKeyboardEvent,
-    layout::setup_keyboard,
+    layout::{setup_keyboard, setup_keyboard_numbers},
     resources::{
         tick_delete_init_timer_physical, tick_delete_init_timer_virtual,
         tick_delete_ongoing_timer_physical, tick_delete_ongoing_timer_vitual, AltTextToggle,
@@ -58,7 +58,7 @@ impl Plugin for KeyboardPlugin {
                 )
                     .run_if(in_state(KeyboardState::On)),
             )
-            .add_systems(Update, setup_keyboard)
+            .add_systems(Update, (setup_keyboard, setup_keyboard_numbers))
             .add_systems(
                 OnExit(KeyboardState::On),
                 cleanup_keyboard_system, //(despawn_screen::<KeyBoard>, cleanup_keyboard_system),
