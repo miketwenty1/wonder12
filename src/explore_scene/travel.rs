@@ -8,8 +8,6 @@ use crate::{
     structy::{EdgeData, EdgeType},
 };
 
-use super::explore::set_camera_tile_bounds;
-
 #[allow(clippy::type_complexity)]
 pub fn travel_event(
     mut event: EventReader<TravelHeight>,

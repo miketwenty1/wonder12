@@ -15,7 +15,10 @@ pub mod zoom;
 use bevy::prelude::*;
 
 use crate::{
-    componenty::InitLoadingNode, despawn_screen, statey::InitLoadingBlocksState, ExploreState,
+    componenty::InitLoadingNode,
+    despawn_screen,
+    statey::{ExploreSelectState, InitLoadingBlocksState},
+    ExploreState,
 };
 
 use self::{
@@ -85,7 +88,6 @@ impl Plugin for ExplorePlugin {
                         .chain(),
                     edge_system,
                     spawn_block_sprites,
-                    (select_tile, apply_deferred, update_amount_selected_text).chain(),
                     buildings_visibility_event,
                     land_color_event,
                     change_tile_text_event,
@@ -95,6 +97,12 @@ impl Plugin for ExplorePlugin {
                     go_to_button_system,
                 )
                     .run_if(in_state(ExploreState::On)),
+            )
+            .add_systems(
+                Update,
+                (select_tile, apply_deferred, update_amount_selected_text)
+                    .chain()
+                    .run_if(in_state(ExploreSelectState::On)),
             )
             .add_systems(
                 Update,

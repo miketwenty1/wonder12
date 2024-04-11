@@ -19,7 +19,7 @@ use crate::resourcey::{
     InvoiceDataFromServer, LastSelectedTile, MaxBlockHeight, ServerURL, SpriteIndexBuilding,
     TargetType, TileCart, TileCartVec, ToggleMap, UpdateGameTimetamp, User, WorldOwnedTileMap,
 };
-use crate::statey::{CommsApiState, DisplayBuyUiState, ExploreState};
+use crate::statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState};
 use crate::structy::EdgeData;
 use bevy::asset::AssetMetaCheck;
 
@@ -115,6 +115,7 @@ pub fn game12(
         light_color: LegacyColor::hex("EEEEEE").unwrap(),
         text_color: LegacyColor::hex("FAFAFA").unwrap(),
         red_color: LegacyColor::hex("B50800").unwrap(),
+        yellow_color: LegacyColor::hex("ADB500").unwrap(),
         green_color: LegacyColor::DARK_GREEN,
     };
 
@@ -211,6 +212,7 @@ pub fn game12(
                 .set(ImagePlugin::default_nearest()), //default_nearest()),
         )
         .init_state::<ExploreState>()
+        .init_state::<ExploreSelectState>()
         .init_state::<CommsApiState>()
         .init_state::<CommsApiBlockLoadState>()
         .init_state::<CommsApiInventoryState>()
@@ -260,6 +262,7 @@ pub fn game12(
 fn setup(
     mut commands: Commands,
     mut ui_state: ResMut<NextState<ExploreState>>,
+    mut ui_select_state: ResMut<NextState<ExploreSelectState>>,
     mut request_inventory_event: EventWriter<RequestInventoryEvent>,
     mut browser_check: EventWriter<ReadLocalBrowserStorage>,
 ) {
@@ -291,6 +294,7 @@ fn setup(
     browser_check.send(ReadLocalBrowserStorage);
     request_inventory_event.send(RequestInventoryEvent);
     ui_state.set(ExploreState::On);
+    ui_select_state.set(ExploreSelectState::On);
 }
 
 fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {

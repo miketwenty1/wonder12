@@ -8,6 +8,7 @@ use crate::{
 
 use super::explore::set_camera_tile_bounds;
 
+const THRESHOLD_FOR_PUSHBACK: i32 = -5_0000;
 pub fn clear_last_selected_tile(
     mut clear_tile_event: EventReader<ClearLastSelectedTile>,
     mut last_selected_tile: ResMut<LastSelectedTile>,
@@ -35,13 +36,22 @@ pub fn desktop_movement_camera_system(
             || mouse.pressed(MouseButton::Right)
         {
             for (mut cam_transform, cam_ortho) in q_camera.iter_mut() {
-                let direction = if ulam::value_of_xy(0, edge.bottom.tile) + 1_000 > max_height.0 {
+                let direction = if ulam::value_of_xy(0, edge.bottom.tile) as i32
+                    + THRESHOLD_FOR_PUSHBACK
+                    > max_height.0 as i32
+                {
                     Vec3::new(-event.delta.x, 100.0, 0.0)
-                } else if ulam::value_of_xy(0, edge.top.tile) + 1_000 > max_height.0 {
+                } else if ulam::value_of_xy(0, edge.top.tile) as i32 + THRESHOLD_FOR_PUSHBACK
+                    > max_height.0 as i32
+                {
                     Vec3::new(-event.delta.x, -100.0, 0.0)
-                } else if ulam::value_of_xy(edge.left.tile, 0) + 1_000 > max_height.0 {
+                } else if ulam::value_of_xy(edge.left.tile, 0) as i32 + THRESHOLD_FOR_PUSHBACK
+                    > max_height.0 as i32
+                {
                     Vec3::new(100.0, event.delta.y, 0.0)
-                } else if ulam::value_of_xy(edge.right.tile, 0) + 1_000 > max_height.0 {
+                } else if ulam::value_of_xy(edge.right.tile, 0) as i32 + THRESHOLD_FOR_PUSHBACK
+                    > max_height.0 as i32
+                {
                     Vec3::new(-100.0, event.delta.y, 0.0)
                 } else {
                     Vec3::new(-event.delta.x, event.delta.y, 0.0)
@@ -94,13 +104,22 @@ pub fn desktop_movement_camera_system(
             };
 
             // push back on people trying to go too far
-            let direction = if ulam::value_of_xy(0, edge.bottom.tile) + 1_000 > max_height.0 {
+            let direction = if ulam::value_of_xy(0, edge.bottom.tile) as i32
+                + THRESHOLD_FOR_PUSHBACK
+                > max_height.0 as i32
+            {
                 Vec3::new(x, 100.0, 0.0)
-            } else if ulam::value_of_xy(0, edge.top.tile) + 1_000 > max_height.0 {
+            } else if ulam::value_of_xy(0, edge.top.tile) as i32 + THRESHOLD_FOR_PUSHBACK
+                > max_height.0 as i32
+            {
                 Vec3::new(x, -100.0, 0.0)
-            } else if ulam::value_of_xy(edge.left.tile, 0) + 1_000 > max_height.0 {
+            } else if ulam::value_of_xy(edge.left.tile, 0) as i32 + THRESHOLD_FOR_PUSHBACK
+                > max_height.0 as i32
+            {
                 Vec3::new(100.0, y, 0.0)
-            } else if ulam::value_of_xy(edge.right.tile, 0) + 1_000 > max_height.0 {
+            } else if ulam::value_of_xy(edge.right.tile, 0) as i32 + THRESHOLD_FOR_PUSHBACK
+                > max_height.0 as i32
+            {
                 Vec3::new(-100.0, y, 0.0)
             } else {
                 Vec3::new(x, y, 0.0)

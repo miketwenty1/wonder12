@@ -19,7 +19,7 @@ use crate::{
         ColorPalette, ConfigAllCartBlocks, CurrentCartBlock, TargetType, TileCartVec,
         ToggleVisible, User,
     },
-    statey::ExploreState,
+    statey::{ExploreSelectState, ExploreState},
     utils::is_valid_email_format_string,
     DisplayBuyUiState,
 };
@@ -523,6 +523,7 @@ pub fn back_button_system(
     //mut text_query: Query<&mut Text>,
     mut overlay_state: ResMut<NextState<DisplayBuyUiState>>,
     mut explore_state: ResMut<NextState<ExploreState>>,
+    mut explore_select_state: ResMut<NextState<ExploreSelectState>>,
     mut keyboard_state: ResMut<NextState<KeyboardState>>,
     colors: Res<ColorPalette>,
     mut mouse: ResMut<ButtonInput<MouseButton>>,
@@ -535,6 +536,7 @@ pub fn back_button_system(
                 *color = colors.light_color.into();
                 //text.sections[0].value = button_text;
                 explore_state.set(ExploreState::On);
+                explore_select_state.set(ExploreSelectState::On);
                 keyboard_state.set(KeyboardState::Off);
                 // help with jumpiness when leaving this screen - hopefully
                 mouse.clear();

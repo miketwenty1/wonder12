@@ -3,8 +3,9 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use crate::{
     building_config::spawn_tile_level,
     componenty::{BuildingStructure, Land, Location, Selected, UiTileSelectedButton},
-    consty::TOTAL_TILE_SCALE_SIZE,
+    consty::{MAX_SELECTION_SIZE, TOTAL_TILE_SCALE_SIZE},
     eventy::{SelectTileEvent, UpdateUiAmount},
+    overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{LastSelectedTile, SpriteSheetSelect},
 };
 
@@ -62,6 +63,7 @@ pub fn select_tile(
     mut last_selected_tile: ResMut<LastSelectedTile>,
     mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
+    mut toast: EventWriter<ToastEvent>,
 ) {
     for e in event.read() {
         //let event_val = ulam::value_of_xy(e.0, e.1);
@@ -88,6 +90,15 @@ pub fn select_tile(
                             );
                         });
                     location.selected = true;
+
+                    let count = selected_lands.iter().count();
+                    // the "-1" accounts for the one that was just spawned.
+                    if count > MAX_SELECTION_SIZE - 1 {
+                        toast.send(ToastEvent {
+                            ttype: ToastType::Warn,
+                            message: "Please unselect some tiles, Maximum 100".to_string(),
+                        });
+                    }
 
                     for mut visibility in tile_selected_button_q.iter_mut() {
                         *visibility = Visibility::Visible;

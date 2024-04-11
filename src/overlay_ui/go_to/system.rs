@@ -4,7 +4,7 @@ use crate::{
     eventy::TravelHeight,
     keyboard::{resources::KeyboardData, KeyboardState},
     resourcey::{ColorPalette, MaxBlockHeight, TargetType},
-    statey::ExploreState,
+    statey::{ExploreSelectState, ExploreState},
 };
 
 use super::{
@@ -21,6 +21,7 @@ pub fn back_button_system(
     //mut text_query: Query<&mut Text>,
     mut overlay_state: ResMut<NextState<GoToUiState>>,
     mut explore_state: ResMut<NextState<ExploreState>>,
+    mut explore_select_state: ResMut<NextState<ExploreSelectState>>,
     mut keyboard_state: ResMut<NextState<KeyboardState>>,
     colors: Res<ColorPalette>,
     mut mouse: ResMut<ButtonInput<MouseButton>>,
@@ -31,14 +32,14 @@ pub fn back_button_system(
         match *interaction {
             Interaction::Pressed => {
                 *color = colors.light_color.into();
-                //text.sections[0].value = button_text;
-                explore_state.set(ExploreState::On);
-                keyboard_state.set(KeyboardState::Off);
                 // help with jumpiness when leaving this screen - hopefully
                 mouse.clear();
                 keyboard.target = TargetType::Nothing;
                 keyboard.value = "".to_string();
                 overlay_state.set(GoToUiState::Off);
+                explore_state.set(ExploreState::On);
+                explore_select_state.set(ExploreSelectState::On);
+                keyboard_state.set(KeyboardState::Off);
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
@@ -60,7 +61,6 @@ pub fn go_button(
     >,
     //mut text_query: Query<&mut Text>,
     mut overlay_state: ResMut<NextState<GoToUiState>>,
-    //mut explore_state: ResMut<NextState<ExploreState>>,
     mut keyboard_state: ResMut<NextState<KeyboardState>>,
     colors: Res<ColorPalette>,
     mut mouse: ResMut<ButtonInput<MouseButton>>,
@@ -68,19 +68,19 @@ pub fn go_button(
     max_block_height: Res<MaxBlockHeight>,
     mut travel: EventWriter<TravelHeight>,
     keys: Res<ButtonInput<KeyCode>>,
+    mut game_select_set_state: ResMut<NextState<ExploreSelectState>>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
                 *color = colors.light_color.into();
-                //text.sections[0].value = button_text;
-                // explore_state.set(ExploreState::On);
                 keyboard_state.set(KeyboardState::Off);
                 // help with jumpiness when leaving this screen - hopefully
                 mouse.clear();
                 keyboard.target = TargetType::Nothing;
                 overlay_state.set(GoToUiState::Off);
+                game_select_set_state.set(ExploreSelectState::On);
                 let block_height = keyboard.clone().value;
                 match block_height.parse::<u32>() {
                     Ok(number) => {
@@ -95,6 +95,7 @@ pub fn go_button(
                     Err(e) => info!("Did you input an invalid blockheight? {}", e),
                 }
                 keyboard.value = "".to_string();
+                keyboard.target = TargetType::Nothing;
             }
             Interaction::Hovered => {
                 //text.sections[0].value = button_text;
@@ -107,13 +108,12 @@ pub fn go_button(
         }
     }
     if keys.pressed(KeyCode::Enter) {
-        //text.sections[0].value = button_text;
-        // explore_state.set(ExploreState::On);
         keyboard_state.set(KeyboardState::Off);
         // help with jumpiness when leaving this screen - hopefully
         mouse.clear();
         keyboard.target = TargetType::Nothing;
         overlay_state.set(GoToUiState::Off);
+        game_select_set_state.set(ExploreSelectState::On);
         let block_height = keyboard.clone().value;
         match block_height.parse::<u32>() {
             Ok(number) => {

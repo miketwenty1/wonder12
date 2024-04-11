@@ -209,6 +209,7 @@ pub struct ColorPalette {
     pub light_color: LegacyColor,
     pub text_color: LegacyColor,
     pub red_color: LegacyColor,
+    pub yellow_color: LegacyColor,
     pub green_color: LegacyColor,
 }
 

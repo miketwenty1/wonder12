@@ -32,6 +32,7 @@ pub struct ToastEvent {
 #[derive(Clone, Debug)]
 pub enum ToastType {
     Good,
+    Warn,
     Bad,
 }
 

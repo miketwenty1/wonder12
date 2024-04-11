@@ -13,7 +13,7 @@ use crate::{
         toast::{ToastEvent, ToastType},
     },
     resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, TileCartVec, User},
-    statey::{CommsApiState, DisplayBuyUiState, ExploreState},
+    statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState},
     structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},
     utils::{convert_color_to_hexstring, extract_number, logout_user},
     ServerURL,
@@ -251,6 +251,7 @@ pub fn api_receive_invoice_check(
     api_timer: Res<ApiPollingTimer>,
     mut api_name_set_state: ResMut<NextState<CommsApiState>>,
     mut game_set_state: ResMut<NextState<ExploreState>>,
+    mut game_select_set_state: ResMut<NextState<ExploreSelectState>>,
     mut qr_set_state: ResMut<NextState<DisplayBuyUiState>>,
     mut invoice_data: ResMut<InvoiceDataFromServer>,
     mut clear_event: EventWriter<ClearSelectionEvent>,
@@ -291,6 +292,7 @@ pub fn api_receive_invoice_check(
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
+                                game_select_set_state.set(ExploreSelectState::On);
                                 clear_event.send(ClearSelectionEvent);
                                 if iphone.0 {
                                     bkp_clipboard_btn.send(HideBackupCopyBtn);
@@ -309,6 +311,7 @@ pub fn api_receive_invoice_check(
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
+                                game_select_set_state.set(ExploreSelectState::On);
                                 if iphone.0 {
                                     bkp_clipboard_btn.send(HideBackupCopyBtn);
                                 }
@@ -325,6 +328,7 @@ pub fn api_receive_invoice_check(
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
+                                game_select_set_state.set(ExploreSelectState::On);
                                 toast.send(ToastEvent {
                                     ttype: ToastType::Bad,
                                     message: "Error002".to_string(),
@@ -335,6 +339,7 @@ pub fn api_receive_invoice_check(
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
                                 game_set_state.set(ExploreState::On);
+                                game_select_set_state.set(ExploreSelectState::On);
                                 toast.send(ToastEvent {
                                     ttype: ToastType::Bad,
                                     message: "Error001".to_string(),

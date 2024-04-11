@@ -24,6 +24,17 @@ pub fn toast_event_reader(
                 );
                 state.set(ToastState::On);
             }
+            ToastType::Warn => {
+                let bg_color = colors.yellow_color;
+                spawn_toast(
+                    &mut commands,
+                    &colors,
+                    &asset_server,
+                    bg_color,
+                    event.message.to_string(),
+                );
+                state.set(ToastState::On);
+            }
             ToastType::Bad => {
                 let bg_color = colors.red_color;
                 spawn_toast(

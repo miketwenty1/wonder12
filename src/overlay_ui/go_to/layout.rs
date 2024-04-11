@@ -6,6 +6,7 @@ use crate::{
     eventy::NumberKeyboardSpawnEvent,
     keyboard::{components::NumberKeyboardNode, resources::KeyboardData},
     resourcey::{ColorPalette, TargetType, WinSize},
+    statey::ExploreSelectState,
 };
 
 use super::component::{GoToBackBtn, GoToGoBtn, GoToNode, GoToTextBoxButton, GoToTextBoxText};
@@ -17,7 +18,9 @@ pub fn spawn_layout(
     win: Res<WinSize>,
     mut keyboard_event: EventWriter<NumberKeyboardSpawnEvent>,
     mut keyboard: ResMut<KeyboardData>,
+    mut game_select_set_state: ResMut<NextState<ExploreSelectState>>,
 ) {
+    game_select_set_state.set(ExploreSelectState::Off);
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     let w_size = if win.width > 450.0 { 450.0 } else { win.width };
     // let h_size = if win.height > 300.0 {

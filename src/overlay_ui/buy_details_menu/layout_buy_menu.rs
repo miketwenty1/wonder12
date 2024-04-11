@@ -18,7 +18,7 @@ use crate::{
         ColorPalette, CurrentCartBlock, TileCart, TileCartData, TileCartVec, User,
         UserPurchasedBlockMessage, WinSize,
     },
-    statey::ExploreState,
+    statey::{ExploreSelectState, ExploreState},
 };
 
 use super::BuyDetailsMenu;
@@ -31,6 +31,7 @@ pub fn spawn_layout(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut explore_state: ResMut<NextState<ExploreState>>,
+    mut game_select_set_state: ResMut<NextState<ExploreSelectState>>,
     mut keyboard_state: ResMut<NextState<KeyboardState>>,
     tile_cart: Res<TileCart>,
     mut current_cart_item: ResMut<CurrentCartBlock>,
@@ -43,6 +44,7 @@ pub fn spawn_layout(
 ) {
     //info!("current_cart_item {:#?}", current_cart_item);
     explore_state.set(ExploreState::Paused);
+    game_select_set_state.set(ExploreSelectState::Off);
     keyboard_state.set(KeyboardState::Off);
 
     // set the Cart data and sort it in the vec.

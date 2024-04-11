@@ -6,7 +6,7 @@ use crate::{
     componenty::{CancelQrButton, ClipboardBtn, ExpirationQrText},
     eventy::{HideBackupCopyBtn, ShowBackupCopyBtn},
     resourcey::{ColorPalette, InvoiceDataFromServer, IsIphone},
-    statey::{CommsApiState, DisplayBuyUiState, ExploreState},
+    statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState},
 };
 
 use wasm_bindgen::prelude::*;
@@ -133,7 +133,7 @@ pub fn clipboard_button_system(
     }
 }
 
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn cancel_qr_button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor),
@@ -141,6 +141,7 @@ pub fn cancel_qr_button_system(
     >,
     colors: Res<ColorPalette>,
     mut explore_state: ResMut<NextState<ExploreState>>,
+    mut explore_select_state: ResMut<NextState<ExploreSelectState>>,
     mut ui_state: ResMut<NextState<DisplayBuyUiState>>,
     mut comms_state: ResMut<NextState<CommsApiState>>,
     mut event: EventWriter<HideBackupCopyBtn>,
@@ -151,6 +152,7 @@ pub fn cancel_qr_button_system(
             Interaction::Pressed => {
                 *color = colors.light_color.into();
                 explore_state.set(ExploreState::On);
+                explore_select_state.set(ExploreSelectState::On);
                 ui_state.set(DisplayBuyUiState::Off);
                 comms_state.set(CommsApiState::Off);
                 if iphone.0 {

@@ -871,7 +871,7 @@ pub fn buy_selection_button(
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
-                text.sections[0].value = "Buy".to_string();
+                //text.sections[0].value = "Buy".to_string();
                 *color = colors.green_color.into();
                 border_color.0 = colors.light_color;
                 // trying to kill jumpiness
@@ -881,7 +881,6 @@ pub fn buy_selection_button(
                 touches.clear();
 
                 let count = selection.iter().count();
-
                 if count > MAX_SELECTION_SIZE {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
@@ -895,7 +894,7 @@ pub fn buy_selection_button(
                 }
             }
             Interaction::Hovered => {
-                text.sections[0].value = "Buy".to_string();
+                //text.sections[0].value = "Buy".to_string();
                 *color = colors.accent_color.into();
                 border_color.0 = colors.node_color;
                 // mouse.clear();
@@ -905,7 +904,7 @@ pub fn buy_selection_button(
                 // mouse_motion_events.read();
             }
             Interaction::None => {
-                text.sections[0].value = "Buy".to_string();
+                //text.sections[0].value = "Buy".to_string();
                 *color = colors.green_color.into();
                 border_color.0 = colors.node_color;
             }
