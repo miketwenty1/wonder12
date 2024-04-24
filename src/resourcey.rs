@@ -236,7 +236,7 @@ pub struct ConfigAllCartBlocks(pub bool);
 pub struct IsIphone(pub bool);
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct NWC(pub bool);
+pub struct Nwc(pub bool);
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct UserInventoryBlocks {

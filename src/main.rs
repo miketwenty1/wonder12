@@ -38,7 +38,7 @@ use overlay_ui::go_to::state::GoToUiState;
 use overlay_ui::inventory::state::InventoryUiState;
 use resourcey::{
     CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, MultiTouchInfo,
-    ToggleVisible, UserInventoryBlocks, WinSize, NWC,
+    Nwc, ToggleVisible, UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
@@ -200,7 +200,7 @@ pub fn game12(
         })
         .insert_resource(ConfigAllCartBlocks(false))
         .insert_resource(IsIphone(is_iphone))
-        .insert_resource(NWC(nwc))
+        .insert_resource(Nwc(nwc))
         .insert_resource(UserInventoryBlocks {
             ownedblocks: HashMap::new(),
         })

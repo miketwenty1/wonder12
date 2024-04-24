@@ -12,7 +12,7 @@ use crate::{
         inventory::event::AddInventoryRow,
         toast::{ToastEvent, ToastType},
     },
-    resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, TileCartVec, User, NWC},
+    resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, Nwc, TileCartVec, User},
     statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState},
     structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},
     utils::{convert_color_to_hexstring, extract_number, logout_user},
@@ -43,7 +43,7 @@ pub fn api_request_invoice(
     user: Res<User>,
     mut api_receive_state: ResMut<NextState<CommsApiState>>,
     mut toast: EventWriter<ToastEvent>,
-    nwc: Res<NWC>,
+    nwc: Res<Nwc>,
 ) {
     for _buy_block_data in button_event_reader.read() {
         //info!("{:#?}", tile_cart_vec.vec);
@@ -101,7 +101,7 @@ pub fn api_request_invoice(
 
                         match api_response_text_rr {
                             Ok(o) => {
-                                cc.try_send(o);
+                                let _ = cc.try_send(o);
                             }
                             Err(e) => {
                                 info!("error with req inv {:#?}", e);
