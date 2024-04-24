@@ -12,7 +12,7 @@ use crate::{
         inventory::event::AddInventoryRow,
         toast::{ToastEvent, ToastType},
     },
-    resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, TileCartVec, User},
+    resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, TileCartVec, User, NWC},
     statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState},
     structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},
     utils::{convert_color_to_hexstring, extract_number, logout_user},
@@ -33,7 +33,7 @@ pub enum InvoiceStatus {
     Error,
 }
 
-#[allow(unused_must_use)]
+#[allow(clippy::too_many_arguments)]
 pub fn api_request_invoice(
     request_invoice_channel: Res<RequestInvoiceChannel>,
     api_server: Res<ServerURL>,
@@ -42,6 +42,8 @@ pub fn api_request_invoice(
     tile_cart_vec: Res<TileCartVec>,
     user: Res<User>,
     mut api_receive_state: ResMut<NextState<CommsApiState>>,
+    mut toast: EventWriter<ToastEvent>,
+    nwc: Res<NWC>,
 ) {
     for _buy_block_data in button_event_reader.read() {
         //info!("{:#?}", tile_cart_vec.vec);
@@ -77,7 +79,14 @@ pub fn api_request_invoice(
                 refund_address: user.ln_address.to_string(),
             };
             let url = format!("{}/comms/invoice/blocks", server);
-            info!("url: {}", url);
+            info!("url: {}, nwc: {}", url, nwc.0);
+            if nwc.0 {
+                toast.send(ToastEvent {
+                    ttype: ToastType::Good,
+                    message: "Attempting to use Nostr Wallet Connect...".to_string(),
+                });
+            }
+
             let _task = pool.spawn(async move {
                 let api_response_text_r = reqwest::Client::new()
                     .post(url)

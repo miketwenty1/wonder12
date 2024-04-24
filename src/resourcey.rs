@@ -236,6 +236,9 @@ pub struct ConfigAllCartBlocks(pub bool);
 pub struct IsIphone(pub bool);
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct NWC(pub bool);
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct UserInventoryBlocks {
     pub ownedblocks: HashMap<u32, UserGameBlock>,
 }
