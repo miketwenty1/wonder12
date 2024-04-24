@@ -8,7 +8,7 @@ pub fn spawn_toast(
     commands: &mut Commands,
     colors: &Res<ColorPalette>,
     asset_server: &Res<AssetServer>,
-    bg_color: LegacyColor,
+    bg_color: Color,
     information_text: String,
 ) {
     commands
@@ -30,7 +30,7 @@ pub fn spawn_toast(
             ToastNode,
         ))
         .with_children(|child| {
-            // let bg_color2 = LegacyColor::Rgba {
+            // let bg_color2 = Color::Rgba {
             //     red: colors.accent_color.r(),
             //     green: colors.accent_color.g(),
             //     blue: colors.accent_color.b(),

@@ -1,4 +1,4 @@
-use bevy::{render::color::LegacyColor, utils::HashMap};
+use bevy::{render::color::Color, utils::HashMap};
 use chrono::{DateTime, Utc};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
@@ -39,7 +39,7 @@ impl TrimTileLocalBrowserStorage {
             let tile_data = TileData {
                 ln_address: trim_tile.l,
                 username: trim_tile.u,
-                color: LegacyColor::hex(&trim_tile.c).unwrap(),
+                color: Color::hex(&trim_tile.c).unwrap(),
                 message: trim_tile.m,
                 resource: crate::structy::TileResource::Wheat,
                 hash: trim_tile.h,
@@ -66,5 +66,5 @@ pub struct GameBlockMessagesFromDB {
 #[derive(Clone, Debug, Default, Deserialize)]
 pub struct MessagesFromServer {
     pub height: u32,
-    pub messages: Vec<GameBlockMessagesFromDB>
+    pub messages: Vec<GameBlockMessagesFromDB>,
 }

@@ -9,7 +9,7 @@ pub fn spawn(
     texture: &Handle<Image>,
     layout: &Handle<TextureAtlasLayout>,
     builder: &mut ChildBuilder,
-    color: LegacyColor,
+    color: Color,
     locationcoord: Location,
     visibility_toggle: Visibility,
 ) {
@@ -28,7 +28,7 @@ pub fn spawn(
         texture,
         layout,
         builder,
-        LegacyColor::rgba(1.0, 1.0, 1.0, 1.0),
+        Color::rgba(1.0, 1.0, 1.0, 1.0),
         locationcoord,
         5,
         visibility_toggle,

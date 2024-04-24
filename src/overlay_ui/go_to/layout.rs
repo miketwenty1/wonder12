@@ -185,7 +185,7 @@ pub fn spawn_layout(
                         //padding: UiRect::all(Val::Px(1.0)),
                         ..default()
                     },
-                    //background_color: BackgroundColor(LegacyColor::YELLOW),
+                    //background_color: BackgroundColor(Color::YELLOW),
                     ..default()
                 },
                 NumberKeyboardNode,
@@ -200,8 +200,8 @@ fn height_input_box(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
-    node_color: LegacyColor,
-    button_color: LegacyColor,
+    node_color: Color,
+    button_color: Color,
     font_size: f32,
     edit_box_width: f32,
 ) {
@@ -283,7 +283,7 @@ fn setup_goto_go_button(
                 //padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
-            //background_color: BackgroundColor(LegacyColor::PURPLE), //colors.node_color),
+            //background_color: BackgroundColor(Color::PURPLE), //colors.node_color),
             ..default()
         })
         .with_children(|parent| {

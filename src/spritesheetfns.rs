@@ -17,11 +17,11 @@ pub fn setup_spritesheets(
         },
     );
     let building_atlas = TextureAtlasLayout::from_grid(
-        UVec2::new(32, 32),
+        bevy::prelude::Vec2::new(32.0, 32.0),
         18,
         1,
-        Some(UVec2::new(2, 2)),
-        Some(UVec2::new(1, 1)),
+        Some(bevy::prelude::Vec2::new(2.0, 2.0)),
+        Some(bevy::prelude::Vec2::new(1.0, 1.0)),
     );
     let building_texture_atlas = texture_atlases.add(building_atlas);
 
@@ -32,11 +32,11 @@ pub fn setup_spritesheets(
         },
     );
     let bg_atlas = TextureAtlasLayout::from_grid(
-        UVec2::new(32, 32),
+        Vec2::new(32.0, 32.0),
         12,
         1,
-        Some(UVec2::new(2, 2)),
-        Some(UVec2::new(1, 1)),
+        Some(Vec2::new(2.0, 2.0)),
+        Some(bevy::prelude::Vec2::new(1.0, 1.0)),
     );
     let bg_texture_atlas = texture_atlases.add(bg_atlas);
 
@@ -47,11 +47,11 @@ pub fn setup_spritesheets(
         },
     );
     let select_atlas = TextureAtlasLayout::from_grid(
-        UVec2::new(32, 32),
+        bevy::prelude::Vec2::new(32.0, 32.0),
         8,
         1,
-        Some(UVec2::new(2, 2)),
-        Some(UVec2::new(1, 1)),
+        Some(bevy::prelude::Vec2::new(2.0, 2.0)),
+        Some(bevy::prelude::Vec2::new(1.0, 1.0)),
     );
     let select_texture_atlas = texture_atlases.add(select_atlas);
 

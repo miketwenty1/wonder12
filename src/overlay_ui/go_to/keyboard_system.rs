@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     keyboard::resources::KeyboardData,
-    resourcey::{ColorPalette, CurrentCartBlock, TargetType},
+    resourcey::{ColorPalette, TargetType},
 };
 
 use super::component::GoToTextBoxText;

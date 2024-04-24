@@ -644,8 +644,7 @@ pub fn show_color_button_system(
             Interaction::None => {
                 if !block_new_data.color_text.is_empty() {
                     block_new_data.color =
-                        LegacyColor::hex(all_colors::get_color_hex(&block_new_data.color_text))
-                            .unwrap();
+                        Color::hex(all_colors::get_color_hex(&block_new_data.color_text)).unwrap();
 
                     *color = block_new_data.color.into();
                 }

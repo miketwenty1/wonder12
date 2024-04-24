@@ -1,9 +1,9 @@
-use bevy::{log::info, math::Vec2, render::color::LegacyColor};
+use bevy::{log::info, math::Vec2, render::color::Color};
 use chrono::{DateTime, Duration, Utc};
 use rand::Rng;
 use regex::Regex;
 
-pub fn convert_color_to_hexstring(c: LegacyColor) -> String {
+pub fn convert_color_to_hexstring(c: Color) -> String {
     // Ensure the input values are within the range [0, 1]
     let r = (c.r().clamp(0.0, 1.0) * 255.0).round() as u8;
     let g = (c.g().clamp(0.0, 1.0) * 255.0).round() as u8;
@@ -19,14 +19,14 @@ pub fn is_valid_email_format_string(email: &str) -> bool {
     email_regex.is_match(email)
 }
 
-pub fn get_random_color() -> LegacyColor {
+pub fn get_random_color() -> Color {
     let mut rng = rand::thread_rng();
     let r: f32 = rng.gen_range(0.0..1.0);
     let g: f32 = rng.gen_range(0.0..1.0);
     let b: f32 = rng.gen_range(0.0..1.0);
 
     //info!("getting a random color: {}-{}-{}", r, g, b);
-    LegacyColor::Rgba {
+    Color::Rgba {
         red: r,
         green: g,
         blue: b,
@@ -79,7 +79,6 @@ pub fn to_millisecond_precision(dt: DateTime<Utc>) -> DateTime<Utc> {
     let micros_to_subtract = dt.timestamp_subsec_micros() - (milliseconds * 1_000);
 
     // Subtract the extra microseconds to align to milliseconds
-    
 
     dt - Duration::microseconds(micros_to_subtract as i64)
 }

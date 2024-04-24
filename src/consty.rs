@@ -1,4 +1,4 @@
-use bevy::render::color::LegacyColor;
+use bevy::render::color::Color;
 
 pub const CHUNK_PIXEL_SIZE: f32 = 400.0;
 pub const TILE_SCALE: f32 = 3.0;
@@ -17,7 +17,9 @@ pub const DEFAULT_NEW_COLOR_TEXT: &str = "Random Color, if not specified.";
 pub const DEFAULT_NEW_MESSAGE_TEXT: &str = "Leave an optional message for others to see";
 pub const DEFAULT_HEIGHT_INPUT_TEXT: &str = "Type in a block height like 420 or 696969";
 
-pub const DEFAULT_NO_PICK_COLOR: LegacyColor = LegacyColor::Rgba {
+pub const THRESHOLD_FOR_PUSHBACK: i32 = -5_0000;
+
+pub const DEFAULT_NO_PICK_COLOR: Color = Color::Rgba {
     red: 0.7,
     green: 0.7,
     blue: 0.7,
@@ -26,9 +28,9 @@ pub const DEFAULT_NO_PICK_COLOR: LegacyColor = LegacyColor::Rgba {
 
 pub const ZOOM_IN_MAX: f32 = 0.25;
 pub const TEXT_ZOOM_OUT_MAX: f32 = 3.0;
-pub const ZOOM_OUT_MAX: f32 = 5.0;
+pub const ZOOM_OUT_MAX: f32 = 10.0;
 
-pub const DARKEST_BUILDING: LegacyColor = LegacyColor::Rgba {
+pub const DARKEST_BUILDING: Color = Color::Rgba {
     red: 0.15,
     green: 0.15,
     blue: 0.15,

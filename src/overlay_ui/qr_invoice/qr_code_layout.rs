@@ -74,7 +74,7 @@ pub fn spawn_qr(
                     justify_items: JustifyItems::Center,
                     ..default()
                 },
-                background_color: BackgroundColor(LegacyColor::Rgba {
+                background_color: BackgroundColor(Color::Rgba {
                     red: 1.,
                     green: 1.,
                     blue: 1.,
@@ -215,7 +215,7 @@ pub fn spawn_qr(
                         ..Default::default()
                     },
                     image: handle.unwrap().into(),
-                    background_color: BackgroundColor(LegacyColor::WHITE),
+                    background_color: BackgroundColor(Color::WHITE),
                     ..Default::default() // style: Style {
                 });
             });

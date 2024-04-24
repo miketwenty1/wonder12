@@ -177,7 +177,7 @@ pub fn init_explorer(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(LegacyColor::BLACK),
+                        border_color: BorderColor(Color::BLACK),
                         background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
                         ..default()
@@ -228,7 +228,7 @@ pub fn init_explorer(
                         margin: UiRect::top(Val::Percent(29.9)),
                         ..default()
                     },
-                    // background_color: LegacyColor::PINK.into(),
+                    // background_color: Color::PINK.into(),
                     ..default()
                 })
                 .with_children(|childtext| {
@@ -275,7 +275,7 @@ pub fn init_explorer(
                         margin: UiRect::top(Val::Percent(30.0)),
                         ..default()
                     },
-                    // background_color: LegacyColor::PINK.into(),
+                    // background_color: Color::PINK.into(),
                     ..default()
                 })
                 .with_children(|childtext| {
@@ -346,7 +346,7 @@ pub fn spawn_block_sprites(
         let slightly_smaller_text_style = TextStyle {
             font,
             font_size: 24.0,
-            color: LegacyColor::WHITE,
+            color: Color::WHITE,
         };
 
         let zoom_level = cam_query.get_single().unwrap().scale;
@@ -413,7 +413,7 @@ pub fn spawn_block_sprites(
                         color_for_sprites = tile_map.map.get(&locationcoord.ulam).unwrap().color;
                         land_sprite_index =
                             tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
-                        color_for_tile = LegacyColor::Rgba {
+                        color_for_tile = Color::Rgba {
                             red: 1.,
                             green: 1.,
                             blue: 1.,
@@ -426,7 +426,7 @@ pub fn spawn_block_sprites(
                     } else {
                         land_sprite_index = rng.gen_range(1..=11);
                         building_sprite_index = 0;
-                        color_for_tile = LegacyColor::Rgba {
+                        color_for_tile = Color::Rgba {
                             red: 0.2,
                             green: 0.2,
                             blue: 0.2,
@@ -677,7 +677,7 @@ pub fn update_tile_textures(
 
                 // show correct color based on toggle
                 if *hiding_colors {
-                    sprite.color = LegacyColor::Rgba {
+                    sprite.color = Color::Rgba {
                         red: 1.0,
                         green: 1.0,
                         blue: 1.0,
@@ -868,7 +868,7 @@ pub fn buy_selection_button(
     mut ui_buttons: Query<&mut Visibility, With<UiOverlayingExplorerButton>>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
+        let mut _text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
                 //text.sections[0].value = "Buy".to_string();

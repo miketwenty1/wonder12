@@ -1,14 +1,13 @@
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
 use crate::{
-    consty::{MOVE_VELOCITY_FACTOR, TILE_SCALE},
+    consty::{MOVE_VELOCITY_FACTOR, THRESHOLD_FOR_PUSHBACK, TILE_SCALE},
     eventy::{ClearLastSelectedTile, EdgeEvent},
     resourcey::{Edge, LastSelectedTile, MaxBlockHeight},
 };
 
 use super::explore::set_camera_tile_bounds;
 
-const THRESHOLD_FOR_PUSHBACK: i32 = -5_0000;
 pub fn clear_last_selected_tile(
     mut clear_tile_event: EventReader<ClearLastSelectedTile>,
     mut last_selected_tile: ResMut<LastSelectedTile>,

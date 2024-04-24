@@ -12,7 +12,7 @@ pub fn spawn_waterwell(
     texture: &Handle<Image>,
     layout: &Handle<TextureAtlasLayout>,
     builder: &mut ChildBuilder,
-    color: LegacyColor,
+    color: Color,
     locationcoord: Location,
     visibility_toggle: Visibility,
     translation: Vec3,

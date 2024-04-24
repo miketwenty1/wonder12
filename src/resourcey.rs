@@ -14,7 +14,7 @@ use chrono::{DateTime, Utc};
 pub struct TileData {
     pub ln_address: String,
     pub username: String,
-    pub color: LegacyColor,
+    pub color: Color,
     pub message: String,
     pub resource: TileResource,
     pub hash: String,
@@ -74,14 +74,14 @@ pub struct TileCartData {
     pub event_date: Option<DateTime<Utc>>,
     pub ln_address: String,
     pub username: String,
-    pub color: Option<LegacyColor>,
+    pub color: Option<Color>,
     pub messages: Option<Vec<UserPurchasedBlockMessage>>,
     pub value: u32,
     pub cost: u32,
     pub height: u32,
     pub new_ln_address: String,
     pub new_username: String,
-    pub new_color: LegacyColor,
+    pub new_color: Color,
     pub new_color_text: String,
     pub new_message: String,
 }
@@ -165,7 +165,7 @@ pub enum TargetType {
 pub struct CurrentCartBlock {
     pub ln_address: String,
     pub color_text: String,
-    pub color: LegacyColor,
+    pub color: Color,
     pub message: String,
 }
 
@@ -174,6 +174,7 @@ pub struct InvoiceDataFromServer {
     pub invoice: String,
     pub expires: DateTime<Utc>,
     pub code: String,
+    pub nwc: Option<bool>,
 }
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
@@ -201,16 +202,16 @@ pub struct InitBlockCount(pub u32);
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct ColorPalette {
-    pub node_color: LegacyColor,
-    pub node_color_lighter: LegacyColor,
-    pub lite_button_color: LegacyColor,
-    pub button_color: LegacyColor,
-    pub accent_color: LegacyColor,
-    pub light_color: LegacyColor,
-    pub text_color: LegacyColor,
-    pub red_color: LegacyColor,
-    pub yellow_color: LegacyColor,
-    pub green_color: LegacyColor,
+    pub node_color: Color,
+    pub node_color_lighter: Color,
+    pub lite_button_color: Color,
+    pub button_color: Color,
+    pub accent_color: Color,
+    pub light_color: Color,
+    pub text_color: Color,
+    pub red_color: Color,
+    pub yellow_color: Color,
+    pub green_color: Color,
 }
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]

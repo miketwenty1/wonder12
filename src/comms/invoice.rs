@@ -134,7 +134,26 @@ pub fn api_receive_invoice(
                         let invoice = server_data.invoice.clone();
                         *invoice_data = server_data;
 
-                        qr_state.set(DisplayBuyUiState::Qr);
+                        let nwc = invoice_data.nwc;
+                        if nwc.is_some() {
+                            if nwc.unwrap() {
+                                toast.send(ToastEvent {
+                                    ttype: ToastType::Good,
+                                    message: "Verifying Nostr Wallet Connect Payment..."
+                                        .to_string(),
+                                });
+                            } else if !nwc.unwrap() {
+                                toast.send(ToastEvent {
+                                    ttype: ToastType::Bad,
+                                    message: "Could not attempt Nostr Wallet Connect Payment"
+                                        .to_string(),
+                                });
+                                qr_state.set(DisplayBuyUiState::Qr);
+                            }
+                        } else {
+                            qr_state.set(DisplayBuyUiState::Qr);
+                        }
+
                         api_name_set_state.set(CommsApiState::CheckInvoice);
                         // server_event.send(ServerInvoiceIn);
                         // qr_state.set(DisplayInvoiceQr::On);

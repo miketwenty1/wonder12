@@ -107,16 +107,16 @@ pub fn game12(
     numbers_map.insert(1048576, 10);
 
     let color_palette = ColorPalette {
-        node_color: LegacyColor::hex("222831").unwrap(),
-        node_color_lighter: LegacyColor::hex("353d48").unwrap(),
-        button_color: LegacyColor::hex("393E46").unwrap(),
-        lite_button_color: LegacyColor::hex("6A7382").unwrap(),
-        accent_color: LegacyColor::hex("00ADB5").unwrap(),
-        light_color: LegacyColor::hex("EEEEEE").unwrap(),
-        text_color: LegacyColor::hex("FAFAFA").unwrap(),
-        red_color: LegacyColor::hex("B50800").unwrap(),
-        yellow_color: LegacyColor::hex("ADB500").unwrap(),
-        green_color: LegacyColor::DARK_GREEN,
+        node_color: Color::hex("222831").unwrap(),
+        node_color_lighter: Color::hex("353d48").unwrap(),
+        button_color: Color::hex("393E46").unwrap(),
+        lite_button_color: Color::hex("6A7382").unwrap(),
+        accent_color: Color::hex("00ADB5").unwrap(),
+        light_color: Color::hex("EEEEEE").unwrap(),
+        text_color: Color::hex("FAFAFA").unwrap(),
+        red_color: Color::hex("B50800").unwrap(),
+        yellow_color: Color::hex("ADB500").unwrap(),
+        green_color: Color::DARK_GREEN,
     };
 
     let start_edge = Edge {
@@ -163,7 +163,7 @@ pub fn game12(
         .insert_resource(CurrentCartBlock {
             ln_address: ln_address.clone(),
             color_text: "".to_string(),
-            color: LegacyColor::DARK_GRAY, // this is just a place holder shouldn't be used.
+            color: Color::DARK_GRAY, // this is just a place holder shouldn't be used.
             message: "".to_string(),
         })
         .insert_resource(LastSelectedTile(1_000_000, 1_000_000))

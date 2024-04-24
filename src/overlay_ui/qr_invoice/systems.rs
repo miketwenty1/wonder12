@@ -188,7 +188,7 @@ pub fn expiration_text(
         if time_left < 10 {
             text.sections[0].style.color = colors.red_color
         } else if time_left < 20 {
-            text.sections[0].style.color = LegacyColor::YELLOW
+            text.sections[0].style.color = Color::YELLOW
         }
     }
 }

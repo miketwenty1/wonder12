@@ -79,7 +79,7 @@ pub fn select_tile(
                                 &texture_atlas.layout,
                                 &texture_atlas.texture,
                                 child_builder,
-                                LegacyColor::Rgba {
+                                Color::Rgba {
                                     red: 1.,
                                     green: 1.,
                                     blue: 1.,

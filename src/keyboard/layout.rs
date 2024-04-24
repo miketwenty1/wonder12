@@ -380,7 +380,7 @@ fn spawn_keyboard_row(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     row_keys: (&str, &str),
-    button_color: LegacyColor,
+    button_color: Color,
     font_size: f32,
     padding_size: f32,
     keyboard_row_justification: JustifyContent,
@@ -405,7 +405,7 @@ fn spawn_keyboard_row(
                 // },
                 ..Default::default()
             },
-            background_color: BackgroundColor(LegacyColor::BLACK),
+            background_color: BackgroundColor(Color::BLACK),
             ..Default::default()
         })
         .with_children(|builder| {
@@ -431,7 +431,7 @@ fn keyboard_button(
     font: Handle<Font>,
     key: char,
     alt_key: char,
-    button_color: LegacyColor,
+    button_color: Color,
     font_size: f32,
     padding_size: f32,
 ) {
@@ -488,7 +488,7 @@ fn keyboard_button(
                                 TextStyle {
                                     font,
                                     font_size,
-                                    color: LegacyColor::rgb(0.9, 0.9, 0.9),
+                                    color: Color::rgb(0.9, 0.9, 0.9),
                                 },
                             ),
                             KeyBoardButton(key, alt_key),

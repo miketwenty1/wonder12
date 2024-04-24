@@ -6,7 +6,7 @@ use crate::{
     },
     consty::MINIMUM_BLOCK_AMOUNT,
     eventy::UpdateUiAmount,
-    resourcey::{UserPurchasedBlockMessage, TileCart, TileCartData, WorldOwnedTileMap},
+    resourcey::{TileCart, TileCartData, UserPurchasedBlockMessage, WorldOwnedTileMap},
     utils::get_random_color,
 };
 
@@ -33,7 +33,7 @@ pub fn setup_amount_selected_text(mut commands: Commands, asset_server: Res<Asse
                     TextStyle {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: 40.0,
-                        color: LegacyColor::rgb(0.9, 0.9, 0.9),
+                        color: Color::rgb(0.9, 0.9, 0.9),
                     },
                 ),
                 AmountSelectedText(0),
@@ -60,8 +60,10 @@ pub fn update_amount_selected_text(
 
             // land exist and is owned by someone
             if let Some(val) = a {
-                let current_message = UserPurchasedBlockMessage { 
-                    username: val.username.clone(), value: val.value, message: val.message.clone() 
+                let current_message = UserPurchasedBlockMessage {
+                    username: val.username.clone(),
+                    value: val.value,
+                    message: val.message.clone(),
                 };
                 total_cost += val.cost;
                 tile_cart.map.insert(
@@ -86,7 +88,6 @@ pub fn update_amount_selected_text(
             } else {
                 //info!("{}", land.ulam);
                 total_cost += MINIMUM_BLOCK_AMOUNT;
-               
 
                 tile_cart.map.insert(
                     land.ulam,

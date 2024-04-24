@@ -8,7 +8,7 @@ pub fn spawn_road(
     texture: &Handle<Image>,
     layout: &Handle<TextureAtlasLayout>,
     builder: &mut ChildBuilder,
-    color: LegacyColor,
+    color: Color,
     locationcoord: Location,
     offset: usize,
     visibility: Visibility,
