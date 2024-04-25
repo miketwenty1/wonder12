@@ -403,6 +403,7 @@ pub fn spawn_layout(
                         20.0,
                         colors.node_color,
                         colors.text_color,
+                        colors.accent_color,
                     );
                     let mut message_node = builder.spawn((
                         NodeBundle {
@@ -881,6 +882,7 @@ fn current_message_title(
     font_size: f32,
     node_color: Color,
     text_color: Color,
+    accent_color: Color,
 ) {
     builder
         .spawn(NodeBundle {
@@ -905,7 +907,7 @@ fn current_message_title(
                             border: UiRect::all(Val::Px(1.0)),
                             ..default()
                         },
-                        border_color: BorderColor(Color::WHITE),
+                        border_color: BorderColor(accent_color),
                         background_color: BackgroundColor(node_color), //node_color
                         ..default()
                     },
@@ -913,7 +915,7 @@ fn current_message_title(
                 ))
                 .with_children(|innerbuilder| {
                     innerbuilder.spawn((TextBundle::from_section(
-                        "Msg Toggle",
+                        "Hide/Show",
                         TextStyle {
                             font: font.clone(),
                             font_size,

@@ -175,6 +175,7 @@ pub struct InvoiceDataFromServer {
     pub expires: DateTime<Utc>,
     pub code: String,
     pub nwc: Option<bool>,
+    pub error_msg: Option<String>,
 }
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]

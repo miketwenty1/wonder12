@@ -141,7 +141,8 @@ pub fn api_receive_invoice(
                 match r_result {
                     Ok(server_data) => {
                         let invoice = server_data.invoice.clone();
-                        *invoice_data = server_data;
+                        *invoice_data = server_data.clone();
+                        let temp_invoice_data = server_data;
 
                         let nwc = invoice_data.nwc;
                         if nwc.is_some() {
@@ -152,11 +153,19 @@ pub fn api_receive_invoice(
                                         .to_string(),
                                 });
                             } else if !nwc.unwrap() {
-                                toast.send(ToastEvent {
-                                    ttype: ToastType::Bad,
-                                    message: "Could not attempt Nostr Wallet Connect Payment"
-                                        .to_string(),
-                                });
+                                if temp_invoice_data.error_msg.is_some() {
+                                    let msg = temp_invoice_data.error_msg.unwrap();
+                                    toast.send(ToastEvent {
+                                        ttype: ToastType::Bad,
+                                        message: msg,
+                                    });
+                                } else {
+                                    toast.send(ToastEvent {
+                                        ttype: ToastType::Bad,
+                                        message: "Could not attempt Nostr Wallet Connect Payment"
+                                            .to_string(),
+                                    });
+                                }
                                 qr_state.set(DisplayBuyUiState::Qr);
                             }
                         } else {
@@ -425,8 +434,10 @@ pub fn show_backup_copy_btn(
                 match vall {
                     Ok(o) => {
                         info!("worked for html element {:#?}", o);
+                        // let cleaninvoice = invoice
+                        //     .strip_prefix("lightning:")
+                        //     .unwrap_or_else(|| invoice);
                         o.set_inner_text(invoice);
-
                         match document_btn {
                             Some(o) => {
                                 info!("btn found");

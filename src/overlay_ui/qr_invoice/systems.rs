@@ -58,6 +58,7 @@ pub fn clipboard_button_system(
         match *interaction {
             Interaction::Pressed => {
                 let invoice = invoice_res.invoice.to_string();
+
                 *color = colors.light_color.into();
 
                 if iphone.0 {
@@ -75,7 +76,9 @@ pub fn clipboard_button_system(
                                 info!("is_active? {}", is_active);
                                 let is_secure = window.is_secure_context();
                                 info!("is_secure_context? {}", is_secure);
-
+                                // let clean_invoice = invoice
+                                // .strip_prefix("lightning:")
+                                // .unwrap_or_else(|| &invoice);
                                 let p = a.write_text(&invoice);
 
                                 let result = wasm_bindgen_futures::JsFuture::from(p).await;
@@ -88,7 +91,7 @@ pub fn clipboard_button_system(
                                         info!("clipboard fail {:?}", e);
                                         let item_data = Object::new();
                                         let item_value = Blob::new_with_blob_sequence_and_options(
-                                            &Array::of1(&"clipboard test".into()),
+                                            &Array::of1(&invoice.into()),
                                             BlobPropertyBag::new().type_("text/plain"),
                                         )
                                         .unwrap();
