@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use bevy::{input::mouse::MouseMotion, prelude::*, text::Text2dBounds};
+use bevy::{
+    input::mouse::MouseMotion, math::Vec3A, prelude::*, render::primitives::Aabb,
+    text::Text2dBounds,
+};
 use rand::Rng;
 use ulam::Quad;
 
@@ -307,7 +310,7 @@ pub fn edge_system(
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
 ) {
     for edge_e in edge_event.read() {
-        info!("EDGE EVENT");
+        //info!("EDGE EVENT");
         for (block_entity, block_location) in blocks.iter() {
             if (block_location.y - edge_e.y).abs() > DESPAWN_TILE_THRESHOLD
                 || (block_location.x - edge_e.x).abs() > DESPAWN_TILE_THRESHOLD
@@ -318,9 +321,7 @@ pub fn edge_system(
                 chunk_map.map.remove(&ulam_i);
             }
         }
-
         //debug!("reached edge: {:?}", edge_e.edge_type);
-
         sprite_spawn_event.send(SpriteSpawnEvent);
         update_ui_amount_event.send(UpdateUiAmount);
     }
@@ -485,12 +486,11 @@ pub fn spawn_block_sprites(
                     };
 
                     cmd.with_children(|builder| {
-                        builder.spawn((
+                        let mut text_ent_cmd = builder.spawn((
                             Text2dBundle {
                                 text: Text {
                                     sections: vec![TextSection::new(
                                         tile_text,
-                                        //format!("{}", locationcoord.ulam),
                                         slightly_smaller_text_style.clone(),
                                     )],
                                     justify: JustifyText::Left,
@@ -508,6 +508,11 @@ pub fn spawn_block_sprites(
                             locationcoord,
                             TileText,
                         ));
+
+                        text_ent_cmd.insert(Aabb {
+                            center: Vec3A::ZERO,
+                            half_extents: Vec3A::ZERO,
+                        });
                     });
 
                     let building_color = sanitize_building_color(color_for_sprites);

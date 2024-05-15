@@ -106,6 +106,9 @@ pub fn game12(
     numbers_map.insert(262144, 10);
     numbers_map.insert(524288, 10);
     numbers_map.insert(1048576, 10);
+    numbers_map.insert(2097152, 10);
+    numbers_map.insert(4194304, 10);
+    numbers_map.insert(8388608, 10);
 
     let color_palette = ColorPalette {
         node_color: Color::hex("222831").unwrap(),

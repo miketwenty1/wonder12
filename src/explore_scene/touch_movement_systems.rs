@@ -62,11 +62,11 @@ pub fn touch_event_system(
             } else if ulam::value_of_xy(0, edge.top.tile) as i32 + THRESHOLD_FOR_PUSHBACK
                 > max_height.0 as i32
             {
-                Vec3::new(x as f32, -100.0, 0.0)
+                Vec3::new(0., -100.0, 0.0)
             } else if ulam::value_of_xy(edge.left.tile, 0) as i32 + THRESHOLD_FOR_PUSHBACK
                 > max_height.0 as i32
             {
-                Vec3::new(100.0, y as f32, 0.0)
+                Vec3::new(100.0, 0., 0.0)
             } else if ulam::value_of_xy(edge.right.tile, 0) as i32 + THRESHOLD_FOR_PUSHBACK
                 > max_height.0 as i32
             {

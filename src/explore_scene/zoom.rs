@@ -1,8 +1,8 @@
 use bevy::{input::mouse::MouseWheel, prelude::*};
 
 use crate::{
-    componenty::{TileText, ZoomInButton, ZoomOutButton},
-    consty::{TEXT_ZOOM_OUT_MAX, ZOOM_IN_MAX, ZOOM_OUT_MAX},
+    componenty::{BuildingStructure, TileText, ZoomInButton, ZoomOutButton},
+    consty::{BUILDING_ZOOM_OUT_MAX, TEXT_ZOOM_OUT_MAX, ZOOM_IN_MAX, ZOOM_OUT_MAX},
     resourcey::{ColorPalette, ToggleMap},
     utils::distance_between_vecs,
 };
@@ -199,26 +199,70 @@ pub fn pinch_system(
     }
 }
 
+#[allow(clippy::type_complexity)]
 pub fn cam_ortho_scale_text_visibility(
     cam_query: Query<&OrthographicProjection, (With<Camera>, Changed<OrthographicProjection>)>,
     mut text_q: Query<&mut Visibility, With<TileText>>,
+    mut building_q: Query<&mut Visibility, (With<BuildingStructure>, Without<TileText>)>,
+    // mut land_q: Query<&mut Visibility, (With<Land>, Without<TileText>, Without<BuildingStructure>)>,
     toggle_map: Res<ToggleMap>,
 ) {
-    let show_toggle = toggle_map.0.get("showtext").unwrap(); // true here means hide it, false means show it - no need to hide text if it's already hidden
+    let show_text_toggle = toggle_map.0.get("showtext").unwrap(); // true here means hide it, false means show it - no need to hide text if it's already hidden
+    let show_building_toggle = toggle_map.0.get("showbuildings").unwrap();
     let cam = cam_query.get_single();
     if let Ok(ortho) = cam {
-        if *show_toggle || ortho.scale >= TEXT_ZOOM_OUT_MAX {
+        // text
+        if *show_text_toggle || ortho.scale >= TEXT_ZOOM_OUT_MAX {
             for mut text_visibility in text_q.iter_mut() {
                 if *text_visibility == Visibility::Visible {
                     *text_visibility = Visibility::Hidden;
                 }
             }
         } else if ortho.scale < TEXT_ZOOM_OUT_MAX {
+            // despawn everything outside of camera view.
             for mut text_visibility in text_q.iter_mut() {
                 if *text_visibility == Visibility::Hidden {
                     *text_visibility = Visibility::Visible;
                 }
             }
         }
+
+        // buildings
+        if *show_building_toggle || ortho.scale >= BUILDING_ZOOM_OUT_MAX {
+            for mut building_visibility in building_q.iter_mut() {
+                if *building_visibility == Visibility::Visible {
+                    *building_visibility = Visibility::Hidden;
+                }
+            }
+        } else if ortho.scale < BUILDING_ZOOM_OUT_MAX {
+            for mut building_visibility in building_q.iter_mut() {
+                if *building_visibility == Visibility::Hidden {
+                    *building_visibility = Visibility::Visible;
+                }
+            }
+        }
+
+        // // land
+        // if ortho.scale >= BUILDING_ZOOM_OUT_MAX {
+        //     info!("this working greater");
+        //     for mut land_visibility in land_q.iter_mut() {
+        //         info!("land visibility: {:?}", land_visibility);
+        //         if *land_visibility == Visibility::Visible
+        //             || *land_visibility == Visibility::Inherited
+        //         {
+        //             info!("GREATER land visibility: {:?}", land_visibility);
+        //             *land_visibility = Visibility::Hidden;
+        //         }
+        //     }
+        // } else if ortho.scale < BUILDING_ZOOM_OUT_MAX {
+        //     info!("this working inner");
+        //     for mut land_visibility in land_q.iter_mut() {
+        //         info!("land visibility: {:?}", land_visibility);
+        //         if *land_visibility == Visibility::Hidden {
+        //             info!("INNER land visibility: {:?}", land_visibility);
+        //             *land_visibility = Visibility::Visible;
+        //         }
+        //     }
+        // }
     }
 }

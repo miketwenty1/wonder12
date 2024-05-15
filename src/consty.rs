@@ -6,7 +6,7 @@ pub const TILE_PIXEL_SIZE: f32 = 32.0;
 //const TILE_PADDING_SIZE: f32 = 0.0;
 pub const TOTAL_TILE_SCALE_SIZE: f32 = TILE_PIXEL_SIZE * TILE_SCALE + 4.0;
 pub const CHUNK_TILE_SPAN_COUNT: i32 = (CHUNK_PIXEL_SIZE / TOTAL_TILE_SCALE_SIZE) as i32;
-pub const DESPAWN_TILE_THRESHOLD: i32 = 51 + CHUNK_TILE_SPAN_COUNT * 16;
+pub const DESPAWN_TILE_THRESHOLD: i32 = 51 + CHUNK_TILE_SPAN_COUNT * 40;
 pub const CAMERA_SANITY_FACTOR: f32 = 1.25;
 pub const MOVE_VELOCITY_FACTOR: f32 = 20.0;
 
@@ -28,7 +28,8 @@ pub const DEFAULT_NO_PICK_COLOR: Color = Color::Rgba {
 
 pub const ZOOM_IN_MAX: f32 = 0.25;
 pub const TEXT_ZOOM_OUT_MAX: f32 = 3.0;
-pub const ZOOM_OUT_MAX: f32 = 10.0;
+pub const BUILDING_ZOOM_OUT_MAX: f32 = 7.0;
+pub const ZOOM_OUT_MAX: f32 = 12.0;
 
 pub const DARKEST_BUILDING: Color = Color::Rgba {
     red: 0.15,
