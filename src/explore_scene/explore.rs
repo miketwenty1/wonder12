@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use bevy::{
     input::mouse::MouseMotion, math::Vec3A, prelude::*, render::primitives::Aabb,
-    text::Text2dBounds,
+    sprite::MaterialMesh2dBundle, text::Text2dBounds,
 };
 use rand::Rng;
 use ulam::Quad;
@@ -11,12 +11,15 @@ use crate::{
     building_config::{spawn_tile_level, utils::sanitize_building_color},
     componenty::{
         AnimationIndices, AnimationTimer, BuildingStructure, BuySelectionButton,
-        ClearSelectionButton, InitLoadingNode, InitLoadingText, Land, Location, Selected, TileText,
-        UiNode, UiOverlayingExplorerButton, UiTileSelectedButton, ZoomInButton, ZoomOutButton,
+        ClearSelectionButton, DrawOverlayMesh, InitLoadingNode, InitLoadingText, Land, Location,
+        Selected, TileText, UiNode, UiOverlayingExplorerButton, UiTileSelectedButton, ZoomInButton,
+        ZoomOutButton,
     },
     consty::{
-        CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT, DESPAWN_TILE_THRESHOLD,
-        MAX_SELECTION_SIZE, TEXT_ZOOM_OUT_MAX, TILE_SCALE, TOTAL_TILE_SCALE_SIZE,
+        BUILDING_ZOOM_OUT_MAX, CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT,
+        DESPAWN_TILE_THRESHOLD, MAX_SELECTION_SIZE, TEXT_ZOOM_OUT_MAX, TILE_SCALE,
+        TOTAL_TILE_SCALE_SIZE, UI_LARGE_BUTTON_HEIGHT, UI_LARGE_BUTTON_WIDTH, UI_LARGE_TEXT_SIZE,
+        UI_MEDIUM_TEXT_SIZE,
     },
     eventy::{
         ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
@@ -46,6 +49,7 @@ pub fn reset_mouse(
     motion.clear();
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn init_explorer(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -53,6 +57,8 @@ pub fn init_explorer(
     initblocks: Res<InitBlockCount>,
     colors: Res<ColorPalette>,
     mut loading_init_block_text: ResMut<NextState<InitLoadingBlocksState>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     info!("initblockcount: {}", initblocks.0);
 
@@ -78,8 +84,8 @@ pub fn init_explorer(
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(100.0),
-                            height: Val::Px(65.0),
+                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
@@ -101,7 +107,7 @@ pub fn init_explorer(
                         "Clear",
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 30.0,
+                            font_size: UI_MEDIUM_TEXT_SIZE,
                             color: colors.text_color,
                         },
                     ));
@@ -111,8 +117,8 @@ pub fn init_explorer(
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(100.0),
-                            height: Val::Px(65.0),
+                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
@@ -132,7 +138,7 @@ pub fn init_explorer(
                         "-",
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 40.0,
+                            font_size: UI_LARGE_TEXT_SIZE,
                             color: colors.text_color,
                         },
                     ));
@@ -141,8 +147,8 @@ pub fn init_explorer(
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(100.0),
-                            height: Val::Px(65.0),
+                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
@@ -159,10 +165,10 @@ pub fn init_explorer(
                 ))
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section(
-                        "+bo",
+                        "+",
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 40.0,
+                            font_size: UI_LARGE_TEXT_SIZE,
                             color: colors.text_color,
                         },
                     ));
@@ -171,8 +177,8 @@ pub fn init_explorer(
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(100.0),
-                            height: Val::Px(65.0),
+                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
@@ -194,11 +200,26 @@ pub fn init_explorer(
                         "Buy",
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 30.0,
+                            font_size: UI_MEDIUM_TEXT_SIZE,
                             color: colors.text_color,
                         },
                     ));
                 });
+            parent.spawn((
+                MaterialMesh2dBundle {
+                    mesh: meshes.add(Rectangle::default()).into(),
+                    transform: Transform::default().with_scale(Vec3::splat(9999999999.)),
+                    material: materials.add(Color::Rgba {
+                        red: 0.2,
+                        green: 0.2,
+                        blue: 0.2,
+                        alpha: 0.65,
+                    }),
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                DrawOverlayMesh,
+            ));
         });
 
     // this is the same text as below but outlined
@@ -358,6 +379,13 @@ pub fn spawn_block_sprites(
                 Visibility::Visible
             };
 
+        let visibility_setting =
+            if *toggle_map.0.get("showbuildings").unwrap() || zoom_level >= BUILDING_ZOOM_OUT_MAX {
+                Visibility::Hidden
+            } else {
+                Visibility::Visible
+            };
+
         let middle_y = (edge.top.tile + edge.bottom.tile) / 2;
         let middle_x = (edge.left.tile + edge.right.tile) / 2;
         //info!("middle x: {}, middle y: {}", middle_x, middle_y);
@@ -479,11 +507,6 @@ pub fn spawn_block_sprites(
                     };
 
                     // SPAWN building visibility based on toggle
-                    let visibility_setting = if *toggle_map.0.get("showbuildings").unwrap() {
-                        Visibility::Hidden
-                    } else {
-                        Visibility::Visible
-                    };
 
                     cmd.with_children(|builder| {
                         let mut text_ent_cmd = builder.spawn((

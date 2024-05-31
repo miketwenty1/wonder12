@@ -1,18 +1,13 @@
 use bevy::prelude::*;
 
-const FONT_PARENT_SIZE: f32 = 22.0;
-const PARENT_BTN_WIDTH: f32 = 95.0;
-const PARENT_BTN_HEIGHT: f32 = 60.0;
-
-const FONT_CHILD_SIZE: f32 = 20.0;
-const CHILD_BTN_WIDTH: f32 = 90.0;
-const CHILD_BTN_HEIGHT: f32 = 60.0;
-
 use crate::{
     componenty::{
-        GoToBtn, HideBuilding, HideText, HideTextText, ShowColors, ShowValues, Toggle1Btn,
+        DrawBtn, GoToBtn, HideBuilding, HideText, HideTextText, ShowColors, ShowValues, Toggle1Btn,
         Toggle1BtnText, Toggle2Btn, Toggle2BtnText, Toggle3Btn, Toggle3BtnText, Toggle4Btn,
         Toggle4BtnText, ToggleButton, ToggleParent, UiOverlayingExplorerButton, UiSideNode,
+    },
+    consty::{
+        UI_LARGE_BUTTON_HEIGHT, UI_LARGE_BUTTON_WIDTH, UI_MEDIUM_TEXT_SIZE, UI_SMALL_TEXT_SIZE,
     },
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
     resourcey::{ColorPalette, ToggleMap, ToggleVisible},
@@ -39,14 +34,48 @@ pub fn setup_side_ui(
         UiSideNode,
     ));
 
+    side_parent.with_children(|parent| {
+        parent
+            .spawn((
+                ButtonBundle {
+                    style: Style {
+                        width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+                        border: UiRect::all(Val::Px(2.0)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    border_color: BorderColor(colors.text_color),
+                    background_color: colors.button_color.into(),
+                    visibility: Visibility::Visible,
+                    ..default()
+                },
+                DrawBtn,
+                UiOverlayingExplorerButton,
+            ))
+            .with_children(|parent| {
+                parent.spawn(ImageBundle {
+                    style: Style {
+                        height: Val::Px(23.0),
+                        width: Val::Px(23.0),
+                        ..default()
+                    },
+                    image: UiImage::new(asset_server.load("ui/pencil60x60.png")),
+                    ..default()
+                });
+            });
+    });
     // goto button
     side_parent.with_children(|parent| {
         parent
             .spawn((
                 ButtonBundle {
                     style: Style {
-                        width: Val::Px(PARENT_BTN_WIDTH),
-                        height: Val::Px(PARENT_BTN_HEIGHT),
+                        width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
                         border: UiRect::all(Val::Px(2.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
@@ -67,7 +96,7 @@ pub fn setup_side_ui(
                     "Go To",
                     TextStyle {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                        font_size: FONT_PARENT_SIZE,
+                        font_size: UI_MEDIUM_TEXT_SIZE,
                         color: colors.text_color,
                     },
                 ));
@@ -79,8 +108,8 @@ pub fn setup_side_ui(
             .spawn((
                 ButtonBundle {
                     style: Style {
-                        width: Val::Px(PARENT_BTN_WIDTH),
-                        height: Val::Px(PARENT_BTN_HEIGHT),
+                        width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
                         border: UiRect::all(Val::Px(2.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
@@ -101,7 +130,7 @@ pub fn setup_side_ui(
                     "Toggle",
                     TextStyle {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                        font_size: FONT_PARENT_SIZE,
+                        font_size: UI_MEDIUM_TEXT_SIZE,
                         color: colors.text_color,
                     },
                 ));
@@ -110,8 +139,8 @@ pub fn setup_side_ui(
             .spawn((
                 ButtonBundle {
                     style: Style {
-                        width: Val::Px(CHILD_BTN_WIDTH),
-                        height: Val::Px(CHILD_BTN_HEIGHT),
+                        width: Val::Px(UI_LARGE_BUTTON_WIDTH * 0.94),
+                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT * 0.94),
                         border: UiRect::all(Val::Px(5.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
@@ -135,7 +164,7 @@ pub fn setup_side_ui(
                         "Hide Buildings",
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: FONT_CHILD_SIZE,
+                            font_size: UI_SMALL_TEXT_SIZE,
                             color: colors.text_color,
                         },
                     ),
@@ -146,8 +175,8 @@ pub fn setup_side_ui(
             .spawn((
                 ButtonBundle {
                     style: Style {
-                        width: Val::Px(CHILD_BTN_WIDTH),
-                        height: Val::Px(CHILD_BTN_HEIGHT),
+                        width: Val::Px(UI_LARGE_BUTTON_WIDTH * 0.94),
+                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT * 0.94),
                         border: UiRect::all(Val::Px(5.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
@@ -171,7 +200,7 @@ pub fn setup_side_ui(
                         "Hide Colors",
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: FONT_CHILD_SIZE,
+                            font_size: UI_SMALL_TEXT_SIZE,
                             color: colors.text_color,
                         },
                     ),
@@ -183,8 +212,8 @@ pub fn setup_side_ui(
             .spawn((
                 ButtonBundle {
                     style: Style {
-                        width: Val::Px(CHILD_BTN_WIDTH),
-                        height: Val::Px(CHILD_BTN_HEIGHT),
+                        width: Val::Px(UI_LARGE_BUTTON_WIDTH * 0.94),
+                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT * 0.94),
                         border: UiRect::all(Val::Px(5.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
@@ -208,7 +237,7 @@ pub fn setup_side_ui(
                         "Show Values",
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: FONT_CHILD_SIZE,
+                            font_size: UI_SMALL_TEXT_SIZE,
                             color: colors.text_color,
                         },
                     ),
@@ -219,8 +248,8 @@ pub fn setup_side_ui(
             .spawn((
                 ButtonBundle {
                     style: Style {
-                        width: Val::Px(CHILD_BTN_WIDTH),
-                        height: Val::Px(CHILD_BTN_HEIGHT),
+                        width: Val::Px(UI_LARGE_BUTTON_WIDTH * 0.94),
+                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT * 0.94),
                         border: UiRect::all(Val::Px(5.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
@@ -244,7 +273,7 @@ pub fn setup_side_ui(
                         "Hide Text",
                         TextStyle {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: FONT_CHILD_SIZE,
+                            font_size: UI_SMALL_TEXT_SIZE,
                             color: colors.text_color,
                         },
                     ),

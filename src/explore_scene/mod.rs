@@ -4,10 +4,11 @@ pub mod explore;
 pub mod explorer_overlay_system;
 pub mod go_to_systems;
 pub mod mouse_movement_systems;
+pub mod pencil;
 pub mod selection;
-pub mod side_ui;
 pub mod touch_movement_systems;
 pub mod travel;
+pub mod ui;
 pub mod update_after_purchase;
 pub mod update_toggle_events;
 pub mod zoom;
@@ -31,13 +32,14 @@ use self::{
     explorer_overlay_system::{clear_last_selected_tile_ui_button, init_block_loading_text},
     go_to_systems::go_to_button_system,
     mouse_movement_systems::{clear_last_selected_tile, desktop_movement_camera_system},
+    pencil::draw_button_system,
     selection::{choose_tile, select_tile},
-    side_ui::{
+    touch_movement_systems::touch_event_system,
+    travel::travel_event,
+    ui::ui_right::{
         setup_side_ui, toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
         toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4, toggle_button_system,
     },
-    touch_movement_systems::touch_event_system,
-    travel::travel_event,
     update_after_purchase::update_tiles_after_purchase,
     update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
     zoom::{
@@ -94,6 +96,7 @@ impl Plugin for ExplorePlugin {
                     clear_selection,
                     clear_last_selected_tile,
                     clear_last_selected_tile_ui_button,
+                    draw_button_system,
                     go_to_button_system,
                 )
                     .run_if(in_state(ExploreState::On)),

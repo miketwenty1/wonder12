@@ -80,7 +80,6 @@ pub fn zoom_in_button_system(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut touches: ResMut<Touches>,
     mut mouse_wheel_events: EventReader<MouseWheel>,
-    //mut touch: ResMut<Touches>, // need a clear method or a clear fn work around
     mut interaction_query: Query<
         (
             &Interaction,
@@ -105,7 +104,7 @@ pub fn zoom_in_button_system(
             Interaction::Pressed => {
                 // for mobile keep eye on https://github.com/bevyengine/bevy/pull/10930
                 //clear_last_selected.send(ClearLastSelectedTile);
-                mouse.clear(); //.clear_just_pressed(MouseButton::Left);
+                mouse.clear();
                 touches.clear();
                 text.sections[0].value = "+".to_string();
                 *color = colors.button_color.into();
@@ -138,7 +137,6 @@ pub fn zoom_in_button_system(
             if ortho.scale < ZOOM_IN_MAX {
                 ortho.scale = ZOOM_IN_MAX;
             }
-            //info!("{}", ortho.scale);
         }
     }
 }
@@ -172,7 +170,6 @@ pub fn pinch_system(
                                 info!("zooming in");
                             }
                         }
-
                         *multitouch_distance = diff2;
                     }
                 }
@@ -241,28 +238,5 @@ pub fn cam_ortho_scale_text_visibility(
                 }
             }
         }
-
-        // // land
-        // if ortho.scale >= BUILDING_ZOOM_OUT_MAX {
-        //     info!("this working greater");
-        //     for mut land_visibility in land_q.iter_mut() {
-        //         info!("land visibility: {:?}", land_visibility);
-        //         if *land_visibility == Visibility::Visible
-        //             || *land_visibility == Visibility::Inherited
-        //         {
-        //             info!("GREATER land visibility: {:?}", land_visibility);
-        //             *land_visibility = Visibility::Hidden;
-        //         }
-        //     }
-        // } else if ortho.scale < BUILDING_ZOOM_OUT_MAX {
-        //     info!("this working inner");
-        //     for mut land_visibility in land_q.iter_mut() {
-        //         info!("land visibility: {:?}", land_visibility);
-        //         if *land_visibility == Visibility::Hidden {
-        //             info!("INNER land visibility: {:?}", land_visibility);
-        //             *land_visibility = Visibility::Visible;
-        //         }
-        //     }
-        // }
     }
 }

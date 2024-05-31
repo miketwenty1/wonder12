@@ -41,7 +41,9 @@ use resourcey::{
     Nwc, ToggleVisible, UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
-use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
+use statey::{
+    CommsApiBlockLoadState, CommsApiInventoryState, DrawState, InitLoadingBlocksState, ToastState,
+};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlCanvasElement;
@@ -193,6 +195,7 @@ pub fn game12(
         .insert_resource(InitGameMap { height: 0 })
         .init_resource::<InvoiceDataFromServer>()
         .init_resource::<InvoiceCheckFromServer>()
+        //.init_resource::<DrawState>()
         .insert_resource(WinSize {
             width: viewport_width as f32,
             height: viewport_height as f32,
@@ -228,6 +231,7 @@ pub fn game12(
         .init_state::<InventoryUiState>()
         .init_state::<BrowserStorageState>()
         .init_state::<GoToUiState>()
+        .init_state::<DrawState>()
         .add_plugins((
             CommsPlugin,
             OverlayUiPlugin,

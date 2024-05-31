@@ -39,3 +39,9 @@ pub const DARKEST_BUILDING: Color = Color::Rgba {
 };
 
 pub const MAX_SELECTION_SIZE: usize = 100;
+
+pub const UI_SMALL_TEXT_SIZE: f32 = 15.0;
+pub const UI_MEDIUM_TEXT_SIZE: f32 = 20.0;
+pub const UI_LARGE_TEXT_SIZE: f32 = 30.0;
+pub const UI_LARGE_BUTTON_WIDTH: f32 = 75.0;
+pub const UI_LARGE_BUTTON_HEIGHT: f32 = 45.0;

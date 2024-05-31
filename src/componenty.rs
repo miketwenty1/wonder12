@@ -13,6 +13,9 @@ pub struct UiOverlayingExplorerButton;
 pub struct GoToBtn;
 
 #[derive(Component)]
+pub struct DrawBtn;
+
+#[derive(Component)]
 pub struct UiTileSelectedButton;
 
 #[derive(Component)]
@@ -242,3 +245,6 @@ pub struct InitLoadingText;
 
 #[derive(Component)]
 pub struct BtnShowingColor;
+
+#[derive(Component)]
+pub struct DrawOverlayMesh;
