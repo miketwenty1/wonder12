@@ -12,14 +12,12 @@ use crate::{
     componenty::{
         AnimationIndices, AnimationTimer, BuildingStructure, BuySelectionButton,
         ClearSelectionButton, DrawOverlayMesh, InitLoadingNode, InitLoadingText, Land, Location,
-        Selected, TileText, UiNode, UiOverlayingExplorerButton, UiTileSelectedButton, ZoomInButton,
-        ZoomOutButton,
+        Selected, SelectedTileUi, TileText, UiNode, UiOverlayingExplorerButton,
     },
     consty::{
         BUILDING_ZOOM_OUT_MAX, CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT,
         DESPAWN_TILE_THRESHOLD, MAX_SELECTION_SIZE, TEXT_ZOOM_OUT_MAX, TILE_SCALE,
-        TOTAL_TILE_SCALE_SIZE, UI_LARGE_BUTTON_HEIGHT, UI_LARGE_BUTTON_WIDTH, UI_LARGE_TEXT_SIZE,
-        UI_MEDIUM_TEXT_SIZE,
+        TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
         ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
@@ -80,131 +78,132 @@ pub fn init_explorer(
             UiNode,
         ))
         .with_children(|parent| {
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                            border: UiRect::all(Val::Px(5.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(colors.button_color),
-                        background_color: colors.button_color.into(),
-                        visibility: Visibility::Hidden,
-                        ..default()
-                    },
-                    ClearSelectionButton,
-                    UiTileSelectedButton,
-                    UiOverlayingExplorerButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Clear",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: UI_MEDIUM_TEXT_SIZE,
-                            color: colors.text_color,
-                        },
-                    ));
-                });
+            // .with_children(|parent| {
+            //     parent
+            //         .spawn((
+            //             ButtonBundle {
+            //                 style: Style {
+            //                     width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+            //                     height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+            //                     border: UiRect::all(Val::Px(5.0)),
+            //                     // horizontally center child text
+            //                     justify_content: JustifyContent::Center,
+            //                     // vertically center child text
+            //                     align_items: AlignItems::Center,
+            //                     ..default()
+            //                 },
+            //                 border_color: BorderColor(colors.button_color),
+            //                 background_color: colors.button_color.into(),
+            //                 visibility: Visibility::Hidden,
+            //                 ..default()
+            //             },
+            //             ClearSelectionButton,
+            //             UiTileSelectedButton,
+            //             UiOverlayingExplorerButton,
+            //         ))
+            //         .with_children(|parent| {
+            //             parent.spawn(TextBundle::from_section(
+            //                 "Clear",
+            //                 TextStyle {
+            //                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+            //                     font_size: UI_MEDIUM_TEXT_SIZE,
+            //                     color: colors.text_color,
+            //                 },
+            //             ));
+            //         });
 
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                            border: UiRect::all(Val::Px(5.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(colors.node_color),
-                        background_color: colors.button_color.into(),
-                        ..default()
-                    },
-                    ZoomOutButton,
-                    UiOverlayingExplorerButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "-",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: UI_LARGE_TEXT_SIZE,
-                            color: colors.text_color,
-                        },
-                    ));
-                });
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                            border: UiRect::all(Val::Px(5.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(colors.node_color),
-                        background_color: colors.button_color.into(),
-                        ..default()
-                    },
-                    ZoomInButton,
-                    UiOverlayingExplorerButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "+",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: UI_LARGE_TEXT_SIZE,
-                            color: colors.text_color,
-                        },
-                    ));
-                });
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                            border: UiRect::all(Val::Px(5.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: colors.button_color.into(),
-                        visibility: Visibility::Hidden,
-                        ..default()
-                    },
-                    UiOverlayingExplorerButton,
-                    BuySelectionButton,
-                    UiTileSelectedButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Buy",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: UI_MEDIUM_TEXT_SIZE,
-                            color: colors.text_color,
-                        },
-                    ));
-                });
+            //     parent
+            //         .spawn((
+            //             ButtonBundle {
+            //                 style: Style {
+            //                     width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+            //                     height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+            //                     border: UiRect::all(Val::Px(5.0)),
+            //                     // horizontally center child text
+            //                     justify_content: JustifyContent::Center,
+            //                     // vertically center child text
+            //                     align_items: AlignItems::Center,
+            //                     ..default()
+            //                 },
+            //                 border_color: BorderColor(colors.node_color),
+            //                 background_color: colors.button_color.into(),
+            //                 ..default()
+            //             },
+            //             ZoomOutButton,
+            //             UiOverlayingExplorerButton,
+            //         ))
+            //         .with_children(|parent| {
+            //             parent.spawn(TextBundle::from_section(
+            //                 "-",
+            //                 TextStyle {
+            //                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+            //                     font_size: UI_LARGE_TEXT_SIZE,
+            //                     color: colors.text_color,
+            //                 },
+            //             ));
+            //         });
+            //     parent
+            //         .spawn((
+            //             ButtonBundle {
+            //                 style: Style {
+            //                     width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+            //                     height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+            //                     border: UiRect::all(Val::Px(5.0)),
+            //                     // horizontally center child text
+            //                     justify_content: JustifyContent::Center,
+            //                     // vertically center child text
+            //                     align_items: AlignItems::Center,
+            //                     ..default()
+            //                 },
+            //                 border_color: BorderColor(colors.node_color),
+            //                 background_color: colors.button_color.into(),
+            //                 ..default()
+            //             },
+            //             ZoomInButton,
+            //             UiOverlayingExplorerButton,
+            //         ))
+            //         .with_children(|parent| {
+            //             parent.spawn(TextBundle::from_section(
+            //                 "+",
+            //                 TextStyle {
+            //                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+            //                     font_size: UI_LARGE_TEXT_SIZE,
+            //                     color: colors.text_color,
+            //                 },
+            //             ));
+            //         });
+            //     parent
+            //         .spawn((
+            //             ButtonBundle {
+            //                 style: Style {
+            //                     width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+            //                     height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+            //                     border: UiRect::all(Val::Px(5.0)),
+            //                     // horizontally center child text
+            //                     justify_content: JustifyContent::Center,
+            //                     // vertically center child text
+            //                     align_items: AlignItems::Center,
+            //                     ..default()
+            //                 },
+            //                 border_color: BorderColor(Color::BLACK),
+            //                 background_color: colors.button_color.into(),
+            //                 visibility: Visibility::Hidden,
+            //                 ..default()
+            //             },
+            //             UiOverlayingExplorerButton,
+            //             BuySelectionButton,
+            //             UiTileSelectedButton,
+            //         ))
+            //         .with_children(|parent| {
+            //             parent.spawn(TextBundle::from_section(
+            //                 "Buy",
+            //                 TextStyle {
+            //                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+            //                     font_size: UI_MEDIUM_TEXT_SIZE,
+            //                     color: colors.text_color,
+            //                 },
+            //             ));
+            //         });
             parent.spawn((
                 MaterialMesh2dBundle {
                     mesh: meshes.add(Rectangle::default()).into(),
@@ -853,7 +852,7 @@ pub fn clear_selection_button(
 pub fn clear_selection(
     mut selected_q: Query<Entity, (With<Selected>, Without<Land>, Without<BuildingStructure>)>,
     mut selected_lands_q: Query<&mut Location>,
-    mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
+    mut tile_selected_button_q: Query<&mut Visibility, With<SelectedTileUi>>,
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
     mut commands: Commands,
     mut clear_event: EventReader<ClearSelectionEvent>,

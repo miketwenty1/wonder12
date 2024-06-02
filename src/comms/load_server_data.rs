@@ -4,7 +4,7 @@ use crate::async_resource_comm_channels::TileDataChannel;
 use crate::browser::event::WriteLocalBrowserStorage;
 use crate::comms::server_structs::UserGameBlock;
 use crate::eventy::{DespawnInventoryHeights, RequestTileUpdates};
-use crate::overlay_ui::inventory::event::AddInventoryRow;
+use crate::explore_scene::ui::inventory::event::AddInventoryRow;
 use crate::overlay_ui::toast::{ToastEvent, ToastType};
 use crate::resourcey::{
     CheckpointTimetamp, InitGameMap, TileData, UpdateGameTimetamp, UserInventoryBlocks,
@@ -240,6 +240,7 @@ pub fn api_receive_server_tiles(
                                 .send(DespawnInventoryHeights(remove_inventory_holder));
                         }
                         if !add_inventory_holder.is_empty() {
+                            info!("am i making it to line 243? {:#?}", add_inventory_holder);
                             spawn_inventory.send(AddInventoryRow(add_inventory_holder));
                         }
                         // // // inventory update code

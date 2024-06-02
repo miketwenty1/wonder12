@@ -2,7 +2,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 
 use crate::{
     building_config::spawn_tile_level,
-    componenty::{BuildingStructure, Land, Location, Selected, UiTileSelectedButton},
+    componenty::{BuildingStructure, Land, Location, Selected, SelectedTileUi},
     consty::{MAX_SELECTION_SIZE, TOTAL_TILE_SCALE_SIZE},
     eventy::{SelectTileEvent, UpdateUiAmount},
     overlay_ui::toast::{ToastEvent, ToastType},
@@ -61,7 +61,7 @@ pub fn select_tile(
         (With<Selected>, Without<Land>, Without<BuildingStructure>),
     >,
     mut last_selected_tile: ResMut<LastSelectedTile>,
-    mut tile_selected_button_q: Query<&mut Visibility, With<UiTileSelectedButton>>,
+    mut tile_selected_button_q: Query<&mut Visibility, With<SelectedTileUi>>,
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
     mut toast: EventWriter<ToastEvent>,
 ) {

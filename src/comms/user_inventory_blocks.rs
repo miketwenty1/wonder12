@@ -1,7 +1,7 @@
 use super::api_timer::ApiPollingTimer;
 use crate::async_resource_comm_channels::UserBlockInventoryChannel;
 use crate::eventy::RequestInventoryEvent;
-use crate::overlay_ui::inventory::state::InventoryUiState;
+use crate::explore_scene::ui::inventory::state::InventoryUiState;
 use crate::overlay_ui::toast::{ToastEvent, ToastType};
 use crate::resourcey::UserInventoryBlocks;
 use crate::statey::CommsApiInventoryState;

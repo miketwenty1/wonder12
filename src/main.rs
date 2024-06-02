@@ -34,8 +34,8 @@ use eventy::{
     MessageReceivedFromServer, NumberKeyboardSpawnEvent, RequestInventoryEvent, ShowBackupCopyBtn,
     TravelHeight, UpdateTilesAfterPurchase,
 };
+use explore_scene::ui::inventory::state::InventoryUiState;
 use overlay_ui::go_to::state::GoToUiState;
-use overlay_ui::inventory::state::InventoryUiState;
 use resourcey::{
     CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, MultiTouchInfo,
     Nwc, ToggleVisible, UserInventoryBlocks, WinSize,

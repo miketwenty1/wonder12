@@ -8,10 +8,8 @@ use crate::{
         BuyBlockRequest, ClearSelectionEvent, HideBackupCopyBtn, ShowBackupCopyBtn,
         UpdateTilesAfterPurchase,
     },
-    overlay_ui::{
-        inventory::event::AddInventoryRow,
-        toast::{ToastEvent, ToastType},
-    },
+    explore_scene::ui::inventory::event::AddInventoryRow,
+    overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, Nwc, TileCartVec, User},
     statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState},
     structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},

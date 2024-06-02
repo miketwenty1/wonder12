@@ -42,7 +42,7 @@ pub fn setup_keyboard(
                 ("@1234567890-=⌫", "@!#$%[]&*()_+⌫"),
                 ("qwertyuiop", "QWERTYUIOP"),
                 ("⇧asdfghjkl:'", "⬆ASDFGHJKL;\""),
-                ("zxcvbnm,.?", "ZXCVBNM<>?"),
+                ("zxcvbnm,.?", "ZXCVBNM<>/"),
                 (" ", " "),
             ];
 

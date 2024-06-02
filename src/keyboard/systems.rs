@@ -14,7 +14,7 @@ use super::{
 // const ACCEPTABLE_CHARS: &str =
 //     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 const ACCEPTABLE_CHARS: &str =
-    "1234567890=⌫!#$%*&'@()[]+-_,.:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz⇧⬆\" ";
+    "1234567890=⌫!#$%*&'@()[]+-_,.:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz⇧⬆/\" ";
 const ACCEPTABLE_NUMBER_CHARS: &str = "1234567890⌫";
 const MAX_INPUT_LENGTH: usize = 140;
 const MAX_INPUT_FOR_HEIGHT: usize = 7;

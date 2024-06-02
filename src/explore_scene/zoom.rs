@@ -19,7 +19,7 @@ pub fn zoom_out_button_system(
             &mut BorderColor,
             &Children,
         ),
-        (Changed<Interaction>, With<Button>, With<ZoomOutButton>),
+        (With<Button>, With<ZoomOutButton>),
     >,
     time: Res<Time>,
     mut text_query: Query<&mut Text>,
@@ -42,7 +42,7 @@ pub fn zoom_out_button_system(
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;
                 zoom_out = true;
-                zoom_amount = 0.25;
+                zoom_amount = 0.1;
             }
             Interaction::Hovered => {
                 text.sections[0].value = "-".to_string();
@@ -87,7 +87,7 @@ pub fn zoom_in_button_system(
             &mut BorderColor,
             &Children,
         ),
-        (Changed<Interaction>, With<Button>, With<ZoomInButton>),
+        (With<Button>, With<ZoomInButton>), //Changed<Interaction>,
     >,
     time: Res<Time>,
     mut text_query: Query<&mut Text>,
@@ -110,7 +110,7 @@ pub fn zoom_in_button_system(
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;
                 zoom_in = true;
-                zoom_amount = 0.25;
+                zoom_amount = 0.1;
             }
             Interaction::Hovered => {
                 text.sections[0].value = "+".to_string();

@@ -23,7 +23,7 @@ use crate::{
 };
 
 use self::{
-    amount_ui::{setup_amount_selected_text, update_amount_selected_text},
+    amount_ui::update_amount_selected_text,
     cron_systems::{cron_update_tiles, tick_update_tile_cron_timer, CronPollingTimer},
     explore::{
         animate_sprites, buy_selection_button, clear_selection, clear_selection_button,
@@ -36,9 +36,13 @@ use self::{
     selection::{choose_tile, select_tile},
     touch_movement_systems::touch_event_system,
     travel::travel_event,
-    ui::ui_right::{
-        setup_side_ui, toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
-        toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4, toggle_button_system,
+    ui::{
+        ui_right::{
+            toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
+            toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4,
+            toggle_button_system,
+        },
+        ExploreUiPlugin,
     },
     update_after_purchase::update_tiles_after_purchase,
     update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
@@ -52,12 +56,13 @@ pub struct ExplorePlugin;
 
 impl Plugin for ExplorePlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<CronPollingTimer>()
+        app.add_plugins(ExploreUiPlugin)
+            .init_resource::<CronPollingTimer>()
             // OnEnter State Systems
             .add_systems(
                 OnEnter(ExploreState::On),
                 (
-                    (init_explorer, setup_side_ui, setup_amount_selected_text).run_if(run_once()),
+                    (init_explorer).run_if(run_once()),
                     (reset_mouse, apply_deferred).chain(),
                 ),
             )

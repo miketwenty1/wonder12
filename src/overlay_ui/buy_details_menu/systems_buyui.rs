@@ -484,7 +484,6 @@ pub fn buy_button_system(
                     if is_valid_email_format_string(a) {
                         user.ln_address = a.to_string();
                         *color = colors.light_color.into();
-                        info!("yay!");
                         cart.vec[index].new_ln_address = text.sections[0].value.to_string();
                         buy_event.send(BuyBlockRequest);
                         // help with jumpiness when leaving this screen - hopefully
@@ -493,7 +492,6 @@ pub fn buy_button_system(
                         keyboard.value = "".to_string();
                     } else {
                         *color = colors.red_color.into();
-                        info!("poop!");
                         text.sections[0].style.color = colors.red_color;
                         toast.send(ToastEvent {
                             ttype: ToastType::Bad,

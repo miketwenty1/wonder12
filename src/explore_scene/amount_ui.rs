@@ -1,55 +1,45 @@
 use bevy::prelude::*;
 
 use crate::{
-    componenty::{
-        AmountSelectedNode, AmountSelectedText, Location, Selected, UiTileSelectedButton,
-    },
+    componenty::{Location, Selected, SelectedTileUi},
     consty::MINIMUM_BLOCK_AMOUNT,
     eventy::UpdateUiAmount,
     resourcey::{TileCart, TileCartData, UserPurchasedBlockMessage, WorldOwnedTileMap},
     utils::get_random_color,
 };
 
-pub fn setup_amount_selected_text(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands
-        .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::FlexStart,
-                    flex_direction: FlexDirection::Column,
-                    ..default()
-                },
-                ..default()
-            },
-            AmountSelectedNode,
-        ))
-        .with_children(|parent| {
-            parent.spawn((
-                TextBundle::from_section(
-                    "",
-                    TextStyle {
-                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                        font_size: 40.0,
-                        color: Color::rgb(0.9, 0.9, 0.9),
-                    },
-                ),
-                AmountSelectedText(0),
-            ));
-        });
-}
+use super::ui::components::{AmountText, BlockCountText};
 
+#[allow(clippy::type_complexity)]
 pub fn update_amount_selected_text(
     mut event: EventReader<UpdateUiAmount>,
+
     selected_lands: Query<&Location, With<Selected>>,
-    mut amount_selected_text: Query<&mut Text, With<AmountSelectedText>>,
+    mut amount_selected_text: Query<
+        &mut Text,
+        (
+            With<AmountText>,
+            Without<BlockCountText>,
+            Without<SelectedTileUi>,
+        ),
+    >,
+    mut block_count_text: Query<
+        &mut Text,
+        (
+            With<BlockCountText>,
+            Without<AmountText>,
+            Without<SelectedTileUi>,
+        ),
+    >,
     tile_map: Res<WorldOwnedTileMap>,
     mut tile_cart: ResMut<TileCart>,
     mut tile_selected_button_q: Query<
         &mut Visibility,
-        (With<UiTileSelectedButton>, Without<AmountSelectedText>),
+        (
+            With<SelectedTileUi>,
+            Without<AmountText>,
+            Without<BlockCountText>,
+        ),
     >,
 ) {
     for _e in event.read() {
@@ -117,7 +107,15 @@ pub fn update_amount_selected_text(
                     *visibility = Visibility::Hidden;
                 }
             } else {
-                text.sections[0].value = format!("Total: {} sats", total_cost);
+                text.sections[0].value = format!("Price: {} satoshis", total_cost);
+            }
+        }
+        for mut text in block_count_text.iter_mut() {
+            let selected_count = tile_cart.map.len();
+            if selected_count == 0 {
+                text.sections[0].value = "".to_string();
+            } else {
+                text.sections[0].value = format!("Blocks Selected: {}", selected_count);
             }
         }
     }
