@@ -1,23 +1,11 @@
-use bevy::prelude::*;
-
-use crate::resourcey::ColorPalette;
-
 use super::components::{
     ExplorerUiNode, ExplorerUiNodeBottom, ExplorerUiNodeLeft, ExplorerUiNodeMiddle,
     ExplorerUiNodeRight, ExplorerUiNodeTop,
 };
+use bevy::prelude::*;
 
 #[allow(clippy::too_many_arguments)]
-pub fn ui_explorer(
-    mut commands: Commands,
-    // asset_server: Res<AssetServer>,
-    // mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
-    // initblocks: Res<InitBlockCount>,
-    colors: Res<ColorPalette>,
-    // mut loading_init_block_text: ResMut<NextState<InitLoadingBlocksState>>,
-    // mut meshes: ResMut<Assets<Mesh>>,
-    // mut materials: ResMut<Assets<ColorMaterial>>,
-) {
+pub fn ui_explorer(mut commands: Commands) {
     let mut parent = commands.spawn((
         NodeBundle {
             style: Style {

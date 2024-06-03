@@ -6,9 +6,7 @@ use crate::{
     consty::UI_MEDIUM_TEXT_SIZE,
     explore_scene::ui::{
         components::ExplorerUiNodeLeft,
-        inventory::component::{
-            InventoryRowsNode, InventoryToggleButton, InventoryToggleable, PlaceHolderInventoryNode,
-        },
+        inventory::component::{InventoryRowsNode, InventoryToggleButton, InventoryToggleable},
     },
     resourcey::{ColorPalette, UserInventoryBlocks},
 };

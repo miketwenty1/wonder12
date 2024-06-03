@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::componenty::DrawOverlayMesh;
 
 pub fn cleanup_system(
-    mut commands: Commands,
+    //mut commands: Commands,
     mut mesh_q: Query<&mut Visibility, With<DrawOverlayMesh>>,
 ) {
     info!("hide em");

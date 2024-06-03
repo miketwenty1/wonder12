@@ -38,40 +38,42 @@ pub fn right_ui(
             UiSideNode,
         ));
 
-        side_parent.with_children(|parent| {
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                            border: UiRect::all(Val::Px(2.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(colors.lite_button_color),
-                        background_color: colors.button_color.into(),
-                        visibility: Visibility::Visible,
-                        ..default()
-                    },
-                    DrawBtn,
-                    UiOverlayingExplorerButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(ImageBundle {
-                        style: Style {
-                            height: Val::Px(23.0),
-                            width: Val::Px(23.0),
-                            ..default()
-                        },
-                        image: UiImage::new(asset_server.load("ui/pencil60x60.png")),
-                        ..default()
-                    });
-                });
-        });
+        // draw button
+
+        // side_parent.with_children(|parent| {
+        //     parent
+        //         .spawn((
+        //             ButtonBundle {
+        //                 style: Style {
+        //                     width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+        //                     height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+        //                     border: UiRect::all(Val::Px(2.0)),
+        //                     // horizontally center child text
+        //                     justify_content: JustifyContent::Center,
+        //                     // vertically center child text
+        //                     align_items: AlignItems::Center,
+        //                     ..default()
+        //                 },
+        //                 border_color: BorderColor(colors.lite_button_color),
+        //                 background_color: colors.button_color.into(),
+        //                 visibility: Visibility::Visible,
+        //                 ..default()
+        //             },
+        //             DrawBtn,
+        //             UiOverlayingExplorerButton,
+        //         ))
+        //         .with_children(|parent| {
+        //             parent.spawn(ImageBundle {
+        //                 style: Style {
+        //                     height: Val::Px(23.0),
+        //                     width: Val::Px(23.0),
+        //                     ..default()
+        //                 },
+        //                 image: UiImage::new(asset_server.load("ui/pencil60x60.png")),
+        //                 ..default()
+        //             });
+        //         });
+        // });
         // goto button
         side_parent.with_children(|parent| {
             parent
