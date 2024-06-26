@@ -138,13 +138,13 @@ pub fn visible_inventory_toggle_button(
                         style.display = Display::None;
 
                         *image = UiImage {
-                            texture: asset_server.load("ui/expandarrow60x60.png"),
+                            texture: asset_server.load("ui/expandarrow_60x60.png"),
                             flip_x: false,
                             flip_y: true,
                         };
                     } else {
                         style.display = Display::Grid;
-                        *image = UiImage::new(asset_server.load("ui/expandarrow60x60.png"));
+                        *image = UiImage::new(asset_server.load("ui/expandarrow_60x60.png"));
                     }
                 }
             }

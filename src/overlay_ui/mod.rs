@@ -1,11 +1,10 @@
 use self::{
-    buy_details_menu::BuyDetailsMenuPlugin, draw::DrawPlugin, go_to::GoToPlugin,
-    qr_invoice::InvoiceQrUiPlugin, toast::ToastUiPlugin,
+    buy_details_menu::BuyDetailsMenuPlugin, go_to::GoToPlugin, qr_invoice::InvoiceQrUiPlugin,
+    toast::ToastUiPlugin,
 };
 use bevy::prelude::*;
 
 pub mod buy_details_menu;
-pub mod draw;
 pub mod go_to;
 pub mod qr_invoice;
 pub mod toast;
@@ -20,7 +19,6 @@ impl Plugin for OverlayUiPlugin {
         app.add_plugins(BuyDetailsMenuPlugin)
             .add_plugins(InvoiceQrUiPlugin)
             .add_plugins(ToastUiPlugin)
-            .add_plugins(GoToPlugin)
-            .add_plugins(DrawPlugin);
+            .add_plugins(GoToPlugin);
     }
 }

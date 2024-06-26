@@ -61,10 +61,3 @@ pub enum ToastState {
     Off,
     On,
 }
-
-#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-pub enum DrawState {
-    On,
-    #[default]
-    Off,
-}

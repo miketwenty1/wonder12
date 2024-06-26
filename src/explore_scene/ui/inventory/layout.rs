@@ -134,7 +134,7 @@ pub fn spawn_layout(
                                     border_color: BorderColor(colors.light_color),
                                     background_color: colors.light_color.into(),
                                     image: UiImage::new(
-                                        asset_server.load("ui/expandarrow60x60.png"),
+                                        asset_server.load("ui/expandarrow_60x60.png"),
                                     ),
                                     ..default()
                                 },
@@ -286,4 +286,16 @@ pub fn spawn_inventory_row(
             ));
         })
         .set_parent(inventory_rows_node);
+}
+
+pub fn show_layout(mut style_query: Query<&mut Style, With<InventoryNode>>) {
+    for mut style in style_query.iter_mut() {
+        style.display = Display::Flex;
+    }
+}
+
+pub fn clean_layout(mut style_query: Query<&mut Style, With<InventoryNode>>) {
+    for mut style in style_query.iter_mut() {
+        style.display = Display::None;
+    }
 }

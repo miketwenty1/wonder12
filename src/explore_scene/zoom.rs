@@ -11,65 +11,54 @@ use crate::{
 pub fn zoom_out_button_system(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut touches: ResMut<Touches>,
-    mut mouse_wheel_events: EventReader<MouseWheel>,
+    //mut mouse_wheel_events: EventReader<MouseWheel>,
     mut interaction_query: Query<
         (
             &Interaction,
             &mut BackgroundColor,
             &mut BorderColor,
-            &Children,
+            //&Children,
         ),
         (With<Button>, With<ZoomOutButton>),
     >,
-    time: Res<Time>,
-    mut text_query: Query<&mut Text>,
+    //time: Res<Time>,
+    //mut text_query: Query<&mut Text>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
     //mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
     colors: Res<ColorPalette>,
 ) {
-    let mut zoom_out = false;
+    //let mut zoom_out = false;
     let mut zoom_amount: f32 = 0.0;
 
-    for (interaction, mut color, mut border_color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
+    for (interaction, mut color, mut border_color) in &mut interaction_query {
+        //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
                 // for mobile keep eye on https://github.com/bevyengine/bevy/pull/10930
                 //clear_last_selected.send(ClearLastSelectedTile);
                 mouse.clear(); //mouse.clear_just_pressed(MouseButton::Left);
                 touches.clear();
-                text.sections[0].value = "-".to_string();
+                //text.sections[0].value = "-".to_string();
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;
-                zoom_out = true;
+                //zoom_out = true;
                 zoom_amount = 0.1;
+                for mut ortho in cam_query.iter_mut() {
+                    ortho.scale += zoom_amount;
+                    if ortho.scale > ZOOM_OUT_MAX {
+                        ortho.scale = ZOOM_OUT_MAX;
+                    }
+                }
             }
             Interaction::Hovered => {
-                text.sections[0].value = "-".to_string();
+                //text.sections[0].value = "-".to_string();
                 *color = colors.accent_color.into();
                 border_color.0 = colors.node_color;
             }
             Interaction::None => {
-                text.sections[0].value = "-".to_string();
+                //text.sections[0].value = "-".to_string();
                 *color = colors.button_color.into();
                 border_color.0 = colors.node_color;
-            }
-        }
-    }
-
-    for mouse_wheel in mouse_wheel_events.read() {
-        if mouse_wheel.y < 0.0 {
-            zoom_out = true;
-            zoom_amount = 0.25 * time.delta_seconds() * 20.0;
-        }
-    }
-
-    if zoom_out {
-        for mut ortho in cam_query.iter_mut() {
-            ortho.scale += zoom_amount;
-            //info!("{}", ortho.scale);
-            if ortho.scale > ZOOM_OUT_MAX {
-                ortho.scale = ZOOM_OUT_MAX;
             }
         }
     }
@@ -79,63 +68,83 @@ pub fn zoom_out_button_system(
 pub fn zoom_in_button_system(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut touches: ResMut<Touches>,
-    mut mouse_wheel_events: EventReader<MouseWheel>,
+    //mut mouse_wheel_events: EventReader<MouseWheel>,
     mut interaction_query: Query<
         (
             &Interaction,
             &mut BackgroundColor,
             &mut BorderColor,
-            &Children,
+            //&Children,
         ),
         (With<Button>, With<ZoomInButton>), //Changed<Interaction>,
     >,
-    time: Res<Time>,
-    mut text_query: Query<&mut Text>,
+    //time: Res<Time>,
+    //mut text_query: Query<&mut Text>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
     //mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
     colors: Res<ColorPalette>,
 ) {
-    let mut zoom_in = false;
+    // let mut zoom_in = false;
     let mut zoom_amount: f32 = 0.0;
 
-    for (interaction, mut color, mut border_color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
+    for (interaction, mut color, mut border_color) in &mut interaction_query {
+        //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
                 // for mobile keep eye on https://github.com/bevyengine/bevy/pull/10930
                 //clear_last_selected.send(ClearLastSelectedTile);
                 mouse.clear();
                 touches.clear();
-                text.sections[0].value = "+".to_string();
+                //text.sections[0].value = "+".to_string();
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;
-                zoom_in = true;
+                // zoom_in = true;
                 zoom_amount = 0.1;
+                for mut ortho in cam_query.iter_mut() {
+                    ortho.scale -= zoom_amount;
+                    if ortho.scale < ZOOM_IN_MAX {
+                        ortho.scale = ZOOM_IN_MAX;
+                    }
+                }
             }
             Interaction::Hovered => {
-                text.sections[0].value = "+".to_string();
+                //text.sections[0].value = "+".to_string();
                 *color = colors.accent_color.into();
                 border_color.0 = colors.node_color;
             }
             Interaction::None => {
-                text.sections[0].value = "+".to_string();
+                //text.sections[0].value = "+".to_string();
                 *color = colors.button_color.into();
                 border_color.0 = colors.node_color;
             }
         }
     }
+}
+
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
+pub fn zoom_wheel_system(
+    mut mouse_wheel_events: EventReader<MouseWheel>,
+    time: Res<Time>,
+    mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
+) {
+    let zoom_amount = 0.25 * time.delta_seconds() * 20.0;
 
     for mouse_wheel in mouse_wheel_events.read() {
         if mouse_wheel.y > 0.0 {
-            zoom_in = true;
-            zoom_amount = 0.25 * time.delta_seconds() * 20.0;
-        }
-    }
-    if zoom_in {
-        for mut ortho in cam_query.iter_mut() {
-            ortho.scale -= zoom_amount;
-            if ortho.scale < ZOOM_IN_MAX {
-                ortho.scale = ZOOM_IN_MAX;
+            // zoom in!
+            for mut ortho in cam_query.iter_mut() {
+                ortho.scale -= zoom_amount;
+                if ortho.scale < ZOOM_IN_MAX {
+                    ortho.scale = ZOOM_IN_MAX;
+                }
+            }
+        } else {
+            // zoom out
+            for mut ortho in cam_query.iter_mut() {
+                ortho.scale += zoom_amount;
+                if ortho.scale > ZOOM_OUT_MAX {
+                    ortho.scale = ZOOM_OUT_MAX;
+                }
             }
         }
     }

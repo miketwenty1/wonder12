@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use inventory::InventoryMenuPlugin;
+use paint_palette::PaintPalettePlugin;
 
 use crate::statey::ExploreState;
 
@@ -11,6 +12,7 @@ use self::{
 pub mod components;
 pub mod inventory;
 pub mod overall_ui;
+pub mod paint_palette;
 pub mod ui_bottom;
 pub mod ui_left;
 pub mod ui_middle;
@@ -34,6 +36,7 @@ impl Plugin for ExploreUiPlugin {
                 .chain())
             .run_if(run_once()),),
         )
-        .add_plugins(InventoryMenuPlugin);
+        .add_plugins(InventoryMenuPlugin)
+        .add_plugins(PaintPalettePlugin);
     }
 }

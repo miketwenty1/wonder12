@@ -16,6 +16,9 @@ pub struct GoToBtn;
 pub struct DrawBtn;
 
 #[derive(Component)]
+pub struct DrawBtnImage;
+
+#[derive(Component)]
 pub struct SelectedTileUi;
 
 #[derive(Component)]

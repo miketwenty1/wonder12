@@ -15,7 +15,7 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.13.2"
-# bevy = { git = "https://github.com/bevyengine/bevy.git", rev = "3a1b9b98e47b1cbd81a8efc4d207355bc6a10371" }
+#bevy = { git = "https://github.com/bevyengine/bevy.git", rev = "158ccc6d6a45eb048cc3f40388f9cff0fc633375" }
 # dd4d07dc9cc3e22210ed43949c5cc08f18b4e707 good after this the background goes black and flashes https://github.com/bevyengine/bevy/issues/11613
 
 # bevy = { version = "0.12.1", default-features = false, features = [

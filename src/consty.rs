@@ -45,3 +45,5 @@ pub const UI_MEDIUM_TEXT_SIZE: f32 = 20.0;
 pub const UI_LARGE_TEXT_SIZE: f32 = 30.0;
 pub const UI_LARGE_BUTTON_WIDTH: f32 = 75.0;
 pub const UI_LARGE_BUTTON_HEIGHT: f32 = 45.0;
+
+pub const UI_ICON_SIZE: f32 = 60.0;

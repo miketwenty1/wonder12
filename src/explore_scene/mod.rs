@@ -1,10 +1,10 @@
 pub mod amount_ui;
 pub mod cron_systems;
+pub mod desktop_movement_systems;
 pub mod explore;
 pub mod explorer_overlay_system;
 pub mod go_to_systems;
-pub mod mouse_movement_systems;
-pub mod pencil;
+pub mod palette;
 pub mod selection;
 pub mod touch_movement_systems;
 pub mod travel;
@@ -14,6 +14,9 @@ pub mod update_toggle_events;
 pub mod zoom;
 
 use bevy::prelude::*;
+use palette::draw_button_system;
+use ui::paint_palette::state::MovementPaletteUiState;
+use zoom::zoom_wheel_system;
 
 use crate::{
     componenty::InitLoadingNode,
@@ -25,14 +28,15 @@ use crate::{
 use self::{
     amount_ui::update_amount_selected_text,
     cron_systems::{cron_update_tiles, tick_update_tile_cron_timer, CronPollingTimer},
+    desktop_movement_systems::{
+        clear_last_selected_tile, keyboard_movement_camera_system, mouse_movement_camera_system,
+    },
     explore::{
         animate_sprites, buy_selection_button, clear_selection, clear_selection_button,
-        edge_system, init_explorer, reset_mouse, spawn_block_sprites, update_tile_textures,
+        edge_system, init_explorer, spawn_block_sprites, update_tile_textures,
     },
     explorer_overlay_system::{clear_last_selected_tile_ui_button, init_block_loading_text},
     go_to_systems::go_to_button_system,
-    mouse_movement_systems::{clear_last_selected_tile, desktop_movement_camera_system},
-    pencil::draw_button_system,
     selection::{choose_tile, select_tile},
     touch_movement_systems::touch_event_system,
     travel::travel_event,
@@ -61,10 +65,7 @@ impl Plugin for ExplorePlugin {
             // OnEnter State Systems
             .add_systems(
                 OnEnter(ExploreState::On),
-                (
-                    (init_explorer).run_if(run_once()),
-                    (reset_mouse, apply_deferred).chain(),
-                ),
+                (init_explorer).run_if(run_once()),
             )
             .add_systems(
                 Update,
@@ -87,12 +88,17 @@ impl Plugin for ExplorePlugin {
                         toggle_button_sub_system_toggle2,
                         toggle_button_sub_system_toggle3,
                         toggle_button_sub_system_toggle4,
-                        choose_tile,
-                        desktop_movement_camera_system,
-                        touch_event_system,
-                        pinch_system,
+                        (
+                            choose_tile,
+                            mouse_movement_camera_system,
+                            touch_event_system,
+                            pinch_system,
+                        )
+                            .run_if(in_state(MovementPaletteUiState::Off)),
                     )
                         .chain(),
+                    zoom_wheel_system,
+                    keyboard_movement_camera_system,
                     edge_system,
                     spawn_block_sprites,
                     buildings_visibility_event,
@@ -123,7 +129,7 @@ impl Plugin for ExplorePlugin {
                     cam_ortho_scale_text_visibility,
                     travel_event,
                 ),
-            )
-            .add_systems(OnExit(ExploreState::On), reset_mouse);
+            );
+        //.add_systems(OnExit(ExploreState::On), reset_mouse);
     }
 }

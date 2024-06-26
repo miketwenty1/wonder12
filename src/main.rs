@@ -35,15 +35,15 @@ use eventy::{
     TravelHeight, UpdateTilesAfterPurchase,
 };
 use explore_scene::ui::inventory::state::InventoryUiState;
+use explore_scene::ui::paint_palette::resource::DefaultDrawColorPalette;
+use explore_scene::ui::paint_palette::state::{MovementPaletteUiState, PaintPaletteUiState};
 use overlay_ui::go_to::state::GoToUiState;
 use resourcey::{
     CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, MultiTouchInfo,
     Nwc, ToggleVisible, UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
-use statey::{
-    CommsApiBlockLoadState, CommsApiInventoryState, DrawState, InitLoadingBlocksState, ToastState,
-};
+use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlCanvasElement;
@@ -125,6 +125,68 @@ pub fn game12(
         green_color: Color::DARK_GREEN,
     };
 
+    let draw_palette = DefaultDrawColorPalette {
+        colors: vec![
+            // Red
+            Color::hex("400000").unwrap(),
+            Color::hex("800000").unwrap(),
+            Color::hex("ff0000").unwrap(),
+            Color::hex("804040").unwrap(),
+            Color::hex("ff8080").unwrap(),
+            // Orange
+            Color::hex("804000").unwrap(),
+            Color::hex("ff8000").unwrap(),
+            Color::hex("ff8040").unwrap(),
+            // Yellow
+            Color::hex("808000").unwrap(),
+            Color::hex("ffff00").unwrap(),
+            Color::hex("ffff80").unwrap(),
+            // Green
+            Color::hex("004000").unwrap(),
+            Color::hex("008000").unwrap(),
+            Color::hex("00ff00").unwrap(),
+            Color::hex("80ff00").unwrap(),
+            Color::hex("80ff80").unwrap(),
+            Color::hex("008040").unwrap(),
+            Color::hex("00ff40").unwrap(),
+            Color::hex("00ff80").unwrap(),
+            // Cyan
+            Color::hex("004040").unwrap(),
+            Color::hex("408080").unwrap(),
+            Color::hex("00ffff").unwrap(),
+            Color::hex("80ffff").unwrap(),
+            // Blue
+            Color::hex("004080").unwrap(),
+            Color::hex("0080c0").unwrap(),
+            Color::hex("0080ff").unwrap(),
+            Color::hex("000040").unwrap(),
+            Color::hex("000080").unwrap(),
+            Color::hex("0000a0").unwrap(),
+            Color::hex("0000ff").unwrap(),
+            // Purple
+            Color::hex("400040").unwrap(),
+            Color::hex("800080").unwrap(),
+            Color::hex("ff00ff").unwrap(),
+            Color::hex("ff80ff").unwrap(),
+            // Pink
+            Color::hex("800040").unwrap(),
+            Color::hex("ff0080").unwrap(),
+            Color::hex("ff80c0").unwrap(),
+            // Brown
+            Color::hex("808040").unwrap(),
+            // Gray
+            Color::hex("808080").unwrap(),
+            Color::hex("8080c0").unwrap(),
+            Color::hex("8080ff").unwrap(),
+            // Silver
+            Color::hex("c0c0c0").unwrap(),
+            // White
+            Color::hex("ffffff").unwrap(),
+            // Black
+            Color::hex("000000").unwrap(),
+        ],
+    };
+
     let start_edge = Edge {
         top: EdgeData {
             pixel: CHUNK_PIXEL_SIZE / 2.0,
@@ -152,6 +214,7 @@ pub fn game12(
     App::new()
         .insert_resource(start_edge)
         .insert_resource(color_palette)
+        .insert_resource(draw_palette)
         .insert_resource(MaxBlockHeight(max_height))
         .insert_resource(ChunkManager {
             map: HashMap::new(),
@@ -231,7 +294,8 @@ pub fn game12(
         .init_state::<InventoryUiState>()
         .init_state::<BrowserStorageState>()
         .init_state::<GoToUiState>()
-        .init_state::<DrawState>()
+        .init_state::<PaintPaletteUiState>()
+        .init_state::<MovementPaletteUiState>()
         .add_plugins((
             CommsPlugin,
             OverlayUiPlugin,

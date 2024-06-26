@@ -18,7 +18,7 @@ pub fn clear_last_selected_tile(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn desktop_movement_camera_system(
+pub fn mouse_movement_camera_system(
     mut mouse_motion_events: EventReader<MouseMotion>,
     mouse: Res<ButtonInput<MouseButton>>,
     mut q_camera: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
@@ -77,6 +77,20 @@ pub fn desktop_movement_camera_system(
             }
         }
     }
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn keyboard_movement_camera_system(
+    mut mouse_motion_events: EventReader<MouseMotion>,
+    mouse: Res<ButtonInput<MouseButton>>,
+    mut q_camera: Query<(&mut Transform, &OrthographicProjection), With<Camera>>,
+    time: Res<Time>,
+    mut edge: ResMut<Edge>,
+    mut edge_event: EventWriter<EdgeEvent>,
+    keys: Res<ButtonInput<KeyCode>>,
+    max_height: Res<MaxBlockHeight>,
+    mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
+) {
     if keys.pressed(KeyCode::KeyW)
         || keys.pressed(KeyCode::KeyA)
         || keys.pressed(KeyCode::KeyS)

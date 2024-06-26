@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use layout::{clean_layout, show_layout};
 use system::{inventory_colorbox_buttons, visible_inventory_toggle_button};
 
 use self::{
@@ -20,7 +21,7 @@ impl Plugin for InventoryMenuPlugin {
         app.add_event::<AddInventoryRow>()
             .add_systems(
                 OnEnter(InventoryUiState::On),
-                (spawn_layout).run_if(run_once()),
+                ((spawn_layout).run_if(run_once()), show_layout),
             )
             .add_systems(
                 Update,
@@ -30,6 +31,7 @@ impl Plugin for InventoryMenuPlugin {
                     visible_inventory_toggle_button,
                     inventory_colorbox_buttons,
                 ),
-            );
+            )
+            .add_systems(OnExit(InventoryUiState::On), clean_layout);
     }
 }

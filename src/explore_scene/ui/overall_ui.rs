@@ -44,12 +44,12 @@ pub fn ui_explorer(mut commands: Commands) {
                     ..default()
                 },
                 //visibility: Visibility::Hidden,
-                // background_color: BackgroundColor(Color::Rgba {
-                //     red: 0.1,
-                //     green: 0.1,
-                //     blue: 0.1,
-                //     alpha: 0.3,
-                // }),
+                background_color: BackgroundColor(Color::Rgba {
+                    red: 1.0,
+                    green: 0.1,
+                    blue: 0.1,
+                    alpha: 0.5,
+                }),
                 ..default()
             },
             ExplorerUiNodeTop,
@@ -72,7 +72,7 @@ pub fn ui_explorer(mut commands: Commands) {
                 //     blue: 0.1,
                 //     alpha: 0.3,
                 // }),
-                //background_color: BackgroundColor(Color::RED),
+                background_color: BackgroundColor(Color::ORANGE_RED),
                 ..default()
             },
             ExplorerUiNodeLeft,

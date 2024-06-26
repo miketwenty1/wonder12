@@ -55,171 +55,25 @@ pub fn init_explorer(
     initblocks: Res<InitBlockCount>,
     colors: Res<ColorPalette>,
     mut loading_init_block_text: ResMut<NextState<InitLoadingBlocksState>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     info!("initblockcount: {}", initblocks.0);
 
     // let texture_atlas_handle_bg = texture_atlases.add(texture_atlas_bg);
     // let texture_atlas_handle_building = texture_atlases.add(texture_atlas_building);
 
-    commands
-        .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::FlexEnd,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
+    commands.spawn((
+        NodeBundle {
+            style: Style {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                align_items: AlignItems::FlexEnd,
+                justify_content: JustifyContent::Center,
                 ..default()
             },
-            UiNode,
-        ))
-        .with_children(|parent| {
-            // .with_children(|parent| {
-            //     parent
-            //         .spawn((
-            //             ButtonBundle {
-            //                 style: Style {
-            //                     width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-            //                     height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-            //                     border: UiRect::all(Val::Px(5.0)),
-            //                     // horizontally center child text
-            //                     justify_content: JustifyContent::Center,
-            //                     // vertically center child text
-            //                     align_items: AlignItems::Center,
-            //                     ..default()
-            //                 },
-            //                 border_color: BorderColor(colors.button_color),
-            //                 background_color: colors.button_color.into(),
-            //                 visibility: Visibility::Hidden,
-            //                 ..default()
-            //             },
-            //             ClearSelectionButton,
-            //             UiTileSelectedButton,
-            //             UiOverlayingExplorerButton,
-            //         ))
-            //         .with_children(|parent| {
-            //             parent.spawn(TextBundle::from_section(
-            //                 "Clear",
-            //                 TextStyle {
-            //                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-            //                     font_size: UI_MEDIUM_TEXT_SIZE,
-            //                     color: colors.text_color,
-            //                 },
-            //             ));
-            //         });
-
-            //     parent
-            //         .spawn((
-            //             ButtonBundle {
-            //                 style: Style {
-            //                     width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-            //                     height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-            //                     border: UiRect::all(Val::Px(5.0)),
-            //                     // horizontally center child text
-            //                     justify_content: JustifyContent::Center,
-            //                     // vertically center child text
-            //                     align_items: AlignItems::Center,
-            //                     ..default()
-            //                 },
-            //                 border_color: BorderColor(colors.node_color),
-            //                 background_color: colors.button_color.into(),
-            //                 ..default()
-            //             },
-            //             ZoomOutButton,
-            //             UiOverlayingExplorerButton,
-            //         ))
-            //         .with_children(|parent| {
-            //             parent.spawn(TextBundle::from_section(
-            //                 "-",
-            //                 TextStyle {
-            //                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-            //                     font_size: UI_LARGE_TEXT_SIZE,
-            //                     color: colors.text_color,
-            //                 },
-            //             ));
-            //         });
-            //     parent
-            //         .spawn((
-            //             ButtonBundle {
-            //                 style: Style {
-            //                     width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-            //                     height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-            //                     border: UiRect::all(Val::Px(5.0)),
-            //                     // horizontally center child text
-            //                     justify_content: JustifyContent::Center,
-            //                     // vertically center child text
-            //                     align_items: AlignItems::Center,
-            //                     ..default()
-            //                 },
-            //                 border_color: BorderColor(colors.node_color),
-            //                 background_color: colors.button_color.into(),
-            //                 ..default()
-            //             },
-            //             ZoomInButton,
-            //             UiOverlayingExplorerButton,
-            //         ))
-            //         .with_children(|parent| {
-            //             parent.spawn(TextBundle::from_section(
-            //                 "+",
-            //                 TextStyle {
-            //                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-            //                     font_size: UI_LARGE_TEXT_SIZE,
-            //                     color: colors.text_color,
-            //                 },
-            //             ));
-            //         });
-            //     parent
-            //         .spawn((
-            //             ButtonBundle {
-            //                 style: Style {
-            //                     width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-            //                     height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-            //                     border: UiRect::all(Val::Px(5.0)),
-            //                     // horizontally center child text
-            //                     justify_content: JustifyContent::Center,
-            //                     // vertically center child text
-            //                     align_items: AlignItems::Center,
-            //                     ..default()
-            //                 },
-            //                 border_color: BorderColor(Color::BLACK),
-            //                 background_color: colors.button_color.into(),
-            //                 visibility: Visibility::Hidden,
-            //                 ..default()
-            //             },
-            //             UiOverlayingExplorerButton,
-            //             BuySelectionButton,
-            //             UiTileSelectedButton,
-            //         ))
-            //         .with_children(|parent| {
-            //             parent.spawn(TextBundle::from_section(
-            //                 "Buy",
-            //                 TextStyle {
-            //                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-            //                     font_size: UI_MEDIUM_TEXT_SIZE,
-            //                     color: colors.text_color,
-            //                 },
-            //             ));
-            //         });
-            parent.spawn((
-                MaterialMesh2dBundle {
-                    mesh: meshes.add(Rectangle::default()).into(),
-                    transform: Transform::default().with_scale(Vec3::splat(9999999999.)),
-                    material: materials.add(Color::Rgba {
-                        red: 0.2,
-                        green: 0.2,
-                        blue: 0.2,
-                        alpha: 0.65,
-                    }),
-                    visibility: Visibility::Hidden,
-                    ..default()
-                },
-                DrawOverlayMesh,
-            ));
-        });
+            ..default()
+        },
+        UiNode,
+    ));
 
     // this is the same text as below but outlined
     commands
@@ -330,7 +184,7 @@ pub fn edge_system(
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
 ) {
     for edge_e in edge_event.read() {
-        //info!("EDGE EVENT");
+        info!("EDGE EVENT");
         for (block_entity, block_location) in blocks.iter() {
             if (block_location.y - edge_e.y).abs() > DESPAWN_TILE_THRESHOLD
                 || (block_location.x - edge_e.x).abs() > DESPAWN_TILE_THRESHOLD
@@ -363,6 +217,7 @@ pub fn spawn_block_sprites(
     cam_query: Query<&OrthographicProjection, With<Camera>>,
 ) {
     for _event in sprite_spawn_event.read() {
+        info!("hello spawn sprites");
         let font = asset_server.load("fonts/FiraSans-Bold.ttf");
         let slightly_smaller_text_style = TextStyle {
             font,

@@ -2,12 +2,14 @@ use bevy::prelude::*;
 
 use crate::{
     componenty::{
-        DrawBtn, GoToBtn, HideBuilding, HideText, HideTextText, ShowColors, ShowValues, Toggle1Btn,
-        Toggle1BtnText, Toggle2Btn, Toggle2BtnText, Toggle3Btn, Toggle3BtnText, Toggle4Btn,
-        Toggle4BtnText, ToggleButton, ToggleParent, UiOverlayingExplorerButton, UiSideNode,
+        DrawBtn, DrawBtnImage, GoToBtn, HideBuilding, HideText, HideTextText, ShowColors,
+        ShowValues, Toggle1Btn, Toggle1BtnText, Toggle2Btn, Toggle2BtnText, Toggle3Btn,
+        Toggle3BtnText, Toggle4Btn, Toggle4BtnText, ToggleButton, ToggleParent,
+        UiOverlayingExplorerButton, UiSideNode,
     },
     consty::{
-        UI_LARGE_BUTTON_HEIGHT, UI_LARGE_BUTTON_WIDTH, UI_MEDIUM_TEXT_SIZE, UI_SMALL_TEXT_SIZE,
+        UI_ICON_SIZE, UI_LARGE_BUTTON_HEIGHT, UI_LARGE_BUTTON_WIDTH, UI_MEDIUM_TEXT_SIZE,
+        UI_SMALL_TEXT_SIZE,
     },
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
     resourcey::{ColorPalette, ToggleMap, ToggleVisible},
@@ -40,48 +42,13 @@ pub fn right_ui(
 
         // draw button
 
-        // side_parent.with_children(|parent| {
-        //     parent
-        //         .spawn((
-        //             ButtonBundle {
-        //                 style: Style {
-        //                     width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-        //                     height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-        //                     border: UiRect::all(Val::Px(2.0)),
-        //                     // horizontally center child text
-        //                     justify_content: JustifyContent::Center,
-        //                     // vertically center child text
-        //                     align_items: AlignItems::Center,
-        //                     ..default()
-        //                 },
-        //                 border_color: BorderColor(colors.lite_button_color),
-        //                 background_color: colors.button_color.into(),
-        //                 visibility: Visibility::Visible,
-        //                 ..default()
-        //             },
-        //             DrawBtn,
-        //             UiOverlayingExplorerButton,
-        //         ))
-        //         .with_children(|parent| {
-        //             parent.spawn(ImageBundle {
-        //                 style: Style {
-        //                     height: Val::Px(23.0),
-        //                     width: Val::Px(23.0),
-        //                     ..default()
-        //                 },
-        //                 image: UiImage::new(asset_server.load("ui/pencil60x60.png")),
-        //                 ..default()
-        //             });
-        //         });
-        // });
-        // goto button
         side_parent.with_children(|parent| {
             parent
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+                            width: Val::Px(UI_ICON_SIZE), // to make it a square.
+                            height: Val::Px(UI_ICON_SIZE),
                             border: UiRect::all(Val::Px(2.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
@@ -89,8 +56,68 @@ pub fn right_ui(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        border_color: BorderColor(colors.lite_button_color),
-                        background_color: colors.button_color.into(),
+                        image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
+                        border_color: BorderColor(Color::Rgba {
+                            red: 1.0,
+                            green: 1.0,
+                            blue: 1.0,
+                            alpha: 0.0,
+                        }),
+                        background_color: BackgroundColor(Color::Rgba {
+                            red: 1.0,
+                            green: 1.0,
+                            blue: 1.0,
+                            alpha: 0.0,
+                        }),
+                        visibility: Visibility::Visible,
+                        ..default()
+                    },
+                    DrawBtn,
+                    UiOverlayingExplorerButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn((
+                        ImageBundle {
+                            style: Style {
+                                height: Val::Px(UI_ICON_SIZE),
+                                width: Val::Px(UI_ICON_SIZE),
+                                ..default()
+                            },
+                            image: UiImage::new(asset_server.load("ui/blank_120x120.png")),
+                            ..default()
+                        },
+                        DrawBtnImage,
+                    ));
+                });
+        });
+        // goto button
+        side_parent.with_children(|parent| {
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            width: Val::Px(UI_ICON_SIZE),
+                            height: Val::Px(UI_ICON_SIZE),
+                            border: UiRect::all(Val::Px(2.0)),
+                            // horizontally center child text
+                            justify_content: JustifyContent::Center,
+                            // vertically center child text
+                            align_items: AlignItems::Center,
+                            ..default()
+                        },
+                        //image: UiImage::new(asset_server.load("ui/goto2_120x120.png")),
+                        border_color: BorderColor(Color::Rgba {
+                            red: 0.0,
+                            green: 0.0,
+                            blue: 0.0,
+                            alpha: 1.0,
+                        }),
+                        background_color: BackgroundColor(Color::Rgba {
+                            red: 1.0,
+                            green: 1.0,
+                            blue: 1.0,
+                            alpha: 1.0,
+                        }),
                         visibility: Visibility::Visible,
                         ..default()
                     },
@@ -98,55 +125,76 @@ pub fn right_ui(
                     UiOverlayingExplorerButton,
                 ))
                 .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Go To",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: UI_MEDIUM_TEXT_SIZE,
-                            color: colors.text_color,
+                    parent.spawn((ImageBundle {
+                        style: Style {
+                            height: Val::Px(UI_ICON_SIZE),
+                            width: Val::Px(UI_ICON_SIZE),
+                            ..default()
                         },
-                    ));
+                        image: UiImage::new(asset_server.load("ui/goto2_120x120.png")),
+                        ..default()
+                    },));
                 });
+            // .with_children(|parent| {
+            //     parent.spawn(TextBundle::from_section(
+            //         "Go To",
+            //         TextStyle {
+            //             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+            //             font_size: UI_MEDIUM_TEXT_SIZE,
+            //             color: colors.text_color,
+            //         },
+            //     ));
+            // });
         });
         //toggle buttons
         side_parent.with_children(|parent| {
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                            border: UiRect::all(Val::Px(2.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_color: BorderColor(colors.lite_button_color),
-                        background_color: colors.button_color.into(),
-                        visibility: Visibility::Visible,
+            parent.spawn((
+                ButtonBundle {
+                    style: Style {
+                        width: Val::Px(UI_ICON_SIZE),
+                        height: Val::Px(UI_ICON_SIZE),
+                        border: UiRect::all(Val::Px(2.0)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
                         ..default()
                     },
-                    ToggleParent,
-                    UiOverlayingExplorerButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Toggle",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: UI_MEDIUM_TEXT_SIZE,
-                            color: colors.text_color,
-                        },
-                    ));
-                });
+                    image: UiImage::new(asset_server.load("ui/toggle_120x120.png")),
+                    border_color: BorderColor(Color::Rgba {
+                        red: 1.0,
+                        green: 1.0,
+                        blue: 1.0,
+                        alpha: 0.0,
+                    }),
+                    background_color: BackgroundColor(Color::Rgba {
+                        red: 1.0,
+                        green: 1.0,
+                        blue: 1.0,
+                        alpha: 1.0,
+                    }),
+                    visibility: Visibility::Visible,
+                    ..default()
+                },
+                ToggleParent,
+                UiOverlayingExplorerButton,
+            ));
+            // .with_children(|parent| {
+            //     parent.spawn(TextBundle::from_section(
+            //         "Toggle",
+            //         TextStyle {
+            //             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+            //             font_size: UI_SMALL_TEXT_SIZE,
+            //             color: colors.text_color,
+            //         },
+            //     ));
+            // });
             parent
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH * 0.94),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT * 0.94),
+                            width: Val::Px(UI_ICON_SIZE),
+                            height: Val::Px(UI_ICON_SIZE),
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
@@ -181,8 +229,8 @@ pub fn right_ui(
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH * 0.94),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT * 0.94),
+                            width: Val::Px(UI_ICON_SIZE),
+                            height: Val::Px(UI_ICON_SIZE),
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
@@ -218,8 +266,8 @@ pub fn right_ui(
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH * 0.94),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT * 0.94),
+                            width: Val::Px(UI_ICON_SIZE),
+                            height: Val::Px(UI_ICON_SIZE),
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
@@ -254,8 +302,8 @@ pub fn right_ui(
                 .spawn((
                     ButtonBundle {
                         style: Style {
-                            width: Val::Px(UI_LARGE_BUTTON_WIDTH * 0.94),
-                            height: Val::Px(UI_LARGE_BUTTON_HEIGHT * 0.94),
+                            width: Val::Px(UI_ICON_SIZE),
+                            height: Val::Px(UI_ICON_SIZE),
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
@@ -322,6 +370,7 @@ pub fn toggle_button_system(
     colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
+        //let default_bg_color = color;
         //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
@@ -370,7 +419,8 @@ pub fn toggle_button_system(
             }
             Interaction::None => {
                 //text.sections[0].value = button_text;
-                *color = colors.button_color.into();
+                //let a = *color;
+                *color = BackgroundColor(Color::rgba(1.0, 1.0, 1.0, 1.0));
             }
         }
     }

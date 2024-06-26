@@ -23,7 +23,12 @@ pub fn go_to_button_system(
                 *color = colors.accent_color.into();
             }
             Interaction::None => {
-                *color = colors.button_color.into();
+                *color = BackgroundColor(Color::Rgba {
+                    red: 1.0,
+                    green: 1.0,
+                    blue: 1.0,
+                    alpha: 1.0,
+                });
             }
         }
     }

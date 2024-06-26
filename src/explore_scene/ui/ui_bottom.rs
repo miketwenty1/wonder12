@@ -26,7 +26,7 @@ pub fn bottom_ui(
                     style: Style {
                         width: Val::Px(UI_LARGE_BUTTON_WIDTH),
                         height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                        border: UiRect::all(Val::Px(5.0)),
+                        border: UiRect::all(Val::Px(2.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
                         // vertically center child text
@@ -60,7 +60,7 @@ pub fn bottom_ui(
                     style: Style {
                         width: Val::Px(UI_LARGE_BUTTON_WIDTH),
                         height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                        border: UiRect::all(Val::Px(5.0)),
+                        border: UiRect::all(Val::Px(2.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
                         // vertically center child text
@@ -91,7 +91,7 @@ pub fn bottom_ui(
                     style: Style {
                         width: Val::Px(UI_LARGE_BUTTON_WIDTH),
                         height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                        border: UiRect::all(Val::Px(5.0)),
+                        border: UiRect::all(Val::Px(2.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
                         // vertically center child text
@@ -122,7 +122,7 @@ pub fn bottom_ui(
                     style: Style {
                         width: Val::Px(UI_LARGE_BUTTON_WIDTH),
                         height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                        border: UiRect::all(Val::Px(5.0)),
+                        border: UiRect::all(Val::Px(2.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
                         // vertically center child text
