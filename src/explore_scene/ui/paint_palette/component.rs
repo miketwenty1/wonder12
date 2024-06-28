@@ -29,9 +29,6 @@ pub struct ColorPaletteViewText;
 pub struct ColorPaletteViewTextNode;
 
 #[derive(Component)]
-pub struct AddToCustomPaletteBtn;
-
-#[derive(Component)]
 pub struct IndividualColorInPalette(pub Color);
 
 #[derive(Component)]

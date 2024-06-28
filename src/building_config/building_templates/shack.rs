@@ -20,11 +20,7 @@ pub fn spawn_shack(
 ) {
     let scale_modifier = process_scale(scale_modifier);
     builder.spawn((
-        SpriteSheetBundle {
-            atlas: TextureAtlas {
-                layout: layout.clone(),
-                index: 13,
-            },
+        SpriteBundle {
             sprite: Sprite {
                 color,
                 ..Default::default()
@@ -44,5 +40,9 @@ pub fn spawn_shack(
         },
         BuildingStructure::Shack,
         locationcoord,
+        TextureAtlas {
+            layout: layout.clone(),
+            index: 13,
+        },
     ));
 }

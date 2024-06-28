@@ -5,17 +5,17 @@ use regex::Regex;
 
 use crate::consty::MINIMUM_BLOCK_AMOUNT;
 
-pub fn convert_color_to_hexstring(c: Srgba) -> String {
-    // // Ensure the input values are within the range [0, 1]
-    // let r = (c.red.clamp(0.0, 1.0) * 255.0).round() as u8;
-    // let g = (c.green.clamp(0.0, 1.0) * 255.0).round() as u8;
-    // let b = (c.blue.clamp(0.0, 1.0) * 255.0).round() as u8;
-    // //info!("color c: {:?}", c);
-    // //info!("r-{}, g-{}, b-{}", r, g, b);
-    // // Format into a hexadecimal string
-    // format!("{:02X}{:02X}{:02X}", r, g, b)
-    c.to_hex()
-}
+// pub fn convert_color_to_hexstring(c: Srgba) -> String {
+//     // // Ensure the input values are within the range [0, 1]
+//     // let r = (c.red.clamp(0.0, 1.0) * 255.0).round() as u8;
+//     // let g = (c.green.clamp(0.0, 1.0) * 255.0).round() as u8;
+//     // let b = (c.blue.clamp(0.0, 1.0) * 255.0).round() as u8;
+//     // //info!("color c: {:?}", c);
+//     // //info!("r-{}, g-{}, b-{}", r, g, b);
+//     // // Format into a hexadecimal string
+//     // format!("{:02X}{:02X}{:02X}", r, g, b)
+//     c.to_hex()
+// }
 
 pub fn is_valid_email_format_string(email: &str) -> bool {
     let email_regex = Regex::new(r"(?i)^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,9})+$").unwrap();

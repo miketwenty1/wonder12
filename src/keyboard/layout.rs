@@ -355,19 +355,6 @@ pub fn setup_keyboard_numbers(
                     },
                     ..default()
                 });
-                // .with_children(|builder| {
-                //     if key_chars.len() > 4 {
-                //         spawn_keyboard_row(
-                //             builder,
-                //             font.clone(),
-                //             key_chars[4],
-                //             colors.button_color,
-                //             font_size,
-                //             padding_size,
-                //             keyboard_row_justification,
-                //         );
-                //     }
-                // });
             });
 
             keyboardcmds.set_parent(ent);
@@ -489,7 +476,12 @@ fn keyboard_button(
                                 TextStyle {
                                     font,
                                     font_size,
-                                    color: Color::rgb(0.9, 0.9, 0.9),
+                                    color: Color::Srgba(Srgba {
+                                        red: 0.9,
+                                        blue: 0.9,
+                                        green: 0.9,
+                                        alpha: 1.0,
+                                    }),
                                 },
                             ),
                             KeyBoardButton(key, alt_key),

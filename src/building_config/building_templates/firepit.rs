@@ -20,11 +20,7 @@ pub fn spawn_firepit(
     let scale_modifier = process_scale(scale_modifier);
     let animation_indices = AnimationIndices { first: 9, last: 11 };
     builder.spawn((
-        SpriteSheetBundle {
-            atlas: TextureAtlas {
-                layout: layout.clone(),
-                index: animation_indices.first,
-            },
+        SpriteBundle {
             transform: Transform {
                 translation,
                 scale: Vec3::new(
@@ -38,9 +34,13 @@ pub fn spawn_firepit(
             visibility: visibility_toggle,
             ..Default::default()
         },
-        animation_indices,
         AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
         BuildingStructure::FirePit,
         locationcoord,
+        TextureAtlas {
+            layout: layout.clone(),
+            index: animation_indices.first,
+        },
+        animation_indices,
     ));
 }

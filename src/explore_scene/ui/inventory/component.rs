@@ -6,7 +6,7 @@ pub struct InventoryNode;
 
 // left side column text
 #[derive(Component)]
-pub struct InventoryHeightText(pub u32);
+pub struct InventoryHeightText;
 
 // left side column nodes
 #[derive(Component)]
@@ -23,9 +23,6 @@ pub struct InventoryColorBoxNode(pub u32);
 // where the block grid is of individual blocks
 #[derive(Component)]
 pub struct InventoryRowsNode;
-
-#[derive(Component)]
-pub struct PlaceHolderInventoryNode;
 
 #[derive(Component)]
 pub struct InventoryToggleButton;

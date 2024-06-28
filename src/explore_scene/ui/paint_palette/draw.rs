@@ -231,7 +231,6 @@ pub fn draw_select_tile(
                         }
                         if !done2 {
                             update_color.send(NewColorPicked(underlying_sprite_for_land.color));
-                            done2 = true;
                         }
                     }
                     _ => {

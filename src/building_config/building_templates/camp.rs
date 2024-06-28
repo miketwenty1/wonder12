@@ -19,12 +19,9 @@ pub fn spawn_camp(
     scale_modifier: Option<f32>,
 ) {
     let scale_modifier = process_scale(scale_modifier);
+
     builder.spawn((
-        SpriteSheetBundle {
-            atlas: TextureAtlas {
-                layout: layout.clone(),
-                index: 1,
-            },
+        SpriteBundle {
             sprite: Sprite {
                 color,
                 ..Default::default()
@@ -40,9 +37,13 @@ pub fn spawn_camp(
             },
             texture: texture.clone(),
             visibility: visibility_toggle,
-            ..Default::default()
+            ..default()
         },
         BuildingStructure::Camp,
         locationcoord,
+        TextureAtlas {
+            layout: layout.clone(),
+            index: 1,
+        },
     ));
 }

@@ -28,7 +28,7 @@ pub fn zoom_out_button_system(
     colors: Res<ColorPalette>,
 ) {
     //let mut zoom_out = false;
-    let mut zoom_amount: f32 = 0.0;
+    //let mut zoom_amount: f32 = 0.0;
 
     for (interaction, mut color, mut border_color) in &mut interaction_query {
         //let mut text = text_query.get_mut(children[0]).unwrap();
@@ -42,7 +42,7 @@ pub fn zoom_out_button_system(
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;
                 //zoom_out = true;
-                zoom_amount = 0.1;
+                let zoom_amount = 0.1;
                 for mut ortho in cam_query.iter_mut() {
                     ortho.scale += zoom_amount;
                     if ortho.scale > ZOOM_OUT_MAX {
@@ -66,8 +66,6 @@ pub fn zoom_out_button_system(
 
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn zoom_in_button_system(
-    mut mouse: ResMut<ButtonInput<MouseButton>>,
-    mut touches: ResMut<Touches>,
     //mut mouse_wheel_events: EventReader<MouseWheel>,
     mut interaction_query: Query<
         (
@@ -84,9 +82,6 @@ pub fn zoom_in_button_system(
     //mut clear_last_selected: EventWriter<ClearLastSelectedTile>,
     colors: Res<ColorPalette>,
 ) {
-    // let mut zoom_in = false;
-    let mut zoom_amount: f32 = 0.0;
-
     for (interaction, mut color, mut border_color) in &mut interaction_query {
         //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
@@ -99,7 +94,7 @@ pub fn zoom_in_button_system(
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;
                 // zoom_in = true;
-                zoom_amount = 0.1;
+                let zoom_amount = 0.1;
                 for mut ortho in cam_query.iter_mut() {
                     ortho.scale -= zoom_amount;
                     if ortho.scale < ZOOM_IN_MAX {
@@ -192,11 +187,12 @@ pub fn pinch_system(
                 };
                 for mut ortho in cam_query.iter_mut() {
                     ortho.scale += zoom_amount * time_adjusted * 30.0;
-                    if ortho.scale > ZOOM_OUT_MAX {
-                        ortho.scale = ZOOM_OUT_MAX;
-                    } else if ortho.scale < ZOOM_IN_MAX {
-                        ortho.scale = ZOOM_IN_MAX;
-                    }
+                    // if ortho.scale > ZOOM_OUT_MAX {
+                    //     ortho.scale = ZOOM_OUT_MAX;
+                    // } else if ortho.scale < ZOOM_IN_MAX {
+                    //     ortho.scale = ZOOM_IN_MAX;
+                    // }
+                    ortho.scale = ortho.scale.clamp(ZOOM_IN_MAX, ZOOM_OUT_MAX);
                 }
             }
         } else {

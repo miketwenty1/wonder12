@@ -1,20 +1,18 @@
-use bevy::{color::palettes::css::DARK_GRAY, prelude::*, ui::FocusPolicy};
+use bevy::{color::palettes::css::DARK_GRAY, prelude::*};
 use rand::seq::SliceRandom;
-use rand::Rng;
 
 use crate::{
-    componenty::{UiInteractionBtn, UiOverlayingExplorerButton},
-    consty::{UI_ICON_SIZE, UI_MEDIUM_TEXT_SIZE, UI_SMALL_TEXT_SIZE},
+    componenty::UiInteractionBtn,
+    consty::{UI_ICON_SIZE, UI_SMALL_TEXT_SIZE},
     explore_scene::ui::{
         components::ExplorerUiNodeLeft,
         inventory::state::InventoryUiState,
         paint_palette::component::{
-            AddToCustomPaletteBtn, ColorPaletteViewText, ColorPaletteViewTextNode, PaletteBtn,
-            PaletteEraserBtn, PaletteEyedropBtn, PaletteMoveBtn, PalettePencilBtn, PaletteTrashBtn,
+            ColorPaletteViewText, ColorPaletteViewTextNode, PaletteBtn, PaletteEraserBtn,
+            PaletteEyedropBtn, PaletteMoveBtn, PalettePencilBtn, PaletteTrashBtn,
         },
     },
     resourcey::ColorPalette,
-    utils::convert_color_to_hexstring,
 };
 
 use super::{
@@ -332,7 +330,7 @@ pub fn spawn_layout(
                         .choose(&mut rng)
                         .unwrap()
                         .to_srgba();
-                    let random_color_string = convert_color_to_hexstring(random_color);
+                    let random_color_string = random_color.to_hex();
 
                     inner_builder
                         .spawn((

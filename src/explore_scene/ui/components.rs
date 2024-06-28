@@ -29,6 +29,3 @@ pub struct AmountNode;
 
 #[derive(Component)]
 pub struct AmountText;
-
-#[derive(Component)]
-pub struct TopUiItem;

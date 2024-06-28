@@ -97,7 +97,7 @@ impl Plugin for ExplorePlugin {
                         )
                             .run_if(
                                 in_state(ToolPaletteUiState::Off)
-                                    .or_else(in_state(ToolPaletteUiState::Move)),
+                                    .or(in_state(ToolPaletteUiState::Move)),
                             ),
                     )
                         .chain(),

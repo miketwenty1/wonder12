@@ -11,9 +11,6 @@ pub mod toast;
 
 pub struct OverlayUiPlugin;
 
-#[derive(Component, Debug)]
-pub struct UiOverlay;
-
 impl Plugin for OverlayUiPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(BuyDetailsMenuPlugin)

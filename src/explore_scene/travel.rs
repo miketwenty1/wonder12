@@ -5,7 +5,7 @@ use crate::{
     consty::{CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT, TOTAL_TILE_SCALE_SIZE},
     eventy::{EdgeEvent, TravelHeight},
     resourcey::Edge,
-    structy::{EdgeData, EdgeType},
+    structy::EdgeData,
 };
 
 #[allow(clippy::type_complexity)]
@@ -45,7 +45,7 @@ pub fn travel_event(
             cam_transform.translation.y = y_trans;
             //set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
             edge_event.send(EdgeEvent {
-                edge_type: EdgeType::Bottom,
+                //edge_type: EdgeType::Bottom,
                 x,
                 y,
             });

@@ -239,7 +239,7 @@ pub fn spawn_inventory_row(
                         color: colors.text_color,
                     },
                 ),
-                InventoryHeightText(block.height),
+                InventoryHeightText,
             ));
         })
         .set_parent(inventory_rows_node);

@@ -13,7 +13,7 @@ use crate::{
     resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, Nwc, TileCartVec, User},
     statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState},
     structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},
-    utils::{convert_color_to_hexstring, extract_number, logout_user},
+    utils::{extract_number, logout_user},
     ServerURL,
 };
 
@@ -58,7 +58,7 @@ pub fn api_request_invoice(
                 // info!("tile new color {:#?}", tile.new_message);
                 let invoice_block = InvoiceGameBlock {
                     height: tile.height,
-                    color: tile.new_color.to_srgba().to_hex(), //convert_color_to_hexstring(tile.new_color),
+                    color: tile.new_color.to_srgba().to_hex(),
                     message: tile.new_message.to_string(),
                     amount: tile.cost,
                 };

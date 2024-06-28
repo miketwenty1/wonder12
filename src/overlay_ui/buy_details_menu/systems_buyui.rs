@@ -431,13 +431,13 @@ pub fn set_default_text_for_empty_text(
 ) {
     if block_new_data.ln_address.is_empty() {
         for mut text in param_set.p0().iter_mut() {
-            text.sections[0].value = DEFAULT_NEW_LN_TEXT.to_owned();
+            text.sections[0].value = DEFAULT_NEW_LN_TEXT.to_string();
             text.sections[0].style.color = DEFAULT_NO_PICK_COLOR.into();
         }
     }
     if block_new_data.color_text.is_empty() {
         for mut text in param_set.p1().iter_mut() {
-            text.sections[0].value = DEFAULT_NEW_COLOR_TEXT.to_owned();
+            text.sections[0].value = DEFAULT_NEW_COLOR_TEXT.to_string();
             text.sections[0].style.color = DEFAULT_NO_PICK_COLOR.into();
         }
     } else {
@@ -447,7 +447,7 @@ pub fn set_default_text_for_empty_text(
     }
     if block_new_data.message.is_empty() {
         for mut text in param_set.p2().iter_mut() {
-            text.sections[0].value = DEFAULT_NEW_MESSAGE_TEXT.to_owned();
+            text.sections[0].value = DEFAULT_NEW_MESSAGE_TEXT.to_string();
             text.sections[0].style.color = DEFAULT_NO_PICK_COLOR.into();
         }
     } else {
@@ -670,18 +670,18 @@ pub fn resolve_target_cart_data(
         }
         TargetType::NewLnAddress => {
             let index = cart.index;
-            cart.vec[index].new_ln_address = keyboard.value.clone();
+            cart.vec[index].new_ln_address = keyboard.value.to_string();
             block_new_data.ln_address = keyboard.value.to_string();
         }
         TargetType::NewColor => {
             let index = cart.index;
-            cart.vec[index].new_color_text = keyboard.value.clone();
+            cart.vec[index].new_color_text = keyboard.value.to_string();
             cart.vec[index].new_color = block_new_data.color;
             block_new_data.color_text = keyboard.value.to_string();
         }
         TargetType::NewMessage => {
             let index = cart.index;
-            cart.vec[index].new_message = keyboard.value.clone();
+            cart.vec[index].new_message = keyboard.value.to_string();
             block_new_data.message = keyboard.value.to_string();
         }
         _ => {}

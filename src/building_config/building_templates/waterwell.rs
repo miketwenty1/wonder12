@@ -21,11 +21,7 @@ pub fn spawn_waterwell(
 ) {
     let scale_modifier = process_scale(scale_modifier);
     builder.spawn((
-        SpriteSheetBundle {
-            atlas: TextureAtlas {
-                layout: layout.clone(),
-                index: 15 + offset,
-            },
+        SpriteBundle {
             sprite: Sprite {
                 color,
                 ..Default::default()
@@ -45,5 +41,9 @@ pub fn spawn_waterwell(
         },
         BuildingStructure::Waterwell,
         locationcoord,
+        TextureAtlas {
+            layout: layout.clone(),
+            index: 15 + offset,
+        },
     ));
 }

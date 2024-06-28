@@ -4,13 +4,13 @@ use serde_json::Value;
 
 use crate::comms::server_structs::UserGameBlock;
 
-#[derive(Debug)]
-pub enum EdgeType {
-    Top,
-    Bottom,
-    Left,
-    Right,
-}
+// #[derive(Debug)]
+// pub enum EdgeType {
+//     Top,
+//     Bottom,
+//     Left,
+//     Right,
+// }
 
 #[derive(Clone)]
 pub struct EdgeData {

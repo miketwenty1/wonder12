@@ -27,11 +27,7 @@ pub fn spawn_road(
         ulam::Quad::Center => (2, 0.0),
     };
     builder.spawn((
-        SpriteSheetBundle {
-            atlas: TextureAtlas {
-                layout: layout.clone(),
-                index: road.0 + offset,
-            },
+        SpriteBundle {
             sprite: Sprite {
                 color,
                 ..Default::default()
@@ -48,5 +44,9 @@ pub fn spawn_road(
         },
         BuildingStructure::Road,
         locationcoord,
+        TextureAtlas {
+            layout: layout.clone(),
+            index: road.0 + offset,
+        },
     ));
 }

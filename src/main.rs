@@ -241,10 +241,6 @@ pub fn game12(
             message: "".to_string(),
         })
         .insert_resource(LastSelectedTile(1_000_000, 1_000_000))
-        .add_plugins(DefaultPlugins.set(AssetPlugin {
-            meta_check: AssetMetaCheck::Never,
-            ..default()
-        }))
         .insert_resource(ServerURL(server_url))
         .insert_resource(SpriteIndexBuilding(numbers_map))
         .insert_resource(ToggleMap(toggle_map))
@@ -288,7 +284,11 @@ pub fn game12(
                     primary_window: Some(window),
                     ..default()
                 })
-                .set(ImagePlugin::default_nearest()), //default_nearest()),
+                .set(ImagePlugin::default_nearest())
+                .set(AssetPlugin {
+                    meta_check: AssetMetaCheck::Never,
+                    ..default()
+                }),
         )
         .init_state::<ExploreState>()
         .init_state::<ExploreSelectState>()

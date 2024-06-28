@@ -2,7 +2,6 @@ use crate::{
     componenty::{Selected, UiInteractionBtn},
     eventy::ClearSelectionEvent,
     resourcey::{ColorPalette, UiInteracting},
-    utils::convert_color_to_hexstring,
 };
 
 use super::{
@@ -116,7 +115,7 @@ pub fn pencil_palette_button(
         Query<&mut BackgroundColor, (With<PaletteMoveBtn>, Without<PalettePencilBtn>)>,
         Query<&mut BackgroundColor, (With<PaletteEyedropBtn>, Without<PalettePencilBtn>)>,
     )>,
-    mut view_event: EventWriter<ViewSelectedTiles>,
+    // mut view_event: EventWriter<ViewSelectedTiles>,
 ) {
     for (interaction, mut color) in &mut pencil_query {
         match *interaction {
@@ -275,7 +274,7 @@ pub fn new_color_picked_on_palette_event(
         for (children, mut bg_color) in node_q.iter_mut() {
             let mut text = text_query.get_mut(children[0]).unwrap();
 
-            let new_color_hex = convert_color_to_hexstring(event_color.into());
+            let new_color_hex = event_color.to_srgba().to_hex();
             text.sections[0].value = format!("#{}", new_color_hex);
 
             *bg_color = BackgroundColor(event_color);

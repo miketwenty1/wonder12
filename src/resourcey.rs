@@ -7,7 +7,6 @@ use crate::comms::structy::TrimTile;
 use crate::comms::structy::TrimTileLocalBrowserStorage;
 use crate::structy::EdgeData;
 use crate::structy::TileResource;
-use crate::utils::convert_color_to_hexstring;
 use chrono::{DateTime, Utc};
 
 #[derive(Resource, Clone, PartialEq, Debug, Serialize, Deserialize)]
@@ -39,7 +38,7 @@ impl WorldOwnedTileMap {
                 (
                     key,
                     TrimTile {
-                        c: convert_color_to_hexstring(tile_data.color.into()), // Assuming a to_hex() method exists for Color
+                        c: tile_data.color.to_srgba().to_hex(),
                         v: tile_data.value,
                         h: tile_data.hash.clone(),
                         l: tile_data.ln_address.clone(),

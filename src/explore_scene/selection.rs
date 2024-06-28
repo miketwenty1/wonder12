@@ -2,7 +2,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 
 use crate::{
     building_config::spawn_tile_level,
-    componenty::{BuildingStructure, Land, Location, Selected, SelectedTileUi},
+    componenty::{BuildingStructure, Land, Location, Selected},
     consty::{MAX_SELECTION_SIZE, TOTAL_TILE_SCALE_SIZE},
     eventy::{SelectTileEvent, UpdateUiAmount},
     overlay_ui::toast::{ToastEvent, ToastType},

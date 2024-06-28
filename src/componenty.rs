@@ -85,46 +85,13 @@ pub struct ToggleButton;
 pub struct HideBuilding;
 
 #[derive(Component)]
-pub struct ShowBuilding;
-
-#[derive(Component)]
 pub struct ShowColors;
-
-#[derive(Component)]
-pub struct HideColors;
 
 #[derive(Component)]
 pub struct ShowValues;
 
 #[derive(Component)]
-pub struct ShowHeights;
-
-#[derive(Component)]
-pub struct ShowText;
-
-#[derive(Component)]
 pub struct HideText;
-
-#[derive(Component)]
-pub struct HideBuildingText;
-
-#[derive(Component)]
-pub struct ShowBuildingText;
-
-#[derive(Component)]
-pub struct ShowColorsText;
-
-#[derive(Component)]
-pub struct HideColorsText;
-
-#[derive(Component)]
-pub struct ShowValuesText;
-
-#[derive(Component)]
-pub struct ShowHeightsText;
-
-#[derive(Component)]
-pub struct ShowTextText;
 
 #[derive(Component)]
 pub struct HideTextText;
@@ -157,37 +124,10 @@ pub struct Toggle4BtnText;
 pub struct TileText;
 
 #[derive(Component)]
-pub struct AmountSelectedNode;
-
-#[derive(Component)]
-pub struct AmountSelectedText(pub u32);
-
-// #[derive(Component)]
-// pub struct RightCartButton;
-
-// #[derive(Component)]
-// pub struct LeftCartButton;
-
-#[derive(Component)]
 pub struct CartButton(pub i32);
 
 #[derive(Component)]
 pub struct BlockHeightCartText;
-
-#[derive(Component)]
-pub struct CurrentBlockValueText;
-
-#[derive(Component)]
-pub struct CurrentBlockDateText;
-
-#[derive(Component)]
-pub struct CurrentBlockUsernameText;
-
-#[derive(Component)]
-pub struct CurrentBlockLnAddressText;
-
-// #[derive(Component)]
-// pub struct CurrentBlockMessageText;
 
 #[derive(Component)]
 pub struct CurrentBlockMessageNode;

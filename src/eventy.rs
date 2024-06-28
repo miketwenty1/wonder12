@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     resourcey::TileData,
-    structy::{EdgeType, RequestTileType, TileTextType},
+    structy::{RequestTileType, TileTextType},
 };
 
 #[derive(Event)]
@@ -10,7 +10,7 @@ pub struct SpriteSpawnEvent;
 
 #[derive(Event, Debug)]
 pub struct EdgeEvent {
-    pub edge_type: EdgeType,
+    // pub edge_type: EdgeType, // NEVER USED!!! maybe remove?
     pub x: i32,
     pub y: i32,
 }

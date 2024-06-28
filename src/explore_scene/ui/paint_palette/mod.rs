@@ -34,9 +34,9 @@ impl Plugin for PaintPalettePlugin {
         .add_systems
         (
             Update,
-            ((individual_color_palette_button, new_color_picked_on_palette_event, move_palette_button, 
+            (individual_color_palette_button, new_color_picked_on_palette_event, move_palette_button, 
                 pencil_palette_button, trash_palette_button, eraser_palette_button, eyedrop_palette_button, 
-                viewhide_palette_button, hide_selected_tiles, view_selected_tiles).run_if(in_state(PaintPaletteUiState::On))),
+                viewhide_palette_button, hide_selected_tiles, view_selected_tiles).run_if(in_state(PaintPaletteUiState::On)),
         )
         .add_systems
         (Update,
@@ -44,9 +44,9 @@ impl Plugin for PaintPalettePlugin {
                 ui_interaction_enabled_buttons,
 
                 ((mouse_draw_choose_tile, draw_select_tile, touch_draw_choose_tile)
-                .run_if(not(in_state(ToolPaletteUiState::Off).or_else(in_state(ToolPaletteUiState::Move)))
-                .and_then(in_state(PaintPaletteUiState::On)
-                .and_then(in_state(DisplayBuyUiState::Off))))),
+                .run_if(not(in_state(ToolPaletteUiState::Off).or(in_state(ToolPaletteUiState::Move)))
+                .and(in_state(PaintPaletteUiState::On)
+                .and(in_state(DisplayBuyUiState::Off))))),
 
                 ui_interaction_released_buttons
 

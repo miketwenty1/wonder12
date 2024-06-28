@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use bevy::{
     input::mouse::MouseMotion, math::Vec3A, prelude::*, render::primitives::Aabb,
-    sprite::MaterialMesh2dBundle, text::Text2dBounds,
+    text::Text2dBounds,
 };
 use rand::Rng;
 use ulam::Quad;
@@ -29,20 +29,20 @@ use crate::{
         SpriteSheetBg, SpriteSheetBuilding, TileData, ToggleMap, WorldOwnedTileMap,
     },
     statey::{DisplayBuyUiState, InitLoadingBlocksState},
-    structy::{EdgeType, SpawnDiffData},
+    structy::SpawnDiffData,
 };
 
 use super::ui::paint_palette::event::ViewSelectedTiles;
 
-pub fn reset_mouse(
-    mut mouse: ResMut<ButtonInput<MouseButton>>,
-    mut motion: ResMut<Events<MouseMotion>>,
-) {
-    mouse.clear();
-    mouse.clear_just_pressed(MouseButton::Left);
-    mouse.clear_just_released(MouseButton::Left);
-    motion.clear();
-}
+// pub fn reset_mouse(
+//     mut mouse: ResMut<ButtonInput<MouseButton>>,
+//     mut motion: ResMut<Events<MouseMotion>>,
+// ) {
+//     mouse.clear();
+//     mouse.clear_just_pressed(MouseButton::Left);
+//     mouse.clear_just_released(MouseButton::Left);
+//     motion.clear();
+// }
 
 #[allow(clippy::too_many_arguments)]
 pub fn init_explorer(
@@ -317,11 +317,7 @@ pub fn spawn_block_sprites(
                     }
 
                     let mut cmd = commands.spawn((
-                        SpriteSheetBundle {
-                            atlas: TextureAtlas {
-                                layout: texture_atlas_handle_bg.layout.clone(),
-                                index: land_sprite_index,
-                            },
+                        SpriteBundle {
                             sprite: Sprite {
                                 color: color_for_tile,
                                 ..Default::default()
@@ -341,6 +337,10 @@ pub fn spawn_block_sprites(
                         },
                         locationcoord,
                         Land,
+                        TextureAtlas {
+                            layout: texture_atlas_handle_bg.layout.clone(),
+                            index: land_sprite_index,
+                        },
                     ));
 
                     // SPAWN correct text for tile based on toggle
@@ -422,7 +422,7 @@ pub fn set_camera_tile_bounds(
         edge.right.tile -= CHUNK_TILE_SPAN_COUNT;
 
         edge_event.send(EdgeEvent {
-            edge_type: EdgeType::Left,
+            //edge_type: EdgeType::Left,
             x: edge.left.tile,
             y: (edge.top.tile + edge.bottom.tile) / 2,
         });
@@ -435,7 +435,7 @@ pub fn set_camera_tile_bounds(
         edge.left.pixel += CHUNK_PIXEL_SIZE;
         edge.left.tile += CHUNK_TILE_SPAN_COUNT;
         edge_event.send(EdgeEvent {
-            edge_type: EdgeType::Right,
+            //edge_type: EdgeType::Right,
             x: edge.right.tile,
             y: (edge.top.tile + edge.bottom.tile) / 2,
         });
@@ -454,7 +454,7 @@ pub fn set_camera_tile_bounds(
         edge.bottom.pixel += CHUNK_PIXEL_SIZE;
         edge.bottom.tile += CHUNK_TILE_SPAN_COUNT;
         edge_event.send(EdgeEvent {
-            edge_type: EdgeType::Top,
+            //edge_type: EdgeType::Top,
             x: (edge.left.tile + edge.right.tile) / 2,
             y: edge.top.tile,
         });
@@ -473,7 +473,7 @@ pub fn set_camera_tile_bounds(
         edge.top.pixel -= CHUNK_PIXEL_SIZE;
         edge.top.tile -= CHUNK_TILE_SPAN_COUNT;
         edge_event.send(EdgeEvent {
-            edge_type: EdgeType::Bottom,
+            //edge_type: EdgeType::Bottom,
             x: (edge.left.tile + edge.right.tile) / 2,
             y: edge.bottom.tile,
         });

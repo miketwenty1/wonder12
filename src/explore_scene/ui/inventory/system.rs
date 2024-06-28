@@ -141,7 +141,7 @@ pub fn visible_inventory_toggle_button(
                             texture: asset_server.load("ui/expandarrow_60x60.png"),
                             flip_x: false,
                             flip_y: true,
-                            color: colors.light_color.into(),
+                            color: colors.light_color,
                         };
                     } else {
                         style.display = Display::Grid;

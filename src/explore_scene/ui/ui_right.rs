@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::WHITE, prelude::*};
 
 use crate::{
     componenty::{
@@ -7,10 +7,7 @@ use crate::{
         Toggle3BtnText, Toggle4Btn, Toggle4BtnText, ToggleButton, ToggleParent, UiInteractionBtn,
         UiOverlayingExplorerButton, UiSideNode,
     },
-    consty::{
-        UI_ICON_SIZE, UI_LARGE_BUTTON_HEIGHT, UI_LARGE_BUTTON_WIDTH, UI_MEDIUM_TEXT_SIZE,
-        UI_SMALL_TEXT_SIZE,
-    },
+    consty::{UI_ICON_SIZE, UI_SMALL_TEXT_SIZE},
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
     resourcey::{ColorPalette, ToggleMap, ToggleVisible},
     structy::TileTextType,
@@ -420,7 +417,7 @@ pub fn toggle_button_system(
             Interaction::None => {
                 //text.sections[0].value = button_text;
                 //let a = *color;
-                *color = BackgroundColor(Color::rgba(1.0, 1.0, 1.0, 1.0));
+                *color = BackgroundColor(WHITE.into());
             }
         }
     }

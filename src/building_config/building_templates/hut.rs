@@ -20,11 +20,7 @@ pub fn spawn_hut(
 ) {
     let scale_modifier = process_scale(scale_modifier);
     builder.spawn((
-        SpriteSheetBundle {
-            atlas: TextureAtlas {
-                layout: layout.clone(),
-                index: 2,
-            },
+        SpriteBundle {
             sprite: Sprite {
                 color,
                 ..Default::default()
@@ -44,5 +40,9 @@ pub fn spawn_hut(
         },
         BuildingStructure::Hut,
         locationcoord,
+        TextureAtlas {
+            layout: layout.clone(),
+            index: 2,
+        },
     ));
 }

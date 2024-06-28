@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::WHITE, prelude::*};
 use rand::Rng;
 
 use crate::componenty::Location;
@@ -33,7 +33,7 @@ pub fn spawn(
         texture,
         layout,
         builder,
-        Color::rgba(1.0, 1.0, 1.0, 1.0),
+        WHITE.into(),
         locationcoord,
         1,
         visibility_toggle,

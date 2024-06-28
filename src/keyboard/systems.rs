@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    input::keyboard::{Key, KeyboardInput},
+    prelude::*,
+};
 
 use crate::resourcey::{ColorPalette, TargetType};
 
@@ -20,7 +23,7 @@ const MAX_INPUT_LENGTH: usize = 140;
 const MAX_INPUT_FOR_HEIGHT: usize = 7;
 #[allow(clippy::type_complexity)]
 pub fn physical_keyboard_system(
-    mut char_evr: EventReader<ReceivedCharacter>,
+    mut char_evr: EventReader<KeyboardInput>,
     keys: Res<ButtonInput<KeyCode>>,
     mut keyboard_text: ResMut<KeyboardData>,
 ) {
@@ -29,26 +32,51 @@ pub fn physical_keyboard_system(
     }
 
     for ev in char_evr.read() {
-        let k = ev.char.to_string().chars().next().unwrap();
+        match &ev.logical_key {
+            Key::Character(smol) => {
+                let ks = smol.chars();
+                for k in ks {
+                    if ACCEPTABLE_CHARS.contains(k)
+                        && keyboard_text.value.len() < MAX_INPUT_LENGTH
+                        && (keyboard_text.target == TargetType::NewColor
+                            || keyboard_text.target == TargetType::NewLnAddress
+                            || keyboard_text.target == TargetType::NewMessage)
+                    {
+                        keyboard_text.value.push(k);
+                        // for numbered only targets
+                    } else if ACCEPTABLE_NUMBER_CHARS.contains(k)
+                        && keyboard_text.value.len() < MAX_INPUT_FOR_HEIGHT
+                        && keyboard_text.target == TargetType::GoTo
+                    {
+                        keyboard_text.value.push(k);
+                    } else {
+                        info!("no likey this character sorry")
+                    }
+                }
+            }
+            Key::Space => {
+                if keyboard_text.value.len() < MAX_INPUT_LENGTH
+                    && (keyboard_text.target == TargetType::NewColor
+                        || keyboard_text.target == TargetType::NewLnAddress
+                        || keyboard_text.target == TargetType::NewMessage)
+                {
+                    keyboard_text.value.push(' ');
+                    // for numbered only targets
+                } else if keyboard_text.value.len() < MAX_INPUT_FOR_HEIGHT
+                    && keyboard_text.target == TargetType::GoTo
+                {
+                    keyboard_text.value.push(' ');
+                } else {
+                    info!("no likey this character sorry")
+                }
+            }
+            _ => {
+                info!("some key came in that")
+            }
+        }
+        // let k = ev. .char.to_string().chars().next().unwrap();
 
         // for alphanumeric targets
-        #[allow(clippy::if_same_then_else)]
-        if ACCEPTABLE_CHARS.contains(k)
-            && keyboard_text.value.len() < MAX_INPUT_LENGTH
-            && (keyboard_text.target == TargetType::NewColor
-                || keyboard_text.target == TargetType::NewLnAddress
-                || keyboard_text.target == TargetType::NewMessage)
-        {
-            keyboard_text.value.push(k);
-            // for numbered only targets
-        } else if ACCEPTABLE_NUMBER_CHARS.contains(k)
-            && keyboard_text.value.len() < MAX_INPUT_FOR_HEIGHT
-            && keyboard_text.target == TargetType::GoTo
-        {
-            keyboard_text.value.push(k);
-        } else {
-            info!("no likey this character sorry")
-        }
 
         //info!("new pkeydata {:?}", keyboard_text.0);
     }

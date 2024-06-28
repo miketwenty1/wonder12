@@ -11,11 +11,7 @@ pub fn spawn(
     color: Color,
 ) {
     builder.spawn((
-        SpriteSheetBundle {
-            atlas: TextureAtlas {
-                layout: layout.clone(),
-                index: 0,
-            },
+        SpriteBundle {
             sprite: Sprite {
                 color,
                 ..Default::default()
@@ -31,5 +27,9 @@ pub fn spawn(
         DrawSelected,
         Selected(color),
         locationcoord,
+        TextureAtlas {
+            layout: layout.clone(),
+            index: 0,
+        },
     ));
 }
