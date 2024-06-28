@@ -5,7 +5,6 @@ use crate::{
     consty::MINIMUM_BLOCK_AMOUNT,
     eventy::UpdateUiAmount,
     resourcey::{TileCart, TileCartData, UserPurchasedBlockMessage, WorldOwnedTileMap},
-    utils::get_random_color,
 };
 
 use super::ui::components::{AmountText, BlockCountText};
@@ -46,16 +45,20 @@ pub fn update_amount_selected_text(
         let mut total_cost: u32 = 0;
         tile_cart.map.clear();
         for (land, selected) in selected_lands.iter() {
+            // info!("raw query {:?}", selected.0);
             let a = tile_map.map.get(&land.ulam);
-
+            // info!("selected color: {:?}", selected.0);
             // land exist and is owned by someone
             if let Some(val) = a {
+                //info!("land exist and is owned by someone...");
                 let current_message = UserPurchasedBlockMessage {
                     username: val.username.clone(),
                     value: val.value,
                     message: val.message.clone(),
                 };
                 total_cost += val.cost;
+
+                //info!("selected color is----->: {:?}", selected.0);
                 tile_cart.map.insert(
                     land.ulam,
                     TileCartData {
@@ -76,6 +79,8 @@ pub fn update_amount_selected_text(
                 );
             // this is a new land that hasn't been purchased yet
             } else {
+                //info!("selected color is++++++> {:?}", selected.0);
+
                 total_cost += MINIMUM_BLOCK_AMOUNT;
                 tile_cart.map.insert(
                     land.ulam,

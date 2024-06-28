@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    componenty::EditabledTextBox,
+    componenty::{EditabledTextBox, UiInteractionBtn},
     consty::{DEFAULT_HEIGHT_INPUT_TEXT, DEFAULT_NO_PICK_COLOR},
     eventy::NumberKeyboardSpawnEvent,
     keyboard::{components::NumberKeyboardNode, resources::KeyboardData},
@@ -145,6 +145,7 @@ pub fn spawn_layout(
                                     background_color: colors.red_color.into(),
                                     ..default()
                                 },
+                                UiInteractionBtn,
                                 GoToBackBtn,
                             ))
                             .with_children(|ccbuilder| {
@@ -247,6 +248,7 @@ fn height_input_box(
                         background_color: button_color.into(),
                         ..default()
                     },
+                    UiInteractionBtn,
                     GoToTextBoxButton,
                     EditabledTextBox,
                 ))
@@ -302,6 +304,7 @@ fn setup_goto_go_button(
                         background_color: colors.button_color.into(),
                         ..default()
                     },
+                    UiInteractionBtn,
                     GoToGoBtn,
                 ))
                 .with_children(|parent2| {

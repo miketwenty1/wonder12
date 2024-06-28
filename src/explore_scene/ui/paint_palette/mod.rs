@@ -1,12 +1,11 @@
 use bevy::prelude::*;
 use draw::{draw_select_tile, mouse_draw_choose_tile, touch_draw_choose_tile};
-use event::{DrawSelectTileEvent, NewColorPicked};
+use event::{DrawSelectTileEvent, HideSelectedTiles, NewColorPicked, ViewSelectedTiles};
 use layout::{hide_layout, highlight_pencil, show_layout, spawn_layout};
+use resource::ViewablePaletteTiles;
 use state::{PaintPaletteUiState, ToolPaletteUiState};
 use system::{
-    eraser_palette_button, eyedrop_palette_button, individual_color_palette_button,
-    move_palette_button, new_color_picked_on_palette_event, pencil_palette_button,
-    trash_palette_button, ui_interaction_enabled_buttons, ui_interaction_released_buttons,
+    eraser_palette_button, eyedrop_palette_button, hide_selected_tiles, individual_color_palette_button, move_palette_button, new_color_picked_on_palette_event, pencil_palette_button, trash_palette_button, ui_interaction_enabled_buttons, ui_interaction_released_buttons, view_selected_tiles, viewhide_palette_button
 };
 
 use crate::statey::DisplayBuyUiState;
@@ -29,10 +28,15 @@ impl Plugin for PaintPalettePlugin {
         )
         .add_event::<NewColorPicked>()
         .add_event::<DrawSelectTileEvent>()
+        .add_event::<ViewSelectedTiles>()
+        .add_event::<HideSelectedTiles>()
+        .insert_resource(ViewablePaletteTiles(true))
         .add_systems
         (
             Update,
-            (individual_color_palette_button, new_color_picked_on_palette_event, move_palette_button, pencil_palette_button, trash_palette_button, eraser_palette_button, eyedrop_palette_button),
+            ((individual_color_palette_button, new_color_picked_on_palette_event, move_palette_button, 
+                pencil_palette_button, trash_palette_button, eraser_palette_button, eyedrop_palette_button, 
+                viewhide_palette_button, hide_selected_tiles, view_selected_tiles).run_if(in_state(PaintPaletteUiState::On))),
         )
         .add_systems
         (Update,

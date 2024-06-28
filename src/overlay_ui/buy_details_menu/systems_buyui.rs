@@ -35,6 +35,7 @@ pub fn update_messages_ui_system(
     message_placement_q: Query<Entity, With<CurrentBlockMessageNode>>,
     asset_server: Res<AssetServer>,
     mut messages_received: EventReader<MessageReceivedFromServer>,
+    mut message_showhide_q: Query<&mut Style, With<HideMessageBtn>>,
 ) {
     for block_height in messages_received.read() {
         if block_height.0 == cart.vec[cart.index].height {
@@ -45,6 +46,11 @@ pub fn update_messages_ui_system(
 
             match &cart.vec[cart.index].messages {
                 Some(s) => {
+                    if !s.is_empty() {
+                        for mut style in message_showhide_q.iter_mut() {
+                            style.display = Display::Grid;
+                        }
+                    }
                     for node in message_placement_q.iter() {
                         commands.entity(node).with_children(|child_builder| {
                             spawn_messages(
@@ -269,8 +275,8 @@ pub fn config_cart_button_system(
                     if cart_config.0 {
                         text.sections[0].value = "X".to_string();
                         for block in cart.vec.iter_mut() {
-                            block.new_color_text = cart_item.color_text.to_string();
-                            block.new_color = cart_item.color;
+                            //block.new_color_text = cart_item.color_text.to_string();
+                            //block.new_color = cart_item.color;
                             block.new_message = cart_item.message.to_string();
                         }
                     } else {

@@ -18,7 +18,7 @@ use crate::{
 };
 
 use super::{
-    component::{IndividualColorInPalette, PaintPaletteNode},
+    component::{IndividualColorInPalette, PaintPaletteNode, PaletteViewHideBtn, ViewHideImg},
     resource::DefaultDrawColorPalette,
     state::ToolPaletteUiState,
 };
@@ -39,12 +39,13 @@ pub fn spawn_layout(
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
                     padding: UiRect::all(Val::Px(4.0)),
-                    margin: UiRect::all(Val::Px(4.0)),
+                    margin: UiRect::bottom(Val::Auto),
+                    //margin: UiRect::all(Val::Px(4.0)),
                     row_gap: Val::Px(6.0),
                     ..default()
                 },
                 visibility: Visibility::Visible,
-                background_color: BackgroundColor(Color::BLUE), //colors.node_color),
+                background_color: BackgroundColor(colors.node_color_lighter), //colors.node_color),
                 ..default()
             },
             PaintPaletteNode,
@@ -65,7 +66,7 @@ pub fn spawn_layout(
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::GREEN),
+                    background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
                 .with_children(|inner_builder| {
@@ -150,12 +151,13 @@ pub fn spawn_layout(
                     style: Style {
                         display: Display::Flex,
                         flex_direction: FlexDirection::Row,
-                        row_gap: Val::Px(6.0),
+                        //row_gap: Val::Px(6.0),
                         justify_content: JustifyContent::Center,
                         padding: UiRect::all(Val::Px(4.0)),
+                        flex_wrap: FlexWrap::Wrap,
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::GREEN),
+                    background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
                 .with_children(|inner_builder| {
@@ -241,6 +243,44 @@ pub fn spawn_layout(
                                     justify_content: JustifyContent::Center,
                                     // vertically center child text
                                     align_items: AlignItems::Center,
+                                    ..default()
+                                },
+                                //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
+                                border_color: BorderColor(Color::BLACK),
+                                background_color: BackgroundColor(Color::WHITE),
+                                visibility: Visibility::Visible,
+                                ..default()
+                            },
+                            UiInteractionBtn,
+                            PaletteViewHideBtn,
+                            PaletteBtn,
+                        ))
+                        .with_children(|in_in_builder| {
+                            in_in_builder.spawn((
+                                ImageBundle {
+                                    style: Style {
+                                        height: Val::Px(UI_ICON_SIZE / 2.5),
+                                        width: Val::Px(UI_ICON_SIZE / 2.5),
+                                        ..default()
+                                    },
+                                    image: UiImage::new(asset_server.load("ui/view_120x120.png")),
+                                    ..default()
+                                },
+                                ViewHideImg,
+                            ));
+                        });
+                    inner_builder
+                        .spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    margin: UiRect::all(Val::Px(3.0)),
+                                    width: Val::Px(UI_ICON_SIZE / 2.), // to make it a square.
+                                    height: Val::Px(UI_ICON_SIZE / 2.),
+                                    border: UiRect::all(Val::Px(2.0)),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
 
                                     ..default()
                                 },
@@ -276,11 +316,11 @@ pub fn spawn_layout(
                         display: Display::Flex,
                         flex_direction: FlexDirection::Row,
                         column_gap: Val::Px(2.0),
+                        justify_content: JustifyContent::Center,
                         padding: UiRect::all(Val::Px(2.0)),
-
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::GREEN),
+                    background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
                 .with_children(|inner_builder| {
@@ -322,54 +362,55 @@ pub fn spawn_layout(
                         });
 
                     // ADD TO PALETTE BTN
-                    inner_builder
-                        .spawn(NodeBundle {
-                            style: Style {
-                                display: Display::Flex,
-                                flex_direction: FlexDirection::Row,
-                                row_gap: Val::Px(6.0),
-                                //padding: UiRect::all(Val::Px(2.0)),
-                                ..default()
-                            },
-                            background_color: BackgroundColor(Color::ORANGE_RED),
-                            ..default()
-                        })
-                        .with_children(|in_in_builder| {
-                            in_in_builder
-                                .spawn((
-                                    ButtonBundle {
-                                        style: Style {
-                                            //margin: UiRect::all(Val::Px(0.0)),
-                                            width: Val::Px(UI_ICON_SIZE), // to make it a square.
-                                            height: Val::Px(UI_ICON_SIZE / 1.5),
-                                            border: UiRect::all(Val::Px(2.0)),
-                                            justify_content: JustifyContent::Center,
-                                            align_items: AlignItems::Center,
-                                            ..default()
-                                        },
-                                        border_color: BorderColor(Color::BLACK),
-                                        background_color: BackgroundColor(Color::BLUE),
-                                        visibility: Visibility::Visible,
-                                        ..default()
-                                    },
-                                    UiInteractionBtn,
-                                    PaletteBtn,
-                                    AddToCustomPaletteBtn,
-                                ))
-                                .with_children(|in_in_in_b| {
-                                    in_in_in_b.spawn((
-                                        TextBundle::from_section(
-                                            "Add to\nPalette".to_string(),
-                                            TextStyle {
-                                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                                font_size: UI_SMALL_TEXT_SIZE,
-                                                color: colors.text_color,
-                                            },
-                                        ),
-                                        ColorPaletteViewText,
-                                    ));
-                                });
-                        });
+                    // THIS FEATURE PUT ON
+                    // inner_builder
+                    //     .spawn(NodeBundle {
+                    //         style: Style {
+                    //             display: Display::Flex,
+                    //             flex_direction: FlexDirection::Row,
+                    //             row_gap: Val::Px(6.0),
+                    //             //padding: UiRect::all(Val::Px(2.0)),
+                    //             ..default()
+                    //         },
+                    //         background_color: BackgroundColor(Color::ORANGE_RED),
+                    //         ..default()
+                    //     })
+                    //     .with_children(|in_in_builder| {
+                    //         in_in_builder
+                    //             .spawn((
+                    //                 ButtonBundle {
+                    //                     style: Style {
+                    //                         //margin: UiRect::all(Val::Px(0.0)),
+                    //                         width: Val::Px(UI_ICON_SIZE), // to make it a square.
+                    //                         height: Val::Px(UI_ICON_SIZE / 1.5),
+                    //                         border: UiRect::all(Val::Px(2.0)),
+                    //                         justify_content: JustifyContent::Center,
+                    //                         align_items: AlignItems::Center,
+                    //                         ..default()
+                    //                     },
+                    //                     border_color: BorderColor(Color::BLACK),
+                    //                     background_color: BackgroundColor(Color::BLUE),
+                    //                     visibility: Visibility::Visible,
+                    //                     ..default()
+                    //                 },
+                    //                 UiInteractionBtn,
+                    //                 PaletteBtn,
+                    //                 AddToCustomPaletteBtn,
+                    //             ))
+                    //             .with_children(|in_in_in_b| {
+                    //                 in_in_in_b.spawn((
+                    //                     TextBundle::from_section(
+                    //                         "Add to\nPalette".to_string(),
+                    //                         TextStyle {
+                    //                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                    //                             font_size: UI_SMALL_TEXT_SIZE,
+                    //                             color: colors.text_color,
+                    //                         },
+                    //                     ),
+                    //                     ColorPaletteViewText,
+                    //                 ));
+                    //             });
+                    //     });
                 });
 
             ///////////
@@ -382,13 +423,14 @@ pub fn spawn_layout(
                         flex_direction: FlexDirection::Row,
                         row_gap: Val::Px(4.0),
                         column_gap: Val::Px(4.0),
-                        width: Val::Auto,
+                        //width: Val::Auto,
+                        //margin: UiRect::horizontal(Val::Px(4.0)),
                         flex_wrap: FlexWrap::Wrap,
-                        padding: UiRect::vertical(Val::Px(4.0)),
+                        padding: UiRect::vertical(Val::Px(2.0)),
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::rgb(0.75, 0.70, 0.80)),
+                    background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
                 .with_children(|inner_builder| {

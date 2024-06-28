@@ -94,7 +94,10 @@ pub fn select_tile(
                     if count > MAX_SELECTION_SIZE - 1 {
                         toast.send(ToastEvent {
                             ttype: ToastType::Warn,
-                            message: "Please unselect some tiles, Maximum 100".to_string(),
+                            message: format!(
+                                "Please unselect some tiles, Maximum {}",
+                                MAX_SELECTION_SIZE
+                            ),
                         });
                     }
 
@@ -124,6 +127,7 @@ pub fn select_tile(
                 }
             }
         }
+        // info!("yo momma4");
         update_ui_amount_event.send(UpdateUiAmount);
     }
 }

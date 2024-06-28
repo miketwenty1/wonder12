@@ -30,9 +30,9 @@ use browser::state::BrowserStorageState;
 use browser::BrowserPlugin;
 use chrono::{Duration, Utc};
 use eventy::{
-    BlockDetailMessage, DespawnInventoryHeights, HideBackupCopyBtn, KeyboardSpawnEvent,
-    MessageReceivedFromServer, NumberKeyboardSpawnEvent, RequestInventoryEvent, ShowBackupCopyBtn,
-    TravelHeight, UpdateTilesAfterPurchase,
+    BlockDetailMessage, ClearManualSelectionEvent, DespawnInventoryHeights, HideBackupCopyBtn,
+    KeyboardSpawnEvent, MessageReceivedFromServer, NumberKeyboardSpawnEvent, RequestInventoryEvent,
+    ShowBackupCopyBtn, TravelHeight, UpdateTilesAfterPurchase,
 };
 use explore_scene::ui::inventory::state::InventoryUiState;
 use explore_scene::ui::paint_palette::resource::DefaultDrawColorPalette;
@@ -320,6 +320,7 @@ pub fn game12(
         .add_event::<BuyBlockRequest>()
         .add_event::<RequestTileUpdates>()
         .add_event::<ClearSelectionEvent>()
+        .add_event::<ClearManualSelectionEvent>()
         .add_event::<ClearLastSelectedTile>()
         .add_event::<KeyboardSpawnEvent>()
         .add_event::<NumberKeyboardSpawnEvent>()

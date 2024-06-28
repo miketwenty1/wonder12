@@ -1,15 +1,13 @@
-use std::ptr::null;
-
 use bevy::prelude::*;
 
 use crate::{
     componenty::{DrawBtn, DrawBtnImage},
-    eventy::ClearSelectionEvent,
+    eventy::ClearManualSelectionEvent,
     explore_scene::ui::paint_palette::state::ToolPaletteUiState,
     resourcey::ColorPalette,
 };
 
-use super::ui::paint_palette::state::PaintPaletteUiState;
+use super::ui::paint_palette::{event::ViewSelectedTiles, state::PaintPaletteUiState};
 
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn draw_button_system(
@@ -24,23 +22,24 @@ pub fn draw_button_system(
     paint_palette_state: Res<State<PaintPaletteUiState>>,
     mut movement_palette_state: ResMut<NextState<ToolPaletteUiState>>,
     asset_server: Res<AssetServer>,
-    mut clear_event: EventWriter<ClearSelectionEvent>,
+    mut clear_event: EventWriter<ClearManualSelectionEvent>,
+    mut palette_tiles_view_event: EventWriter<ViewSelectedTiles>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 for mut image in &mut draw_image_q {
                     *color = colors.light_color.into();
-
                     if *paint_palette_state == PaintPaletteUiState::On {
+                        palette_tiles_view_event.send(ViewSelectedTiles);
                         ui_state.set(PaintPaletteUiState::Off);
-                        clear_event.send(ClearSelectionEvent);
+                        clear_event.send(ClearManualSelectionEvent);
                         info!("draw off");
                         *image = UiImage::new(asset_server.load("ui/blank_120x120.png"));
                     } else {
                         ui_state.set(PaintPaletteUiState::On);
                         movement_palette_state.set(ToolPaletteUiState::Pencil);
-                        clear_event.send(ClearSelectionEvent);
+                        clear_event.send(ClearManualSelectionEvent);
                         info!("draw on");
                         *image = UiImage::new(asset_server.load("ui/cancel_120x120.png"));
                     }

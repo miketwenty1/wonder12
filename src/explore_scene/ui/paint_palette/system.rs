@@ -1,5 +1,5 @@
 use crate::{
-    componenty::UiInteractionBtn,
+    componenty::{Selected, UiInteractionBtn},
     eventy::ClearSelectionEvent,
     resourcey::{ColorPalette, UiInteracting},
     utils::convert_color_to_hexstring,
@@ -8,9 +8,10 @@ use crate::{
 use super::{
     component::{
         ColorPaletteViewTextNode, IndividualColorInPalette, PaletteEraserBtn, PaletteEyedropBtn,
-        PaletteMoveBtn, PalettePencilBtn, PaletteTrashBtn,
+        PaletteMoveBtn, PalettePencilBtn, PaletteTrashBtn, PaletteViewHideBtn, ViewHideImg,
     },
-    event::NewColorPicked,
+    event::{HideSelectedTiles, NewColorPicked, ViewSelectedTiles},
+    resource::ViewablePaletteTiles,
     state::ToolPaletteUiState,
 };
 use bevy::{
@@ -114,6 +115,7 @@ pub fn pencil_palette_button(
         Query<&mut BackgroundColor, (With<PaletteMoveBtn>, Without<PalettePencilBtn>)>,
         Query<&mut BackgroundColor, (With<PaletteEyedropBtn>, Without<PalettePencilBtn>)>,
     )>,
+    mut view_event: EventWriter<ViewSelectedTiles>,
 ) {
     for (interaction, mut color) in &mut pencil_query {
         match *interaction {
@@ -158,11 +160,13 @@ pub fn eraser_palette_button(
         Query<&mut BackgroundColor, (With<PaletteMoveBtn>, Without<PaletteEraserBtn>)>,
         Query<&mut BackgroundColor, (With<PaletteEyedropBtn>, Without<PaletteEraserBtn>)>,
     )>,
+    mut view_event: EventWriter<ViewSelectedTiles>,
 ) {
     for (interaction, mut color) in &mut eraser_query {
         match *interaction {
             Interaction::Pressed => {
                 *color = colors.green_color.into();
+                view_event.send(ViewSelectedTiles);
                 tool_palette_state_c.set(ToolPaletteUiState::Eraser);
 
                 for mut bg_color in tool_set.p0().iter_mut() {
@@ -280,17 +284,18 @@ pub fn new_color_picked_on_palette_event(
 
 #[allow(clippy::type_complexity)]
 pub fn trash_palette_button(
-    mut pencil_query: Query<
+    mut trash_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<PaletteTrashBtn>),
     >,
     colors: Res<ColorPalette>,
     mut clear_event: EventWriter<ClearSelectionEvent>,
-    mut mouse: ResMut<ButtonInput<MouseButton>>,
+    mut view_event: EventWriter<ViewSelectedTiles>,
 ) {
-    for (interaction, mut color) in &mut pencil_query {
+    for (interaction, mut color) in &mut trash_query {
         match *interaction {
             Interaction::Pressed => {
+                view_event.send(ViewSelectedTiles);
                 *color = colors.green_color.into();
                 clear_event.send(ClearSelectionEvent);
             }
@@ -300,6 +305,76 @@ pub fn trash_palette_button(
             Interaction::None => {
                 *color = colors.light_color.into();
             }
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn viewhide_palette_button(
+    mut viewhide_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<PaletteViewHideBtn>),
+    >,
+    colors: Res<ColorPalette>,
+    mut view: ResMut<ViewablePaletteTiles>,
+    mut hide_event: EventWriter<HideSelectedTiles>,
+    mut view_event: EventWriter<ViewSelectedTiles>,
+) {
+    for (interaction, mut color) in &mut viewhide_query {
+        match *interaction {
+            Interaction::Pressed => {
+                if !view.0 {
+                    view_event.send(ViewSelectedTiles);
+                } else {
+                    hide_event.send(HideSelectedTiles);
+                }
+                view.0 = !view.0;
+                *color = colors.green_color.into();
+            }
+            Interaction::Hovered => {
+                *color = colors.accent_color.into();
+            }
+            Interaction::None => {
+                *color = colors.light_color.into();
+            }
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn hide_selected_tiles(
+    mut event: EventReader<HideSelectedTiles>,
+    mut selected_query: Query<&mut Visibility, With<Selected>>,
+    mut viewhide_query: Query<&mut UiImage, With<ViewHideImg>>,
+    asset_server: Res<AssetServer>,
+    mut view: ResMut<ViewablePaletteTiles>,
+) {
+    for _e in event.read() {
+        for mut visi in selected_query.iter_mut() {
+            view.0 = false;
+            *visi = Visibility::Hidden;
+        }
+        for mut image in viewhide_query.iter_mut() {
+            *image = UiImage::new(asset_server.load("ui/hide_120x120.png"));
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn view_selected_tiles(
+    mut event: EventReader<ViewSelectedTiles>,
+    mut selected_query: Query<&mut Visibility, With<Selected>>,
+    asset_server: Res<AssetServer>,
+    mut viewhide_query: Query<&mut UiImage, With<ViewHideImg>>,
+    mut view: ResMut<ViewablePaletteTiles>,
+) {
+    for _e in event.read() {
+        for mut visi in selected_query.iter_mut() {
+            view.0 = true;
+            *visi = Visibility::Visible;
+        }
+        for mut image in viewhide_query.iter_mut() {
+            *image = UiImage::new(asset_server.load("ui/view_120x120.png"));
         }
     }
 }

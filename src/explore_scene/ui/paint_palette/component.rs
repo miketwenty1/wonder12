@@ -33,3 +33,9 @@ pub struct AddToCustomPaletteBtn;
 
 #[derive(Component)]
 pub struct IndividualColorInPalette(pub Color);
+
+#[derive(Component)]
+pub struct PaletteViewHideBtn;
+
+#[derive(Component)]
+pub struct ViewHideImg;

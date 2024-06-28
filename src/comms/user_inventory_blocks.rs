@@ -65,8 +65,8 @@ pub fn api_receive_inventory_blocks(
                 let r_result = serde_json::from_str::<UserInventoryBlocksFromServer>(&og_r);
                 match r_result {
                     Ok(o) => {
-                        info!("receiving inventory: {:#?}", o);
-
+                        //info!("receiving inventory: {:#?}", o);
+                        info!("receiving {} blocks for inventory", o.ownedblocks.len());
                         data_res_map.ownedblocks = o.map();
                         api_inventory_state.set(CommsApiInventoryState::Off);
                         inventory_ui_state.set(InventoryUiState::On);

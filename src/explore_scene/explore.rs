@@ -11,8 +11,8 @@ use crate::{
     building_config::{spawn_tile_level, utils::sanitize_building_color},
     componenty::{
         AnimationIndices, AnimationTimer, BuildingStructure, BuySelectionButton,
-        ClearSelectionButton, InitLoadingNode, InitLoadingText, Land, Location, Selected,
-        SelectedTileUi, TileText, UiNode, UiOverlayingExplorerButton,
+        ClearSelectionButton, InitLoadingNode, InitLoadingText, Land, Location, ManualSelected,
+        Selected, SelectedTileUi, TileText, UiNode, UiOverlayingExplorerButton,
     },
     consty::{
         BUILDING_ZOOM_OUT_MAX, CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT,
@@ -20,7 +20,8 @@ use crate::{
         TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
-        ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent, UpdateTileTextureEvent, UpdateUiAmount,
+        ClearManualSelectionEvent, ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent,
+        UpdateTileTextureEvent, UpdateUiAmount,
     },
     overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
@@ -31,11 +32,7 @@ use crate::{
     structy::{EdgeType, SpawnDiffData},
 };
 
-// async fn get_game_data() -> Result<String, JsValue> {
-//     let promise = retrieveLocalBrowserGameData();
-//     let result = JsFuture::from(promise).await?;
-//     Ok(result.as_string().unwrap_or_default())
-// }
+use super::ui::paint_palette::event::ViewSelectedTiles;
 
 pub fn reset_mouse(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
@@ -196,6 +193,9 @@ pub fn edge_system(
         }
         //debug!("reached edge: {:?}", edge_e.edge_type);
         sprite_spawn_event.send(SpriteSpawnEvent);
+        //info!("yo momma1");
+
+        // We are calling so many edge events that this update amount is being called constantly when the camera moves around, just FYI
         update_ui_amount_event.send(UpdateUiAmount);
     }
 }
@@ -502,9 +502,6 @@ pub fn update_tile_textures(
     texture_atlas_handle_building: Res<SpriteSheetBuilding>,
     toggle_map: Res<ToggleMap>,
     mut text_q: Query<(&mut Text, &Location), With<TileText>>,
-    // mut toggle_buildings: EventWriter<ToggleBuildings>,
-    // mut toggle_colors: EventWriter<ToggleColors>,
-    // mut toggle_text: EventWriter<ToggleText>,
 ) {
     for tile_vec in event.read() {
         info!("receving update texture event");
@@ -524,15 +521,12 @@ pub fn update_tile_textures(
         } else {
             Visibility::Visible
         };
-        // info!("for loop");
-        // info!("EVENT MAP {:#?}", tile_map_from_e);
-        // info!("TILEMAP {:#?}", tile_map.map);
+
         for (mut texture, mut sprite, location, parent_entity) in lands.iter_mut() {
             if tile_map.map.contains_key(&location.ulam)
                 && tile_map_from_e.contains_key(&location.ulam)
             {
-                //info!("location.ulam: {}", location.ulam);
-                //let tile_data = tile_map.map.get(&location.ulam).unwrap(); // making it where the event is driving not the tile resource
+                // making it where the event is driving not the tile resource
                 let tile_data = tile_map_from_e.get(&location.ulam).unwrap();
                 // info!("{:#?}", tile_data);
                 let building_sprite_index = *texture_map.0.get(&tile_data.value).unwrap() as usize;
@@ -568,14 +562,6 @@ pub fn update_tile_textures(
                     texture.index = 0;
                 }
 
-                //let base_sprite_index: usize = rng.gen_range(1..=11);
-                //let land_sprite_index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
-                //texture.index = land_sprite_index; //*texture_map.0.get(&base_sprite_index).unwrap() as usize;
-
-                // if (there is some change) {
-
-                // }
-                //if building
                 for (building_location, building_entity) in buildings.iter() {
                     if building_location.ulam == location.ulam {
                         //info!("despawning old building stuff");
@@ -597,26 +583,10 @@ pub fn update_tile_textures(
                             visibility_building_toggle,
                         );
                     });
-
-                //info!("{:#?}", locationcoord);
             }
         }
 
-        info!("updated textures");
         for (mut text, loc) in text_q.iter_mut() {
-            //let a = tile_map.map.get(&loc.ulam);
-
-            // match a {
-            //     Some(val) => {
-            //         if *hiding_text {
-            //         } else if *showing_value {
-            //             text.sections[0].value = val.cost.to_string();
-            //         } else {
-            //             text.sections[0].value = val.height.to_string();
-            //         }
-            //     }
-            //     None => {}
-            // }
             if let Some(val) = tile_map.map.get(&loc.ulam) {
                 if !*hiding_text {
                     if *showing_value {
@@ -627,19 +597,6 @@ pub fn update_tile_textures(
                 }
             }
         }
-
-        info!("updated text");
-        // toggle_buildings.send(ToggleBuildings);
-        // toggle_colors.send(ToggleColors);
-        // if !*hiding_text {
-        //     if *showing_value {
-        //         toggle_text.send(ToggleText(TileTextType::Value));
-        //     } else {
-        //         toggle_text.send(ToggleText(TileTextType::Height));
-        //     }
-        // } else {
-        //     toggle_text.send(ToggleText(TileTextType::Blank));
-        // }
     }
 }
 
@@ -677,11 +634,13 @@ pub fn clear_selection_button(
     mut text_query: Query<&mut Text>,
     mut clear_event: EventWriter<ClearSelectionEvent>,
     colors: Res<ColorPalette>,
+    mut palette_tiles_view_event: EventWriter<ViewSelectedTiles>,
 ) {
     for (interaction, mut color, mut border_color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
+                palette_tiles_view_event.send(ViewSelectedTiles);
                 text.sections[0].value = "Clear".to_string();
                 *color = colors.light_color.into();
                 border_color.0 = colors.light_color;
@@ -720,6 +679,39 @@ pub fn clear_selection(
         for mut visibility in tile_selected_button_q.iter_mut() {
             *visibility = Visibility::Hidden;
         }
+        // info!("yo momma2");
+        update_ui_amount_event.send(UpdateUiAmount);
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn clear_manual_selection(
+    mut selected_q: Query<
+        Entity,
+        (
+            With<Selected>,
+            Without<Land>,
+            With<ManualSelected>,
+            Without<BuildingStructure>,
+        ),
+    >,
+    mut selected_lands_q: Query<&mut Location>,
+    mut tile_selected_button_q: Query<&mut Visibility, With<SelectedTileUi>>,
+    mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
+    mut commands: Commands,
+    mut clear_event: EventReader<ClearManualSelectionEvent>,
+) {
+    for _e in clear_event.read() {
+        for sentity in selected_q.iter_mut() {
+            commands.entity(sentity).despawn();
+        }
+        for mut location in selected_lands_q.iter_mut() {
+            location.selected = false;
+        }
+        for mut visibility in tile_selected_button_q.iter_mut() {
+            *visibility = Visibility::Hidden;
+        }
+        // info!("yo momma3");
         update_ui_amount_event.send(UpdateUiAmount);
     }
 }
@@ -764,7 +756,10 @@ pub fn buy_selection_button(
                 if count > MAX_SELECTION_SIZE {
                     toast.send(ToastEvent {
                         ttype: ToastType::Bad,
-                        message: "Please unselect some tiles, Maximum 100".to_string(),
+                        message: format!(
+                            "Please unselect some tiles, Maximum {}",
+                            MAX_SELECTION_SIZE
+                        ),
                     });
                 } else {
                     for mut button in ui_buttons.iter_mut() {

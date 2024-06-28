@@ -11,7 +11,8 @@ use crate::{
 
 use super::{
     component::ColorPaletteViewTextNode,
-    event::{DrawSelectTileEvent, NewColorPicked},
+    event::{DrawSelectTileEvent, NewColorPicked, ViewSelectedTiles},
+    resource::ViewablePaletteTiles,
     state::ToolPaletteUiState,
 };
 
@@ -111,8 +112,16 @@ pub fn draw_select_tile(
     tool_palette_state: Res<State<ToolPaletteUiState>>,
     //mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
     mut update_color: EventWriter<NewColorPicked>,
+    mut view_event: EventWriter<ViewSelectedTiles>,
+    view: Res<ViewablePaletteTiles>,
 ) {
     for e in event.read() {
+        // doing this as an easy hack to prevent doing some complicated state thing where the pencil
+        // is selected and then you hide the view but then afterwards you continue to draw
+        if !view.0 {
+            view_event.send(ViewSelectedTiles);
+        }
+
         let mut done = false;
         //let event_val = ulam::value_of_xy(e.0, e.1);
         for (mut location, parent_entity, underlying_sprite_for_land) in lands.iter_mut() {
@@ -120,8 +129,9 @@ pub fn draw_select_tile(
             if location.x == e.0 && location.y == e.1 {
                 match **tool_palette_state {
                     ToolPaletteUiState::Pencil => {
+                        //info!("pencil");
                         // looping through all selected tiles
-                        for (_ent, mut sprite, slocation, draw_selected) in
+                        for (ent, mut sprite, slocation, _draw_selected) in
                             selected_lands.iter_mut()
                         {
                             // color is new for already selected tile color
@@ -129,26 +139,31 @@ pub fn draw_select_tile(
                                 && slocation.y == e.1
                                 && slocation.x == location.x
                                 && slocation.y == location.y
-                                && draw_selected.0 != e.2
+                                && sprite.color != e.2
                             {
+                                //info!("ONE");
                                 //info!("despawn branch");
                                 // commands.entity(sentity).despawn();
                                 // location.selected = false;
                                 //change color
+                                commands.entity(ent).remove::<Selected>();
+                                commands.entity(ent).insert(Selected(e.2));
                                 sprite.color = e.2;
                                 done = true;
+                                update_ui_amount_event.send(UpdateUiAmount);
                             }
                             // nothing to do color is the same
                             if slocation.x == e.0
                                 && slocation.y == e.1
                                 && slocation.x == location.x
                                 && slocation.y == location.y
-                                && draw_selected.0 == e.2
+                                && sprite.color == e.2
                             {
-                                //info!("despawn branch");
+                                // info!("TWO");
+                                // info!("despawn branch");
                                 // commands.entity(sentity).despawn();
                                 // location.selected = false;
-                                //change color
+                                // change color
                                 done = true;
                             }
                         }
@@ -156,6 +171,7 @@ pub fn draw_select_tile(
                         if !done
                         // there a new color is being written, overwrite, otherwise nothing
                         {
+                            //info!("THREE");
                             commands
                                 .entity(parent_entity)
                                 .with_children(|child_builder| {
@@ -200,24 +216,20 @@ pub fn draw_select_tile(
                     }
                     ToolPaletteUiState::Eyedrop => {
                         let mut done2 = false;
-                        for (_ent, sprite_selected, slocation, draw_selected) in
+                        for (_ent, sprite_selected, slocation, _draw_selected) in
                             selected_lands.iter_mut()
                         {
-                            let a = draw_selected.0;
                             // color is new for already selected tile color
                             if slocation.x == e.0
                                 && slocation.y == e.1
                                 && slocation.x == location.x
                                 && slocation.y == location.y
                             {
-                                info!("huh?");
-                                update_color.send(NewColorPicked(draw_selected.0));
-                                done = true;
+                                update_color.send(NewColorPicked(sprite_selected.color));
+                                done2 = true;
                             }
-                            info!("huh3?");
                         }
                         if !done2 {
-                            info!("huh2?");
                             update_color.send(NewColorPicked(underlying_sprite_for_land.color));
                             done2 = true;
                         }

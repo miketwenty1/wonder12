@@ -43,6 +43,9 @@ pub struct RequestTileUpdates(pub RequestTileType);
 pub struct ClearSelectionEvent;
 
 #[derive(Event, Debug)]
+pub struct ClearManualSelectionEvent;
+
+#[derive(Event, Debug)]
 pub struct ClearLastSelectedTile;
 
 #[derive(Event, Debug)]

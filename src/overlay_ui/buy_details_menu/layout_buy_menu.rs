@@ -359,7 +359,7 @@ pub fn spawn_layout(
                     ..default()
                 })
                 .with_children(|builder| {
-                    setup_config_for_all_blocks_button(
+                    setup_message_for_all_blocks_button(
                         builder,
                         font.clone(),
                         " ".to_string(),
@@ -370,7 +370,7 @@ pub fn spawn_layout(
                     spawn_nested_text_bundle_flex(
                         builder,
                         font.clone(),
-                        "Apply to all selected blocks",
+                        "Apply message to\nall selected blocks",
                         15.0,
                         colors.node_color,
                         colors.text_color,
@@ -578,7 +578,7 @@ fn spawn_new_value_block_cost(
             ));
         });
 }
-fn setup_config_for_all_blocks_button(
+fn setup_message_for_all_blocks_button(
     builder: &mut ChildBuilder,
     font: Handle<Font>,
     button_text: String,
@@ -772,7 +772,7 @@ fn spawn_nested_text_bundle_flex(
                 display: Display::Flex,
                 //justify_items: JustifyItems::Center,
                 //flex_direction: FlexDirection::Row,
-                padding: UiRect::all(Val::Px(1.0)),
+                margin: UiRect::horizontal(Val::Px(5.0)),
                 ..default()
             },
             background_color: BackgroundColor(node_color),
@@ -908,6 +908,7 @@ fn current_message_title(
                     ButtonBundle {
                         style: Style {
                             border: UiRect::all(Val::Px(1.0)),
+                            display: Display::None,
                             ..default()
                         },
                         border_color: BorderColor(accent_color),
@@ -918,7 +919,7 @@ fn current_message_title(
                 ))
                 .with_children(|innerbuilder| {
                     innerbuilder.spawn((TextBundle::from_section(
-                        "Hide/Show",
+                        "Hide Messages",
                         TextStyle {
                             font: font.clone(),
                             font_size,

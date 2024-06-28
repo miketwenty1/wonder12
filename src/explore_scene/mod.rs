@@ -14,6 +14,7 @@ pub mod update_toggle_events;
 pub mod zoom;
 
 use bevy::prelude::*;
+use explore::clear_manual_selection;
 use palette::draw_button_system;
 use ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
 use zoom::zoom_wheel_system;
@@ -108,6 +109,7 @@ impl Plugin for ExplorePlugin {
                     land_color_event,
                     change_tile_text_event,
                     clear_selection,
+                    clear_manual_selection,
                     clear_last_selected_tile,
                     clear_last_selected_tile_ui_button,
                     draw_button_system,

@@ -43,13 +43,13 @@ pub fn ui_explorer(mut commands: Commands) {
                     height: Val::Px(50.0),
                     ..default()
                 },
-                //visibility: Visibility::Hidden,
-                background_color: BackgroundColor(Color::Rgba {
-                    red: 1.0,
-                    green: 0.1,
-                    blue: 0.1,
-                    alpha: 0.5,
-                }),
+                visibility: Visibility::Hidden,
+                // background_color: BackgroundColor(Color::Rgba {
+                //     red: 1.0,
+                //     green: 0.1,
+                //     blue: 0.1,
+                //     alpha: 0.5,
+                // }),
                 ..default()
             },
             ExplorerUiNodeTop,
@@ -72,7 +72,7 @@ pub fn ui_explorer(mut commands: Commands) {
                 //     blue: 0.1,
                 //     alpha: 0.3,
                 // }),
-                background_color: BackgroundColor(Color::ORANGE_RED),
+                //background_color: BackgroundColor(Color::ORANGE_RED),
                 ..default()
             },
             ExplorerUiNodeLeft,
