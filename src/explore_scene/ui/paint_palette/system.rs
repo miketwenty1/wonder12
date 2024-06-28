@@ -1,70 +1,304 @@
-use crate::resourcey::ColorPalette;
+use crate::{
+    componenty::UiInteractionBtn,
+    eventy::ClearSelectionEvent,
+    resourcey::{ColorPalette, UiInteracting},
+    utils::convert_color_to_hexstring,
+};
 
 use super::{
-    component::{PaletteBtn, PaletteMoveBtn},
-    resource::MovementPaletteSelected,
-    state::MovementPaletteUiState,
+    component::{
+        ColorPaletteViewTextNode, IndividualColorInPalette, PaletteEraserBtn, PaletteEyedropBtn,
+        PaletteMoveBtn, PalettePencilBtn, PaletteTrashBtn,
+    },
+    event::NewColorPicked,
+    state::ToolPaletteUiState,
 };
-use bevy::prelude::*;
+use bevy::{
+    input::{mouse::MouseButtonInput, touch::TouchPhase, ButtonState},
+    prelude::*,
+};
 
 #[allow(clippy::type_complexity)]
-pub fn general_palette_buttons(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (
-            Changed<Interaction>,
-            (With<PaletteBtn>, Without<PaletteMoveBtn>),
-        ),
-    >,
-    colors: Res<ColorPalette>,
+pub fn ui_interaction_enabled_buttons(
+    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<UiInteractionBtn>)>,
+    mut ui_interacting: ResMut<UiInteracting>,
 ) {
-    for (interaction, mut color) in &mut interaction_query {
+    for interaction in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
+                //info!("interaction true");
+                *ui_interacting = UiInteracting(true);
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn ui_interaction_released_buttons(
+    mut ui_interacting: ResMut<UiInteracting>,
+    mut mouse_event: EventReader<MouseButtonInput>,
+    mut touch_event: EventReader<TouchInput>,
+) {
+    for mouse in mouse_event.read() {
+        if mouse.button == MouseButton::Left && mouse.state == ButtonState::Released {
+            //info!("interaction false");
+            ui_interacting.0 = false;
+        }
+    }
+
+    for touch in touch_event.read() {
+        if touch.phase == TouchPhase::Ended || touch.phase == TouchPhase::Canceled {
+            ui_interacting.0 = false;
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn move_palette_button(
+    mut move_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<PaletteMoveBtn>),
+    >,
+    colors: Res<ColorPalette>,
+    mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
+    tool_palette_state: Res<State<ToolPaletteUiState>>,
+    mut tool_set: ParamSet<(
+        Query<&mut BackgroundColor, (With<PalettePencilBtn>, Without<PaletteMoveBtn>)>,
+        Query<&mut BackgroundColor, (With<PaletteEraserBtn>, Without<PaletteMoveBtn>)>,
+        Query<&mut BackgroundColor, (With<PaletteEyedropBtn>, Without<PaletteMoveBtn>)>,
+    )>,
+) {
+    for (interaction, mut color) in &mut move_query {
+        match *interaction {
+            Interaction::Pressed => {
+                tool_palette_state_c.set(ToolPaletteUiState::Move);
                 *color = colors.green_color.into();
+
+                for mut bg_color in tool_set.p0().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
+                for mut bg_color in tool_set.p1().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
+                for mut bg_color in tool_set.p2().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
             }
             Interaction::None => {
-                *color = colors.light_color.into();
+                if **tool_palette_state != ToolPaletteUiState::Move {
+                    *color = colors.light_color.into();
+                } else {
+                    *color = colors.accent_color.into();
+                }
             }
         }
     }
 }
 
 #[allow(clippy::type_complexity)]
-pub fn move_palette_buttons(
-    mut interaction_query: Query<
+pub fn pencil_palette_button(
+    mut pencil_query: Query<
         (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<PaletteMoveBtn>),
+        (Changed<Interaction>, With<PalettePencilBtn>),
     >,
     colors: Res<ColorPalette>,
-    mut selected: ResMut<MovementPaletteSelected>,
-    mut movement_palette_state: ResMut<NextState<MovementPaletteUiState>>,
+    mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
+    tool_palette_state: Res<State<ToolPaletteUiState>>,
+    mut tool_set: ParamSet<(
+        Query<&mut BackgroundColor, (With<PaletteEraserBtn>, Without<PalettePencilBtn>)>,
+        Query<&mut BackgroundColor, (With<PaletteMoveBtn>, Without<PalettePencilBtn>)>,
+        Query<&mut BackgroundColor, (With<PaletteEyedropBtn>, Without<PalettePencilBtn>)>,
+    )>,
 ) {
-    for (interaction, mut color) in &mut interaction_query {
+    for (interaction, mut color) in &mut pencil_query {
         match *interaction {
             Interaction::Pressed => {
-                *selected = MovementPaletteSelected(!selected.0);
-
-                if selected.0 {
-                    movement_palette_state.set(MovementPaletteUiState::Off);
-                } else {
-                    movement_palette_state.set(MovementPaletteUiState::On);
-                }
-
+                tool_palette_state_c.set(ToolPaletteUiState::Pencil);
                 *color = colors.green_color.into();
+                for mut bg_color in tool_set.p0().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
+                for mut bg_color in tool_set.p1().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
+                for mut bg_color in tool_set.p2().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
             }
             Interaction::None => {
-                if selected.0 {
-                    *color = colors.accent_color.into();
-                } else {
+                if **tool_palette_state != ToolPaletteUiState::Pencil {
                     *color = colors.light_color.into();
+                } else {
+                    *color = colors.accent_color.into();
                 }
+            }
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn eraser_palette_button(
+    mut eraser_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<PaletteEraserBtn>),
+    >,
+    colors: Res<ColorPalette>,
+    mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
+    tool_palette_state: Res<State<ToolPaletteUiState>>,
+    mut tool_set: ParamSet<(
+        Query<&mut BackgroundColor, (With<PalettePencilBtn>, Without<PaletteEraserBtn>)>,
+        Query<&mut BackgroundColor, (With<PaletteMoveBtn>, Without<PaletteEraserBtn>)>,
+        Query<&mut BackgroundColor, (With<PaletteEyedropBtn>, Without<PaletteEraserBtn>)>,
+    )>,
+) {
+    for (interaction, mut color) in &mut eraser_query {
+        match *interaction {
+            Interaction::Pressed => {
+                *color = colors.green_color.into();
+                tool_palette_state_c.set(ToolPaletteUiState::Eraser);
+
+                for mut bg_color in tool_set.p0().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
+                for mut bg_color in tool_set.p1().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
+                for mut bg_color in tool_set.p2().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
+            }
+            Interaction::Hovered => {
+                *color = colors.accent_color.into();
+            }
+            Interaction::None => {
+                if **tool_palette_state != ToolPaletteUiState::Eraser {
+                    *color = colors.light_color.into();
+                } else {
+                    *color = colors.accent_color.into();
+                }
+            }
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn eyedrop_palette_button(
+    mut eyedrop_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<PaletteEyedropBtn>),
+    >,
+    colors: Res<ColorPalette>,
+    mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
+    tool_palette_state: Res<State<ToolPaletteUiState>>,
+    mut tool_set: ParamSet<(
+        Query<&mut BackgroundColor, (With<PalettePencilBtn>, Without<PaletteEyedropBtn>)>,
+        Query<&mut BackgroundColor, (With<PaletteMoveBtn>, Without<PaletteEyedropBtn>)>,
+        Query<&mut BackgroundColor, (With<PaletteEraserBtn>, Without<PaletteEyedropBtn>)>,
+    )>,
+) {
+    for (interaction, mut color) in &mut eyedrop_query {
+        match *interaction {
+            Interaction::Pressed => {
+                *color = colors.green_color.into();
+                tool_palette_state_c.set(ToolPaletteUiState::Eyedrop);
+
+                for mut bg_color in tool_set.p0().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
+                for mut bg_color in tool_set.p1().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
+                for mut bg_color in tool_set.p2().iter_mut() {
+                    *bg_color = colors.light_color.into();
+                }
+            }
+            Interaction::Hovered => {
+                *color = colors.accent_color.into();
+            }
+            Interaction::None => {
+                if **tool_palette_state != ToolPaletteUiState::Eyedrop {
+                    *color = colors.light_color.into();
+                } else {
+                    *color = colors.accent_color.into();
+                }
+            }
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn individual_color_palette_button(
+    mut query: Query<
+        (&Interaction, &mut BorderColor, &IndividualColorInPalette),
+        (Changed<Interaction>, With<IndividualColorInPalette>),
+    >,
+    colors: Res<ColorPalette>,
+    mut color_update: EventWriter<NewColorPicked>,
+) {
+    for (interaction, mut border_color, color) in &mut query {
+        match *interaction {
+            Interaction::Pressed => {
+                *border_color = colors.light_color.into();
+                color_update.send(NewColorPicked(color.0));
+            }
+            Interaction::Hovered => {
+                *border_color = colors.yellow_color.into();
+            }
+            Interaction::None => {
+                *border_color = Color::DARK_GRAY.into();
+            }
+        }
+    }
+}
+
+#[allow(dead_code)]
+pub fn new_color_picked_on_palette_event(
+    mut event_reader: EventReader<NewColorPicked>,
+    mut node_q: Query<(&mut Children, &mut BackgroundColor), With<ColorPaletteViewTextNode>>,
+    mut text_query: Query<&mut Text>,
+) {
+    for event in event_reader.read() {
+        let event_color = event.0;
+        for (children, mut bg_color) in node_q.iter_mut() {
+            let mut text = text_query.get_mut(children[0]).unwrap();
+
+            let new_color_hex = convert_color_to_hexstring(event_color);
+            text.sections[0].value = format!("#{}", new_color_hex);
+
+            *bg_color = BackgroundColor(event_color);
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn trash_palette_button(
+    mut pencil_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<PaletteTrashBtn>),
+    >,
+    colors: Res<ColorPalette>,
+    mut clear_event: EventWriter<ClearSelectionEvent>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
+) {
+    for (interaction, mut color) in &mut pencil_query {
+        match *interaction {
+            Interaction::Pressed => {
+                *color = colors.green_color.into();
+                clear_event.send(ClearSelectionEvent);
+            }
+            Interaction::Hovered => {
+                *color = colors.accent_color.into();
+            }
+            Interaction::None => {
+                *color = colors.light_color.into();
             }
         }
     }

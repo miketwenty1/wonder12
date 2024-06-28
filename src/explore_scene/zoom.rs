@@ -93,8 +93,8 @@ pub fn zoom_in_button_system(
             Interaction::Pressed => {
                 // for mobile keep eye on https://github.com/bevyengine/bevy/pull/10930
                 //clear_last_selected.send(ClearLastSelectedTile);
-                mouse.clear();
-                touches.clear();
+                // mouse.clear();
+                // touches.clear();
                 //text.sections[0].value = "+".to_string();
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;

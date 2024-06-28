@@ -4,6 +4,7 @@ use crate::componenty::Location;
 
 pub mod level1;
 pub mod level10;
+pub mod level11;
 pub mod level2;
 pub mod level3;
 pub mod level4;
@@ -13,6 +14,7 @@ pub mod level7;
 pub mod level8;
 pub mod level9;
 
+pub mod draw_select_tile;
 pub mod select_tile;
 pub mod utils;
 
@@ -128,11 +130,24 @@ pub fn spawn_tile_level(
                 building_visibility_toggle,
             );
         }
+        11 => {
+            level11::spawn(
+                texture,
+                layout,
+                builder,
+                color_for_sprites,
+                locationcoord,
+                building_visibility_toggle,
+            );
+        }
         100 => {
             select_tile::spawn(texture, layout, builder, locationcoord);
         }
+        101 => {
+            draw_select_tile::spawn(texture, layout, builder, locationcoord, color_for_sprites);
+        }
         _ => {
-            // do nothing
+            // do no ting
         }
     }
 }

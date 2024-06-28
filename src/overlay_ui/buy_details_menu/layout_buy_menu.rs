@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, ui::FocusPolicy};
 
 use crate::{
     componenty::{
@@ -6,11 +6,11 @@ use crate::{
         BlockUiMessageItem, BtnShowingColor, BuyMenuButton, CartButton, CouldBeEditabledTextBox,
         CurrentBlockMessageNode, EditabledTextBox, HideMessageBtn, NewBlockColorButton,
         NewBlockColorText, NewBlockDataButton, NewBlockLnAddressButton, NewBlockLnAddressText,
-        NewBlockMessageButton, NewBlockMessageText,
+        NewBlockMessageButton, NewBlockMessageText, UiInteractionBtn,
     },
     consty::{
         DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
-        DEFAULT_NO_PICK_COLOR,
+        DEFAULT_NO_PICK_COLOR, MINIMUM_BLOCK_AMOUNT,
     },
     eventy::{BlockDetailMessage, KeyboardSpawnEvent},
     keyboard::{components::KeyboardNode, KeyboardState},
@@ -55,8 +55,8 @@ pub fn spawn_layout(
     let cart_total: u32 = tile_cart_vec.vec.iter().map(|tile| tile.cost).sum();
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     let first_cart_block = tile_cart_vec.vec.first().unwrap();
-    // if there might be messages (i.e. value > 128, meaning more than just the current potential message then we'll query db)
-    if first_cart_block.value > 128 {
+    // if there might be messages (i.e. value > MINIMUM_BLOCK_AMOUNT, meaning more than just the current potential message then we'll query db)
+    if first_cart_block.value > MINIMUM_BLOCK_AMOUNT {
         message_writer.send(BlockDetailMessage(first_cart_block.height));
     }
 
@@ -111,7 +111,7 @@ pub fn spawn_layout(
                     min_width: Val::Px(w_size), //Val::Percent(25.0),
                     ..default()
                 },
-
+                focus_policy: FocusPolicy::Block,
                 background_color: BackgroundColor(colors.node_color),
                 ..default()
             },
@@ -186,6 +186,7 @@ pub fn spawn_layout(
                                     background_color: colors.red_color.into(),
                                     ..default()
                                 },
+                                UiInteractionBtn,
                                 ButtonBack,
                             ))
                             .with_children(|ccbuilder| {
@@ -669,6 +670,7 @@ fn setup_buy_create_invoice_button(
                         background_color: button_color.into(),
                         ..default()
                     },
+                    UiInteractionBtn,
                     BuyMenuButton,
                 ))
                 .with_children(|parent2| {
@@ -720,6 +722,7 @@ fn setup_back_from_buy_menu_button(
                         background_color: button_color.into(),
                         ..default()
                     },
+                    UiInteractionBtn,
                     ButtonBack,
                 ))
                 .with_children(|parent2| {

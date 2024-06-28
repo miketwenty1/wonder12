@@ -8,8 +8,11 @@ pub enum PaintPaletteUiState {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-pub enum MovementPaletteUiState {
-    On,
+pub enum ToolPaletteUiState {
+    Pencil,
+    Move,
+    Eraser,
+    Eyedrop,
     #[default]
     Off,
 }

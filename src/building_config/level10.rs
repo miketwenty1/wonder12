@@ -1,8 +1,9 @@
 use bevy::prelude::*;
+use rand::Rng;
 
 use crate::componenty::Location;
 
-use super::building_templates::{castle::spawn_castle, road::spawn_road};
+use super::building_templates::{house::spawn_house, road::spawn_road, waterwell::spawn_waterwell};
 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn(
@@ -13,15 +14,33 @@ pub fn spawn(
     locationcoord: Location,
     visibility_toggle: Visibility,
 ) {
-    spawn_castle(
+    let mut rng = rand::thread_rng();
+    let x: f32 = rng.gen_range(-4.0..4.0);
+    let y: f32 = rng.gen_range(5.0..7.0);
+
+    spawn_house(
         texture,
         layout,
         builder,
         color,
         locationcoord,
         visibility_toggle,
-        Vec3::new(0., 0., 3.0),
-        Some(2.0),
+        Vec3::new(x, y, 3.0),
+        Some(1.5),
+    );
+
+    let x: f32 = rng.gen_range(-9.0..9.0);
+    let y: f32 = rng.gen_range(-9.0..-6.0);
+    spawn_waterwell(
+        texture,
+        layout,
+        builder,
+        color,
+        locationcoord,
+        visibility_toggle,
+        Vec3::new(x, y, 4.0),
+        Some(0.75),
+        1,
     );
 
     spawn_road(

@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use crate::{
     componenty::{DrawBtn, DrawBtnImage},
     eventy::ClearSelectionEvent,
-    explore_scene::ui::paint_palette::state::MovementPaletteUiState,
+    explore_scene::ui::paint_palette::state::ToolPaletteUiState,
     resourcey::ColorPalette,
 };
 
@@ -22,7 +22,7 @@ pub fn draw_button_system(
     colors: Res<ColorPalette>,
     mut ui_state: ResMut<NextState<PaintPaletteUiState>>,
     paint_palette_state: Res<State<PaintPaletteUiState>>,
-    mut movement_palette_state: ResMut<NextState<MovementPaletteUiState>>,
+    mut movement_palette_state: ResMut<NextState<ToolPaletteUiState>>,
     asset_server: Res<AssetServer>,
     mut clear_event: EventWriter<ClearSelectionEvent>,
 ) {
@@ -34,11 +34,12 @@ pub fn draw_button_system(
 
                     if *paint_palette_state == PaintPaletteUiState::On {
                         ui_state.set(PaintPaletteUiState::Off);
+                        clear_event.send(ClearSelectionEvent);
                         info!("draw off");
                         *image = UiImage::new(asset_server.load("ui/blank_120x120.png"));
                     } else {
                         ui_state.set(PaintPaletteUiState::On);
-                        movement_palette_state.set(MovementPaletteUiState::On);
+                        movement_palette_state.set(ToolPaletteUiState::Pencil);
                         clear_event.send(ClearSelectionEvent);
                         info!("draw on");
                         *image = UiImage::new(asset_server.load("ui/cancel_120x120.png"));

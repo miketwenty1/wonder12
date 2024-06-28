@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
+    componenty::UiInteractionBtn,
     eventy::{KeyboardSpawnEvent, NumberKeyboardSpawnEvent},
     resourcey::{ColorPalette, WinSize},
 };
@@ -477,6 +478,7 @@ fn keyboard_button(
                         background_color: button_color.into(),
                         ..default()
                     },
+                    UiInteractionBtn,
                     KeyBoardButton(key, alt_key),
                     //key_type.clone(),
                 ))

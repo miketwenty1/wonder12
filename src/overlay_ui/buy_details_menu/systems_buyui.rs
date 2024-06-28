@@ -10,7 +10,7 @@ use crate::{
     },
     consty::{
         DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
-        DEFAULT_NO_PICK_COLOR,
+        DEFAULT_NO_PICK_COLOR, MINIMUM_BLOCK_AMOUNT,
     },
     eventy::{BlockDetailMessage, BuyBlockRequest, MessageReceivedFromServer},
     keyboard::{resources::KeyboardData, KeyboardState},
@@ -165,12 +165,12 @@ pub fn leftright_cart_button_system(
 
                     match cart.vec[cart.index].value {
                         0 => {
-                            // 0: show nothing, 128: show current owner
+                            // 0: show nothing, MINIMUM_BLOCK_AMOUNT: show current owner
                             // Since both cases are effectively no-ops in your example, they're combined here.
-                            // You may need to adjust this based on actual logic you want to implement for value 128.
+                            // You may need to adjust this based on actual logic you want to implement for value MINIMUM_BLOCK_AMOUNT.
                             //info!("no messages to show");
                         }
-                        128 => {
+                        MINIMUM_BLOCK_AMOUNT => {
                             //info!("current message to show"); eventually if it makes sense we can load the first message first
                         }
                         _ => {

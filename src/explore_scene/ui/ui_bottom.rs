@@ -2,8 +2,8 @@ use bevy::prelude::*;
 
 use crate::{
     componenty::{
-        BuySelectionButton, ClearSelectionButton, SelectedTileUi, UiOverlayingExplorerButton,
-        ZoomInButton, ZoomOutButton,
+        BuySelectionButton, ClearSelectionButton, SelectedTileUi, UiInteractionBtn,
+        UiOverlayingExplorerButton, ZoomInButton, ZoomOutButton,
     },
     consty::{
         UI_LARGE_BUTTON_HEIGHT, UI_LARGE_BUTTON_WIDTH, UI_LARGE_TEXT_SIZE, UI_MEDIUM_TEXT_SIZE,
@@ -38,6 +38,7 @@ pub fn bottom_ui(
                     visibility: Visibility::Hidden,
                     ..default()
                 },
+                UiInteractionBtn,
                 ClearSelectionButton,
                 SelectedTileUi,
                 UiOverlayingExplorerButton,
@@ -71,6 +72,7 @@ pub fn bottom_ui(
                     background_color: colors.button_color.into(),
                     ..default()
                 },
+                UiInteractionBtn,
                 ZoomOutButton,
                 UiOverlayingExplorerButton,
             ))
@@ -102,6 +104,7 @@ pub fn bottom_ui(
                     background_color: colors.button_color.into(),
                     ..default()
                 },
+                UiInteractionBtn,
                 ZoomInButton,
                 UiOverlayingExplorerButton,
             ))
@@ -134,6 +137,7 @@ pub fn bottom_ui(
                     visibility: Visibility::Hidden,
                     ..default()
                 },
+                UiInteractionBtn,
                 UiOverlayingExplorerButton,
                 BuySelectionButton,
                 SelectedTileUi,

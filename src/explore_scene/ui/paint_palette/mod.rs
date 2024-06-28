@@ -1,8 +1,15 @@
 use bevy::prelude::*;
-use layout::{hide_layout, show_layout, spawn_layout};
-use resource::MovementPaletteSelected;
-use state::PaintPaletteUiState;
-use system::{general_palette_buttons, move_palette_buttons};
+use draw::{draw_select_tile, mouse_draw_choose_tile, touch_draw_choose_tile};
+use event::{DrawSelectTileEvent, NewColorPicked};
+use layout::{hide_layout, highlight_pencil, show_layout, spawn_layout};
+use state::{PaintPaletteUiState, ToolPaletteUiState};
+use system::{
+    eraser_palette_button, eyedrop_palette_button, individual_color_palette_button,
+    move_palette_button, new_color_picked_on_palette_event, pencil_palette_button,
+    trash_palette_button, ui_interaction_enabled_buttons, ui_interaction_released_buttons,
+};
+
+use crate::statey::DisplayBuyUiState;
 
 pub mod component;
 pub mod layout;
@@ -10,6 +17,7 @@ pub mod resource;
 pub mod state;
 pub mod system;
 pub struct PaintPalettePlugin;
+pub mod draw;
 pub mod event;
 
 impl Plugin for PaintPalettePlugin {
@@ -17,13 +25,32 @@ impl Plugin for PaintPalettePlugin {
         app.add_systems(
             OnEnter(PaintPaletteUiState::On),
             ((spawn_layout).run_if(run_once()),
-            show_layout).chain()
+            show_layout, highlight_pencil).chain()
         )
-        .insert_resource(MovementPaletteSelected(false))
-        .add_systems(
+        .add_event::<NewColorPicked>()
+        .add_event::<DrawSelectTileEvent>()
+        .add_systems
+        (
             Update,
-            (general_palette_buttons, move_palette_buttons).run_if(in_state(PaintPaletteUiState::On)),
+            (individual_color_palette_button, new_color_picked_on_palette_event, move_palette_button, pencil_palette_button, trash_palette_button, eraser_palette_button, eyedrop_palette_button),
         )
+        .add_systems
+        (Update,
+            (
+                ui_interaction_enabled_buttons,
+
+                ((mouse_draw_choose_tile, draw_select_tile, touch_draw_choose_tile)
+                .run_if(not(in_state(ToolPaletteUiState::Off).or_else(in_state(ToolPaletteUiState::Move)))
+                .and_then(in_state(PaintPaletteUiState::On)
+                .and_then(in_state(DisplayBuyUiState::Off))))),
+
+                ui_interaction_released_buttons
+
+        ).chain())
+        // .add_systems(
+        //     Update,
+        //     .run_if(in_state(ToolPaletteUiState::Eraser))
+        // )
         .add_systems(
             OnExit(PaintPaletteUiState::On),
             hide_layout

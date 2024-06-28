@@ -251,3 +251,6 @@ pub struct ToggleVisible(pub bool);
 // pub struct UserInventoryBlocksFromServer {
 //     pub ownedblocks: Vec<UserGameBlock>,
 // }
+
+#[derive(Resource, Clone, Debug)]
+pub struct UiInteracting(pub bool);

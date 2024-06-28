@@ -3,6 +3,8 @@ use chrono::{DateTime, Duration, Utc};
 use rand::Rng;
 use regex::Regex;
 
+use crate::consty::MINIMUM_BLOCK_AMOUNT;
+
 pub fn convert_color_to_hexstring(c: Color) -> String {
     // Ensure the input values are within the range [0, 1]
     let r = (c.r().clamp(0.0, 1.0) * 255.0).round() as u8;
@@ -56,7 +58,7 @@ pub fn extract_number(input: &str) -> Option<i32> {
 
 pub fn derive_cost_from_value(v: u32) -> u32 {
     if v == 0 {
-        128
+        MINIMUM_BLOCK_AMOUNT
     } else {
         v * 2
     }

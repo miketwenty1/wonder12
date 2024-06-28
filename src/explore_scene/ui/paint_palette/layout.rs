@@ -1,23 +1,26 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, ui::FocusPolicy};
+use rand::seq::SliceRandom;
+use rand::Rng;
 
 use crate::{
-    componenty::UiOverlayingExplorerButton,
-    consty::{UI_ICON_SIZE, UI_MEDIUM_TEXT_SIZE},
+    componenty::{UiInteractionBtn, UiOverlayingExplorerButton},
+    consty::{UI_ICON_SIZE, UI_MEDIUM_TEXT_SIZE, UI_SMALL_TEXT_SIZE},
     explore_scene::ui::{
         components::ExplorerUiNodeLeft,
         inventory::state::InventoryUiState,
         paint_palette::component::{
             AddToCustomPaletteBtn, ColorPaletteViewText, ColorPaletteViewTextNode, PaletteBtn,
-            PaletteEraserBtn, PaletteEyedropBtn, PaletteMoveBtn, PaletteTrashBtn,
+            PaletteEraserBtn, PaletteEyedropBtn, PaletteMoveBtn, PalettePencilBtn, PaletteTrashBtn,
         },
     },
     resourcey::ColorPalette,
+    utils::convert_color_to_hexstring,
 };
 
 use super::{
-    component::PaintPaletteNode,
-    resource::{DefaultDrawColorPalette, MovementPaletteSelected},
-    state::MovementPaletteUiState,
+    component::{IndividualColorInPalette, PaintPaletteNode},
+    resource::DefaultDrawColorPalette,
+    state::ToolPaletteUiState,
 };
 
 pub fn spawn_layout(
@@ -29,27 +32,15 @@ pub fn spawn_layout(
     // mut inv_event: EventWriter<AddInventoryRow>,
     default_color_palette: Res<DefaultDrawColorPalette>,
 ) {
-    info!("this being reached?");
     for parent_node in placement_query.iter() {
         let mut overall_inventory_node = commands.spawn((
             NodeBundle {
                 style: Style {
                     display: Display::Flex,
-                    //height: Val::Percent(100.0),
-                    // grid_template_columns: vec![GridTrack::auto()],
-                    // grid_template_rows: vec![
-                    //     GridTrack::min_content(),
-                    //     GridTrack::min_content(),
-                    //     GridTrack::min_content(),
-                    // ],
-                    // justify_items: JustifyItems::Start,
-                    // justify_self: JustifySelf::Start,
                     flex_direction: FlexDirection::Column,
                     padding: UiRect::all(Val::Px(4.0)),
                     margin: UiRect::all(Val::Px(4.0)),
                     row_gap: Val::Px(6.0),
-                    //width: Val::Px(80.0),
-                    //height: Val::Percent(100.0),
                     ..default()
                 },
                 visibility: Visibility::Visible,
@@ -69,6 +60,7 @@ pub fn spawn_layout(
                         display: Display::Flex,
                         flex_direction: FlexDirection::Row,
                         row_gap: Val::Px(6.0),
+                        column_gap: Val::Px(8.0),
                         padding: UiRect::all(Val::Px(4.0)),
                         justify_content: JustifyContent::Center,
                         ..default()
@@ -92,30 +84,56 @@ pub fn spawn_layout(
                                     ..default()
                                 },
                                 //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
-                                border_color: BorderColor(Color::Rgba {
-                                    red: 0.0,
-                                    green: 0.0,
-                                    blue: 0.0,
-                                    alpha: 1.0,
-                                }),
-                                background_color: BackgroundColor(Color::Rgba {
-                                    red: 1.0,
-                                    green: 1.0,
-                                    blue: 1.0,
-                                    alpha: 1.0,
-                                }),
+                                border_color: BorderColor(Color::BLACK),
+                                background_color: BackgroundColor(colors.accent_color),
                                 visibility: Visibility::Visible,
                                 ..default()
                             },
-                            PaletteMoveBtn,
-                            UiOverlayingExplorerButton,
+                            UiInteractionBtn,
+                            PalettePencilBtn,
                             PaletteBtn,
                         ))
                         .with_children(|in_in_builder| {
                             in_in_builder.spawn((ImageBundle {
                                 style: Style {
-                                    height: Val::Px(UI_ICON_SIZE / 1.7),
-                                    width: Val::Px(UI_ICON_SIZE / 1.7),
+                                    height: Val::Px(UI_ICON_SIZE / 2.),
+                                    width: Val::Px(UI_ICON_SIZE / 2.),
+                                    ..default()
+                                },
+                                image: UiImage::new(asset_server.load("ui/pencil_120x120.png")),
+                                ..default()
+                            },));
+                        });
+
+                    inner_builder
+                        .spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    margin: UiRect::all(Val::Px(3.0)),
+                                    width: Val::Px(UI_ICON_SIZE / 1.5), // to make it a square.
+                                    height: Val::Px(UI_ICON_SIZE / 1.5),
+                                    border: UiRect::all(Val::Px(2.0)),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    ..default()
+                                },
+                                //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
+                                border_color: BorderColor(Color::BLACK),
+                                background_color: BackgroundColor(Color::WHITE),
+                                visibility: Visibility::Visible,
+                                ..default()
+                            },
+                            UiInteractionBtn,
+                            PaletteMoveBtn,
+                            PaletteBtn,
+                        ))
+                        .with_children(|in_in_builder| {
+                            in_in_builder.spawn((ImageBundle {
+                                style: Style {
+                                    height: Val::Px(UI_ICON_SIZE / 2.),
+                                    width: Val::Px(UI_ICON_SIZE / 2.),
                                     ..default()
                                 },
                                 image: UiImage::new(asset_server.load("ui/move_60x60.png")),
@@ -156,23 +174,13 @@ pub fn spawn_layout(
                                     ..default()
                                 },
                                 //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
-                                border_color: BorderColor(Color::Rgba {
-                                    red: 0.0,
-                                    green: 0.0,
-                                    blue: 0.0,
-                                    alpha: 1.0,
-                                }),
-                                background_color: BackgroundColor(Color::Rgba {
-                                    red: 1.0,
-                                    green: 1.0,
-                                    blue: 1.0,
-                                    alpha: 1.0,
-                                }),
+                                border_color: BorderColor(Color::BLACK),
+                                background_color: BackgroundColor(Color::WHITE),
                                 visibility: Visibility::Visible,
                                 ..default()
                             },
+                            UiInteractionBtn,
                             PaletteEraserBtn,
-                            UiOverlayingExplorerButton,
                             PaletteBtn,
                         ))
                         .with_children(|in_in_builder| {
@@ -201,23 +209,13 @@ pub fn spawn_layout(
                                     ..default()
                                 },
                                 //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
-                                border_color: BorderColor(Color::Rgba {
-                                    red: 0.0,
-                                    green: 0.0,
-                                    blue: 0.0,
-                                    alpha: 1.0,
-                                }),
-                                background_color: BackgroundColor(Color::Rgba {
-                                    red: 1.0,
-                                    green: 1.0,
-                                    blue: 1.0,
-                                    alpha: 1.0,
-                                }),
+                                border_color: BorderColor(Color::BLACK),
+                                background_color: BackgroundColor(Color::WHITE),
                                 visibility: Visibility::Visible,
                                 ..default()
                             },
+                            UiInteractionBtn,
                             PaletteEyedropBtn,
-                            UiOverlayingExplorerButton,
                             PaletteBtn,
                         ))
                         .with_children(|in_in_builder| {
@@ -243,26 +241,17 @@ pub fn spawn_layout(
                                     justify_content: JustifyContent::Center,
                                     // vertically center child text
                                     align_items: AlignItems::Center,
+
                                     ..default()
                                 },
                                 //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
-                                border_color: BorderColor(Color::Rgba {
-                                    red: 0.0,
-                                    green: 0.0,
-                                    blue: 0.0,
-                                    alpha: 1.0,
-                                }),
-                                background_color: BackgroundColor(Color::Rgba {
-                                    red: 1.0,
-                                    green: 1.0,
-                                    blue: 1.0,
-                                    alpha: 1.0,
-                                }),
+                                border_color: BorderColor(Color::BLACK),
+                                background_color: BackgroundColor(Color::WHITE),
                                 visibility: Visibility::Visible,
                                 ..default()
                             },
+                            UiInteractionBtn,
                             PaletteTrashBtn,
-                            UiOverlayingExplorerButton,
                             PaletteBtn,
                         ))
                         .with_children(|in_in_builder| {
@@ -286,8 +275,9 @@ pub fn spawn_layout(
                     style: Style {
                         display: Display::Flex,
                         flex_direction: FlexDirection::Row,
-                        column_gap: Val::Px(6.0),
-                        padding: UiRect::all(Val::Px(4.0)),
+                        column_gap: Val::Px(2.0),
+                        padding: UiRect::all(Val::Px(2.0)),
+
                         ..default()
                     },
                     background_color: BackgroundColor(Color::GREEN),
@@ -295,6 +285,11 @@ pub fn spawn_layout(
                 })
                 .with_children(|inner_builder| {
                     // TEXT BOX
+
+                    let mut rng = rand::thread_rng();
+                    let random_color = default_color_palette.colors.choose(&mut rng).unwrap();
+                    let random_color_string = convert_color_to_hexstring(*random_color);
+
                     inner_builder
                         .spawn((
                             NodeBundle {
@@ -302,11 +297,12 @@ pub fn spawn_layout(
                                     display: Display::Flex,
                                     flex_direction: FlexDirection::Row,
                                     padding: UiRect::all(Val::Px(4.0)),
+                                    width: Val::Px(56.0),
                                     justify_content: JustifyContent::Center,
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: BackgroundColor(Color::ORANGE_RED),
+                                background_color: BackgroundColor(*random_color),
                                 ..default()
                             },
                             ColorPaletteViewTextNode,
@@ -314,10 +310,10 @@ pub fn spawn_layout(
                         .with_children(|in_in_builder| {
                             in_in_builder.spawn((
                                 TextBundle::from_section(
-                                    "#FF0000",
+                                    format!("#{}", random_color_string),
                                     TextStyle {
                                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                        font_size: UI_MEDIUM_TEXT_SIZE,
+                                        font_size: UI_SMALL_TEXT_SIZE,
                                         color: colors.text_color,
                                     },
                                 ),
@@ -332,7 +328,7 @@ pub fn spawn_layout(
                                 display: Display::Flex,
                                 flex_direction: FlexDirection::Row,
                                 row_gap: Val::Px(6.0),
-                                padding: UiRect::all(Val::Px(4.0)),
+                                //padding: UiRect::all(Val::Px(2.0)),
                                 ..default()
                             },
                             background_color: BackgroundColor(Color::ORANGE_RED),
@@ -343,7 +339,7 @@ pub fn spawn_layout(
                                 .spawn((
                                     ButtonBundle {
                                         style: Style {
-                                            margin: UiRect::all(Val::Px(3.0)),
+                                            //margin: UiRect::all(Val::Px(0.0)),
                                             width: Val::Px(UI_ICON_SIZE), // to make it a square.
                                             height: Val::Px(UI_ICON_SIZE / 1.5),
                                             border: UiRect::all(Val::Px(2.0)),
@@ -351,21 +347,13 @@ pub fn spawn_layout(
                                             align_items: AlignItems::Center,
                                             ..default()
                                         },
-                                        border_color: BorderColor(Color::Rgba {
-                                            red: 0.0,
-                                            green: 0.0,
-                                            blue: 0.0,
-                                            alpha: 1.0,
-                                        }),
-                                        background_color: BackgroundColor(Color::Rgba {
-                                            red: 0.0,
-                                            green: 0.0,
-                                            blue: 1.0,
-                                            alpha: 1.0,
-                                        }),
+                                        border_color: BorderColor(Color::BLACK),
+                                        background_color: BackgroundColor(Color::BLUE),
                                         visibility: Visibility::Visible,
                                         ..default()
                                     },
+                                    UiInteractionBtn,
+                                    PaletteBtn,
                                     AddToCustomPaletteBtn,
                                 ))
                                 .with_children(|in_in_in_b| {
@@ -374,7 +362,7 @@ pub fn spawn_layout(
                                             "Add to\nPalette".to_string(),
                                             TextStyle {
                                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                                font_size: UI_MEDIUM_TEXT_SIZE,
+                                                font_size: UI_SMALL_TEXT_SIZE,
                                                 color: colors.text_color,
                                             },
                                         ),
@@ -396,25 +384,39 @@ pub fn spawn_layout(
                         column_gap: Val::Px(4.0),
                         width: Val::Auto,
                         flex_wrap: FlexWrap::Wrap,
+                        padding: UiRect::vertical(Val::Px(4.0)),
+                        justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::BEIGE),
+                    background_color: BackgroundColor(Color::rgb(0.75, 0.70, 0.80)),
                     ..default()
                 })
                 .with_children(|inner_builder| {
                     for color in &default_color_palette.colors {
-                        inner_builder.spawn(ButtonBundle {
-                            style: Style {
-                                //margin: UiRect::all(Val::Px(3.0)),
-                                width: Val::Px(UI_ICON_SIZE / 2.), // to make it a square.
-                                height: Val::Px(UI_ICON_SIZE / 2.),
-                                align_items: AlignItems::Center,
+                        inner_builder.spawn((
+                            ButtonBundle {
+                                style: Style {
+                                    border: UiRect {
+                                        left: Val::Px(2.0),
+                                        right: Val::Px(0.0),
+                                        top: Val::Px(2.0),
+                                        bottom: Val::Px(0.0),
+                                    },
+                                    //margin: UiRect::all(Val::Px(3.0)),
+                                    width: Val::Px(UI_ICON_SIZE / 2.5), // to make it a square.
+                                    height: Val::Px(UI_ICON_SIZE / 2.5),
+                                    align_items: AlignItems::Center,
+                                    ..default()
+                                },
+                                border_color: BorderColor(Color::DARK_GRAY),
+                                background_color: BackgroundColor(*color),
+                                visibility: Visibility::Visible,
                                 ..default()
                             },
-                            background_color: BackgroundColor(*color),
-                            visibility: Visibility::Visible,
-                            ..default()
-                        });
+                            UiInteractionBtn,
+                            PaletteBtn,
+                            IndividualColorInPalette(*color),
+                        ));
                     }
                 });
         });
@@ -434,11 +436,18 @@ pub fn show_layout(
         style.display = Display::Flex;
     }
 }
+pub fn highlight_pencil(
+    mut query: Query<&mut BackgroundColor, With<PalettePencilBtn>>,
+    colors: Res<ColorPalette>,
+) {
+    for mut bg_color in query.iter_mut() {
+        *bg_color = BackgroundColor(colors.accent_color);
+    }
+}
 pub fn hide_layout(
     mut query: Query<&mut Style, With<PaintPaletteNode>>,
     mut inventory_state: ResMut<NextState<InventoryUiState>>,
-    mut movement_palette_state: ResMut<NextState<MovementPaletteUiState>>,
-    mut selected: ResMut<MovementPaletteSelected>,
+    mut movement_palette_state: ResMut<NextState<ToolPaletteUiState>>,
     mut move_btn_color_bg_q: Query<
         &mut BackgroundColor,
         (With<PaletteMoveBtn>, Without<PaintPaletteNode>),
@@ -448,11 +457,10 @@ pub fn hide_layout(
     for mut color in move_btn_color_bg_q.iter_mut() {
         *color = colors.light_color.into();
     }
-    *selected = MovementPaletteSelected(false);
 
     for mut style in query.iter_mut() {
         inventory_state.set(InventoryUiState::On);
-        movement_palette_state.set(MovementPaletteUiState::Off);
+        movement_palette_state.set(ToolPaletteUiState::Off);
         style.display = Display::None;
     }
 }

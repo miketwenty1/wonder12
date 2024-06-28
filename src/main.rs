@@ -36,11 +36,11 @@ use eventy::{
 };
 use explore_scene::ui::inventory::state::InventoryUiState;
 use explore_scene::ui::paint_palette::resource::DefaultDrawColorPalette;
-use explore_scene::ui::paint_palette::state::{MovementPaletteUiState, PaintPaletteUiState};
+use explore_scene::ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
 use overlay_ui::go_to::state::GoToUiState;
 use resourcey::{
     CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, MultiTouchInfo,
-    Nwc, ToggleVisible, UserInventoryBlocks, WinSize,
+    Nwc, ToggleVisible, UiInteracting, UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
@@ -94,23 +94,25 @@ pub fn game12(
     let mut numbers_map = HashMap::new();
 
     numbers_map.insert(0, 0);
-    numbers_map.insert(128, 1);
-    numbers_map.insert(256, 2);
-    numbers_map.insert(512, 3);
-    numbers_map.insert(1024, 4);
-    numbers_map.insert(2048, 5);
-    numbers_map.insert(4096, 6);
-    numbers_map.insert(8192, 7);
-    numbers_map.insert(16384, 8);
-    numbers_map.insert(32768, 9);
-    numbers_map.insert(65536, 10);
-    numbers_map.insert(131072, 10);
-    numbers_map.insert(262144, 10);
-    numbers_map.insert(524288, 10);
-    numbers_map.insert(1048576, 10);
-    numbers_map.insert(2097152, 10);
-    numbers_map.insert(4194304, 10);
-    numbers_map.insert(8388608, 10);
+    numbers_map.insert(32, 1);
+    numbers_map.insert(64, 1);
+    numbers_map.insert(128, 2);
+    numbers_map.insert(256, 3);
+    numbers_map.insert(512, 4);
+    numbers_map.insert(1024, 5);
+    numbers_map.insert(2048, 6);
+    numbers_map.insert(4096, 7);
+    numbers_map.insert(8192, 8);
+    numbers_map.insert(16384, 9);
+    numbers_map.insert(32768, 10);
+    numbers_map.insert(65536, 11);
+    numbers_map.insert(131072, 11);
+    numbers_map.insert(262144, 11);
+    numbers_map.insert(524288, 11);
+    numbers_map.insert(1048576, 11);
+    numbers_map.insert(2097152, 11);
+    numbers_map.insert(4194304, 11);
+    numbers_map.insert(8388608, 11);
 
     let color_palette = ColorPalette {
         node_color: Color::hex("222831").unwrap(),
@@ -127,63 +129,64 @@ pub fn game12(
 
     let draw_palette = DefaultDrawColorPalette {
         colors: vec![
-            // Red
-            Color::hex("400000").unwrap(),
-            Color::hex("800000").unwrap(),
-            Color::hex("ff0000").unwrap(),
-            Color::hex("804040").unwrap(),
-            Color::hex("ff8080").unwrap(),
-            // Orange
-            Color::hex("804000").unwrap(),
-            Color::hex("ff8000").unwrap(),
-            Color::hex("ff8040").unwrap(),
-            // Yellow
-            Color::hex("808000").unwrap(),
-            Color::hex("ffff00").unwrap(),
-            Color::hex("ffff80").unwrap(),
-            // Green
-            Color::hex("004000").unwrap(),
-            Color::hex("008000").unwrap(),
-            Color::hex("00ff00").unwrap(),
-            Color::hex("80ff00").unwrap(),
-            Color::hex("80ff80").unwrap(),
-            Color::hex("008040").unwrap(),
-            Color::hex("00ff40").unwrap(),
-            Color::hex("00ff80").unwrap(),
-            // Cyan
-            Color::hex("004040").unwrap(),
-            Color::hex("408080").unwrap(),
-            Color::hex("00ffff").unwrap(),
-            Color::hex("80ffff").unwrap(),
-            // Blue
-            Color::hex("004080").unwrap(),
-            Color::hex("0080c0").unwrap(),
-            Color::hex("0080ff").unwrap(),
-            Color::hex("000040").unwrap(),
-            Color::hex("000080").unwrap(),
-            Color::hex("0000a0").unwrap(),
-            Color::hex("0000ff").unwrap(),
-            // Purple
-            Color::hex("400040").unwrap(),
-            Color::hex("800080").unwrap(),
-            Color::hex("ff00ff").unwrap(),
-            Color::hex("ff80ff").unwrap(),
-            // Pink
-            Color::hex("800040").unwrap(),
-            Color::hex("ff0080").unwrap(),
-            Color::hex("ff80c0").unwrap(),
-            // Brown
-            Color::hex("808040").unwrap(),
-            // Gray
-            Color::hex("808080").unwrap(),
-            Color::hex("8080c0").unwrap(),
-            Color::hex("8080ff").unwrap(),
-            // Silver
-            Color::hex("c0c0c0").unwrap(),
-            // White
-            Color::hex("ffffff").unwrap(),
-            // Black
-            Color::hex("000000").unwrap(),
+            // Absolute colors
+            Color::hex("000000").unwrap(), // Black
+            Color::hex("ffffff").unwrap(), // White
+            // Grays and Silver
+            Color::hex("808080").unwrap(), // Gray
+            Color::hex("c0c0c0").unwrap(), // Silver
+            // Reds and Pinks
+            Color::hex("ff0000").unwrap(), // Red
+            Color::hex("ff4500").unwrap(), // Orange Red
+            Color::hex("dc143c").unwrap(), // Crimson
+            Color::hex("8b0000").unwrap(), // Dark Red
+            Color::hex("ff1493").unwrap(), // Deep Pink
+            Color::hex("ff69b4").unwrap(), // Hot Pink
+            Color::hex("ffc0cb").unwrap(), // Pink
+            // Oranges
+            Color::hex("ff8000").unwrap(), // Orange
+            Color::hex("ffa500").unwrap(), // Dark Orange
+            // Yellows
+            Color::hex("ffff00").unwrap(), // Yellow
+            Color::hex("ffd700").unwrap(), // Gold
+            // Greens
+            Color::hex("00ff00").unwrap(), // Green
+            Color::hex("32cd32").unwrap(), // Lime Green
+            Color::hex("006400").unwrap(), // Dark Green
+            Color::hex("008000").unwrap(), // Dark Green
+            Color::hex("80ff80").unwrap(), // Light Green
+            // Cyans
+            Color::hex("00ffff").unwrap(), // Cyan
+            Color::hex("7fffd4").unwrap(), // Aquamarine
+            Color::hex("66cdaa").unwrap(), // Medium Aquamarine
+            Color::hex("20b2aa").unwrap(), // Light Sea Green
+            Color::hex("008080").unwrap(), // Teal
+            Color::hex("004040").unwrap(), // Dark Teal
+            Color::hex("408080").unwrap(), // Light Teal
+            Color::hex("80ffff").unwrap(), // Light Cyan
+            // Blues
+            Color::hex("0000ff").unwrap(), // Blue
+            Color::hex("4682b4").unwrap(), // Steel Blue
+            Color::hex("5f9ea0").unwrap(), // Cadet Blue
+            Color::hex("000080").unwrap(), // Navy
+            Color::hex("004080").unwrap(), // Darker Blue
+            Color::hex("0080c0").unwrap(), // Sky Blue
+            Color::hex("0080ff").unwrap(), // Bright Blue
+            // Purples and Violets
+            Color::hex("800080").unwrap(), // Purple
+            Color::hex("4b0082").unwrap(), // Indigo
+            Color::hex("6a5acd").unwrap(), // Slate Blue
+            Color::hex("9370db").unwrap(), // Medium Purple
+            Color::hex("8a2be2").unwrap(), // Blue Violet
+            Color::hex("9400d3").unwrap(), // Dark Violet
+            Color::hex("9932cc").unwrap(), // Dark Orchid
+            Color::hex("ba55d3").unwrap(), // Medium Orchid
+            Color::hex("ff00ff").unwrap(), // Magenta
+            Color::hex("ff80ff").unwrap(), // Light Magenta
+            // Browns
+            Color::hex("a52a2a").unwrap(), // Brown
+            Color::hex("d2691e").unwrap(), // Chocolate
+            Color::hex("8b4513").unwrap(), // Saddle Brown
         ],
     };
 
@@ -212,6 +215,7 @@ pub fn game12(
     };
 
     App::new()
+        .insert_resource(UiInteracting(false))
         .insert_resource(start_edge)
         .insert_resource(color_palette)
         .insert_resource(draw_palette)
@@ -295,7 +299,7 @@ pub fn game12(
         .init_state::<BrowserStorageState>()
         .init_state::<GoToUiState>()
         .init_state::<PaintPaletteUiState>()
-        .init_state::<MovementPaletteUiState>()
+        .init_state::<ToolPaletteUiState>()
         .add_plugins((
             CommsPlugin,
             OverlayUiPlugin,

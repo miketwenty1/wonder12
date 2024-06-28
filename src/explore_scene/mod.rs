@@ -15,7 +15,7 @@ pub mod zoom;
 
 use bevy::prelude::*;
 use palette::draw_button_system;
-use ui::paint_palette::state::MovementPaletteUiState;
+use ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
 use zoom::zoom_wheel_system;
 
 use crate::{
@@ -94,7 +94,10 @@ impl Plugin for ExplorePlugin {
                             touch_event_system,
                             pinch_system,
                         )
-                            .run_if(in_state(MovementPaletteUiState::Off)),
+                            .run_if(
+                                in_state(ToolPaletteUiState::Off)
+                                    .or_else(in_state(ToolPaletteUiState::Move)),
+                            ),
                     )
                         .chain(),
                     zoom_wheel_system,
@@ -114,7 +117,11 @@ impl Plugin for ExplorePlugin {
             )
             .add_systems(
                 Update,
-                (select_tile, apply_deferred, update_amount_selected_text)
+                (
+                    (select_tile.run_if(in_state(PaintPaletteUiState::Off))),
+                    apply_deferred,
+                    update_amount_selected_text,
+                )
                     .chain()
                     .run_if(in_state(ExploreSelectState::On)),
             )

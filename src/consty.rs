@@ -10,7 +10,7 @@ pub const DESPAWN_TILE_THRESHOLD: i32 = 51 + CHUNK_TILE_SPAN_COUNT * 40;
 pub const CAMERA_SANITY_FACTOR: f32 = 1.25;
 pub const MOVE_VELOCITY_FACTOR: f32 = 20.0;
 
-pub const MINIMUM_BLOCK_AMOUNT: u32 = 128;
+pub const MINIMUM_BLOCK_AMOUNT: u32 = 32;
 
 pub const DEFAULT_NEW_LN_TEXT: &str = "Type in a lightning address!";
 pub const DEFAULT_NEW_COLOR_TEXT: &str = "Random Color, if not specified.";
@@ -38,7 +38,7 @@ pub const DARKEST_BUILDING: Color = Color::Rgba {
     alpha: 1.0,
 };
 
-pub const MAX_SELECTION_SIZE: usize = 100;
+pub const MAX_SELECTION_SIZE: usize = 500;
 
 pub const UI_SMALL_TEXT_SIZE: f32 = 15.0;
 pub const UI_MEDIUM_TEXT_SIZE: f32 = 20.0;

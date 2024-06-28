@@ -4,7 +4,7 @@ use crate::{
     componenty::{
         DrawBtn, DrawBtnImage, GoToBtn, HideBuilding, HideText, HideTextText, ShowColors,
         ShowValues, Toggle1Btn, Toggle1BtnText, Toggle2Btn, Toggle2BtnText, Toggle3Btn,
-        Toggle3BtnText, Toggle4Btn, Toggle4BtnText, ToggleButton, ToggleParent,
+        Toggle3BtnText, Toggle4Btn, Toggle4BtnText, ToggleButton, ToggleParent, UiInteractionBtn,
         UiOverlayingExplorerButton, UiSideNode,
     },
     consty::{
@@ -54,6 +54,7 @@ pub fn right_ui(
                             justify_content: JustifyContent::Center,
                             // vertically center child text
                             align_items: AlignItems::Center,
+                            margin: UiRect::vertical(Val::Px(3.0)),
                             ..default()
                         },
                         image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
@@ -72,6 +73,7 @@ pub fn right_ui(
                         visibility: Visibility::Visible,
                         ..default()
                     },
+                    UiInteractionBtn,
                     DrawBtn,
                     UiOverlayingExplorerButton,
                 ))
@@ -103,15 +105,11 @@ pub fn right_ui(
                             justify_content: JustifyContent::Center,
                             // vertically center child text
                             align_items: AlignItems::Center,
+                            margin: UiRect::vertical(Val::Px(3.0)),
                             ..default()
                         },
                         //image: UiImage::new(asset_server.load("ui/goto2_120x120.png")),
-                        border_color: BorderColor(Color::Rgba {
-                            red: 0.0,
-                            green: 0.0,
-                            blue: 0.0,
-                            alpha: 1.0,
-                        }),
+                        border_color: BorderColor(Color::BLACK),
                         background_color: BackgroundColor(Color::Rgba {
                             red: 1.0,
                             green: 1.0,
@@ -121,6 +119,7 @@ pub fn right_ui(
                         visibility: Visibility::Visible,
                         ..default()
                     },
+                    UiInteractionBtn,
                     GoToBtn,
                     UiOverlayingExplorerButton,
                 ))
@@ -158,6 +157,7 @@ pub fn right_ui(
                         justify_content: JustifyContent::Center,
                         // vertically center child text
                         align_items: AlignItems::Center,
+                        margin: UiRect::top(Val::Px(3.0)),
                         ..default()
                     },
                     image: UiImage::new(asset_server.load("ui/toggle_120x120.png")),
@@ -167,15 +167,11 @@ pub fn right_ui(
                         blue: 1.0,
                         alpha: 0.0,
                     }),
-                    background_color: BackgroundColor(Color::Rgba {
-                        red: 1.0,
-                        green: 1.0,
-                        blue: 1.0,
-                        alpha: 1.0,
-                    }),
+                    background_color: BackgroundColor(Color::WHITE),
                     visibility: Visibility::Visible,
                     ..default()
                 },
+                UiInteractionBtn,
                 ToggleParent,
                 UiOverlayingExplorerButton,
             ));
@@ -207,6 +203,7 @@ pub fn right_ui(
                         visibility: Visibility::Hidden,
                         ..default()
                     },
+                    UiInteractionBtn,
                     HideBuilding,
                     Toggle1Btn,
                     ToggleButton,
@@ -243,6 +240,7 @@ pub fn right_ui(
                         visibility: Visibility::Hidden,
                         ..default()
                     },
+                    UiInteractionBtn,
                     ShowColors,
                     ToggleButton,
                     Toggle2Btn,
@@ -280,6 +278,7 @@ pub fn right_ui(
                         visibility: Visibility::Hidden,
                         ..default()
                     },
+                    UiInteractionBtn,
                     ShowValues,
                     ToggleButton,
                     Toggle3Btn,
@@ -316,6 +315,7 @@ pub fn right_ui(
                         visibility: Visibility::Hidden,
                         ..default()
                     },
+                    UiInteractionBtn,
                     HideText,
                     ToggleButton,
                     Toggle4Btn,

@@ -22,7 +22,13 @@ pub struct DrawBtnImage;
 pub struct SelectedTileUi;
 
 #[derive(Component)]
-pub struct Selected;
+pub struct Selected(pub Color);
+
+#[derive(Component)]
+pub struct ManualSelected;
+
+#[derive(Component)]
+pub struct DrawSelected;
 
 #[derive(Component)]
 pub struct AnimationIndices {
@@ -250,4 +256,4 @@ pub struct InitLoadingText;
 pub struct BtnShowingColor;
 
 #[derive(Component)]
-pub struct DrawOverlayMesh;
+pub struct UiInteractionBtn;

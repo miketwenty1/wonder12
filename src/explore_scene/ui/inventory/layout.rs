@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     comms::server_structs::UserGameBlock,
-    componenty::UiOverlayingExplorerButton,
+    componenty::{UiInteractionBtn, UiOverlayingExplorerButton},
     consty::UI_MEDIUM_TEXT_SIZE,
     explore_scene::ui::{
         components::ExplorerUiNodeLeft,
@@ -281,6 +281,7 @@ pub fn spawn_inventory_row(
                     background_color: Color::hex(block.color.clone()).unwrap().into(),
                     ..default()
                 },
+                UiInteractionBtn,
                 InventoryColorBox(block.height),
                 UiOverlayingExplorerButton,
             ));

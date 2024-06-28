@@ -1,4 +1,4 @@
-use bevy::ecs::component::Component;
+use bevy::{ecs::component::Component, render::color::Color};
 
 // overall inventory node
 #[derive(Component)]
@@ -6,6 +6,9 @@ pub struct PaintPaletteNode;
 
 #[derive(Component)]
 pub struct PaletteBtn;
+
+#[derive(Component)]
+pub struct PalettePencilBtn;
 
 #[derive(Component)]
 pub struct PaletteMoveBtn;
@@ -27,3 +30,6 @@ pub struct ColorPaletteViewTextNode;
 
 #[derive(Component)]
 pub struct AddToCustomPaletteBtn;
+
+#[derive(Component)]
+pub struct IndividualColorInPalette(pub Color);

@@ -3,7 +3,7 @@ use rand::Rng;
 
 use crate::componenty::Location;
 
-use super::building_templates::{hut::spawn_hut, road::spawn_road};
+use super::building_templates::camp::spawn_camp;
 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn(
@@ -15,10 +15,10 @@ pub fn spawn(
     visibility_toggle: Visibility,
 ) {
     let mut rng = rand::thread_rng();
-    let x: f32 = rng.gen_range(-10.0..10.0);
-    let y: f32 = rng.gen_range(-10.0..10.0);
+    let x: f32 = rng.gen_range(-12.0..12.0);
+    let y: f32 = rng.gen_range(-12.0..12.0);
 
-    spawn_hut(
+    spawn_camp(
         texture,
         layout,
         builder,
@@ -26,16 +26,20 @@ pub fn spawn(
         locationcoord,
         visibility_toggle,
         Vec3::new(x, y, 3.0),
-        Some(0.85),
+        Some(0.75),
     );
 
-    spawn_road(
+    let x: f32 = rng.gen_range(-12.0..12.0);
+    let y: f32 = rng.gen_range(-12.0..12.0);
+
+    spawn_camp(
         texture,
         layout,
         builder,
-        Color::rgba(1.0, 1.0, 1.0, 1.0),
+        color,
         locationcoord,
-        1,
         visibility_toggle,
+        Vec3::new(x, y, 3.0),
+        Some(0.75),
     );
 }

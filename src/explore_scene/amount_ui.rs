@@ -14,7 +14,7 @@ use super::ui::components::{AmountText, BlockCountText};
 pub fn update_amount_selected_text(
     mut event: EventReader<UpdateUiAmount>,
 
-    selected_lands: Query<&Location, With<Selected>>,
+    selected_lands: Query<(&Location, &Selected), With<Selected>>,
     mut amount_selected_text: Query<
         &mut Text,
         (
@@ -45,7 +45,7 @@ pub fn update_amount_selected_text(
     for _e in event.read() {
         let mut total_cost: u32 = 0;
         tile_cart.map.clear();
-        for land in selected_lands.iter() {
+        for (land, selected) in selected_lands.iter() {
             let a = tile_map.map.get(&land.ulam);
 
             // land exist and is owned by someone
@@ -69,16 +69,14 @@ pub fn update_amount_selected_text(
                         height: val.height,
                         new_ln_address: "".to_string(),
                         new_username: "".to_string(),
-                        new_color: get_random_color(),
+                        new_color: selected.0,
                         new_color_text: "".to_string(),
                         new_message: "".to_string(),
                     },
                 );
             // this is a new land that hasn't been purchased yet
             } else {
-                //info!("{}", land.ulam);
                 total_cost += MINIMUM_BLOCK_AMOUNT;
-
                 tile_cart.map.insert(
                     land.ulam,
                     TileCartData {
@@ -92,7 +90,7 @@ pub fn update_amount_selected_text(
                         height: land.ulam,
                         new_ln_address: "".to_string(),
                         new_username: "".to_string(),
-                        new_color: get_random_color(),
+                        new_color: selected.0,
                         new_color_text: "".to_string(),
                         new_message: "".to_string(),
                     },
@@ -107,6 +105,9 @@ pub fn update_amount_selected_text(
                     *visibility = Visibility::Hidden;
                 }
             } else {
+                for mut visibility in tile_selected_button_q.iter_mut() {
+                    *visibility = Visibility::Visible;
+                }
                 text.sections[0].value = format!("Price: {} satoshis", total_cost);
             }
         }

@@ -11,8 +11,8 @@ use crate::{
     building_config::{spawn_tile_level, utils::sanitize_building_color},
     componenty::{
         AnimationIndices, AnimationTimer, BuildingStructure, BuySelectionButton,
-        ClearSelectionButton, DrawOverlayMesh, InitLoadingNode, InitLoadingText, Land, Location,
-        Selected, SelectedTileUi, TileText, UiNode, UiOverlayingExplorerButton,
+        ClearSelectionButton, InitLoadingNode, InitLoadingText, Land, Location, Selected,
+        SelectedTileUi, TileText, UiNode, UiOverlayingExplorerButton,
     },
     consty::{
         BUILDING_ZOOM_OUT_MAX, CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT,
@@ -184,7 +184,6 @@ pub fn edge_system(
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
 ) {
     for edge_e in edge_event.read() {
-        info!("EDGE EVENT");
         for (block_entity, block_location) in blocks.iter() {
             if (block_location.y - edge_e.y).abs() > DESPAWN_TILE_THRESHOLD
                 || (block_location.x - edge_e.x).abs() > DESPAWN_TILE_THRESHOLD
@@ -217,7 +216,6 @@ pub fn spawn_block_sprites(
     cam_query: Query<&OrthographicProjection, With<Camera>>,
 ) {
     for _event in sprite_spawn_event.read() {
-        info!("hello spawn sprites");
         let font = asset_server.load("fonts/FiraSans-Bold.ttf");
         let slightly_smaller_text_style = TextStyle {
             font,

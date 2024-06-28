@@ -16,8 +16,6 @@ pub fn choose_tile(
 
     q_window: Query<&Window, With<PrimaryWindow>>,
     mut select_tile_event: EventWriter<SelectTileEvent>,
-    //mut last_selected_tile: ResMut<LastSelectedTile>,
-    //location_query: Query<&Location>,
 ) {
     if mouse.just_pressed(MouseButton::Left) {
         for (camera, camera_transform) in q_camera_simple.iter_mut() {
@@ -61,7 +59,7 @@ pub fn select_tile(
         (With<Selected>, Without<Land>, Without<BuildingStructure>),
     >,
     mut last_selected_tile: ResMut<LastSelectedTile>,
-    mut tile_selected_button_q: Query<&mut Visibility, With<SelectedTileUi>>,
+    // mut tile_selected_button_q: Query<&mut Visibility, With<SelectedTileUi>>,
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
     mut toast: EventWriter<ToastEvent>,
 ) {
@@ -100,9 +98,9 @@ pub fn select_tile(
                         });
                     }
 
-                    for mut visibility in tile_selected_button_q.iter_mut() {
-                        *visibility = Visibility::Visible;
-                    }
+                    // for mut visibility in tile_selected_button_q.iter_mut() {
+                    //     *visibility = Visibility::Visible;
+                    // }
                 } else if last_selected_tile.0 != e.0
                     && last_selected_tile.1 != e.1
                     && !location.selected
