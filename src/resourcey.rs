@@ -39,7 +39,7 @@ impl WorldOwnedTileMap {
                 (
                     key,
                     TrimTile {
-                        c: convert_color_to_hexstring(tile_data.color), // Assuming a to_hex() method exists for Color
+                        c: convert_color_to_hexstring(tile_data.color.into()), // Assuming a to_hex() method exists for Color
                         v: tile_data.value,
                         h: tile_data.hash.clone(),
                         l: tile_data.ln_address.clone(),

@@ -23,6 +23,7 @@ use crate::statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, Explor
 use crate::structy::EdgeData;
 use bevy::asset::AssetMetaCheck;
 
+use bevy::color::palettes::css::{DARK_GRAY, DARK_GREEN};
 // use bevy::window::WindowResolution;
 use bevy::{prelude::*, utils::HashMap};
 use browser::event::ReadLocalBrowserStorage;
@@ -115,78 +116,78 @@ pub fn game12(
     numbers_map.insert(8388608, 11);
 
     let color_palette = ColorPalette {
-        node_color: Color::hex("222831").unwrap(),
-        node_color_lighter: Color::hex("353d48").unwrap(),
-        button_color: Color::hex("393E46").unwrap(),
-        lite_button_color: Color::hex("6A7382").unwrap(),
-        accent_color: Color::hex("00ADB5").unwrap(),
-        light_color: Color::hex("EEEEEE").unwrap(),
-        text_color: Color::hex("FAFAFA").unwrap(),
-        red_color: Color::hex("B50800").unwrap(),
-        yellow_color: Color::hex("ADB500").unwrap(),
-        green_color: Color::DARK_GREEN,
+        node_color: Srgba::hex("222831").unwrap().into(),
+        node_color_lighter: Srgba::hex("353d48").unwrap().into(),
+        button_color: Srgba::hex("393E46").unwrap().into(),
+        lite_button_color: Srgba::hex("6A7382").unwrap().into(),
+        accent_color: Srgba::hex("00ADB5").unwrap().into(),
+        light_color: Srgba::hex("EEEEEE").unwrap().into(),
+        text_color: Srgba::hex("FAFAFA").unwrap().into(),
+        red_color: Srgba::hex("B50800").unwrap().into(),
+        yellow_color: Srgba::hex("ADB500").unwrap().into(),
+        green_color: DARK_GREEN.into(),
     };
 
     let draw_palette = DefaultDrawColorPalette {
         colors: vec![
             // Absolute colors
-            Color::hex("000000").unwrap(), // Black
-            Color::hex("ffffff").unwrap(), // White
+            Srgba::hex("000000").unwrap().into(), // Black
+            Srgba::hex("ffffff").unwrap().into(), // White
             // Grays and Silver
-            Color::hex("808080").unwrap(), // Gray
-            Color::hex("c0c0c0").unwrap(), // Silver
+            Srgba::hex("808080").unwrap().into(), // Gray
+            Srgba::hex("c0c0c0").unwrap().into(), // Silver
             // Reds and Pinks
-            Color::hex("ff0000").unwrap(), // Red
-            Color::hex("ff4500").unwrap(), // Orange Red
-            Color::hex("dc143c").unwrap(), // Crimson
-            Color::hex("8b0000").unwrap(), // Dark Red
-            Color::hex("ff1493").unwrap(), // Deep Pink
-            Color::hex("ff69b4").unwrap(), // Hot Pink
-            Color::hex("ffc0cb").unwrap(), // Pink
+            Srgba::hex("ff0000").unwrap().into(), // Red
+            Srgba::hex("ff4500").unwrap().into(), // Orange Red
+            Srgba::hex("dc143c").unwrap().into(), // Crimson
+            Srgba::hex("8b0000").unwrap().into(), // Dark Red
+            Srgba::hex("ff1493").unwrap().into(), // Deep Pink
+            Srgba::hex("ff69b4").unwrap().into(), // Hot Pink
+            Srgba::hex("ffc0cb").unwrap().into(), // Pink
             // Oranges
-            Color::hex("ff8000").unwrap(), // Orange
-            Color::hex("ffa500").unwrap(), // Dark Orange
+            Srgba::hex("ff8000").unwrap().into(), // Orange
+            Srgba::hex("ffa500").unwrap().into(), // Dark Orange
             // Yellows
-            Color::hex("ffff00").unwrap(), // Yellow
-            Color::hex("ffd700").unwrap(), // Gold
+            Srgba::hex("ffff00").unwrap().into(), // Yellow
+            Srgba::hex("ffd700").unwrap().into(), // Gold
             // Greens
-            Color::hex("00ff00").unwrap(), // Green
-            Color::hex("32cd32").unwrap(), // Lime Green
-            Color::hex("006400").unwrap(), // Dark Green
-            Color::hex("008000").unwrap(), // Dark Green
-            Color::hex("80ff80").unwrap(), // Light Green
+            Srgba::hex("00ff00").unwrap().into(), // Green
+            Srgba::hex("32cd32").unwrap().into(), // Lime Green
+            Srgba::hex("006400").unwrap().into(), // Dark Green
+            Srgba::hex("008000").unwrap().into(), // Dark Green
+            Srgba::hex("80ff80").unwrap().into(), // Light Green
             // Cyans
-            Color::hex("00ffff").unwrap(), // Cyan
-            Color::hex("7fffd4").unwrap(), // Aquamarine
-            Color::hex("66cdaa").unwrap(), // Medium Aquamarine
-            Color::hex("20b2aa").unwrap(), // Light Sea Green
-            Color::hex("008080").unwrap(), // Teal
-            Color::hex("004040").unwrap(), // Dark Teal
-            Color::hex("408080").unwrap(), // Light Teal
-            Color::hex("80ffff").unwrap(), // Light Cyan
+            Srgba::hex("00ffff").unwrap().into(), // Cyan
+            Srgba::hex("7fffd4").unwrap().into(), // Aquamarine
+            Srgba::hex("66cdaa").unwrap().into(), // Medium Aquamarine
+            Srgba::hex("20b2aa").unwrap().into(), // Light Sea Green
+            Srgba::hex("008080").unwrap().into(), // Teal
+            Srgba::hex("004040").unwrap().into(), // Dark Teal
+            Srgba::hex("408080").unwrap().into(), // Light Teal
+            Srgba::hex("80ffff").unwrap().into(), // Light Cyan
             // Blues
-            Color::hex("0000ff").unwrap(), // Blue
-            Color::hex("4682b4").unwrap(), // Steel Blue
-            Color::hex("5f9ea0").unwrap(), // Cadet Blue
-            Color::hex("000080").unwrap(), // Navy
-            Color::hex("004080").unwrap(), // Darker Blue
-            Color::hex("0080c0").unwrap(), // Sky Blue
-            Color::hex("0080ff").unwrap(), // Bright Blue
+            Srgba::hex("0000ff").unwrap().into(), // Blue
+            Srgba::hex("4682b4").unwrap().into(), // Steel Blue
+            Srgba::hex("5f9ea0").unwrap().into(), // Cadet Blue
+            Srgba::hex("000080").unwrap().into(), // Navy
+            Srgba::hex("004080").unwrap().into(), // Darker Blue
+            Srgba::hex("0080c0").unwrap().into(), // Sky Blue
+            Srgba::hex("0080ff").unwrap().into(), // Bright Blue
             // Purples and Violets
-            Color::hex("800080").unwrap(), // Purple
-            Color::hex("4b0082").unwrap(), // Indigo
-            Color::hex("6a5acd").unwrap(), // Slate Blue
-            Color::hex("9370db").unwrap(), // Medium Purple
-            Color::hex("8a2be2").unwrap(), // Blue Violet
-            Color::hex("9400d3").unwrap(), // Dark Violet
-            Color::hex("9932cc").unwrap(), // Dark Orchid
-            Color::hex("ba55d3").unwrap(), // Medium Orchid
-            Color::hex("ff00ff").unwrap(), // Magenta
-            Color::hex("ff80ff").unwrap(), // Light Magenta
+            Srgba::hex("800080").unwrap().into(), // Purple
+            Srgba::hex("4b0082").unwrap().into(), // Indigo
+            Srgba::hex("6a5acd").unwrap().into(), // Slate Blue
+            Srgba::hex("9370db").unwrap().into(), // Medium Purple
+            Srgba::hex("8a2be2").unwrap().into(), // Blue Violet
+            Srgba::hex("9400d3").unwrap().into(), // Dark Violet
+            Srgba::hex("9932cc").unwrap().into(), // Dark Orchid
+            Srgba::hex("ba55d3").unwrap().into(), // Medium Orchid
+            Srgba::hex("ff00ff").unwrap().into(), // Magenta
+            Srgba::hex("ff80ff").unwrap().into(), // Light Magenta
             // Browns
-            Color::hex("a52a2a").unwrap(), // Brown
-            Color::hex("d2691e").unwrap(), // Chocolate
-            Color::hex("8b4513").unwrap(), // Saddle Brown
+            Srgba::hex("a52a2a").unwrap().into(), // Brown
+            Srgba::hex("d2691e").unwrap().into(), // Chocolate
+            Srgba::hex("8b4513").unwrap().into(), // Saddle Brown
         ],
     };
 
@@ -236,11 +237,14 @@ pub fn game12(
         .insert_resource(CurrentCartBlock {
             ln_address: ln_address.clone(),
             color_text: "".to_string(),
-            color: Color::DARK_GRAY, // this is just a place holder shouldn't be used.
+            color: DARK_GRAY.into(), // this is just a place holder shouldn't be used.
             message: "".to_string(),
         })
         .insert_resource(LastSelectedTile(1_000_000, 1_000_000))
-        .insert_resource(AssetMetaCheck::Never)
+        .add_plugins(DefaultPlugins.set(AssetPlugin {
+            meta_check: AssetMetaCheck::Never,
+            ..default()
+        }))
         .insert_resource(ServerURL(server_url))
         .insert_resource(SpriteIndexBuilding(numbers_map))
         .insert_resource(ToggleMap(toggle_map))

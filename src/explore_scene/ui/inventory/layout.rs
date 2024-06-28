@@ -278,7 +278,7 @@ pub fn spawn_inventory_row(
                         ..default()
                     },
                     border_color: BorderColor(colors.light_color),
-                    background_color: Color::hex(block.color.clone()).unwrap().into(),
+                    background_color: Srgba::hex(block.color.clone()).unwrap().into(),
                     ..default()
                 },
                 UiInteractionBtn,

@@ -15,6 +15,7 @@ use super::{
     state::ToolPaletteUiState,
 };
 use bevy::{
+    color::palettes::css::DARK_GRAY,
     input::{mouse::MouseButtonInput, touch::TouchPhase, ButtonState},
     prelude::*,
 };
@@ -257,7 +258,7 @@ pub fn individual_color_palette_button(
                 *border_color = colors.yellow_color.into();
             }
             Interaction::None => {
-                *border_color = Color::DARK_GRAY.into();
+                *border_color = DARK_GRAY.into();
             }
         }
     }
@@ -274,7 +275,7 @@ pub fn new_color_picked_on_palette_event(
         for (children, mut bg_color) in node_q.iter_mut() {
             let mut text = text_query.get_mut(children[0]).unwrap();
 
-            let new_color_hex = convert_color_to_hexstring(event_color);
+            let new_color_hex = convert_color_to_hexstring(event_color.into());
             text.sections[0].value = format!("#{}", new_color_hex);
 
             *bg_color = BackgroundColor(event_color);

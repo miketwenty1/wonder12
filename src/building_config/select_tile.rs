@@ -30,7 +30,7 @@ pub fn spawn(
             ..Default::default()
         },
         ManualSelected,
-        Selected(get_random_color()),
+        Selected(bevy::prelude::Color::Srgba(get_random_color())),
         locationcoord,
         animation_indices,
         AnimationTimer(Timer::from_seconds(0.25, TimerMode::Repeating)),

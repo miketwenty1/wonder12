@@ -74,12 +74,12 @@ pub fn spawn_qr(
                     justify_items: JustifyItems::Center,
                     ..default()
                 },
-                background_color: BackgroundColor(Color::Rgba {
+                background_color: BackgroundColor(Color::Srgba(Srgba {
                     red: 1.,
                     green: 1.,
                     blue: 1.,
                     alpha: 0.,
-                }),
+                })),
                 ..default()
             },
             QrInvoiceOverlay,

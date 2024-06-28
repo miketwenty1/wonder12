@@ -259,7 +259,7 @@ fn height_input_box(
                             TextStyle {
                                 font: font.clone(),
                                 font_size,
-                                color: DEFAULT_NO_PICK_COLOR,
+                                color: DEFAULT_NO_PICK_COLOR.into(),
                             },
                         ),
                         GoToTextBoxText,

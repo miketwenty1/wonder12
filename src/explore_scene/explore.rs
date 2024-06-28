@@ -294,12 +294,12 @@ pub fn spawn_block_sprites(
                         color_for_sprites = tile_map.map.get(&locationcoord.ulam).unwrap().color;
                         land_sprite_index =
                             tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
-                        color_for_tile = Color::Rgba {
+                        color_for_tile = Color::Srgba(Srgba {
                             red: 1.,
                             green: 1.,
                             blue: 1.,
                             alpha: 1.,
-                        };
+                        });
                         if !*toggle_map.0.get("showcolors").unwrap() {
                             land_sprite_index = 0;
                             color_for_tile = color_for_sprites;
@@ -307,12 +307,12 @@ pub fn spawn_block_sprites(
                     } else {
                         land_sprite_index = rng.gen_range(1..=11);
                         building_sprite_index = 0;
-                        color_for_tile = Color::Rgba {
+                        color_for_tile = Color::Srgba(Srgba {
                             red: 0.2,
                             green: 0.2,
                             blue: 0.2,
                             alpha: 1.0,
-                        };
+                        });
                         color_for_sprites = color_for_tile;
                     }
 
@@ -390,7 +390,7 @@ pub fn spawn_block_sprites(
                         });
                     });
 
-                    let building_color = sanitize_building_color(color_for_sprites);
+                    let building_color = sanitize_building_color(color_for_sprites.into());
 
                     cmd.with_children(|builder| {
                         spawn_tile_level(
@@ -398,7 +398,7 @@ pub fn spawn_block_sprites(
                             &texture_atlas_handle_building.layout,
                             &texture_atlas_handle_building.texture,
                             builder,
-                            building_color,
+                            bevy::prelude::Color::Srgba(building_color),
                             locationcoord,
                             visibility_setting,
                         );
@@ -551,12 +551,12 @@ pub fn update_tile_textures(
 
                 // show correct color based on toggle
                 if *hiding_colors {
-                    sprite.color = Color::Rgba {
+                    sprite.color = Color::Srgba(Srgba {
                         red: 1.0,
                         green: 1.0,
                         blue: 1.0,
                         alpha: 1.0,
-                    };
+                    });
                 } else {
                     sprite.color = tile_data.color;
                     texture.index = 0;
@@ -578,7 +578,9 @@ pub fn update_tile_textures(
                             &texture_atlas_handle_building.layout,
                             &texture_atlas_handle_building.texture,
                             child_builder,
-                            sanitize_building_color(tile_data.color),
+                            bevy::prelude::Color::Srgba(sanitize_building_color(
+                                tile_data.color.into(),
+                            )),
                             locationcoord,
                             visibility_building_toggle,
                         );

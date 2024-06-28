@@ -49,12 +49,12 @@ pub fn draw_button_system(
                 *color = colors.accent_color.into();
             }
             Interaction::None => {
-                *color = BackgroundColor(Color::Rgba {
+                *color = BackgroundColor(Color::Srgba(Srgba {
                     red: 1.0,
                     green: 1.0,
                     blue: 1.0,
                     alpha: 1.0,
-                })
+                }))
             }
         }
     }

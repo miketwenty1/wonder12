@@ -1,4 +1,4 @@
-use bevy::{prelude::Event, render::color::Color};
+use bevy::{color::Color, prelude::Event};
 
 #[derive(Event, Debug)]
 pub struct NewColorPicked(pub Color);

@@ -1,4 +1,4 @@
-use bevy::{prelude::*, ui::FocusPolicy};
+use bevy::{color::palettes::css::DARK_GREEN, prelude::*, ui::FocusPolicy};
 
 use crate::{
     componenty::{
@@ -455,7 +455,7 @@ pub fn spawn_layout(
                         grid_template_rows: vec![GridTrack::auto()],
                         ..default()
                     },
-                    background_color: BackgroundColor(Color::DARK_GREEN),
+                    background_color: BackgroundColor(DARK_GREEN.into()),
                     ..default()
                 })
                 .with_children(|builder| {
@@ -1194,7 +1194,7 @@ fn setup_ln_addr_menu_button(
                             TextStyle {
                                 font: font.clone(),
                                 font_size,
-                                color: DEFAULT_NO_PICK_COLOR,
+                                color: DEFAULT_NO_PICK_COLOR.into(),
                             },
                         ),
                         NewBlockLnAddressText,
@@ -1266,7 +1266,7 @@ fn setup_color_menu_button(
                             TextStyle {
                                 font: font.clone(),
                                 font_size,
-                                color: DEFAULT_NO_PICK_COLOR,
+                                color: DEFAULT_NO_PICK_COLOR.into(),
                             },
                         ),
                         NewBlockColorText,
@@ -1333,7 +1333,7 @@ fn setup_message_menu_button(
                             TextStyle {
                                 font: font.clone(),
                                 font_size,
-                                color: DEFAULT_NO_PICK_COLOR,
+                                color: DEFAULT_NO_PICK_COLOR.into(),
                             },
                         ),
                         NewBlockMessageText,

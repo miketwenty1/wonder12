@@ -77,12 +77,12 @@ pub fn select_tile(
                                 &texture_atlas.layout,
                                 &texture_atlas.texture,
                                 child_builder,
-                                Color::Rgba {
+                                Color::Srgba(Srgba {
                                     red: 1.,
                                     green: 1.,
                                     blue: 1.,
                                     alpha: 1.,
-                                },
+                                }),
                                 *location,
                                 Visibility::Inherited,
                             );

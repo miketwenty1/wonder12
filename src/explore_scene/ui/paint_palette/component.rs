@@ -1,4 +1,4 @@
-use bevy::{ecs::component::Component, render::color::Color};
+use bevy::{color::Color, ecs::component::Component};
 
 // overall inventory node
 #[derive(Component)]

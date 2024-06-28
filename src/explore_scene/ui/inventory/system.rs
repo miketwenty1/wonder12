@@ -51,7 +51,7 @@ pub fn inventory_adder_system(
             if check.is_some() {
                 for (mut bg_color, comp_height) in inventory_color_boxes.iter_mut() {
                     if comp_height.0 == tile.height {
-                        let new_color = Color::hex(tile.color.clone()).unwrap();
+                        let new_color = Srgba::hex(tile.color.clone()).unwrap().into();
                         *bg_color = BackgroundColor(new_color);
                         updated_block = true;
                     }
@@ -141,6 +141,7 @@ pub fn visible_inventory_toggle_button(
                             texture: asset_server.load("ui/expandarrow_60x60.png"),
                             flip_x: false,
                             flip_y: true,
+                            color: colors.light_color.into(),
                         };
                     } else {
                         style.display = Display::Grid;

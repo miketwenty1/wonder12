@@ -58,18 +58,18 @@ pub fn right_ui(
                             ..default()
                         },
                         image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
-                        border_color: BorderColor(Color::Rgba {
+                        border_color: BorderColor(Color::Srgba(Srgba {
                             red: 1.0,
                             green: 1.0,
                             blue: 1.0,
                             alpha: 0.0,
-                        }),
-                        background_color: BackgroundColor(Color::Rgba {
+                        })),
+                        background_color: BackgroundColor(Color::Srgba(Srgba {
                             red: 1.0,
                             green: 1.0,
                             blue: 1.0,
                             alpha: 0.0,
-                        }),
+                        })),
                         visibility: Visibility::Visible,
                         ..default()
                     },
@@ -110,12 +110,12 @@ pub fn right_ui(
                         },
                         //image: UiImage::new(asset_server.load("ui/goto2_120x120.png")),
                         border_color: BorderColor(Color::BLACK),
-                        background_color: BackgroundColor(Color::Rgba {
+                        background_color: BackgroundColor(Color::Srgba(Srgba {
                             red: 1.0,
                             green: 1.0,
                             blue: 1.0,
                             alpha: 1.0,
-                        }),
+                        })),
                         visibility: Visibility::Visible,
                         ..default()
                     },
@@ -161,12 +161,12 @@ pub fn right_ui(
                         ..default()
                     },
                     image: UiImage::new(asset_server.load("ui/toggle_120x120.png")),
-                    border_color: BorderColor(Color::Rgba {
+                    border_color: BorderColor(Color::Srgba(Srgba {
                         red: 1.0,
                         green: 1.0,
                         blue: 1.0,
                         alpha: 0.0,
-                    }),
+                    })),
                     background_color: BackgroundColor(Color::WHITE),
                     visibility: Visibility::Visible,
                     ..default()

@@ -176,7 +176,7 @@ pub fn api_receive_server_tiles(
                             let mut new_td = TileData {
                                 ln_address: block_data.refund_ln_addr,
                                 username: block_data.username,
-                                color: Color::hex(block_data.color).unwrap(),
+                                color: Srgba::hex(block_data.color).unwrap().into(),
                                 message: block_data.message,
                                 resource: TileResource::Wheat,
                                 value: block_data.amount as u32,
@@ -205,7 +205,7 @@ pub fn api_receive_server_tiles(
                                         add_inventory_holder.push(UserGameBlock {
                                             height: new_td.height,
                                             amount: new_td.value,
-                                            color: convert_color_to_hexstring(new_td.color),
+                                            color: convert_color_to_hexstring(new_td.color.into()),
                                         });
                                     } else {
                                         info!("block came in and matches inv amount");

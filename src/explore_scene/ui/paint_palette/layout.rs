@@ -1,4 +1,4 @@
-use bevy::{prelude::*, ui::FocusPolicy};
+use bevy::{color::palettes::css::DARK_GRAY, prelude::*, ui::FocusPolicy};
 use rand::seq::SliceRandom;
 use rand::Rng;
 
@@ -327,8 +327,12 @@ pub fn spawn_layout(
                     // TEXT BOX
 
                     let mut rng = rand::thread_rng();
-                    let random_color = default_color_palette.colors.choose(&mut rng).unwrap();
-                    let random_color_string = convert_color_to_hexstring(*random_color);
+                    let random_color = default_color_palette
+                        .colors
+                        .choose(&mut rng)
+                        .unwrap()
+                        .to_srgba();
+                    let random_color_string = convert_color_to_hexstring(random_color);
 
                     inner_builder
                         .spawn((
@@ -342,7 +346,7 @@ pub fn spawn_layout(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: BackgroundColor(*random_color),
+                                background_color: BackgroundColor(random_color.into()),
                                 ..default()
                             },
                             ColorPaletteViewTextNode,
@@ -444,15 +448,13 @@ pub fn spawn_layout(
                                         top: Val::Px(2.0),
                                         bottom: Val::Px(0.0),
                                     },
-                                    //margin: UiRect::all(Val::Px(3.0)),
-                                    width: Val::Px(UI_ICON_SIZE / 2.5), // to make it a square.
+                                    width: Val::Px(UI_ICON_SIZE / 2.5),
                                     height: Val::Px(UI_ICON_SIZE / 2.5),
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                border_color: BorderColor(Color::DARK_GRAY),
+                                border_color: BorderColor(DARK_GRAY.into()),
                                 background_color: BackgroundColor(*color),
-                                visibility: Visibility::Visible,
                                 ..default()
                             },
                             UiInteractionBtn,
@@ -462,7 +464,9 @@ pub fn spawn_layout(
                     }
                 });
         });
-
+        //     UiInteractionBtn,
+        //     PaletteBtn,
+        //     IndividualColorInPalette(*color),
         overall_inventory_node.set_parent(parent_node);
     }
 }

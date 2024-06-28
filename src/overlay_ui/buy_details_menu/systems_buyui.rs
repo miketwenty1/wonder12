@@ -432,13 +432,13 @@ pub fn set_default_text_for_empty_text(
     if block_new_data.ln_address.is_empty() {
         for mut text in param_set.p0().iter_mut() {
             text.sections[0].value = DEFAULT_NEW_LN_TEXT.to_owned();
-            text.sections[0].style.color = DEFAULT_NO_PICK_COLOR;
+            text.sections[0].style.color = DEFAULT_NO_PICK_COLOR.into();
         }
     }
     if block_new_data.color_text.is_empty() {
         for mut text in param_set.p1().iter_mut() {
             text.sections[0].value = DEFAULT_NEW_COLOR_TEXT.to_owned();
-            text.sections[0].style.color = DEFAULT_NO_PICK_COLOR;
+            text.sections[0].style.color = DEFAULT_NO_PICK_COLOR.into();
         }
     } else {
         for mut text in param_set.p1().iter_mut() {
@@ -448,7 +448,7 @@ pub fn set_default_text_for_empty_text(
     if block_new_data.message.is_empty() {
         for mut text in param_set.p2().iter_mut() {
             text.sections[0].value = DEFAULT_NEW_MESSAGE_TEXT.to_owned();
-            text.sections[0].style.color = DEFAULT_NO_PICK_COLOR;
+            text.sections[0].style.color = DEFAULT_NO_PICK_COLOR.into();
         }
     } else {
         for mut text in param_set.p2().iter_mut() {
@@ -648,7 +648,9 @@ pub fn show_color_button_system(
             Interaction::None => {
                 if !block_new_data.color_text.is_empty() {
                     block_new_data.color =
-                        Color::hex(all_colors::get_color_hex(&block_new_data.color_text)).unwrap();
+                        Srgba::hex(all_colors::get_color_hex(&block_new_data.color_text))
+                            .unwrap()
+                            .into();
 
                     *color = block_new_data.color.into();
                 }

@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::YELLOW, prelude::*};
 use chrono::Utc;
 use web_sys::{Blob, BlobPropertyBag};
 
@@ -191,7 +191,7 @@ pub fn expiration_text(
         if time_left < 10 {
             text.sections[0].style.color = colors.red_color
         } else if time_left < 20 {
-            text.sections[0].style.color = Color::YELLOW
+            text.sections[0].style.color = YELLOW.into()
         }
     }
 }

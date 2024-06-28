@@ -1,4 +1,4 @@
-use bevy::render::color::Color;
+use bevy::color::Srgba;
 
 pub const CHUNK_PIXEL_SIZE: f32 = 400.0;
 pub const TILE_SCALE: f32 = 3.0;
@@ -19,7 +19,7 @@ pub const DEFAULT_HEIGHT_INPUT_TEXT: &str = "Type in a block height like 420 or 
 
 pub const THRESHOLD_FOR_PUSHBACK: i32 = -5_0000;
 
-pub const DEFAULT_NO_PICK_COLOR: Color = Color::Rgba {
+pub const DEFAULT_NO_PICK_COLOR: Srgba = Srgba {
     red: 0.7,
     green: 0.7,
     blue: 0.7,
@@ -31,10 +31,10 @@ pub const TEXT_ZOOM_OUT_MAX: f32 = 3.0;
 pub const BUILDING_ZOOM_OUT_MAX: f32 = 7.0;
 pub const ZOOM_OUT_MAX: f32 = 12.0;
 
-pub const DARKEST_BUILDING: Color = Color::Rgba {
-    red: 0.15,
-    green: 0.15,
-    blue: 0.15,
+pub const DARKEST_BUILDING: Srgba = Srgba {
+    red: 0.2,
+    green: 0.2,
+    blue: 0.2,
     alpha: 1.0,
 };
 

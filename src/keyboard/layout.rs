@@ -345,30 +345,29 @@ pub fn setup_keyboard_numbers(
                             keyboard_row_justification,
                         );
                     });
-                builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            display: Display::Grid,
-                            justify_items: JustifyItems::Center,
-                            padding: UiRect::all(Val::Px(0.0)),
-                            height: Val::Px(row_height),
-                            ..default()
-                        },
+                builder.spawn(NodeBundle {
+                    style: Style {
+                        display: Display::Grid,
+                        justify_items: JustifyItems::Center,
+                        padding: UiRect::all(Val::Px(0.0)),
+                        height: Val::Px(row_height),
                         ..default()
-                    })
-                    .with_children(|builder| {
-                        if key_chars.len() > 4 {
-                            spawn_keyboard_row(
-                                builder,
-                                font.clone(),
-                                key_chars[4],
-                                colors.button_color,
-                                font_size,
-                                padding_size,
-                                keyboard_row_justification,
-                            );
-                        }
-                    });
+                    },
+                    ..default()
+                });
+                // .with_children(|builder| {
+                //     if key_chars.len() > 4 {
+                //         spawn_keyboard_row(
+                //             builder,
+                //             font.clone(),
+                //             key_chars[4],
+                //             colors.button_color,
+                //             font_size,
+                //             padding_size,
+                //             keyboard_row_justification,
+                //         );
+                //     }
+                // });
             });
 
             keyboardcmds.set_parent(ent);

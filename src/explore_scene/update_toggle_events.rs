@@ -43,12 +43,12 @@ pub fn land_color_event(
             } else {
                 let a = tile_res.map.get(&loc.ulam);
                 if let Some(_val) = a {
-                    sprite.color = Color::Rgba {
+                    sprite.color = Color::Srgba(Srgba {
                         red: 1.0,
                         green: 1.0,
                         blue: 1.0,
                         alpha: 1.0,
-                    };
+                    });
                     texture.index = tile_res.map.get(&loc.ulam).unwrap().land_index;
                 }
             }
