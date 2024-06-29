@@ -1,9 +1,15 @@
 use bevy::{
-    input::keyboard::{Key, KeyboardInput},
+    input::{
+        keyboard::{Key, KeyboardInput},
+        ButtonState,
+    },
     prelude::*,
 };
 
-use crate::resourcey::{ColorPalette, TargetType};
+use crate::{
+    consty::{ACCEPTABLE_CHARS, MAX_MESSAGE_SIZE},
+    resourcey::{ColorPalette, TargetType},
+};
 
 use super::{
     components::{Changeable, KeyBoardButton},
@@ -16,10 +22,8 @@ use super::{
 
 // const ACCEPTABLE_CHARS: &str =
 //     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-const ACCEPTABLE_CHARS: &str =
-    "1234567890=⌫!#$%*&'@()[]+-_,.:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz⇧⬆/\" ";
+
 const ACCEPTABLE_NUMBER_CHARS: &str = "1234567890⌫";
-const MAX_INPUT_LENGTH: usize = 140;
 const MAX_INPUT_FOR_HEIGHT: usize = 7;
 #[allow(clippy::type_complexity)]
 pub fn physical_keyboard_system(
@@ -32,53 +36,56 @@ pub fn physical_keyboard_system(
     }
 
     for ev in char_evr.read() {
-        match &ev.logical_key {
-            Key::Character(smol) => {
-                let ks = smol.chars();
-                for k in ks {
-                    if ACCEPTABLE_CHARS.contains(k)
-                        && keyboard_text.value.len() < MAX_INPUT_LENGTH
+        if ev.state == ButtonState::Pressed {
+            match &ev.logical_key {
+                Key::Character(smol) => {
+                    let ks: std::str::Chars = smol.chars();
+                    let k = ks.last();
+                    if let Some(s) = k {
+                        if ACCEPTABLE_CHARS.contains(s)
+                            && keyboard_text.value.len() < MAX_MESSAGE_SIZE
+                            && (keyboard_text.target == TargetType::NewColor
+                                || keyboard_text.target == TargetType::NewLnAddress
+                                || keyboard_text.target == TargetType::NewMessage)
+                        {
+                            keyboard_text.value.push(s);
+                            // for numbered only targets
+                        } else if ACCEPTABLE_NUMBER_CHARS.contains(s)
+                            && keyboard_text.value.len() < MAX_INPUT_FOR_HEIGHT
+                            && keyboard_text.target == TargetType::GoTo
+                        {
+                            keyboard_text.value.push(s);
+                        } else {
+                            info!("no likey this character sorry")
+                        }
+                    }
+                }
+                Key::Space => {
+                    if keyboard_text.value.len() < MAX_MESSAGE_SIZE
                         && (keyboard_text.target == TargetType::NewColor
                             || keyboard_text.target == TargetType::NewLnAddress
                             || keyboard_text.target == TargetType::NewMessage)
                     {
-                        keyboard_text.value.push(k);
+                        keyboard_text.value.push(' ');
                         // for numbered only targets
-                    } else if ACCEPTABLE_NUMBER_CHARS.contains(k)
-                        && keyboard_text.value.len() < MAX_INPUT_FOR_HEIGHT
+                    } else if keyboard_text.value.len() < MAX_INPUT_FOR_HEIGHT
                         && keyboard_text.target == TargetType::GoTo
                     {
-                        keyboard_text.value.push(k);
+                        keyboard_text.value.push(' ');
                     } else {
                         info!("no likey this character sorry")
                     }
                 }
-            }
-            Key::Space => {
-                if keyboard_text.value.len() < MAX_INPUT_LENGTH
-                    && (keyboard_text.target == TargetType::NewColor
-                        || keyboard_text.target == TargetType::NewLnAddress
-                        || keyboard_text.target == TargetType::NewMessage)
-                {
-                    keyboard_text.value.push(' ');
-                    // for numbered only targets
-                } else if keyboard_text.value.len() < MAX_INPUT_FOR_HEIGHT
-                    && keyboard_text.target == TargetType::GoTo
-                {
-                    keyboard_text.value.push(' ');
-                } else {
-                    info!("no likey this character sorry")
+                _ => {
+                    info!("some key came in that")
                 }
             }
-            _ => {
-                info!("some key came in that")
-            }
+            // let k = ev. .char.to_string().chars().next().unwrap();
+
+            // for alphanumeric targets
+
+            //info!("new pkeydata {:?}", keyboard_text.0);
         }
-        // let k = ev. .char.to_string().chars().next().unwrap();
-
-        // for alphanumeric targets
-
-        //info!("new pkeydata {:?}", keyboard_text.0);
     }
 }
 
@@ -109,7 +116,7 @@ pub fn virtual_keyboard_system(
                 let max_input_length = match keyboard_text.target {
                     TargetType::GoTo => MAX_INPUT_FOR_HEIGHT,
                     TargetType::NewLnAddress | TargetType::NewMessage | TargetType::NewColor => {
-                        MAX_INPUT_LENGTH
+                        MAX_MESSAGE_SIZE
                     }
                     _ => 0,
                 };

@@ -2,6 +2,7 @@ use crate::{
     componenty::{Selected, UiInteractionBtn},
     eventy::ClearSelectionEvent,
     resourcey::{ColorPalette, UiInteracting},
+    utils::convert_color_to_hexstring,
 };
 
 use super::{
@@ -241,23 +242,45 @@ pub fn eyedrop_palette_button(
 #[allow(clippy::type_complexity)]
 pub fn individual_color_palette_button(
     mut query: Query<
-        (&Interaction, &mut BorderColor, &IndividualColorInPalette),
+        (
+            &Interaction,
+            &mut BorderColor,
+            &IndividualColorInPalette,
+            &mut Style,
+        ),
         (Changed<Interaction>, With<IndividualColorInPalette>),
     >,
     colors: Res<ColorPalette>,
     mut color_update: EventWriter<NewColorPicked>,
 ) {
-    for (interaction, mut border_color, color) in &mut query {
+    for (interaction, mut border_color, color, mut style) in &mut query {
         match *interaction {
             Interaction::Pressed => {
-                *border_color = colors.light_color.into();
+                style.border = UiRect {
+                    left: Val::Px(0.0),
+                    right: Val::Px(2.0),
+                    top: Val::Px(0.0),
+                    bottom: Val::Px(2.0),
+                };
                 color_update.send(NewColorPicked(color.0));
             }
             Interaction::Hovered => {
-                *border_color = colors.yellow_color.into();
+                *border_color = colors.light_color.into();
+                style.border = UiRect {
+                    left: Val::Px(2.0),
+                    right: Val::Px(0.0),
+                    top: Val::Px(2.0),
+                    bottom: Val::Px(0.0),
+                };
             }
             Interaction::None => {
                 *border_color = DARK_GRAY.into();
+                style.border = UiRect {
+                    left: Val::Px(2.0),
+                    right: Val::Px(0.0),
+                    top: Val::Px(2.0),
+                    bottom: Val::Px(0.0),
+                };
             }
         }
     }
@@ -274,8 +297,8 @@ pub fn new_color_picked_on_palette_event(
         for (children, mut bg_color) in node_q.iter_mut() {
             let mut text = text_query.get_mut(children[0]).unwrap();
 
-            let new_color_hex = event_color.to_srgba().to_hex();
-            text.sections[0].value = format!("#{}", new_color_hex);
+            let new_color_hex = convert_color_to_hexstring(event_color.to_srgba());
+            text.sections[0].value = new_color_hex;
 
             *bg_color = BackgroundColor(event_color);
         }

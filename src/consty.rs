@@ -39,6 +39,9 @@ pub const DARKEST_BUILDING: Srgba = Srgba {
 };
 
 pub const MAX_SELECTION_SIZE: usize = 500;
+pub const MAX_MESSAGE_SIZE: usize = 140;
+pub const ACCEPTABLE_CHARS: &str =
+    "1234567890=⌫!#$%*&'@()[]+-_,.:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz⇧⬆/\" ";
 
 pub const UI_SMALL_TEXT_SIZE: f32 = 15.0;
 pub const UI_MEDIUM_TEXT_SIZE: f32 = 20.0;

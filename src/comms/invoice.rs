@@ -13,7 +13,7 @@ use crate::{
     resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, Nwc, TileCartVec, User},
     statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState},
     structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},
-    utils::{extract_number, logout_user},
+    utils::{convert_color_to_hexstring, extract_number, logout_user},
     ServerURL,
 };
 
@@ -58,14 +58,14 @@ pub fn api_request_invoice(
                 // info!("tile new color {:#?}", tile.new_message);
                 let invoice_block = InvoiceGameBlock {
                     height: tile.height,
-                    color: tile.new_color.to_srgba().to_hex(),
+                    color: convert_color_to_hexstring(tile.new_color.to_srgba()),
                     message: tile.new_message.to_string(),
                     amount: tile.cost,
                 };
                 info!(
                     "color before hex: {:?} after hex {:?}, and inside {:?}",
                     tile.new_color,
-                    tile.new_color.to_srgba().to_hex(),
+                    convert_color_to_hexstring(tile.new_color.to_srgba()),
                     invoice_block.color,
                 );
                 block_request_block_vec.push(invoice_block);
@@ -319,7 +319,9 @@ pub fn api_receive_invoice_check(
                                     let user_game_block = UserGameBlock {
                                         height: tile.height,
                                         amount: tile.cost,
-                                        color: tile.new_color.to_srgba().to_hex(),
+                                        color: convert_color_to_hexstring(
+                                            tile.new_color.to_srgba(),
+                                        ),
                                     };
                                     inv.push(user_game_block);
                                 }

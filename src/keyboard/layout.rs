@@ -461,6 +461,7 @@ fn keyboard_button(
                             align_items: AlignItems::Center,
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(4.0)),
                         background_color: button_color.into(),
                         ..default()
                     },
@@ -490,17 +491,6 @@ fn keyboard_button(
                     parent.add_command(move |world: &mut World| {
                         world.entity_mut(ent_text).insert(Changeable);
                     });
-                    // if key_type == KeyType::Letter {
-                    //let a = parent;
-                    // parent.add_command(|world: &mut World| {
-                    //     world.entity_mut(ent_text).insert(Capitalizable)
-                    // });
-
-                    // parent.add_command(bevy::ecs::system::Insert {
-                    //     entity: ent_text,
-                    //     bundle: Capitalizable,
-                    // });
-                    // }
                 });
         });
 }

@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::WHITE, prelude::*};
 
 use crate::{
     componenty::{DrawBtn, DrawBtnImage},
@@ -12,7 +12,7 @@ use super::ui::paint_palette::{event::ViewSelectedTiles, state::PaintPaletteUiSt
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn draw_button_system(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
+        (&Interaction, &mut UiImage),
         (Changed<Interaction>, With<DrawBtn>),
     >,
     mut draw_image_q: Query<&mut UiImage, (With<DrawBtnImage>, Without<DrawBtn>)>,
@@ -29,7 +29,7 @@ pub fn draw_button_system(
         match *interaction {
             Interaction::Pressed => {
                 for mut image in &mut draw_image_q {
-                    *color = colors.light_color.into();
+                    *color = UiImage::new(asset_server.load("ui/palette_120x120.png"));
                     if *paint_palette_state == PaintPaletteUiState::On {
                         palette_tiles_view_event.send(ViewSelectedTiles);
                         ui_state.set(PaintPaletteUiState::Off);
@@ -46,15 +46,13 @@ pub fn draw_button_system(
                 }
             }
             Interaction::Hovered => {
-                *color = colors.accent_color.into();
+                *color = UiImage::new(asset_server.load("ui/palette_120x120.png"))
+                    .with_color(colors.accent_color);
+                //colors.accent_color.into();
             }
             Interaction::None => {
-                *color = BackgroundColor(Color::Srgba(Srgba {
-                    red: 1.0,
-                    green: 1.0,
-                    blue: 1.0,
-                    alpha: 1.0,
-                }))
+                *color = UiImage::new(asset_server.load("ui/palette_120x120.png"))
+                    .with_color(colors.light_color);
             }
         }
     }

@@ -111,6 +111,7 @@ pub fn spawn_layout(
                     min_width: Val::Px(w_size), //Val::Percent(25.0),
                     ..default()
                 },
+                border_radius: BorderRadius::all(Val::Px(4.0)),
                 focus_policy: FocusPolicy::Block,
                 background_color: BackgroundColor(colors.node_color),
                 ..default()
@@ -181,8 +182,10 @@ pub fn spawn_layout(
                                         align_items: AlignItems::Center,
                                         align_content: AlignContent::Center,
                                         justify_items: JustifyItems::Center,
+                                        margin: UiRect::all(Val::Px(3.0)),
                                         ..default()
                                     },
+                                    border_radius: BorderRadius::all(Val::Px(3.0)),
                                     background_color: colors.red_color.into(),
                                     ..default()
                                 },
@@ -421,6 +424,7 @@ pub fn spawn_layout(
                                 //grid_template_rows: vec![GridTrack::auto()],
                                 ..default()
                             },
+                            border_radius: BorderRadius::all(Val::Px(8.0)),
                             background_color: BackgroundColor(colors.node_color_lighter),
                             //background_color: BackgroundColor(Color::GREEN), //colors.node_color),
                             ..default()
@@ -597,6 +601,7 @@ fn setup_message_for_all_blocks_button(
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
+            border_radius: BorderRadius::all(Val::Px(2.0)),
             background_color: BackgroundColor(node_color),
             ..default()
         })
@@ -613,6 +618,7 @@ fn setup_message_for_all_blocks_button(
                             justify_content: JustifyContent::Center,
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(2.0)),
                         background_color: button_color.into(),
                         ..default()
                     },
@@ -665,8 +671,10 @@ fn setup_buy_create_invoice_button(
                             height: Val::Px(30.0),
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
+                            margin: UiRect::horizontal(Val::Px(2.0)),
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(4.0)),
                         background_color: button_color.into(),
                         ..default()
                     },
@@ -701,7 +709,6 @@ fn setup_back_from_buy_menu_button(
                 justify_items: JustifyItems::Start,
                 align_items: AlignItems::Center,
                 align_content: AlignContent::Start,
-
                 padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
@@ -717,8 +724,10 @@ fn setup_back_from_buy_menu_button(
                             height: Val::Px(30.0),
                             justify_content: JustifyContent::Center,
                             align_items: AlignItems::Center,
+                            margin: UiRect::horizontal(Val::Px(2.0)),
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(4.0)),
                         background_color: button_color.into(),
                         ..default()
                     },
@@ -816,6 +825,7 @@ fn setup_left_block_menu_button(
                     },
                     ..default()
                 },
+                border_radius: BorderRadius::all(Val::Px(10.0)),
                 background_color: button_color.into(),
                 visibility,
                 ..default()
@@ -860,6 +870,7 @@ fn setup_right_block_menu_button(
                     },
                     ..default()
                 },
+                border_radius: BorderRadius::all(Val::Px(10.0)),
                 visibility,
                 background_color: button_color.into(),
                 ..default()
@@ -911,6 +922,7 @@ fn current_message_title(
                             display: Display::None,
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(4.0)),
                         border_color: BorderColor(accent_color),
                         background_color: BackgroundColor(node_color), //node_color
                         ..default()
@@ -1122,6 +1134,7 @@ fn new_value_title(
                             border: UiRect::all(Val::Px(1.0)),
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(4.0)),
                         border_color: BorderColor(Color::WHITE),
                         background_color: BackgroundColor(box_color), //node_color
                         ..default()
@@ -1159,6 +1172,7 @@ fn setup_ln_addr_menu_button(
                 margin: UiRect::bottom(Val::Px(12.0)),
                 ..default()
             },
+            border_radius: BorderRadius::all(Val::Px(3.0)),
             background_color: BackgroundColor(node_color),
             ..default()
         })
@@ -1180,6 +1194,7 @@ fn setup_ln_addr_menu_button(
                             //min_height: Val::Px(80.0),
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(8.0)),
                         background_color: button_color.into(),
                         ..default()
                     },
@@ -1230,6 +1245,7 @@ fn setup_color_menu_button(
                 margin: UiRect::bottom(Val::Px(12.0)),
                 ..default()
             },
+            border_radius: BorderRadius::all(Val::Px(3.0)),
             background_color: BackgroundColor(node_color),
             ..default()
         })
@@ -1251,6 +1267,7 @@ fn setup_color_menu_button(
                             //min_height: Val::Px(80.0),
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(8.0)),
                         background_color: button_color.into(),
                         ..default()
                     },
@@ -1299,6 +1316,7 @@ fn setup_message_menu_button(
                 //padding: UiRect::all(Val::Px(1.0)),
                 ..default()
             },
+            border_radius: BorderRadius::all(Val::Px(3.0)),
             background_color: BackgroundColor(node_color),
             ..default()
         })
@@ -1318,6 +1336,7 @@ fn setup_message_menu_button(
                             margin: UiRect::all(Val::Px(1.0)),
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(8.0)),
                         background_color: button_color.into(),
                         ..default()
                     },

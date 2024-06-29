@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::WHITE, prelude::*};
 
 use crate::{componenty::GoToBtn, overlay_ui::go_to::state::GoToUiState, resourcey::ColorPalette};
 
@@ -15,7 +15,7 @@ pub fn go_to_button_system(
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                *color = colors.light_color.into();
+                *color = WHITE.into();
                 ui_state.set(GoToUiState::On);
                 info!("goto");
             }
@@ -23,12 +23,7 @@ pub fn go_to_button_system(
                 *color = colors.accent_color.into();
             }
             Interaction::None => {
-                *color = BackgroundColor(Color::Srgba(Srgba {
-                    red: 1.0,
-                    green: 1.0,
-                    blue: 1.0,
-                    alpha: 1.0,
-                }));
+                *color = colors.light_color.into();
             }
         }
     }

@@ -13,6 +13,7 @@ use crate::{
         },
     },
     resourcey::ColorPalette,
+    utils::convert_color_to_hexstring,
 };
 
 use super::{
@@ -32,7 +33,7 @@ pub fn spawn_layout(
 ) {
     for parent_node in placement_query.iter() {
         let mut overall_inventory_node = commands.spawn((
-            NodeBundle {
+            ButtonBundle {
                 style: Style {
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
@@ -42,11 +43,13 @@ pub fn spawn_layout(
                     row_gap: Val::Px(6.0),
                     ..default()
                 },
+                border_radius: BorderRadius::all(Val::Px(8.0)),
                 visibility: Visibility::Visible,
                 background_color: BackgroundColor(colors.node_color_lighter), //colors.node_color),
                 ..default()
             },
             PaintPaletteNode,
+            UiInteractionBtn,
         ));
 
         overall_inventory_node.with_children(|builder| {
@@ -64,6 +67,7 @@ pub fn spawn_layout(
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
+                    border_radius: BorderRadius::all(Val::Px(8.0)),
                     background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
@@ -82,6 +86,7 @@ pub fn spawn_layout(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
+                                border_radius: BorderRadius::all(Val::Px(8.0)),
                                 //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
                                 border_color: BorderColor(Color::BLACK),
                                 background_color: BackgroundColor(colors.accent_color),
@@ -118,6 +123,7 @@ pub fn spawn_layout(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
+                                border_radius: BorderRadius::all(Val::Px(40.0)),
                                 //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
                                 border_color: BorderColor(Color::BLACK),
                                 background_color: BackgroundColor(Color::WHITE),
@@ -155,6 +161,7 @@ pub fn spawn_layout(
                         flex_wrap: FlexWrap::Wrap,
                         ..default()
                     },
+                    border_radius: BorderRadius::all(Val::Px(8.0)),
                     background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
@@ -173,6 +180,7 @@ pub fn spawn_layout(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
+                                border_radius: BorderRadius::all(Val::Px(8.0)),
                                 //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
                                 border_color: BorderColor(Color::BLACK),
                                 background_color: BackgroundColor(Color::WHITE),
@@ -208,6 +216,7 @@ pub fn spawn_layout(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
+                                border_radius: BorderRadius::all(Val::Px(8.0)),
                                 //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
                                 border_color: BorderColor(Color::BLACK),
                                 background_color: BackgroundColor(Color::WHITE),
@@ -243,6 +252,7 @@ pub fn spawn_layout(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
+                                border_radius: BorderRadius::all(Val::Px(8.0)),
                                 //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
                                 border_color: BorderColor(Color::BLACK),
                                 background_color: BackgroundColor(Color::WHITE),
@@ -282,6 +292,7 @@ pub fn spawn_layout(
 
                                     ..default()
                                 },
+                                border_radius: BorderRadius::all(Val::Px(8.0)),
                                 //image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
                                 border_color: BorderColor(Color::BLACK),
                                 background_color: BackgroundColor(Color::WHITE),
@@ -318,6 +329,7 @@ pub fn spawn_layout(
                         padding: UiRect::all(Val::Px(2.0)),
                         ..default()
                     },
+                    border_radius: BorderRadius::all(Val::Px(8.0)),
                     background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
@@ -330,7 +342,7 @@ pub fn spawn_layout(
                         .choose(&mut rng)
                         .unwrap()
                         .to_srgba();
-                    let random_color_string = random_color.to_hex();
+                    let random_color_string = convert_color_to_hexstring(random_color);
 
                     inner_builder
                         .spawn((
@@ -344,6 +356,7 @@ pub fn spawn_layout(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
+                                border_radius: BorderRadius::all(Val::Px(8.0)),
                                 background_color: BackgroundColor(random_color.into()),
                                 ..default()
                             },
@@ -352,7 +365,7 @@ pub fn spawn_layout(
                         .with_children(|in_in_builder| {
                             in_in_builder.spawn((
                                 TextBundle::from_section(
-                                    format!("#{}", random_color_string),
+                                    random_color_string,
                                     TextStyle {
                                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                         font_size: UI_SMALL_TEXT_SIZE,
@@ -432,6 +445,7 @@ pub fn spawn_layout(
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
+                    //border_radius: BorderRadius::all(Val::Px(2.0)),
                     background_color: BackgroundColor(colors.node_color),
                     ..default()
                 })
@@ -451,6 +465,7 @@ pub fn spawn_layout(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
+                                border_radius: BorderRadius::all(Val::Px(3.0)),
                                 border_color: BorderColor(DARK_GRAY.into()),
                                 background_color: BackgroundColor(*color),
                                 ..default()

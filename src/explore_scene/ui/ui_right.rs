@@ -32,6 +32,7 @@ pub fn right_ui(
                     flex_direction: FlexDirection::Column,
                     ..default()
                 },
+                border_radius: BorderRadius::all(Val::Px(4.0)),
                 ..default()
             },
             UiSideNode,
@@ -46,7 +47,7 @@ pub fn right_ui(
                         style: Style {
                             width: Val::Px(UI_ICON_SIZE), // to make it a square.
                             height: Val::Px(UI_ICON_SIZE),
-                            border: UiRect::all(Val::Px(2.0)),
+                            //border: UiRect::all(Val::Px(2.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
                             // vertically center child text
@@ -55,18 +56,19 @@ pub fn right_ui(
                             ..default()
                         },
                         image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
-                        border_color: BorderColor(Color::Srgba(Srgba {
-                            red: 1.0,
-                            green: 1.0,
-                            blue: 1.0,
-                            alpha: 0.0,
-                        })),
-                        background_color: BackgroundColor(Color::Srgba(Srgba {
-                            red: 1.0,
-                            green: 1.0,
-                            blue: 1.0,
-                            alpha: 0.0,
-                        })),
+
+                        // border_color: BorderColor(Color::Srgba(Srgba {
+                        //     red: 1.0,
+                        //     green: 1.0,
+                        //     blue: 1.0,
+                        //     alpha: 0.0,
+                        // })),
+                        // background_color: BackgroundColor(Color::Srgba(Srgba {
+                        //     red: 1.0,
+                        //     green: 1.0,
+                        //     blue: 1.0,
+                        //     alpha: 0.0,
+                        // })),
                         visibility: Visibility::Visible,
                         ..default()
                     },
@@ -105,14 +107,10 @@ pub fn right_ui(
                             margin: UiRect::vertical(Val::Px(3.0)),
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(16.0)),
                         //image: UiImage::new(asset_server.load("ui/goto2_120x120.png")),
                         border_color: BorderColor(Color::BLACK),
-                        background_color: BackgroundColor(Color::Srgba(Srgba {
-                            red: 1.0,
-                            green: 1.0,
-                            blue: 1.0,
-                            alpha: 1.0,
-                        })),
+                        background_color: BackgroundColor(WHITE.into()),
                         visibility: Visibility::Visible,
                         ..default()
                     },
@@ -131,16 +129,6 @@ pub fn right_ui(
                         ..default()
                     },));
                 });
-            // .with_children(|parent| {
-            //     parent.spawn(TextBundle::from_section(
-            //         "Go To",
-            //         TextStyle {
-            //             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-            //             font_size: UI_MEDIUM_TEXT_SIZE,
-            //             color: colors.text_color,
-            //         },
-            //     ));
-            // });
         });
         //toggle buttons
         side_parent.with_children(|parent| {
@@ -149,7 +137,7 @@ pub fn right_ui(
                     style: Style {
                         width: Val::Px(UI_ICON_SIZE),
                         height: Val::Px(UI_ICON_SIZE),
-                        border: UiRect::all(Val::Px(2.0)),
+                        //border: UiRect::all(Val::Px(2.0)),
                         // horizontally center child text
                         justify_content: JustifyContent::Center,
                         // vertically center child text
@@ -158,13 +146,14 @@ pub fn right_ui(
                         ..default()
                     },
                     image: UiImage::new(asset_server.load("ui/toggle_120x120.png")),
-                    border_color: BorderColor(Color::Srgba(Srgba {
-                        red: 1.0,
-                        green: 1.0,
-                        blue: 1.0,
-                        alpha: 0.0,
-                    })),
-                    background_color: BackgroundColor(Color::WHITE),
+
+                    // border_color: BorderColor(Color::Srgba(Srgba {
+                    //     red: 1.0,
+                    //     green: 1.0,
+                    //     blue: 1.0,
+                    //     alpha: 0.0,
+                    // })),
+                    //background_color: BackgroundColor(Color::WHITE),
                     visibility: Visibility::Visible,
                     ..default()
                 },
@@ -191,10 +180,13 @@ pub fn right_ui(
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
+                            justify_items: JustifyItems::Center,
+                            align_content: AlignContent::Center,
                             // vertically center child text
                             align_items: AlignItems::Center,
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(8.0)),
                         border_color: BorderColor(colors.node_color),
                         background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
@@ -228,10 +220,13 @@ pub fn right_ui(
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
+                            justify_items: JustifyItems::Center,
+                            align_content: AlignContent::Center,
                             // vertically center child text
                             align_items: AlignItems::Center,
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(8.0)),
                         border_color: BorderColor(colors.node_color),
                         background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
@@ -266,10 +261,13 @@ pub fn right_ui(
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
+                            justify_items: JustifyItems::Center,
+                            align_content: AlignContent::Center,
                             // vertically center child text
                             align_items: AlignItems::Center,
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(8.0)),
                         border_color: BorderColor(colors.node_color),
                         background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
@@ -303,10 +301,13 @@ pub fn right_ui(
                             border: UiRect::all(Val::Px(5.0)),
                             // horizontally center child text
                             justify_content: JustifyContent::Center,
+                            justify_items: JustifyItems::Center,
+                            align_content: AlignContent::Center,
                             // vertically center child text
                             align_items: AlignItems::Center,
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(8.0)),
                         border_color: BorderColor(colors.node_color),
                         background_color: colors.button_color.into(),
                         visibility: Visibility::Hidden,
@@ -340,10 +341,10 @@ pub fn right_ui(
 
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn toggle_button_system(
-    mut mouse: ResMut<ButtonInput<MouseButton>>,
-    mut touches: ResMut<Touches>,
+    // mut mouse: ResMut<ButtonInput<MouseButton>>,
+    // mut touches: ResMut<Touches>,
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor),
+        (&Interaction, &mut UiImage),
         (
             Changed<Interaction>,
             (
@@ -361,20 +362,17 @@ pub fn toggle_button_system(
         Query<&mut Visibility, With<Toggle3Btn>>,
         Query<&mut Visibility, With<Toggle4Btn>>,
     )>,
-
-    //mut toggle_visible: Local<bool>,
     mut toggle_visible: ResMut<ToggleVisible>,
     colors: Res<ColorPalette>,
+    asset_server: Res<AssetServer>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         //let default_bg_color = color;
         //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
-                mouse.clear_just_pressed(MouseButton::Left);
-                touches.clear();
                 //text.sections[0].value = button_text;
-                *color = colors.light_color.into();
+                *color = UiImage::new(asset_server.load("ui/toggle_120x120.png"));
                 //game_state.set(DisplayBuyUiState::On);
                 if toggle_visible.0 {
                     for mut btn_vis in param_set.p0().iter_mut() {
@@ -411,13 +409,13 @@ pub fn toggle_button_system(
                 }
             }
             Interaction::Hovered => {
-                //text.sections[0].value = button_text;
-                *color = colors.accent_color.into();
+                *color = UiImage::new(asset_server.load("ui/toggle_120x120.png"))
+                    .with_color(colors.accent_color)
+                //colors.accent_color.into();
             }
             Interaction::None => {
-                //text.sections[0].value = button_text;
-                //let a = *color;
-                *color = BackgroundColor(WHITE.into());
+                *color = UiImage::new(asset_server.load("ui/toggle_120x120.png"))
+                    .with_color(colors.light_color);
             }
         }
     }

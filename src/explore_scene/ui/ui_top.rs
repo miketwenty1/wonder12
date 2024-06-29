@@ -26,6 +26,7 @@ pub fn top_ui(
                         margin: UiRect::all(Val::Px(10.0)),
                         ..default()
                     },
+                    border_radius: BorderRadius::all(Val::Px(8.0)),
                     background_color: colors.button_color.into(),
                     visibility: Visibility::Hidden,
                     ..default()
@@ -62,6 +63,7 @@ pub fn top_ui(
                         margin: UiRect::all(Val::Px(10.0)),
                         ..default()
                     },
+                    border_radius: BorderRadius::all(Val::Px(8.0)),
                     background_color: colors.button_color.into(),
                     visibility: Visibility::Hidden,
                     ..default()

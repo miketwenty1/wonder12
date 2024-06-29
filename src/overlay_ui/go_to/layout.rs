@@ -64,7 +64,7 @@ pub fn spawn_layout(
                 //max_height: Val::Px(h_size),
                 ..default()
             },
-
+            border_radius: BorderRadius::all(Val::Px(10.0)),
             background_color: BackgroundColor(colors.node_color),
             ..default()
         });
@@ -140,8 +140,10 @@ pub fn spawn_layout(
                                         align_items: AlignItems::Center,
                                         align_content: AlignContent::Center,
                                         justify_items: JustifyItems::Center,
+                                        margin: UiRect::all(Val::Px(2.0)),
                                         ..default()
                                     },
+                                    border_radius: BorderRadius::all(Val::Px(3.0)),
                                     background_color: colors.red_color.into(),
                                     ..default()
                                 },
@@ -224,6 +226,7 @@ fn height_input_box(
                 //margin: UiRect::bottom(Val::Px(5.0)),
                 ..default()
             },
+            border_radius: BorderRadius::all(Val::Px(3.0)),
             background_color: BackgroundColor(node_color),
             ..default()
         })
@@ -245,6 +248,7 @@ fn height_input_box(
                             //min_height: Val::Px(80.0),
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(8.0)),
                         background_color: button_color.into(),
                         ..default()
                     },
@@ -300,6 +304,7 @@ fn setup_goto_go_button(
                             border: UiRect::all(Val::Px(2.0)),
                             ..default()
                         },
+                        border_radius: BorderRadius::all(Val::Px(8.0)),
                         border_color: BorderColor(colors.text_color),
                         background_color: colors.button_color.into(),
                         ..default()

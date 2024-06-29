@@ -11,7 +11,7 @@ use crate::resourcey::{
 };
 use crate::statey::CommsApiBlockLoadState;
 use crate::structy::{RequestTileType, TileResource};
-use crate::utils::{logout_user, to_millisecond_precision};
+use crate::utils::{convert_color_to_hexstring, logout_user, to_millisecond_precision};
 use crate::{ServerURL, UpdateTileTextureEvent, WorldOwnedTileMap};
 use bevy::prelude::*;
 use chrono::Duration;
@@ -205,7 +205,9 @@ pub fn api_receive_server_tiles(
                                         add_inventory_holder.push(UserGameBlock {
                                             height: new_td.height,
                                             amount: new_td.value,
-                                            color: new_td.color.to_srgba().to_hex(),
+                                            color: convert_color_to_hexstring(
+                                                new_td.color.to_srgba(),
+                                            ),
                                         });
                                     } else {
                                         info!("block came in and matches inv amount");
