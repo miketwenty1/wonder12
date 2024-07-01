@@ -40,8 +40,8 @@ use explore_scene::ui::paint_palette::resource::DefaultDrawColorPalette;
 use explore_scene::ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
 use overlay_ui::go_to::state::GoToUiState;
 use resourcey::{
-    CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, MultiTouchInfo,
-    Nwc, ToggleVisible, UiInteracting, UserInventoryBlocks, WinSize,
+    CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, Nwc,
+    ToggleVisible, UiInteracting, UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
@@ -267,10 +267,10 @@ pub fn game12(
             width: viewport_width as f32,
             height: viewport_height as f32,
         })
-        .insert_resource(MultiTouchInfo {
-            //status: false,
-            distance: 0.0,
-        })
+        // .insert_resource(MultiTouchInfo {
+        //     //status: false,
+        //     distance: 0.0,
+        // })
         .insert_resource(ConfigAllCartBlocks(false))
         .insert_resource(IsIphone(is_iphone))
         .insert_resource(Nwc(nwc))

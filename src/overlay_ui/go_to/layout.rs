@@ -1,4 +1,4 @@
-use bevy::{color::palettes::css::PINK, prelude::*};
+use bevy::prelude::*;
 
 use crate::{
     componenty::{EditabledTextBox, UiInteractionBtn},

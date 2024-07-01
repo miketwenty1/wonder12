@@ -224,11 +224,11 @@ pub struct WinSize {
     pub height: f32,
 }
 
-#[derive(Resource, Clone, Debug, Default, Deserialize)]
-pub struct MultiTouchInfo {
-    //pub status: bool,
-    pub distance: f32,
-}
+// #[derive(Resource, Clone, Debug, Default, Deserialize)]
+// pub struct MultiTouchInfo {
+//     //pub status: bool,
+//     pub distance: f32,
+// }
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct ConfigAllCartBlocks(pub bool);

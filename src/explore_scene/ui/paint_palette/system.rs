@@ -290,6 +290,7 @@ pub fn new_color_picked_on_palette_event(
     mut event_reader: EventReader<NewColorPicked>,
     mut node_q: Query<(&mut Children, &mut BackgroundColor), With<ColorPaletteViewTextNode>>,
     mut text_query: Query<&mut Text>,
+    mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
 ) {
     for event in event_reader.read() {
         let event_color = event.0;
@@ -300,6 +301,7 @@ pub fn new_color_picked_on_palette_event(
             text.sections[0].value = event_color.to_srgba().to_hex();
 
             *bg_color = BackgroundColor(event_color);
+            tool_palette_state_c.set(ToolPaletteUiState::Pencil);
         }
     }
 }
