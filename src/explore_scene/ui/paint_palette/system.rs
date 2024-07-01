@@ -77,15 +77,15 @@ pub fn move_palette_button(
                 tool_palette_state_c.set(ToolPaletteUiState::Move);
                 *color = colors.green_color.into();
 
-                for mut bg_color in tool_set.p0().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
-                for mut bg_color in tool_set.p1().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
-                for mut bg_color in tool_set.p2().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
+                // for mut bg_color in tool_set.p0().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
+                // for mut bg_color in tool_set.p1().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
+                // for mut bg_color in tool_set.p2().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
@@ -122,15 +122,15 @@ pub fn pencil_palette_button(
             Interaction::Pressed => {
                 tool_palette_state_c.set(ToolPaletteUiState::Pencil);
                 *color = colors.green_color.into();
-                for mut bg_color in tool_set.p0().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
-                for mut bg_color in tool_set.p1().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
-                for mut bg_color in tool_set.p2().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
+                // for mut bg_color in tool_set.p0().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
+                // for mut bg_color in tool_set.p1().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
+                // for mut bg_color in tool_set.p2().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
@@ -169,15 +169,15 @@ pub fn eraser_palette_button(
                 view_event.send(ViewSelectedTiles);
                 tool_palette_state_c.set(ToolPaletteUiState::Eraser);
 
-                for mut bg_color in tool_set.p0().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
-                for mut bg_color in tool_set.p1().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
-                for mut bg_color in tool_set.p2().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
+                // for mut bg_color in tool_set.p0().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
+                // for mut bg_color in tool_set.p1().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
+                // for mut bg_color in tool_set.p2().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
@@ -214,15 +214,15 @@ pub fn eyedrop_palette_button(
                 *color = colors.green_color.into();
                 tool_palette_state_c.set(ToolPaletteUiState::Eyedrop);
 
-                for mut bg_color in tool_set.p0().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
-                for mut bg_color in tool_set.p1().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
-                for mut bg_color in tool_set.p2().iter_mut() {
-                    *bg_color = colors.light_color.into();
-                }
+                // for mut bg_color in tool_set.p0().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
+                // for mut bg_color in tool_set.p1().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
+                // for mut bg_color in tool_set.p2().iter_mut() {
+                //     *bg_color = colors.light_color.into();
+                // }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
@@ -315,6 +315,8 @@ pub fn trash_palette_button(
     colors: Res<ColorPalette>,
     mut clear_event: EventWriter<ClearSelectionEvent>,
     mut view_event: EventWriter<ViewSelectedTiles>,
+    tool_palette_state: Res<State<ToolPaletteUiState>>,
+    mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
 ) {
     for (interaction, mut color) in &mut trash_query {
         match *interaction {
@@ -322,6 +324,11 @@ pub fn trash_palette_button(
                 view_event.send(ViewSelectedTiles);
                 *color = colors.green_color.into();
                 clear_event.send(ClearSelectionEvent);
+                if **tool_palette_state == ToolPaletteUiState::Eraser
+                    || **tool_palette_state == ToolPaletteUiState::ViewHide
+                {
+                    tool_palette_state_c.set(ToolPaletteUiState::Pencil);
+                }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
@@ -343,6 +350,7 @@ pub fn viewhide_palette_button(
     mut view: ResMut<ViewablePaletteTiles>,
     mut hide_event: EventWriter<HideSelectedTiles>,
     mut view_event: EventWriter<ViewSelectedTiles>,
+    mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
 ) {
     for (interaction, mut color) in &mut viewhide_query {
         match *interaction {
@@ -354,6 +362,7 @@ pub fn viewhide_palette_button(
                 }
                 view.0 = !view.0;
                 *color = colors.green_color.into();
+                tool_palette_state_c.set(ToolPaletteUiState::ViewHide);
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
@@ -361,6 +370,66 @@ pub fn viewhide_palette_button(
             Interaction::None => {
                 *color = colors.light_color.into();
             }
+        }
+    }
+}
+
+#[allow(clippy::type_complexity)]
+pub fn change_palette_selection(
+    mut tool_set: ParamSet<(
+        Query<&mut BackgroundColor, With<PalettePencilBtn>>,
+        Query<&mut BackgroundColor, With<PaletteMoveBtn>>,
+        Query<&mut BackgroundColor, With<PaletteEraserBtn>>,
+        Query<&mut BackgroundColor, With<PaletteEyedropBtn>>,
+        Query<&mut BackgroundColor, With<PaletteViewHideBtn>>,
+    )>,
+    tool_palette_state: Res<State<ToolPaletteUiState>>,
+    colors: Res<ColorPalette>,
+) {
+    for mut bg_color in tool_set.p0().iter_mut() {
+        *bg_color = colors.light_color.into();
+    }
+    for mut bg_color in tool_set.p1().iter_mut() {
+        *bg_color = colors.light_color.into();
+    }
+    for mut bg_color in tool_set.p2().iter_mut() {
+        *bg_color = colors.light_color.into();
+    }
+    for mut bg_color in tool_set.p3().iter_mut() {
+        *bg_color = colors.light_color.into();
+    }
+    for mut bg_color in tool_set.p4().iter_mut() {
+        *bg_color = colors.light_color.into();
+    }
+
+    match **tool_palette_state {
+        ToolPaletteUiState::Pencil => {
+            for mut bg_color in tool_set.p0().iter_mut() {
+                *bg_color = colors.accent_color.into();
+            }
+        }
+        ToolPaletteUiState::Move => {
+            for mut bg_color in tool_set.p1().iter_mut() {
+                *bg_color = colors.accent_color.into();
+            }
+        }
+        ToolPaletteUiState::Eraser => {
+            for mut bg_color in tool_set.p2().iter_mut() {
+                *bg_color = colors.accent_color.into();
+            }
+        }
+        ToolPaletteUiState::Eyedrop => {
+            for mut bg_color in tool_set.p3().iter_mut() {
+                *bg_color = colors.accent_color.into();
+            }
+        }
+        ToolPaletteUiState::ViewHide => {
+            for mut bg_color in tool_set.p4().iter_mut() {
+                *bg_color = colors.accent_color.into();
+            }
+        }
+        ToolPaletteUiState::Off => {
+            // do nothing
         }
     }
 }

@@ -11,3 +11,6 @@ pub struct HideSelectedTiles;
 
 #[derive(Event, Debug)]
 pub struct ViewSelectedTiles;
+
+// #[derive(Event, Debug)]
+// pub struct ChangePaletteSelection(ToolPaletteUiState::);

@@ -13,6 +13,7 @@ pub enum ToolPaletteUiState {
     Move,
     Eraser,
     Eyedrop,
+    ViewHide,
     #[default]
     Off,
 }
