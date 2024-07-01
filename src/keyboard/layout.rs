@@ -71,6 +71,7 @@ pub fn setup_keyboard(
                         ],
                         ..default()
                     },
+                    border_radius: BorderRadius::all(Val::Px(4.0)),
                     background_color: BackgroundColor(colors.node_color),
                     //z_index: ZIndex::Global(20),
                     ..default()
@@ -243,11 +244,12 @@ pub fn setup_keyboard_numbers(
                             GridTrack::auto(),
                             GridTrack::auto(),
                             GridTrack::auto(),
-                            GridTrack::auto(),
-                            GridTrack::flex(1.0),
+                            //GridTrack::auto(),
+                            //GridTrack::flex(1.0),
                         ],
                         ..default()
                     },
+                    border_radius: BorderRadius::all(Val::Px(4.0)),
                     background_color: BackgroundColor(colors.node_color),
                     //z_index: ZIndex::Global(20),
                     ..default()
@@ -345,16 +347,16 @@ pub fn setup_keyboard_numbers(
                             keyboard_row_justification,
                         );
                     });
-                builder.spawn(NodeBundle {
-                    style: Style {
-                        display: Display::Grid,
-                        justify_items: JustifyItems::Center,
-                        padding: UiRect::all(Val::Px(0.0)),
-                        height: Val::Px(row_height),
-                        ..default()
-                    },
-                    ..default()
-                });
+                // builder.spawn(NodeBundle {
+                //     style: Style {
+                //         display: Display::Grid,
+                //         justify_items: JustifyItems::Center,
+                //         padding: UiRect::all(Val::Px(0.0)),
+                //         height: Val::Px(row_height),
+                //         ..default()
+                //     },
+                //     ..default()
+                // });
             });
 
             keyboardcmds.set_parent(ent);

@@ -13,7 +13,6 @@ use crate::{
         },
     },
     resourcey::ColorPalette,
-    utils::convert_color_to_hexstring,
 };
 
 use super::{
@@ -342,7 +341,7 @@ pub fn spawn_layout(
                         .choose(&mut rng)
                         .unwrap()
                         .to_srgba();
-                    let random_color_string = convert_color_to_hexstring(random_color);
+                    let random_color_string = random_color.to_hex();
 
                     inner_builder
                         .spawn((
@@ -350,8 +349,13 @@ pub fn spawn_layout(
                                 style: Style {
                                     display: Display::Flex,
                                     flex_direction: FlexDirection::Row,
-                                    padding: UiRect::all(Val::Px(4.0)),
-                                    width: Val::Px(56.0),
+                                    padding: UiRect {
+                                        left: Val::Px(12.0),
+                                        right: Val::Px(12.0),
+                                        top: Val::Px(4.0),
+                                        bottom: Val::Px(4.0),
+                                    },
+                                    //width: Val::Px(56.0),
                                     justify_content: JustifyContent::Center,
                                     align_items: AlignItems::Center,
                                     ..default()

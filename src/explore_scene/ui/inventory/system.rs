@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::WHITE, prelude::*};
 
 use crate::{
     eventy::{DespawnInventoryHeights, TravelHeight},
@@ -19,7 +19,7 @@ pub fn inventory_adder_system(
     mut commands: Commands,
     mut inventory_row_node: Query<Entity, (With<InventoryRowsNode>, Without<InventoryColorBox>)>,
     mut inventory_node: Query<
-        &mut Visibility,
+        &mut Style,
         (
             With<InventoryNode>,
             Without<InventoryColorBox>,
@@ -40,9 +40,9 @@ pub fn inventory_adder_system(
         info!("inv event trig");
 
         let inventory_rows = inventory_row_node.get_single_mut().unwrap();
-        let mut inventory_visibility = inventory_node.get_single_mut().unwrap();
-        if *inventory_visibility == Visibility::Hidden {
-            *inventory_visibility = Visibility::Visible;
+        let mut inventory_style = inventory_node.get_single_mut().unwrap();
+        if inventory_style.display == Display::None {
+            inventory_style.display = Display::Flex;
         }
         for tile in &inventory_event.0 {
             let mut updated_block = false;
@@ -116,7 +116,7 @@ pub fn inventory_remover_system(
 #[allow(clippy::type_complexity)]
 pub fn visible_inventory_toggle_button(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &mut UiImage),
+        (&Interaction, &mut UiImage),
         (Changed<Interaction>, With<InventoryToggleButton>),
     >,
     // mut clear_event: EventWriter<ClearSelectionEvent>,
@@ -127,10 +127,9 @@ pub fn visible_inventory_toggle_button(
     >,
     asset_server: Res<AssetServer>,
 ) {
-    for (interaction, mut color, mut image) in &mut interaction_query {
+    for (interaction, mut image) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                *color = colors.light_color.into();
                 info!("inventory toggle");
 
                 for mut style in inventory_rows_node_q.iter_mut() {
@@ -141,19 +140,34 @@ pub fn visible_inventory_toggle_button(
                             texture: asset_server.load("ui/expandarrow_60x60.png"),
                             flip_x: false,
                             flip_y: true,
-                            color: colors.light_color,
+                            color: colors.accent_color,
                         };
                     } else {
                         style.display = Display::Grid;
-                        *image = UiImage::new(asset_server.load("ui/expandarrow_60x60.png"));
+                        *image = UiImage {
+                            texture: asset_server.load("ui/expandarrow_60x60.png"),
+                            flip_x: false,
+                            flip_y: false,
+                            color: colors.accent_color,
+                        };
                     }
                 }
             }
             Interaction::Hovered => {
-                *color = colors.accent_color.into();
+                *image = UiImage {
+                    color: WHITE.into(),
+                    texture: asset_server.load("ui/expandarrow_60x60.png"),
+                    flip_x: image.flip_x,
+                    flip_y: image.flip_y,
+                };
             }
             Interaction::None => {
-                *color = colors.light_color.into();
+                *image = UiImage {
+                    color: colors.light_color,
+                    texture: asset_server.load("ui/expandarrow_60x60.png"),
+                    flip_x: image.flip_x,
+                    flip_y: image.flip_y,
+                };
             }
         }
     }

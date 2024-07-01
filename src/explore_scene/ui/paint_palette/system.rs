@@ -2,7 +2,6 @@ use crate::{
     componenty::{Selected, UiInteractionBtn},
     eventy::ClearSelectionEvent,
     resourcey::{ColorPalette, UiInteracting},
-    utils::convert_color_to_hexstring,
 };
 
 use super::{
@@ -297,8 +296,8 @@ pub fn new_color_picked_on_palette_event(
         for (children, mut bg_color) in node_q.iter_mut() {
             let mut text = text_query.get_mut(children[0]).unwrap();
 
-            let new_color_hex = convert_color_to_hexstring(event_color.to_srgba());
-            text.sections[0].value = new_color_hex;
+            //let new_color_hex = convert_color_to_hexstring();
+            text.sections[0].value = event_color.to_srgba().to_hex();
 
             *bg_color = BackgroundColor(event_color);
         }

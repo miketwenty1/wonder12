@@ -132,7 +132,7 @@ impl Plugin for ExplorePlugin {
                 (
                     update_tile_textures,
                     animate_sprites,
-                    cron_update_tiles,
+                    cron_update_tiles.run_if(in_state(InitLoadingBlocksState::Off)),
                     tick_update_tile_cron_timer,
                     update_tiles_after_purchase,
                     cam_ortho_scale_text_visibility,

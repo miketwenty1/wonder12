@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::PINK, prelude::*};
 
 use crate::{
     componenty::{EditabledTextBox, UiInteractionBtn},
@@ -61,9 +61,11 @@ pub fn spawn_layout(
                 justify_items: JustifyItems::Center,
                 flex_direction: FlexDirection::Column,
                 width: Val::Px(w_size),
+                border: UiRect::all(Val::Px(5.0)),
                 //max_height: Val::Px(h_size),
                 ..default()
             },
+            border_color: BorderColor(colors.node_color_lighter),
             border_radius: BorderRadius::all(Val::Px(10.0)),
             background_color: BackgroundColor(colors.node_color),
             ..default()
@@ -83,6 +85,7 @@ pub fn spawn_layout(
                     justify_content: JustifyContent::SpaceBetween,
                     ..Default::default()
                 },
+                border_radius: BorderRadius::all(Val::Px(5.0)),
                 background_color: BackgroundColor(colors.node_color),
                 ..Default::default()
             });
@@ -105,6 +108,7 @@ pub fn spawn_layout(
                 builder
                     .spawn(NodeBundle {
                         style: Style {
+                            margin: UiRect::vertical(Val::Px(8.0)),
                             //padding: UiRect::all(Val::Px(1.0)),
                             ..default()
                         },
@@ -182,12 +186,16 @@ pub fn spawn_layout(
                 NodeBundle {
                     style: Style {
                         width: Val::Percent(100.0),
-                        height: Val::Percent(23.0),
+                        //height: Val::Percent(23.0),
                         display: Display::Grid,
                         justify_items: JustifyItems::Center,
+                        border: UiRect::all(Val::Px(5.0)),
+                        margin: UiRect::top(Val::Px(4.0)),
                         //padding: UiRect::all(Val::Px(1.0)),
                         ..default()
                     },
+                    border_radius: BorderRadius::all(Val::Px(4.0)),
+                    border_color: BorderColor(colors.node_color_lighter),
                     //background_color: BackgroundColor(Color::YELLOW),
                     ..default()
                 },
@@ -285,6 +293,7 @@ fn setup_goto_go_button(
                 justify_items: JustifyItems::Start,
                 align_items: AlignItems::Center,
                 align_content: AlignContent::Start,
+                margin: UiRect::vertical(Val::Px(16.0)),
                 //margin: UiRect::all(Val::Px(5.)),
                 //padding: UiRect::all(Val::Px(1.0)),
                 ..default()

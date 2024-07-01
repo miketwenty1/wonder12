@@ -29,13 +29,13 @@ pub fn spawn_layout(
 ) {
     for parent_node in placement_query.iter() {
         let mut should_add_init_inventory = false;
-        let visibility = if inventory_blocks.ownedblocks.is_empty() {
-            Visibility::Hidden
+        let display = if inventory_blocks.ownedblocks.is_empty() {
+            Display::None
         } else {
             // in the visibility logic also add in the blocks that are already owned.
 
             should_add_init_inventory = true;
-            Visibility::Visible
+            Display::Flex
         };
 
         info!("spawn inventory layout");
@@ -43,7 +43,7 @@ pub fn spawn_layout(
         let mut overall_inventory_node = commands.spawn((
             NodeBundle {
                 style: Style {
-                    display: Display::Flex,
+                    display,
                     //height: Val::Percent(100.0),
                     // grid_template_columns: vec![GridTrack::auto()],
                     // grid_template_rows: vec![
@@ -59,7 +59,7 @@ pub fn spawn_layout(
 
                     ..default()
                 },
-                visibility,
+                //visibility,
                 background_color: BackgroundColor(colors.node_color_lighter), //colors.node_color),
                 ..default()
             },
@@ -131,8 +131,8 @@ pub fn spawn_layout(
                                         border: UiRect::all(Val::Px(2.0)),
                                         ..default()
                                     },
-                                    border_color: BorderColor(colors.light_color),
-                                    background_color: colors.light_color.into(),
+                                    border_color: BorderColor(colors.lite_button_color),
+                                    background_color: colors.button_color.into(),
                                     image: UiImage::new(
                                         asset_server.load("ui/expandarrow_60x60.png"),
                                     ),
@@ -289,9 +289,18 @@ pub fn spawn_inventory_row(
         .set_parent(inventory_rows_node);
 }
 
-pub fn show_layout(mut style_query: Query<&mut Style, With<InventoryNode>>) {
+pub fn show_layout(
+    mut style_query: Query<&mut Style, With<InventoryNode>>,
+    inventory_blocks: Res<UserInventoryBlocks>,
+) {
     for mut style in style_query.iter_mut() {
-        style.display = Display::Flex;
+        let display = if inventory_blocks.ownedblocks.is_empty() {
+            Display::None
+        } else {
+            Display::Flex
+        };
+
+        style.display = display;
     }
 }
 
