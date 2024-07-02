@@ -110,7 +110,7 @@ pub fn draw_select_tile(
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
     mut toast: EventWriter<ToastEvent>,
     tool_palette_state: Res<State<ToolPaletteUiState>>,
-    //mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
+    mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
     mut update_color: EventWriter<NewColorPicked>,
     mut view_event: EventWriter<ViewSelectedTiles>,
     view: Res<ViewablePaletteTiles>,
@@ -120,6 +120,7 @@ pub fn draw_select_tile(
         // is selected and then you hide the view but then afterwards you continue to draw
         if !view.0 {
             view_event.send(ViewSelectedTiles);
+            tool_palette_state_c.set(ToolPaletteUiState::Pencil);
         }
 
         let mut done = false;

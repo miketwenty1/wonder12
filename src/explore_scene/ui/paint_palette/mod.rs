@@ -52,7 +52,7 @@ impl Plugin for PaintPalettePlugin {
                 ui_interaction_released_buttons
 
         ).chain())
-        //.add_systems(Update, (change_palette_selection).run_if(state_changed::<ToolPaletteUiState>))
+        .add_systems(Update, (change_palette_selection).run_if(state_changed::<ToolPaletteUiState>))
         // .add_systems(
         //     Update,
         //     .run_if(in_state(ToolPaletteUiState::Eraser))

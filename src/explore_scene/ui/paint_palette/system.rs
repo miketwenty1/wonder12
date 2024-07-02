@@ -65,27 +65,12 @@ pub fn move_palette_button(
     colors: Res<ColorPalette>,
     mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
     tool_palette_state: Res<State<ToolPaletteUiState>>,
-    mut tool_set: ParamSet<(
-        Query<&mut BackgroundColor, (With<PalettePencilBtn>, Without<PaletteMoveBtn>)>,
-        Query<&mut BackgroundColor, (With<PaletteEraserBtn>, Without<PaletteMoveBtn>)>,
-        Query<&mut BackgroundColor, (With<PaletteEyedropBtn>, Without<PaletteMoveBtn>)>,
-    )>,
 ) {
     for (interaction, mut color) in &mut move_query {
         match *interaction {
             Interaction::Pressed => {
                 tool_palette_state_c.set(ToolPaletteUiState::Move);
                 *color = colors.green_color.into();
-
-                // for mut bg_color in tool_set.p0().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
-                // for mut bg_color in tool_set.p1().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
-                // for mut bg_color in tool_set.p2().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
@@ -110,11 +95,6 @@ pub fn pencil_palette_button(
     colors: Res<ColorPalette>,
     mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
     tool_palette_state: Res<State<ToolPaletteUiState>>,
-    mut tool_set: ParamSet<(
-        Query<&mut BackgroundColor, (With<PaletteEraserBtn>, Without<PalettePencilBtn>)>,
-        Query<&mut BackgroundColor, (With<PaletteMoveBtn>, Without<PalettePencilBtn>)>,
-        Query<&mut BackgroundColor, (With<PaletteEyedropBtn>, Without<PalettePencilBtn>)>,
-    )>,
     // mut view_event: EventWriter<ViewSelectedTiles>,
 ) {
     for (interaction, mut color) in &mut pencil_query {
@@ -122,15 +102,6 @@ pub fn pencil_palette_button(
             Interaction::Pressed => {
                 tool_palette_state_c.set(ToolPaletteUiState::Pencil);
                 *color = colors.green_color.into();
-                // for mut bg_color in tool_set.p0().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
-                // for mut bg_color in tool_set.p1().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
-                // for mut bg_color in tool_set.p2().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
@@ -155,11 +126,7 @@ pub fn eraser_palette_button(
     colors: Res<ColorPalette>,
     mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
     tool_palette_state: Res<State<ToolPaletteUiState>>,
-    mut tool_set: ParamSet<(
-        Query<&mut BackgroundColor, (With<PalettePencilBtn>, Without<PaletteEraserBtn>)>,
-        Query<&mut BackgroundColor, (With<PaletteMoveBtn>, Without<PaletteEraserBtn>)>,
-        Query<&mut BackgroundColor, (With<PaletteEyedropBtn>, Without<PaletteEraserBtn>)>,
-    )>,
+
     mut view_event: EventWriter<ViewSelectedTiles>,
 ) {
     for (interaction, mut color) in &mut eraser_query {
@@ -168,16 +135,6 @@ pub fn eraser_palette_button(
                 *color = colors.green_color.into();
                 view_event.send(ViewSelectedTiles);
                 tool_palette_state_c.set(ToolPaletteUiState::Eraser);
-
-                // for mut bg_color in tool_set.p0().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
-                // for mut bg_color in tool_set.p1().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
-                // for mut bg_color in tool_set.p2().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
@@ -202,27 +159,12 @@ pub fn eyedrop_palette_button(
     colors: Res<ColorPalette>,
     mut tool_palette_state_c: ResMut<NextState<ToolPaletteUiState>>,
     tool_palette_state: Res<State<ToolPaletteUiState>>,
-    mut tool_set: ParamSet<(
-        Query<&mut BackgroundColor, (With<PalettePencilBtn>, Without<PaletteEyedropBtn>)>,
-        Query<&mut BackgroundColor, (With<PaletteMoveBtn>, Without<PaletteEyedropBtn>)>,
-        Query<&mut BackgroundColor, (With<PaletteEraserBtn>, Without<PaletteEyedropBtn>)>,
-    )>,
 ) {
     for (interaction, mut color) in &mut eyedrop_query {
         match *interaction {
             Interaction::Pressed => {
                 *color = colors.green_color.into();
                 tool_palette_state_c.set(ToolPaletteUiState::Eyedrop);
-
-                // for mut bg_color in tool_set.p0().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
-                // for mut bg_color in tool_set.p1().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
-                // for mut bg_color in tool_set.p2().iter_mut() {
-                //     *bg_color = colors.light_color.into();
-                // }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
@@ -357,12 +299,13 @@ pub fn viewhide_palette_button(
             Interaction::Pressed => {
                 if !view.0 {
                     view_event.send(ViewSelectedTiles);
+                    tool_palette_state_c.set(ToolPaletteUiState::Pencil);
                 } else {
                     hide_event.send(HideSelectedTiles);
+                    tool_palette_state_c.set(ToolPaletteUiState::ViewHide);
                 }
                 view.0 = !view.0;
                 *color = colors.green_color.into();
-                tool_palette_state_c.set(ToolPaletteUiState::ViewHide);
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
