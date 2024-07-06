@@ -1,4 +1,5 @@
 pub mod amount_ui;
+pub mod core_ui;
 pub mod cron_systems;
 pub mod desktop_movement_systems;
 pub mod explore;
@@ -8,15 +9,14 @@ pub mod palette;
 pub mod selection;
 pub mod touch_movement_systems;
 pub mod travel;
-pub mod ui;
 pub mod update_after_purchase;
 pub mod update_toggle_events;
 pub mod zoom;
 
 use bevy::prelude::*;
+use core_ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
 use explore::clear_manual_selection;
 use palette::draw_button_system;
-use ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
 use zoom::zoom_wheel_system;
 
 use crate::{
@@ -28,6 +28,14 @@ use crate::{
 
 use self::{
     amount_ui::update_amount_selected_text,
+    core_ui::{
+        ui_right::{
+            toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
+            toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4,
+            toggle_button_system,
+        },
+        ExploreUiPlugin,
+    },
     cron_systems::{cron_update_tiles, tick_update_tile_cron_timer, CronPollingTimer},
     desktop_movement_systems::{
         clear_last_selected_tile, keyboard_movement_camera_system, mouse_movement_camera_system,
@@ -41,14 +49,6 @@ use self::{
     selection::{choose_tile, select_tile},
     touch_movement_systems::touch_event_system,
     travel::travel_event,
-    ui::{
-        ui_right::{
-            toggle_button_sub_system_toggle1, toggle_button_sub_system_toggle2,
-            toggle_button_sub_system_toggle3, toggle_button_sub_system_toggle4,
-            toggle_button_system,
-        },
-        ExploreUiPlugin,
-    },
     update_after_purchase::update_tiles_after_purchase,
     update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
     zoom::{

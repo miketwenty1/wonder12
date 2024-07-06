@@ -35,9 +35,9 @@ use eventy::{
     KeyboardSpawnEvent, MessageReceivedFromServer, NumberKeyboardSpawnEvent, RequestInventoryEvent,
     ShowBackupCopyBtn, TravelHeight, UpdateTilesAfterPurchase,
 };
-use explore_scene::ui::inventory::state::InventoryUiState;
-use explore_scene::ui::paint_palette::resource::DefaultDrawColorPalette;
-use explore_scene::ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
+use explore_scene::core_ui::inventory::state::InventoryUiState;
+use explore_scene::core_ui::paint_palette::resource::DefaultDrawColorPalette;
+use explore_scene::core_ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
 use overlay_ui::go_to::state::GoToUiState;
 use resourcey::{
     CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, Nwc,

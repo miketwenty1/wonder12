@@ -3,11 +3,11 @@ use bevy::prelude::*;
 use crate::{
     componenty::{DrawBtn, DrawBtnImage},
     eventy::ClearManualSelectionEvent,
-    explore_scene::ui::paint_palette::state::ToolPaletteUiState,
+    explore_scene::core_ui::paint_palette::state::ToolPaletteUiState,
     resourcey::ColorPalette,
 };
 
-use super::ui::paint_palette::{event::ViewSelectedTiles, state::PaintPaletteUiState};
+use super::core_ui::paint_palette::{event::ViewSelectedTiles, state::PaintPaletteUiState};
 
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn draw_button_system(

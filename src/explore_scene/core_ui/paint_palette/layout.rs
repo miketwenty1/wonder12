@@ -4,7 +4,7 @@ use rand::seq::SliceRandom;
 use crate::{
     componenty::UiInteractionBtn,
     consty::{UI_ICON_SIZE, UI_SMALL_TEXT_SIZE},
-    explore_scene::ui::{
+    explore_scene::core_ui::{
         components::ExplorerUiNodeLeft,
         inventory::state::InventoryUiState,
         paint_palette::component::{

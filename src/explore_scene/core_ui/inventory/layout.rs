@@ -4,7 +4,7 @@ use crate::{
     comms::server_structs::UserGameBlock,
     componenty::{UiInteractionBtn, UiOverlayingExplorerButton},
     consty::UI_MEDIUM_TEXT_SIZE,
-    explore_scene::ui::{
+    explore_scene::core_ui::{
         components::ExplorerUiNodeLeft,
         inventory::component::{InventoryRowsNode, InventoryToggleButton, InventoryToggleable},
     },

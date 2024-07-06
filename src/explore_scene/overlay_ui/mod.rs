@@ -9,6 +9,7 @@ pub mod go_to;
 pub mod qr_invoice;
 pub mod toast;
 
+/// Overlays don't use the core ui grid
 pub struct OverlayUiPlugin;
 
 impl Plugin for OverlayUiPlugin {

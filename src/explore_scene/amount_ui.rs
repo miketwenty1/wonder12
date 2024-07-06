@@ -7,7 +7,7 @@ use crate::{
     resourcey::{TileCart, TileCartData, UserPurchasedBlockMessage, WorldOwnedTileMap},
 };
 
-use super::ui::components::{AmountText, BlockCountText};
+use super::core_ui::components::{AmountText, BlockCountText};
 
 #[allow(clippy::type_complexity)]
 pub fn update_amount_selected_text(

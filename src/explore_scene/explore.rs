@@ -32,7 +32,7 @@ use crate::{
     structy::SpawnDiffData,
 };
 
-use super::ui::paint_palette::event::ViewSelectedTiles;
+use super::core_ui::paint_palette::event::ViewSelectedTiles;
 
 // pub fn reset_mouse(
 //     mut mouse: ResMut<ButtonInput<MouseButton>>,

@@ -4,7 +4,7 @@ use crate::async_resource_comm_channels::TileDataChannel;
 use crate::browser::event::WriteLocalBrowserStorage;
 use crate::comms::server_structs::UserGameBlock;
 use crate::eventy::{DespawnInventoryHeights, RequestTileUpdates};
-use crate::explore_scene::ui::inventory::event::AddInventoryRow;
+use crate::explore_scene::core_ui::inventory::event::AddInventoryRow;
 use crate::overlay_ui::toast::{ToastEvent, ToastType};
 use crate::resourcey::{
     CheckpointTimetamp, InitGameMap, TileData, UpdateGameTimetamp, UserInventoryBlocks,
