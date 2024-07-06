@@ -10,14 +10,20 @@ pub fn go_to_button_system(
     >,
     // mut clear_event: EventWriter<ClearSelectionEvent>,
     colors: Res<ColorPalette>,
-    mut ui_state: ResMut<NextState<GoToUiState>>,
+    mut ui_state_c: ResMut<NextState<GoToUiState>>,
+    ui_state: Res<State<GoToUiState>>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
                 *color = WHITE.into();
-                ui_state.set(GoToUiState::On);
-                info!("goto");
+                if **ui_state == GoToUiState::Off {
+                    ui_state_c.set(GoToUiState::On);
+                    info!("goto");
+                } else {
+                    ui_state_c.set(GoToUiState::Off);
+                    info!("goto off");
+                }
             }
             Interaction::Hovered => {
                 *color = colors.accent_color.into();
