@@ -1,3 +1,4 @@
+use bevy::utils::HashSet;
 use bevy::{prelude::*, utils::HashMap};
 use serde::Deserialize;
 use serde::Serialize;
@@ -16,13 +17,20 @@ pub struct TileData {
     pub username: String,
     pub color: Color,
     pub message: String,
-    pub resource: TileResource,
-    pub hash: String,
     pub value: u32,
     pub cost: u32,
     pub height: u32,
     pub land_index: usize,
     pub event_date: DateTime<Utc>,
+    pub resource: TileResource,
+    pub block_hash: String,
+    pub block_time: i64,
+    pub block_bits: i64,
+    pub block_n_tx: i32,
+    pub block_size: i32,
+    pub block_fee: i64,
+    pub block_weight: i64,
+    pub block_ver: i32,
 }
 
 #[derive(Resource, Clone, PartialEq, Serialize, Deserialize)]
@@ -41,11 +49,18 @@ impl WorldOwnedTileMap {
                     TrimTile {
                         c: convert_color_to_hexstring(tile_data.color.to_srgba()),
                         v: tile_data.value,
-                        h: tile_data.hash.clone(),
                         l: tile_data.ln_address.clone(),
                         m: tile_data.message.clone(),
                         u: tile_data.username.clone(),
                         d: tile_data.event_date,
+                        h: tile_data.block_hash.clone(),
+                        bt: tile_data.block_time,
+                        bb: tile_data.block_bits,
+                        bn: tile_data.block_n_tx,
+                        bs: tile_data.block_size,
+                        bf: tile_data.block_fee,
+                        bw: tile_data.block_weight,
+                        bv: tile_data.block_ver,
                     },
                 )
             })
@@ -102,7 +117,7 @@ pub struct SpriteIndexBuilding(pub HashMap<u32, u32>);
 
 #[derive(Resource, Clone)]
 pub struct ChunkManager {
-    pub map: HashMap<u32, bool>,
+    pub set: HashSet<u32>,
 }
 
 #[derive(Resource, Clone)]
@@ -122,14 +137,20 @@ pub struct SpriteSheetBuilding {
     pub texture: Handle<Image>,
 }
 
+// #[derive(Resource, Clone)]
+// pub struct SpriteSheetBg {
+//     pub layout: Handle<TextureAtlasLayout>,
+//     pub texture: Handle<Image>,
+// }
+
 #[derive(Resource, Clone)]
-pub struct SpriteSheetBg {
+pub struct SpriteSheetSelect {
     pub layout: Handle<TextureAtlasLayout>,
     pub texture: Handle<Image>,
 }
 
 #[derive(Resource, Clone)]
-pub struct SpriteSheetSelect {
+pub struct SpriteSheetLand {
     pub layout: Handle<TextureAtlasLayout>,
     pub texture: Handle<Image>,
 }

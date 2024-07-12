@@ -5,7 +5,7 @@ use crate::{
     componenty::{BuildingStructure, Land, Location, Selected},
     consty::{MAX_SELECTION_SIZE, TOTAL_TILE_SCALE_SIZE},
     eventy::{SelectTileEvent, UpdateUiAmount},
-    overlay_ui::toast::{ToastEvent, ToastType},
+    explore_scene::overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{LastSelectedTile, SpriteSheetSelect},
 };
 

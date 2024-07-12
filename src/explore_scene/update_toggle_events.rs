@@ -2,9 +2,9 @@ use bevy::prelude::*;
 
 use crate::{
     componenty::{BuildingStructure, Land, Location, TileText},
-    consty::TEXT_ZOOM_OUT_MAX,
+    consty::{INDEX_WHITE_LAND, TEXT_ZOOM_OUT_MAX},
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
-    resourcey::{ToggleMap, WorldOwnedTileMap},
+    resourcey::{SpriteSheetLand, ToggleMap, WorldOwnedTileMap},
     structy::TileTextType,
 };
 
@@ -31,6 +31,7 @@ pub fn land_color_event(
     mut land_q: Query<(&mut TextureAtlas, &mut Sprite, &Location), With<Land>>,
     toggle_map: Res<ToggleMap>,
     tile_res: Res<WorldOwnedTileMap>,
+    land: Res<SpriteSheetLand>,
 ) {
     for _t in toggle.read() {
         for (mut texture, mut sprite, loc) in land_q.iter_mut() {
@@ -38,7 +39,7 @@ pub fn land_color_event(
                 let a = tile_res.map.get(&loc.ulam);
                 if let Some(val) = a {
                     sprite.color = val.color;
-                    texture.index = 0;
+                    texture.index = INDEX_WHITE_LAND;
                 }
             } else {
                 let a = tile_res.map.get(&loc.ulam);
@@ -50,6 +51,7 @@ pub fn land_color_event(
                         alpha: 1.0,
                     });
                     texture.index = tile_res.map.get(&loc.ulam).unwrap().land_index;
+                    texture.layout = land.layout.clone();
                 }
             }
         }

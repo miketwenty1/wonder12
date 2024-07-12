@@ -1,9 +1,13 @@
-use bevy::{color::Srgba, log::info, math::Vec2};
+use bevy::{color::Srgba, log::info, math::Vec2, utils::hashbrown};
 use chrono::{DateTime, Duration, Utc};
 use rand::Rng;
 use regex::Regex;
 
-use crate::consty::MINIMUM_BLOCK_AMOUNT;
+use crate::{
+    consty::MINIMUM_BLOCK_AMOUNT,
+    resourcey::{TileData, WorldOwnedTileMap},
+    structy::TileResource,
+};
 
 pub fn convert_color_to_hexstring(c: Srgba) -> String {
     // // Ensure the input values are within the range [0, 1]
@@ -86,4 +90,41 @@ pub fn to_millisecond_precision(dt: DateTime<Utc>) -> DateTime<Utc> {
     // Subtract the extra microseconds to align to milliseconds
 
     dt - Duration::microseconds(micros_to_subtract as i64)
+}
+
+pub fn get_resource_for_tile(block_hash: &String) -> TileResource {
+    let last_char = block_hash.chars().last().unwrap().to_ascii_uppercase();
+
+    // Match the last hex character to the corresponding TileResource using ranges
+    match last_char {
+        '0'..='1' => TileResource::Mountain,
+        '2'..='3' => TileResource::Water,
+        '4'..='B' => TileResource::Grass,
+        'C'..='D' => TileResource::Forest,
+        'E'..='F' => TileResource::Desert,
+        _ => TileResource::Unknown, // Handle any unexpected characters
+    }
+
+    //TileResource::Unknown
+}
+
+pub fn get_land_index(
+    height: u32,
+    resource: &TileResource,
+    tile_map: Option<&hashbrown::HashMap<u32, TileData>>,
+) -> usize {
+    match tile_map {
+        Some(s) => {
+            info!("defaulting to mountain index 22");
+            22
+        }
+        None => match resource {
+            TileResource::Mountain => 0,
+            TileResource::Water => 1,
+            TileResource::Grass => 2,
+            TileResource::Forest => 3,
+            TileResource::Desert => 4,
+            TileResource::Unknown => 36,
+        },
+    }
 }

@@ -10,10 +10,10 @@ use crate::eventy::{
     SelectTileEvent, SpriteSpawnEvent, ToggleBuildings, ToggleColors, ToggleText,
     UpdateTileTextureEvent, UpdateUiAmount,
 };
+use crate::explore_scene::overlay_ui::OverlayUiPlugin;
 use crate::explore_scene::ExplorePlugin;
 use crate::keyboard::resources::KeyboardData;
 use crate::keyboard::{KeyboardPlugin, KeyboardState};
-use crate::overlay_ui::OverlayUiPlugin;
 use crate::resourcey::{
     ChunkManager, ColorPalette, CurrentCartBlock, Edge, InvoiceCheckFromServer,
     InvoiceDataFromServer, LastSelectedTile, MaxBlockHeight, ServerURL, SpriteIndexBuilding,
@@ -24,6 +24,7 @@ use crate::structy::EdgeData;
 use bevy::asset::AssetMetaCheck;
 
 use bevy::color::palettes::css::{DARK_GRAY, DARK_GREEN};
+use bevy::utils::HashSet;
 // use bevy::window::WindowResolution;
 use bevy::{prelude::*, utils::HashMap};
 use browser::event::ReadLocalBrowserStorage;
@@ -38,7 +39,7 @@ use eventy::{
 use explore_scene::core_ui::inventory::state::InventoryUiState;
 use explore_scene::core_ui::paint_palette::resource::DefaultDrawColorPalette;
 use explore_scene::core_ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
-use overlay_ui::go_to::state::GoToUiState;
+use explore_scene::overlay_ui::go_to::state::GoToUiState;
 use resourcey::{
     CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone, Nwc,
     ToggleVisible, UiInteracting, UserInventoryBlocks, WinSize,
@@ -53,7 +54,6 @@ mod building_config;
 mod comms;
 mod explore_scene;
 mod keyboard;
-mod overlay_ui;
 
 mod async_resource_comm_channels;
 mod browser;
@@ -191,6 +191,7 @@ pub fn game12(
         ],
     };
 
+    // dividing by 2 to get middle locations.
     let start_edge = Edge {
         top: EdgeData {
             pixel: CHUNK_PIXEL_SIZE / 2.0,
@@ -222,7 +223,7 @@ pub fn game12(
         .insert_resource(draw_palette)
         .insert_resource(MaxBlockHeight(max_height))
         .insert_resource(ChunkManager {
-            map: HashMap::new(),
+            set: HashSet::new(),
         })
         .insert_resource(WorldOwnedTileMap {
             map: HashMap::new(),

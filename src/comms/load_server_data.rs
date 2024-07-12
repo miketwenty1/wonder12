@@ -3,15 +3,19 @@ use super::server_structs::GameBlocksDataFromDBMod;
 use crate::async_resource_comm_channels::TileDataChannel;
 use crate::browser::event::WriteLocalBrowserStorage;
 use crate::comms::server_structs::UserGameBlock;
+use crate::consty::INDEX_MAX_LAND;
 use crate::eventy::{DespawnInventoryHeights, RequestTileUpdates};
 use crate::explore_scene::core_ui::inventory::event::AddInventoryRow;
-use crate::overlay_ui::toast::{ToastEvent, ToastType};
+use crate::explore_scene::overlay_ui::toast::{ToastEvent, ToastType};
 use crate::resourcey::{
     CheckpointTimetamp, InitGameMap, TileData, UpdateGameTimetamp, UserInventoryBlocks,
 };
 use crate::statey::CommsApiBlockLoadState;
 use crate::structy::{RequestTileType, TileResource};
-use crate::utils::{convert_color_to_hexstring, logout_user, to_millisecond_precision};
+use crate::utils::{
+    convert_color_to_hexstring, get_land_index, get_resource_for_tile, logout_user,
+    to_millisecond_precision,
+};
 use crate::{ServerURL, UpdateTileTextureEvent, WorldOwnedTileMap};
 use bevy::prelude::*;
 use chrono::Duration;
@@ -173,18 +177,28 @@ pub fn api_receive_server_tiles(
 
                         for block_data in server_block_data.blocks {
                             let mut new_insert_update = false;
+                            let resource = get_resource_for_tile(&block_data.block_hash);
+                            let land_index =
+                                get_land_index(block_data.height as u32, &resource, None);
                             let mut new_td = TileData {
                                 ln_address: block_data.refund_ln_addr,
                                 username: block_data.username,
                                 color: Srgba::hex(block_data.color).unwrap().into(),
                                 message: block_data.message,
-                                resource: TileResource::Wheat,
                                 value: block_data.amount as u32,
                                 cost: (block_data.amount * 2) as u32,
-                                hash: "".to_string(),
                                 height: block_data.height as u32,
-                                land_index: rng.gen_range(1..=11),
+                                land_index,
                                 event_date: block_data.event_date,
+                                resource,
+                                block_hash: block_data.block_hash,
+                                block_time: block_data.block_time,
+                                block_bits: block_data.block_bits,
+                                block_n_tx: block_data.block_n_tx,
+                                block_size: block_data.block_size,
+                                block_fee: block_data.block_fee,
+                                block_weight: block_data.block_weight,
+                                block_ver: block_data.block_ver,
                             };
 
                             // // // // inventory update code

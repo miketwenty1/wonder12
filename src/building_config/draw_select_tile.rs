@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::componenty::{DrawSelected, Location, Selected};
+use crate::{
+    componenty::{DrawSelected, Location, Selected},
+    consty::INDEX_WHITE_LAND,
+};
 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn(
@@ -29,7 +32,7 @@ pub fn spawn(
         locationcoord,
         TextureAtlas {
             layout: layout.clone(),
-            index: 0,
+            index: INDEX_WHITE_LAND,
         },
     ));
 }

@@ -13,8 +13,8 @@ use crate::{
         DEFAULT_NO_PICK_COLOR, MINIMUM_BLOCK_AMOUNT,
     },
     eventy::{BlockDetailMessage, BuyBlockRequest, MessageReceivedFromServer},
+    explore_scene::overlay_ui::toast::{ToastEvent, ToastType},
     keyboard::{resources::KeyboardData, KeyboardState},
-    overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
         ColorPalette, ConfigAllCartBlocks, CurrentCartBlock, TargetType, TileCartVec,
         ToggleVisible, User,

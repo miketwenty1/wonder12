@@ -10,6 +10,14 @@ pub struct GameBlocksDataFromDB {
     pub amount: i32,
     pub username: String,
     pub refund_ln_addr: String,
+    pub block_hash: String,
+    pub block_time: i64,
+    pub block_bits: i64,
+    pub block_n_tx: i32,
+    pub block_size: i32,
+    pub block_fee: i64,
+    pub block_weight: i64,
+    pub block_ver: i32,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

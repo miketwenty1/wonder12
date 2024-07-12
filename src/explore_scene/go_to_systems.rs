@@ -1,6 +1,9 @@
 use bevy::{color::palettes::css::WHITE, prelude::*};
 
-use crate::{componenty::GoToBtn, overlay_ui::go_to::state::GoToUiState, resourcey::ColorPalette};
+use crate::{
+    componenty::GoToBtn, explore_scene::overlay_ui::go_to::state::GoToUiState,
+    resourcey::ColorPalette,
+};
 
 #[allow(clippy::type_complexity)]
 pub fn go_to_button_system(

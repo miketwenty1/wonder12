@@ -9,7 +9,7 @@ use crate::{
         UpdateTilesAfterPurchase,
     },
     explore_scene::core_ui::inventory::event::AddInventoryRow,
-    overlay_ui::toast::{ToastEvent, ToastType},
+   explore_scene::overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, Nwc, TileCartVec, User},
     statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState},
     structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},

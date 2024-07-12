@@ -3,7 +3,7 @@ use bevy::{prelude::*, tasks::IoTaskPool};
 use crate::{
     async_resource_comm_channels::BlockMessagesStorageChannel,
     eventy::{BlockDetailMessage, MessageReceivedFromServer},
-    overlay_ui::toast::{ToastEvent, ToastType},
+    explore_scene::overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{TileCartVec, UserPurchasedBlockMessage},
     utils::logout_user,
     ServerURL,

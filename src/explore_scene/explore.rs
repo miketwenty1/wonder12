@@ -7,6 +7,8 @@ use bevy::{
 use rand::Rng;
 use ulam::Quad;
 
+use crate::consty::{CHUNK_TILE_SPAN_MULTIPLIER, INDEX_MAX_LAND, INDEX_WHITE_LAND};
+use crate::resourcey::SpriteSheetLand;
 use crate::{
     building_config::{spawn_tile_level, utils::sanitize_building_color},
     componenty::{
@@ -23,16 +25,18 @@ use crate::{
         ClearManualSelectionEvent, ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent,
         UpdateTileTextureEvent, UpdateUiAmount,
     },
-    overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{
         ChunkManager, ColorPalette, Edge, InitBlockCount, MaxBlockHeight, SpriteIndexBuilding,
-        SpriteSheetBg, SpriteSheetBuilding, TileData, ToggleMap, WorldOwnedTileMap,
+        SpriteSheetBuilding, TileData, ToggleMap, WorldOwnedTileMap,
     },
     statey::{DisplayBuyUiState, InitLoadingBlocksState},
     structy::SpawnDiffData,
 };
 
-use super::core_ui::paint_palette::event::ViewSelectedTiles;
+use super::{
+    core_ui::paint_palette::event::ViewSelectedTiles,
+    overlay_ui::toast::{ToastEvent, ToastType},
+};
 
 // pub fn reset_mouse(
 //     mut mouse: ResMut<ButtonInput<MouseButton>>,
@@ -54,9 +58,6 @@ pub fn init_explorer(
     mut loading_init_block_text: ResMut<NextState<InitLoadingBlocksState>>,
 ) {
     info!("initblockcount: {}", initblocks.0);
-
-    // let texture_atlas_handle_bg = texture_atlases.add(texture_atlas_bg);
-    // let texture_atlas_handle_building = texture_atlases.add(texture_atlas_building);
 
     commands.spawn((
         NodeBundle {
@@ -176,7 +177,7 @@ pub fn edge_system(
     mut commands: Commands,
     blocks: Query<(Entity, &Location), With<Land>>,
     mut edge_event: EventReader<EdgeEvent>,
-    mut chunk_map: ResMut<ChunkManager>,
+    mut chunk_set: ResMut<ChunkManager>,
     mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
 ) {
@@ -188,7 +189,7 @@ pub fn edge_system(
                 //info!("despawning");
                 let ulam_i = ulam::value_of_xy(block_location.x, block_location.y);
                 commands.entity(block_entity).despawn_recursive();
-                chunk_map.map.remove(&ulam_i);
+                chunk_set.set.remove(&ulam_i);
             }
         }
         //debug!("reached edge: {:?}", edge_e.edge_type);
@@ -203,13 +204,13 @@ pub fn edge_system(
 #[allow(clippy::too_many_arguments)]
 pub fn spawn_block_sprites(
     asset_server: Res<AssetServer>,
-    texture_map: Res<SpriteIndexBuilding>,
+    building_texture_mapping: Res<SpriteIndexBuilding>,
     mut sprite_spawn_event: EventReader<SpriteSpawnEvent>,
     mut commands: Commands,
-    texture_atlas_handle_bg: Res<SpriteSheetBg>,
     texture_atlas_handle_building: Res<SpriteSheetBuilding>,
+    texture_atlas_handle_land: Res<SpriteSheetLand>,
     edge: Res<Edge>,
-    mut chunk_map: ResMut<ChunkManager>,
+    mut chunk_set: ResMut<ChunkManager>,
     tile_map: Res<WorldOwnedTileMap>,
     toggle_map: Res<ToggleMap>,
     max_height: Res<MaxBlockHeight>,
@@ -224,13 +225,14 @@ pub fn spawn_block_sprites(
         };
 
         let zoom_level = cam_query.get_single().unwrap().scale;
+        // getting whether or not we should spawn text as hidden or visible depending on zoom level
         let text_visibility =
             if *toggle_map.0.get("showtext").unwrap() || zoom_level >= TEXT_ZOOM_OUT_MAX {
                 Visibility::Hidden
             } else {
                 Visibility::Visible
             };
-
+        // getting whether or not we should spawn buildings as hidden or visible depending on zoom level
         let visibility_setting =
             if *toggle_map.0.get("showbuildings").unwrap() || zoom_level >= BUILDING_ZOOM_OUT_MAX {
                 Visibility::Hidden
@@ -240,29 +242,30 @@ pub fn spawn_block_sprites(
 
         let middle_y = (edge.top.tile + edge.bottom.tile) / 2;
         let middle_x = (edge.left.tile + edge.right.tile) / 2;
-        //info!("middle x: {}, middle y: {}", middle_x, middle_y);
+
+        // removing "4" here as it seem arbitrary. We should make this a CONST
         let spawn_diff = SpawnDiffData {
-            xstart: middle_x - CHUNK_TILE_SPAN_COUNT * 4,
-            xend: middle_x + CHUNK_TILE_SPAN_COUNT * 4,
-            ystart: middle_y - CHUNK_TILE_SPAN_COUNT * 4,
-            yend: middle_y + CHUNK_TILE_SPAN_COUNT * 4,
+            xstart: middle_x - CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+            xend: middle_x + CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+            ystart: middle_y - CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+            yend: middle_y + CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
         };
 
         //info!("spawning {:#?}", spawn_diff);
-        let mut building_sprite_index;
-        let mut land_sprite_index: usize;
-        let mut color_for_sprites;
-        let mut color_for_tile;
+
         // let mut tile_text = "".to_string();
 
         for x in spawn_diff.xstart..=spawn_diff.xend {
             for y in spawn_diff.ystart..=spawn_diff.yend {
+                let building_sprite_index;
+                let color_for_sprites;
+                let color_for_tile;
                 let ulam_i = ulam::value_of_xy(x, y);
+                let mut rng = rand::thread_rng();
+                let mut index = rng.gen_range(0..=INDEX_MAX_LAND);
 
-                if max_height.0 >= ulam_i && !chunk_map.map.contains_key(&ulam_i) {
-                    chunk_map.map.insert(ulam_i, true);
-
-                    //info!("spawning: x: {}, y: {}", x, y);
+                if max_height.0 >= ulam_i && !chunk_set.set.contains(&ulam_i) {
+                    chunk_set.set.insert(ulam_i);
 
                     let mut locationcoord = Location {
                         x,
@@ -281,31 +284,31 @@ pub fn spawn_block_sprites(
                         locationcoord.quad = Quad::SouthEast;
                     }
 
-                    // writing this code to make tile_text populate correctly where it updates tiles correctly based on toggle.
-
-                    let mut rng = rand::thread_rng();
-                    //land_sprite_index = rng.gen_range(1..=11);
                     let mut value_from_tile = 0;
                     if tile_map.map.contains_key(&locationcoord.ulam) {
                         value_from_tile = tile_map.map.get(&locationcoord.ulam).unwrap().value;
                         building_sprite_index =
-                            *texture_map.0.get(&value_from_tile).unwrap() as usize;
-
+                            *building_texture_mapping.0.get(&value_from_tile).unwrap() as usize;
                         color_for_sprites = tile_map.map.get(&locationcoord.ulam).unwrap().color;
-                        land_sprite_index =
-                            tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
-                        color_for_tile = Color::Srgba(Srgba {
-                            red: 1.,
-                            green: 1.,
-                            blue: 1.,
-                            alpha: 1.,
-                        });
-                        if !*toggle_map.0.get("showcolors").unwrap() {
-                            land_sprite_index = 0;
+
+                        //meaning don't show the colors
+                        if *toggle_map.0.get("showcolors").unwrap() {
+                            index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
+
+                            color_for_tile = Color::Srgba(Srgba {
+                                red: 1.,
+                                green: 1.,
+                                blue: 1.,
+                                alpha: 1.,
+                            });
+                        } else {
+                            // show color
+
+                            index = INDEX_WHITE_LAND;
+
                             color_for_tile = color_for_sprites;
                         };
                     } else {
-                        land_sprite_index = rng.gen_range(1..=11);
                         building_sprite_index = 0;
                         color_for_tile = Color::Srgba(Srgba {
                             red: 0.2,
@@ -332,14 +335,14 @@ pub fn spawn_block_sprites(
                                 scale: Vec3::new(TILE_SCALE, TILE_SCALE, 1.0),
                                 ..Default::default()
                             },
-                            texture: texture_atlas_handle_bg.texture.clone(),
+                            texture: texture_atlas_handle_land.texture.clone(),
                             ..Default::default()
                         },
                         locationcoord,
                         Land,
                         TextureAtlas {
-                            layout: texture_atlas_handle_bg.layout.clone(),
-                            index: land_sprite_index,
+                            layout: texture_atlas_handle_land.layout.clone(),
+                            index,
                         },
                     ));
 
@@ -557,11 +560,14 @@ pub fn update_tile_textures(
                         blue: 1.0,
                         alpha: 1.0,
                     });
+                    texture.index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
                 } else {
                     sprite.color = tile_data.color;
-                    texture.index = 0;
+                    texture.index = INDEX_WHITE_LAND;
                 }
 
+                // Not really a big deal to do this everytime because likely after each purchase we will need to configure the buildings differently.
+                /////////////////////
                 for (building_location, building_entity) in buildings.iter() {
                     if building_location.ulam == location.ulam {
                         //info!("despawning old building stuff");
@@ -585,6 +591,7 @@ pub fn update_tile_textures(
                             visibility_building_toggle,
                         );
                     });
+                /////////////////////
             }
         }
 

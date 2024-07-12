@@ -5,6 +5,7 @@ pub mod desktop_movement_systems;
 pub mod explore;
 pub mod explorer_overlay_system;
 pub mod go_to_systems;
+pub mod overlay_ui;
 pub mod palette;
 pub mod selection;
 pub mod touch_movement_systems;

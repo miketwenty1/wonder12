@@ -20,15 +20,12 @@ pub struct EdgeData {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum TileResource {
-    Wheat,
-    // Brick,
-    // Sheep,
-    // Wood,
-    // Stone,
-    // Desert,
-    // Water,
-    // Grass,
-    // Unknown,
+    Mountain,
+    Water,
+    Grass,
+    Forest,
+    Desert,
+    Unknown,
 }
 
 #[derive(Debug)]
@@ -52,6 +49,30 @@ pub struct InvoiceGameBlock {
     pub color: String,
     pub message: String,
     pub amount: u32,
+}
+
+struct Hex64([u8; 32]);
+
+impl Hex64 {
+    // Function to create a Hex64 from a 64-character hex string
+    fn from_hex_string(hex: &str) -> Result<Self, std::num::ParseIntError> {
+        assert!(hex.len() == 64, "Hex string must be 64 characters long");
+        let mut bytes = [0u8; 32];
+        for (i, byte) in bytes.iter_mut().enumerate() {
+            *byte = u8::from_str_radix(&hex[2 * i..2 * i + 2], 16)?;
+        }
+        Ok(Hex64(bytes))
+    }
+
+    // Function to process the last hex character as per the given rules
+    fn process_last_hex_char(&self) -> u8 {
+        let last_byte = self.0[31];
+        let last_char = last_byte & 0x0F; // Get the last hex character (0-15)
+        match last_char {
+            0..=4 => last_char,
+            _ => 2, // All values from 5 to F result in 2
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

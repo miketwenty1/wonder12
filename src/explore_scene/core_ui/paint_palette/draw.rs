@@ -5,8 +5,8 @@ use crate::{
     componenty::{Land, Location, Selected},
     consty::{MAX_SELECTION_SIZE, TOTAL_TILE_SCALE_SIZE},
     eventy::UpdateUiAmount,
-    overlay_ui::toast::{ToastEvent, ToastType},
-    resourcey::{SpriteSheetBg, UiInteracting},
+    explore_scene::overlay_ui::toast::{ToastEvent, ToastType},
+    resourcey::{SpriteSheetLand, UiInteracting},
 };
 
 use super::{
@@ -99,7 +99,7 @@ pub fn touch_draw_choose_tile(
 pub fn draw_select_tile(
     mut commands: Commands,
     mut lands: Query<(&mut Location, Entity, &Sprite), With<Land>>,
-    texture_atlas: Res<SpriteSheetBg>,
+    texture_atlas: Res<SpriteSheetLand>,
     mut event: EventReader<DrawSelectTileEvent>,
     mut selected_lands: Query<
         (Entity, &mut Sprite, &Location, &Selected),
