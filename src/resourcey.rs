@@ -33,6 +33,12 @@ pub struct TileData {
     pub block_ver: i32,
 }
 
+impl TileData {
+    pub fn set_index(&mut self, new_index: usize) {
+        self.land_index = new_index;
+    }
+}
+
 #[derive(Resource, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WorldOwnedTileMap {
     pub map: HashMap<u32, TileData>,

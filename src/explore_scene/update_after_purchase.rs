@@ -2,11 +2,11 @@ use bevy::prelude::*;
 use rand::Rng;
 
 use crate::{
-    consty::{DEFAULT_HASH, INDEX_MAX_LAND, INDEX_WHITE_LAND},
+    consty::DEFAULT_HASH,
     eventy::{UpdateTileTextureEvent, UpdateTilesAfterPurchase},
     resourcey::{TileCartVec, TileData, WorldOwnedTileMap},
     structy::TileResource,
-    utils::{get_land_index, get_resource_for_tile},
+    utils::{calculate_index_for_resourced_lands, get_land_index, get_resource_for_tile},
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -18,7 +18,6 @@ pub fn update_tiles_after_purchase(
 ) {
     for _e in event.read() {
         let mut new_tile_vec = Vec::new();
-        let mut rng = rand::thread_rng();
         info!("updating after purchase!");
 
         for tile in &tile_cart_vec.vec {
@@ -36,8 +35,8 @@ pub fn update_tiles_after_purchase(
                         value: tile.cost,
                         cost: (tile.cost * 2),
                         event_date: tile.event_date.unwrap_or_default(),
-                        land_index: land_index,
-                        resource: resource,
+                        land_index,
+                        resource,
                         height: tile.height,
                         block_hash: s.block_hash.clone(),
                         block_time: s.block_time,
@@ -57,11 +56,10 @@ pub fn update_tiles_after_purchase(
                     value: tile.cost,
                     cost: (tile.cost * 2),
                     event_date: tile.event_date.unwrap_or_default(),
-                    land_index: INDEX_WHITE_LAND,
+                    land_index: 22,
                     resource: TileResource::Desert,
                     height: tile.height,
-                    block_hash: "0000000000000000000000000000000000000000000000000000000000000000"
-                        .to_string(),
+                    block_hash: DEFAULT_HASH.to_string(),
                     block_time: 0,
                     block_bits: 0,
                     block_n_tx: 0,
@@ -75,6 +73,8 @@ pub fn update_tiles_after_purchase(
             new_tile_vec.push(new_td.clone());
             tile_map.map.insert(new_td.height, new_td);
         }
+        let land_index_map = calculate_index_for_resourced_lands(&mut tile_map.map);
+        *tile_map = land_index_map;
 
         update_tile_event.send(UpdateTileTextureEvent(new_tile_vec));
     }

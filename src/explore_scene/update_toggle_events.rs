@@ -114,22 +114,3 @@ pub fn change_tile_text_event(
         }
     }
 }
-// for (mut text, loc) in text_q.iter_mut() {
-//     if *toggle_map.0.get("showvalues").unwrap() {
-//         let a = tile_res.map.get(&loc.ulam);
-//         if let Some(val) = a {
-//             text.sections[0].value = val.amount.to_string();
-//         }
-//     } else {
-//         let a = tile_res.map.get(&loc.ulam);
-//         if let Some(_val) = a {
-//             texture.color = Color::Rgba {
-//                 red: 1.0,
-//                 green: 1.0,
-//                 blue: 1.0,
-//                 alpha: 1.0,
-//             };
-//             texture.index = tile_res.map.get(&loc.ulam).unwrap().land_index;
-//         }
-//     }
-// }

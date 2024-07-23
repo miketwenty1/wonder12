@@ -1,9 +1,8 @@
 use super::api_timer::ApiPollingTimer;
-use super::server_structs::GameBlocksDataFromDBMod;
+use super::server_structs::GameBlockDataFromDBMod;
 use crate::async_resource_comm_channels::TileDataChannel;
 use crate::browser::event::WriteLocalBrowserStorage;
 use crate::comms::server_structs::UserGameBlock;
-use crate::consty::INDEX_MAX_LAND;
 use crate::eventy::{DespawnInventoryHeights, RequestTileUpdates};
 use crate::explore_scene::core_ui::inventory::event::AddInventoryRow;
 use crate::explore_scene::overlay_ui::toast::{ToastEvent, ToastType};
@@ -11,16 +10,16 @@ use crate::resourcey::{
     CheckpointTimetamp, InitGameMap, TileData, UpdateGameTimetamp, UserInventoryBlocks,
 };
 use crate::statey::CommsApiBlockLoadState;
-use crate::structy::{RequestTileType, TileResource};
+use crate::structy::RequestTileType;
 use crate::utils::{
-    convert_color_to_hexstring, get_land_index, get_resource_for_tile, logout_user,
-    to_millisecond_precision,
+    calculate_index_for_resourced_lands, convert_color_to_hexstring, get_land_index,
+    get_resource_for_tile, logout_user, to_millisecond_precision,
 };
 use crate::{ServerURL, UpdateTileTextureEvent, WorldOwnedTileMap};
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use chrono::Duration;
 //use bevy::tasks::IoTaskPool;
-use rand::Rng;
 use wasm_bindgen_futures::spawn_local;
 
 //SetTileDataChannel
@@ -130,12 +129,12 @@ pub fn api_receive_server_tiles(
                 // if a tile comes in and the previous owner is the user.. (AND the new owner isn't the user) add to vec.
 
                 //info!("api_receive_server_tiles: {}", r);
-                let r_block_result = serde_json::from_str::<GameBlocksDataFromDBMod>(&og_r);
+                let r_block_result = serde_json::from_str::<GameBlockDataFromDBMod>(&og_r);
 
                 match r_block_result {
                     Ok(server_block_data) => {
                         match server_block_data.clone() {
-                            GameBlocksDataFromDBMod {
+                            GameBlockDataFromDBMod {
                                 ts_checkpoint: Some(t),
                                 height_checkpoint: None,
                                 blocks: _,
@@ -157,7 +156,7 @@ pub fn api_receive_server_tiles(
                                     info!("!!!updating game ts to {}", t);
                                 }
                             }
-                            GameBlocksDataFromDBMod {
+                            GameBlockDataFromDBMod {
                                 ts_checkpoint: None,
                                 height_checkpoint: Some(h),
                                 blocks: _,
@@ -177,7 +176,7 @@ pub fn api_receive_server_tiles(
 
                         for block_data in server_block_data.blocks {
                             let mut new_insert_update = false;
-                            let resource = get_resource_for_tile(&block_data.block_hash);
+                            let resource = get_resource_for_tile(&block_data.hash);
                             let land_index =
                                 get_land_index(block_data.height as u32, &resource, None);
                             let mut new_td = TileData {
@@ -191,14 +190,14 @@ pub fn api_receive_server_tiles(
                                 land_index,
                                 event_date: block_data.event_date,
                                 resource,
-                                block_hash: block_data.block_hash,
-                                block_time: block_data.block_time,
-                                block_bits: block_data.block_bits,
-                                block_n_tx: block_data.block_n_tx,
-                                block_size: block_data.block_size,
-                                block_fee: block_data.block_fee,
-                                block_weight: block_data.block_weight,
-                                block_ver: block_data.block_ver,
+                                block_hash: block_data.hash,
+                                block_time: block_data.time,
+                                block_bits: block_data.bits,
+                                block_n_tx: block_data.n_tx,
+                                block_size: block_data.size,
+                                block_fee: block_data.fee,
+                                block_weight: block_data.weight,
+                                block_ver: block_data.ver,
                             };
 
                             // // // // inventory update code
@@ -250,6 +249,10 @@ pub fn api_receive_server_tiles(
                                 tile_map.map.insert(block_data.height as u32, new_td);
                             }
                         }
+
+                        let land_index_map = calculate_index_for_resourced_lands(&mut tile_map.map);
+                        *tile_map = land_index_map;
+
                         // // // inventory update code
                         if !remove_inventory_holder.is_empty() {
                             despawn_inventory

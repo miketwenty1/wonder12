@@ -4,10 +4,9 @@ use bevy::{
     input::mouse::MouseMotion, math::Vec3A, prelude::*, render::primitives::Aabb,
     text::Text2dBounds,
 };
-use rand::Rng;
 use ulam::Quad;
 
-use crate::consty::{CHUNK_TILE_SPAN_MULTIPLIER, INDEX_MAX_LAND, INDEX_WHITE_LAND};
+use crate::consty::{CHUNK_TILE_SPAN_MULTIPLIER, INDEX_WHITE_LAND};
 use crate::resourcey::SpriteSheetLand;
 use crate::{
     building_config::{spawn_tile_level, utils::sanitize_building_color},
@@ -261,8 +260,8 @@ pub fn spawn_block_sprites(
                 let color_for_sprites;
                 let color_for_tile;
                 let ulam_i = ulam::value_of_xy(x, y);
-                let mut rng = rand::thread_rng();
-                let mut index = rng.gen_range(0..=INDEX_MAX_LAND);
+                // let mut rng = rand::thread_rng();
+                let mut index = 22; //rng.gen_range(0..=INDEX_MAX_LAND);
 
                 if max_height.0 >= ulam_i && !chunk_set.set.contains(&ulam_i) {
                     chunk_set.set.insert(ulam_i);

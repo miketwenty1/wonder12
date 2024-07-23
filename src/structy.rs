@@ -27,6 +27,18 @@ pub enum TileResource {
     Desert,
     Unknown,
 }
+impl TileResource {
+    pub fn spritesheet_index_value(&self) -> usize {
+        match self {
+            TileResource::Mountain => 0,
+            TileResource::Water => 1,
+            TileResource::Grass => 2,
+            TileResource::Forest => 3,
+            TileResource::Desert => 4,
+            TileResource::Unknown => 35,
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct SpawnDiffData {
