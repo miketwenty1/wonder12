@@ -38,6 +38,12 @@ pub struct BrowserCheckpointLocalStorageChannel {
 }
 
 #[derive(Resource, Clone)]
+pub struct BrowserIndexedDBStorageChannel {
+    pub tx: Sender<String>,
+    pub rx: Receiver<String>,
+}
+
+#[derive(Resource, Clone)]
 pub struct BlockMessagesStorageChannel {
     pub tx: Sender<String>,
     pub rx: Receiver<String>,

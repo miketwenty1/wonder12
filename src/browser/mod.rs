@@ -2,9 +2,11 @@ use self::{
     event::{ReadLocalBrowserStorage, WriteLocalBrowserStorage},
     localstorage::{readcheck_local_storage, request_local_storage, write_local_storage},
     resource::{tick_browser_receive_timer, BrowserPollingTimer},
-    state::BrowserStorageState,
+    state::BrowserLocalStorageState,
 };
 use bevy::prelude::*;
+use localstorage::{readcheck_indexeddb_storage, request_indexeddb_storage};
+use state::BrowserIndexedDBStorageState;
 
 pub mod event;
 pub mod localstorage;
@@ -26,7 +28,16 @@ impl Plugin for BrowserPlugin {
                     readcheck_local_storage,
                     tick_browser_receive_timer,
                 )
-                    .run_if(in_state(BrowserStorageState::On)),
+                    .run_if(in_state(BrowserLocalStorageState::On)),
+            )
+            .add_systems(
+                OnEnter(BrowserIndexedDBStorageState::On),
+                (request_indexeddb_storage).run_if(run_once()),
+            )
+            .add_systems(
+                Update,
+                (readcheck_indexeddb_storage, tick_browser_receive_timer)
+                    .run_if(in_state(BrowserIndexedDBStorageState::On)),
             );
     }
 }

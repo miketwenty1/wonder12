@@ -4,4 +4,7 @@ use bevy::prelude::*;
 pub struct ReadLocalBrowserStorage;
 
 #[derive(Event, Debug)]
+pub struct ReadIndexedDBStorage;
+
+#[derive(Event, Debug)]
 pub struct WriteLocalBrowserStorage;

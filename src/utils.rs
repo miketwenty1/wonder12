@@ -110,7 +110,7 @@ pub fn get_resource_for_tile(block_hash: &str) -> TileResource {
 
     // Convert the last two characters to a number
     let last_two_num = u8::from_str_radix(last_two_chars, 16).unwrap_or(255);
-    info!("last 2 nums of hash {:?}", last_two_num);
+    // info!("last 2 nums of hash {:?}", last_two_num);
     // Match the number to the corresponding TileResource using ranges
     match last_two_num {
         0..=2 => TileResource::Mountain,

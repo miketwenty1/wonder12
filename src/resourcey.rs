@@ -264,6 +264,9 @@ pub struct ConfigAllCartBlocks(pub bool);
 pub struct IsIphone(pub bool);
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]
+pub struct BlockExplorer(pub bool);
+
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct Nwc(pub bool);
 
 #[derive(Resource, Clone, Debug, Default, Deserialize)]

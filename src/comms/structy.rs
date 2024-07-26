@@ -46,6 +46,22 @@ pub struct TrimTile {
     pub bv: i32,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct TrimExplorerTileVec(pub Vec<TrimExplorerTile>);
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct TrimExplorerTile {
+    pub h: i32,    // height
+    pub x: String, // hash
+    pub t: i64,    // time
+    pub b: i64,    // bits
+    pub n: i32,    // n_tx (number of transactions)
+    pub s: i32,    // size
+    pub f: i64,    // fee
+    pub w: i64,    // weight
+    pub v: i32,    // ver (version)
+}
+
 impl TrimTileLocalBrowserStorage {
     pub fn convert_trim_to_tilemap(self) -> WorldOwnedTileMap {
         let mut tile_map = HashMap::new();
