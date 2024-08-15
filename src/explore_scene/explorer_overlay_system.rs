@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    browser::event::WriteLocalBrowserStorage,
+    browser::event::WriteBrowserStorage,
     componenty::{InitLoadingText, UiOverlayingExplorerButton},
     eventy::ClearLastSelectedTile,
     resourcey::{InitBlockCount, WorldOwnedTileMap},
@@ -31,7 +31,7 @@ pub fn init_block_loading_text(
     tilemap: Res<WorldOwnedTileMap>,
     init: Res<InitBlockCount>,
     mut state: ResMut<NextState<InitLoadingBlocksState>>,
-    mut browser: EventWriter<WriteLocalBrowserStorage>,
+    mut browser: EventWriter<WriteBrowserStorage>,
 ) {
     for mut text in &mut text_query {
         let blocks_loaded = tilemap.map.len();
@@ -42,7 +42,7 @@ pub fn init_block_loading_text(
         if percentage >= 100.0 {
             info!("yarr we initilized");
             state.set(InitLoadingBlocksState::Off);
-            browser.send(WriteLocalBrowserStorage);
+            browser.send(WriteBrowserStorage);
         }
     }
 }

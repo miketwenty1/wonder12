@@ -1,7 +1,7 @@
 use super::api_timer::ApiPollingTimer;
 use super::server_structs::GameBlockDataFromDBMod;
 use crate::async_resource_comm_channels::TileDataChannel;
-use crate::browser::event::WriteLocalBrowserStorage;
+use crate::browser::event::WriteBrowserStorage;
 use crate::comms::server_structs::UserGameBlock;
 use crate::eventy::{DespawnInventoryHeights, RequestTileUpdates};
 use crate::explore_scene::core_ui::inventory::event::AddInventoryRow;
@@ -110,7 +110,7 @@ pub fn api_receive_server_tiles(
     mut despawn_inventory: EventWriter<DespawnInventoryHeights>,
     mut spawn_inventory: EventWriter<AddInventoryRow>,
     inventory: Res<UserInventoryBlocks>,
-    mut browser_event: EventWriter<WriteLocalBrowserStorage>,
+    mut browser_event: EventWriter<WriteBrowserStorage>,
 ) {
     if api_timer.timer.finished() && !channel.rx.is_empty() {
         //info!("checking for tiles response");
@@ -152,7 +152,7 @@ pub fn api_receive_server_tiles(
                                 gametime.ts = to_millisecond_precision(t);
                                 if gametime.ts - Duration::minutes(15) > checkpoint_time.ts {
                                     checkpoint_time.ts = gametime.ts;
-                                    browser_event.send(WriteLocalBrowserStorage);
+                                    browser_event.send(WriteBrowserStorage);
                                     info!("!!!updating game ts to {}", t);
                                 }
                             }
@@ -282,7 +282,7 @@ pub fn api_receive_server_tiles(
                             // this prevents you from needing to update browser cache on every single tile update.
                             if gametime.ts - Duration::minutes(15) > checkpoint_time.ts {
                                 info!("what is the gametime ts?: {}", gametime.ts);
-                                browser_event.send(WriteLocalBrowserStorage);
+                                browser_event.send(WriteBrowserStorage);
                             }
                         }
                     }

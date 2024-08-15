@@ -79,6 +79,39 @@ pub struct UiSideNode;
 pub struct ToggleParent;
 
 #[derive(Component)]
+pub struct MagnifyToggleParentBtn;
+
+#[derive(Component)]
+pub struct MagnifyToggleChild;
+
+#[derive(Component)]
+pub struct MagnifyToggleVersion;
+
+#[derive(Component)]
+pub struct MagnifyToggleDifficulty;
+
+#[derive(Component)]
+pub struct MagnifyToggleLeadingZeros;
+
+#[derive(Component)]
+pub struct MagnifyToggleFee;
+
+#[derive(Component)]
+pub struct MagnifyToggleSizeBytes;
+
+#[derive(Component)]
+pub struct MagnifyToggleSizeWeight;
+
+#[derive(Component)]
+pub struct MagnifyToggleTxCount;
+
+#[derive(Component)]
+pub struct MagnifyToggleBlockTime;
+
+#[derive(Component)]
+pub struct MagnifyToggleExcessWork;
+
+#[derive(Component)]
 pub struct ToggleButton;
 
 #[derive(Component)]

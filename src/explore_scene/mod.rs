@@ -15,7 +15,10 @@ pub mod update_toggle_events;
 pub mod zoom;
 
 use bevy::prelude::*;
-use core_ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
+use core_ui::{
+    paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState},
+    ui_right::toggle_magnify_button_system,
+};
 use explore::clear_manual_selection;
 use palette::draw_button_system;
 use zoom::zoom_wheel_system;
@@ -90,6 +93,7 @@ impl Plugin for ExplorePlugin {
                         toggle_button_sub_system_toggle2,
                         toggle_button_sub_system_toggle3,
                         toggle_button_sub_system_toggle4,
+                        toggle_magnify_button_system,
                         (
                             choose_tile,
                             mouse_movement_camera_system,

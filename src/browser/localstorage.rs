@@ -20,7 +20,7 @@ use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_futures::JsFuture;
 use wasm_bindgen_futures::{js_sys, wasm_bindgen};
 
-use super::event::{ReadIndexedDBStorage, ReadLocalBrowserStorage, WriteLocalBrowserStorage};
+use super::event::{ReadIndexedDBStorage, ReadLocalBrowserStorage, WriteBrowserStorage};
 use super::resource::BrowserPollingTimer;
 use super::state::BrowserLocalStorageState;
 
@@ -30,7 +30,7 @@ use serde_wasm_bindgen::from_value as wasm_from_value;
 use wasm_bindgen::prelude::*;
 
 pub fn write_local_storage(
-    mut event: EventReader<WriteLocalBrowserStorage>,
+    mut event: EventReader<WriteBrowserStorage>,
     tile_map: Res<WorldOwnedTileMap>,
     gametime: Res<UpdateGameTimetamp>,
 ) {
@@ -87,7 +87,6 @@ pub fn request_local_storage(
     checkpoint_channel: Res<BrowserCheckpointLocalStorageChannel>,
 ) {
     for _e in event.read() {
-        info!("did this happen1");
         let map_cc = map_channel.tx.clone();
         let checkpoint_cc = checkpoint_channel.tx.clone();
         spawn_local(async move {
@@ -98,7 +97,6 @@ pub fn request_local_storage(
 
             match checkpoint_result {
                 Ok(o) => {
-                    info!("did this happen1-1");
                     // info!("good checkpoint {:#?}", o);
                     let _ = checkpoint_cc.try_send(o.as_string().unwrap_or_default());
                 }
@@ -109,7 +107,6 @@ pub fn request_local_storage(
             }
             match mapdata_result {
                 Ok(o) => {
-                    info!("did this happen1-2");
                     let _ = map_cc.try_send(o.as_string().unwrap_or_default());
                 }
                 Err(e) => {
@@ -138,7 +135,6 @@ pub fn readcheck_local_storage(
     indexed_res_bool: Res<BlockExplorer>,
 ) {
     if browser_poll_timer.timer.just_finished() {
-        info!("did this happen2");
         info!("ticky boy");
         let map_res = map_channel.rx.try_recv();
         let checkpoint_res = checkpoint_channel.rx.try_recv();
@@ -186,10 +182,9 @@ pub fn readcheck_local_storage(
 
                                             // now trigger BrowserIndexedDBStorageState after completing the read with local browser storage.
                                             if indexed_res_bool.0 {
-                                                info!("did this go on?");
                                                 indexed_state.set(BrowserIndexedDBStorageState::On);
                                             } else {
-                                                info!("it didn't work?");
+                                                info!("it didn't work?! indexeddb fail");
                                             }
 
                                             request_tiles_event
@@ -218,6 +213,7 @@ pub fn readcheck_local_storage(
             Err(e) => {
                 info!("probably don't have any browser storage, if this is a fresh session ignore this, otherwise: {}", e);
                 browser_state.set(BrowserLocalStorageState::Off);
+                request_tiles_event.send(RequestTileUpdates(RequestTileType::Height));
             }
         }
     }
@@ -232,7 +228,6 @@ pub fn convert_js_value_to_string(js_value: JsValue) -> Result<String, JsValue> 
 }
 
 pub fn request_indexeddb_storage(indexeddb_channel: Res<BrowserIndexedDBStorageChannel>) {
-    info!("did this happen3");
     let indexeddb_cc = indexeddb_channel.tx.clone();
     spawn_local(async move {
         let indexed_promise = retrieveIndexedDBBlockExplorerData();
@@ -240,11 +235,11 @@ pub fn request_indexeddb_storage(indexeddb_channel: Res<BrowserIndexedDBStorageC
 
         match indexed_result {
             Ok(o) => {
-                info!("what is this JsValue?: {:#?}", o);
+                //info!("what is this JsValue?: {:#?}", o);
                 let ooo = convert_js_value_to_string(o);
                 match ooo {
                     Ok(o) => {
-                        info!("str parse?: {:#?}", o);
+                        //info!("str parse?: {:#?}", o);
                         let _ = indexeddb_cc.try_send(o);
                     }
                     Err(e) => {
@@ -273,7 +268,6 @@ pub fn readcheck_indexeddb_storage(
     mut update_tile_event: EventWriter<UpdateTileTextureEvent>,
 ) {
     if browser_poll_timer.timer.just_finished() {
-        info!("did this happen4");
         info!("indexedDBcheck");
         let res = comms_channel.rx.try_recv();
 
@@ -281,7 +275,7 @@ pub fn readcheck_indexeddb_storage(
             Ok(o) => {
                 browser_state.set(BrowserIndexedDBStorageState::Off);
                 info!("data made it!");
-                info!("{:#?}", o);
+                //info!("{:#?}", o);
                 //let r_result = JsValue::from_str(&o);
                 let a = serde_json::from_str::<TrimExplorerTileVec>(&o);
                 match a {
@@ -293,25 +287,49 @@ pub fn readcheck_indexeddb_storage(
                             let resource = get_resource_for_tile(&t.x);
                             let land_index = get_land_index(t.h as u32, &resource, None);
 
-                            let tt = TileData {
-                                ln_address: "a@b.com".to_string(),
-                                username: "bob".to_string(),
-                                color: Srgba::hex("9000B0").unwrap().into(),
-                                message: "".to_string(),
-                                value: 32,
-                                cost: 64,
-                                height: t.h as u32,
-                                land_index,
-                                event_date: Utc::now(),
-                                resource,
-                                block_hash: DEFAULT_HASH.to_owned(),
-                                block_time: 0,
-                                block_bits: 0,
-                                block_n_tx: 1,
-                                block_size: 1,
-                                block_fee: 1,
-                                block_weight: 1,
-                                block_ver: 1,
+                            let tile_from_purchase = tile_map.map.get(&(t.h as u32));
+
+                            let tt = match tile_from_purchase {
+                                Some(s) => TileData {
+                                    ln_address: s.ln_address.clone(),
+                                    username: s.username.clone(),
+                                    color: s.color,
+                                    message: s.message.clone(),
+                                    value: s.value,
+                                    cost: s.cost,
+                                    height: t.h as u32,
+                                    land_index,
+                                    event_date: s.event_date,
+                                    resource,
+                                    block_hash: t.x,
+                                    block_time: t.t,
+                                    block_bits: t.b,
+                                    block_n_tx: t.n,
+                                    block_size: t.s,
+                                    block_fee: t.f,
+                                    block_weight: t.w,
+                                    block_ver: t.v,
+                                },
+                                None => TileData {
+                                    ln_address: "satoshisettlers@zbd.gg".to_string(),
+                                    username: "".to_string(),
+                                    color: Srgba::hex("333333").unwrap().into(),
+                                    message: "".to_string(),
+                                    value: 0,
+                                    cost: 32,
+                                    height: t.h as u32,
+                                    land_index,
+                                    event_date: Utc::now(),
+                                    resource,
+                                    block_hash: t.x,
+                                    block_time: t.t,
+                                    block_bits: t.b,
+                                    block_n_tx: t.n,
+                                    block_size: t.s,
+                                    block_fee: t.f,
+                                    block_weight: t.w,
+                                    block_ver: t.v,
+                                },
                             };
                             holder_array.push(tt.clone());
                             tile_map.map.insert(t.h as u32, tt.clone());

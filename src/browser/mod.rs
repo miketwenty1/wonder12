@@ -1,5 +1,5 @@
 use self::{
-    event::{ReadLocalBrowserStorage, WriteLocalBrowserStorage},
+    event::{ReadLocalBrowserStorage, WriteBrowserStorage},
     localstorage::{readcheck_local_storage, request_local_storage, write_local_storage},
     resource::{tick_browser_receive_timer, BrowserPollingTimer},
     state::BrowserLocalStorageState,
@@ -19,7 +19,7 @@ impl Plugin for BrowserPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<BrowserPollingTimer>()
             .add_event::<ReadLocalBrowserStorage>()
-            .add_event::<WriteLocalBrowserStorage>()
+            .add_event::<WriteBrowserStorage>()
             .add_systems(Update, write_local_storage)
             .add_systems(
                 Update,

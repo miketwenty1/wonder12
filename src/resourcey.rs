@@ -49,6 +49,7 @@ impl WorldOwnedTileMap {
         let trimmed_map: HashMap<u32, TrimTile> = self
             .map
             .iter()
+            .filter(|(_, tile_data)| tile_data.value != 0)
             .map(|(&key, tile_data)| {
                 (
                     key,

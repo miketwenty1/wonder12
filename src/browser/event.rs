@@ -7,4 +7,4 @@ pub struct ReadLocalBrowserStorage;
 pub struct ReadIndexedDBStorage;
 
 #[derive(Event, Debug)]
-pub struct WriteLocalBrowserStorage;
+pub struct WriteBrowserStorage;
