@@ -42,8 +42,9 @@ use explore_scene::core_ui::paint_palette::resource::DefaultDrawColorPalette;
 use explore_scene::core_ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
 use explore_scene::overlay_ui::go_to::state::GoToUiState;
 use resourcey::{
-    BlockExplorer, CheckpointTimetamp, ConfigAllCartBlocks, InitBlockCount, InitGameMap, IsIphone,
-    Nwc, ToggleVisible, UiInteracting, UserInventoryBlocks, WinSize,
+    BlockExplorer, CheckpointTimetamp, ColorMapToggle, ConfigAllCartBlocks, InitBlockCount,
+    InitGameMap, IsIphone, MapTileMode, Nwc, ToggleVisible, UiInteracting, UserInventoryBlocks,
+    WinSize, WorldOwnedTileMapLod1, WorldOwnedTileMapLod2,
 };
 use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
@@ -219,6 +220,7 @@ pub fn game12(
     };
 
     App::new()
+        .insert_resource(MapTileMode(ColorMapToggle::GameColor))
         .insert_resource(UiInteracting(false))
         .insert_resource(start_edge)
         .insert_resource(color_palette)
@@ -228,6 +230,12 @@ pub fn game12(
             set: HashSet::new(),
         })
         .insert_resource(WorldOwnedTileMap {
+            map: HashMap::new(),
+        })
+        .insert_resource(WorldOwnedTileMapLod1 {
+            map: HashMap::new(),
+        })
+        .insert_resource(WorldOwnedTileMapLod2 {
             map: HashMap::new(),
         })
         .insert_resource(TileCart {

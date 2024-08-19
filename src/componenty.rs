@@ -82,7 +82,7 @@ pub struct ToggleParent;
 pub struct MagnifyToggleParentBtn;
 
 #[derive(Component)]
-pub struct MagnifyToggleChild;
+pub struct MagnifyToggleChild(pub String);
 
 #[derive(Component)]
 pub struct MagnifyToggleVersion;
@@ -125,9 +125,6 @@ pub struct ShowValues;
 
 #[derive(Component)]
 pub struct HideText;
-
-#[derive(Component)]
-pub struct HideTextText;
 
 #[derive(Component)]
 pub struct Toggle1Btn;

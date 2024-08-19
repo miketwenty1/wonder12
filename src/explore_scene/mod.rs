@@ -17,10 +17,11 @@ pub mod zoom;
 use bevy::prelude::*;
 use core_ui::{
     paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState},
-    ui_right::toggle_magnify_button_system,
+    ui_right::{magnify_child_btn, toggle_magnify_button_system},
 };
 use explore::clear_manual_selection;
 use palette::draw_button_system;
+use update_toggle_events::land_color_event;
 use zoom::zoom_wheel_system;
 
 use crate::{
@@ -54,7 +55,7 @@ use self::{
     touch_movement_systems::touch_event_system,
     travel::travel_event,
     update_after_purchase::update_tiles_after_purchase,
-    update_toggle_events::{buildings_visibility_event, change_tile_text_event, land_color_event},
+    update_toggle_events::{buildings_visibility_event, change_tile_text_event},
     zoom::{
         cam_ortho_scale_text_visibility, pinch_system, zoom_in_button_system,
         zoom_out_button_system,
@@ -94,6 +95,7 @@ impl Plugin for ExplorePlugin {
                         toggle_button_sub_system_toggle3,
                         toggle_button_sub_system_toggle4,
                         toggle_magnify_button_system,
+                        magnify_child_btn,
                         (
                             choose_tile,
                             mouse_movement_camera_system,

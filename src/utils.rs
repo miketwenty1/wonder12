@@ -2,7 +2,6 @@ use bevy::{
     color::Srgba,
     log::info,
     math::Vec2,
-    prelude::IntoSystem,
     utils::{hashbrown, HashMap},
 };
 use chrono::{DateTime, Duration, Utc};
@@ -300,4 +299,13 @@ pub fn calculate_index_for_resourced_lands(
         new_tile_map.insert(*height, tile.clone());
     }
     WorldOwnedTileMap { map: new_tile_map }
+}
+
+pub fn bits_to_target_hash(bits: i64) -> String {
+    // Extract the exponent and mantissa from the bits
+    let exponent = ((bits >> 24) & 0xff) as u8;
+    let mantissa = (bits & 0x00ffffff) as u32;
+
+    let mantissa_shifted = (mantissa as u128) << (8 * (exponent - 3));
+    format!("{:032x}", mantissa_shifted)
 }

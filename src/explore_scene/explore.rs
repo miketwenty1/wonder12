@@ -6,8 +6,13 @@ use bevy::{
 };
 use ulam::Quad;
 
-use crate::consty::{CHUNK_TILE_SPAN_MULTIPLIER, INDEX_WHITE_LAND};
-use crate::resourcey::SpriteSheetLand;
+use super::{
+    core_ui::paint_palette::event::ViewSelectedTiles,
+    overlay_ui::toast::{ToastEvent, ToastType},
+};
+use crate::consty::{CHUNK_TILE_SPAN_MULTIPLIER, INDEX_WHITE_LAND, WHITE_COLOR_SRGBA};
+use crate::resourcey::{ColorMapToggle, MapTileMode, SpriteSheetLand};
+use crate::{building_config::utils::get_text_color, utils::bits_to_target_hash};
 use crate::{
     building_config::{spawn_tile_level, utils::sanitize_building_color},
     componenty::{
@@ -31,11 +36,8 @@ use crate::{
     statey::{DisplayBuyUiState, InitLoadingBlocksState},
     structy::SpawnDiffData,
 };
-
-use super::{
-    core_ui::paint_palette::event::ViewSelectedTiles,
-    overlay_ui::toast::{ToastEvent, ToastType},
-};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 // pub fn reset_mouse(
 //     mut mouse: ResMut<ButtonInput<MouseButton>>,
@@ -214,15 +216,9 @@ pub fn spawn_block_sprites(
     toggle_map: Res<ToggleMap>,
     max_height: Res<MaxBlockHeight>,
     cam_query: Query<&OrthographicProjection, With<Camera>>,
+    map_mode: Res<MapTileMode>,
 ) {
     for _event in sprite_spawn_event.read() {
-        let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-        let slightly_smaller_text_style = TextStyle {
-            font,
-            font_size: 24.0,
-            color: Color::WHITE,
-        };
-
         let zoom_level = cam_query.get_single().unwrap().scale;
         // getting whether or not we should spawn text as hidden or visible depending on zoom level
         let text_visibility =
@@ -290,23 +286,10 @@ pub fn spawn_block_sprites(
                             *building_texture_mapping.0.get(&value_from_tile).unwrap() as usize;
                         color_for_sprites = tile_map.map.get(&locationcoord.ulam).unwrap().color;
 
-                        //meaning don't show the colors
-                        if *toggle_map.0.get("showcolors").unwrap() {
-                            index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
+                        //Decide what type of tile to show based on the map mode enum
 
-                            color_for_tile = Color::Srgba(Srgba {
-                                red: 1.,
-                                green: 1.,
-                                blue: 1.,
-                                alpha: 1.,
-                            });
-                        } else {
-                            // show color
-
-                            index = INDEX_WHITE_LAND;
-
-                            color_for_tile = color_for_sprites;
-                        };
+                        (index, color_for_tile) =
+                            get_index_color(&map_mode, &tile_map, &locationcoord.ulam);
                     } else {
                         building_sprite_index = 0;
                         color_for_tile = Color::Srgba(Srgba {
@@ -363,6 +346,12 @@ pub fn spawn_block_sprites(
                     // SPAWN building visibility based on toggle
 
                     cmd.with_children(|builder| {
+                        let slightly_smaller_text_style = TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 24.0,
+                            color: get_text_color(&color_for_tile),
+                        };
+
                         let mut text_ent_cmd = builder.spawn((
                             Text2dBundle {
                                 text: Text {
@@ -494,7 +483,7 @@ pub fn set_camera_tile_bounds(
 pub fn update_tile_textures(
     mut commands: Commands,
     mut lands: Query<
-        (&mut TextureAtlas, &mut Sprite, &Location, Entity),
+        (&mut TextureAtlas, &mut Sprite, &Location, Entity, &Children),
         (With<Land>, Without<BuildingStructure>),
     >,
     buildings: Query<(&Location, Entity), (Without<Land>, With<BuildingStructure>)>,
@@ -504,6 +493,7 @@ pub fn update_tile_textures(
     texture_atlas_handle_building: Res<SpriteSheetBuilding>,
     toggle_map: Res<ToggleMap>,
     mut text_q: Query<(&mut Text, &Location), With<TileText>>,
+    map_mode: Res<MapTileMode>,
 ) {
     for tile_vec in event.read() {
         info!("receving update texture event");
@@ -516,7 +506,7 @@ pub fn update_tile_textures(
         // let showing_buildings = toggle_map.0.get("hidebuildings").unwrap();
         let showing_value = toggle_map.0.get("showheights").unwrap();
         let hiding_text = toggle_map.0.get("showtext").unwrap();
-        let hiding_colors = toggle_map.0.get("showcolors").unwrap();
+        //let hiding_colors = toggle_map.0.get("showcolors").unwrap();
         let hiding_buildings = toggle_map.0.get("showbuildings").unwrap();
         let visibility_building_toggle = if *hiding_buildings {
             Visibility::Hidden
@@ -524,7 +514,7 @@ pub fn update_tile_textures(
             Visibility::Visible
         };
 
-        for (mut texture, mut sprite, location, parent_entity) in lands.iter_mut() {
+        for (mut texture, mut sprite, location, parent_entity, children) in lands.iter_mut() {
             if tile_map.map.contains_key(&location.ulam)
                 && tile_map_from_e.contains_key(&location.ulam)
             {
@@ -552,18 +542,21 @@ pub fn update_tile_textures(
                 }
 
                 // show correct color based on toggle
-                if *hiding_colors {
-                    sprite.color = Color::Srgba(Srgba {
-                        red: 1.0,
-                        green: 1.0,
-                        blue: 1.0,
-                        alpha: 1.0,
-                    });
-                    texture.index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
-                } else {
-                    sprite.color = tile_data.color;
-                    texture.index = INDEX_WHITE_LAND;
-                }
+
+                (texture.index, sprite.color) =
+                    get_index_color(&map_mode, &tile_map, &locationcoord.ulam);
+                // if *hiding_colors {
+                //     sprite.color = Color::Srgba(Srgba {
+                //         red: 1.0,
+                //         green: 1.0,
+                //         blue: 1.0,
+                //         alpha: 1.0,
+                //     });
+                //     texture.index = tile_map.map.get(&locationcoord.ulam).unwrap().land_index;
+                // } else {
+                //     sprite.color = tile_data.color;
+                //     texture.index = INDEX_WHITE_LAND;
+                // }
 
                 // Not really a big deal to do this everytime because likely after each purchase we will need to configure the buildings differently.
                 /////////////////////
@@ -592,11 +585,12 @@ pub fn update_tile_textures(
                     });
                 /////////////////////
             }
-        }
+            let (mut text, loc) = text_q.get_mut(children[0]).unwrap();
 
-        for (mut text, loc) in text_q.iter_mut() {
+            //for (mut text, loc) in text_q.iter_mut() {
             if let Some(val) = tile_map.map.get(&loc.ulam) {
                 if !*hiding_text {
+                    text.sections[0].style.color = get_text_color(&sprite.color);
                     if *showing_value {
                         text.sections[0].value = val.cost.to_string();
                     } else {
@@ -604,6 +598,151 @@ pub fn update_tile_textures(
                     }
                 }
             }
+            // }
+        }
+
+        // for (mut text, loc) in text_q.iter_mut() {
+        //     if let Some(val) = tile_map.map.get(&loc.ulam) {
+        //         if !*hiding_text {
+        //             if *showing_value {
+        //                 text.sections[0].value = val.cost.to_string();
+        //             } else {
+        //                 text.sections[0].value = val.height.to_string();
+        //             }
+        //         }
+        //     }
+        // }
+    }
+}
+
+pub fn get_index_color(
+    map_mode: &MapTileMode,
+    tile_map: &WorldOwnedTileMap,
+    height: &u32,
+) -> (usize, Color) {
+    match map_mode.0 {
+        ColorMapToggle::GameColor => {
+            let color = tile_map.map.get(height).cloned().unwrap_or_default().color;
+            (INDEX_WHITE_LAND, color)
+        }
+        ColorMapToggle::LandTile => {
+            let index = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .land_index;
+
+            (index, WHITE_COLOR_SRGBA)
+        }
+        ColorMapToggle::Fee => {
+            let fee = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .block_fee;
+            let color = get_fee_color(fee);
+            (INDEX_WHITE_LAND, color)
+        }
+        ColorMapToggle::BlockTime => {
+            let current = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .block_time;
+            let previous = tile_map
+                .map
+                .get(&(height - 1))
+                .cloned()
+                .unwrap_or_default()
+                .block_time;
+
+            let color = get_blocktime_color(current - previous);
+            (INDEX_WHITE_LAND, color)
+        }
+        ColorMapToggle::TxCount => {
+            let txcount = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .block_n_tx;
+            let color = get_tx_count_color(txcount);
+            (INDEX_WHITE_LAND, color)
+        }
+        ColorMapToggle::Byte => {
+            let bytes = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .block_size;
+            let color = get_byte_color(bytes);
+            (INDEX_WHITE_LAND, color)
+        }
+        ColorMapToggle::Weight => {
+            let weight = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .block_weight;
+            let color = get_weight_color(weight);
+            (INDEX_WHITE_LAND, color)
+        }
+        ColorMapToggle::TargetDifficulty => {
+            let bits = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .block_bits;
+            let color = get_bits_color(bits);
+            (INDEX_WHITE_LAND, color)
+        }
+        ColorMapToggle::LeadingZeros => {
+            let hash = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .block_hash;
+            let leading_zeros = hash.chars().take_while(|&c| c == '0').count();
+            let color = get_leading_zeros_color(leading_zeros);
+
+            (INDEX_WHITE_LAND, color)
+        }
+        ColorMapToggle::ExcessWork => {
+            let hash = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .block_hash;
+            let leading_zeros = hash.chars().take_while(|&c| c == '0').count();
+            let bits = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .block_bits;
+            let target_hash = bits_to_target_hash(bits);
+            let required_zeros = target_hash.chars().take_while(|&c| c == '0').count();
+            //info!("leading: {}, required: {}", leading_zeros, required_zeros);
+            let color = get_excesswork_color(leading_zeros - required_zeros);
+            (INDEX_WHITE_LAND, color)
+        }
+        ColorMapToggle::Version => {
+            let ver = tile_map
+                .map
+                .get(height)
+                .cloned()
+                .unwrap_or_default()
+                .block_ver;
+            let color = get_version_color(ver);
+            (INDEX_WHITE_LAND, color)
         }
     }
 }
@@ -793,4 +932,593 @@ pub fn buy_selection_button(
             }
         }
     }
+}
+
+fn get_fee_color(value: i64) -> Color {
+    match value {
+        // 0: Black
+        0 => Color::Srgba(Srgba {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }),
+
+        // 1..=5_000,000: Orange to Red
+        1..=5_000_000 => {
+            let intensity = value as f32 / 5_000_000.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.5 - intensity * 0.5,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 5_000_001..=20_000_000: Red to Pink
+        5_000_001..=20_000_000 => {
+            let intensity = (value - 5_000_001) as f32 / 15_000_000.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.0,
+                blue: intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+
+        // 20_000_001..=100_000_000: Pink to Purpleish Blue
+        20_000_001..=100_000_000 => {
+            let intensity = (value - 20_000_001) as f32 / 80_000_000.0;
+            Color::Srgba(Srgba {
+                red: 1.0 - intensity * 0.5,
+                green: 0.0,
+                blue: 0.5 + intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+
+        // 100_000_001..=500_000_000: Purple to Magenta
+        100_000_001..=500_000_000 => {
+            let intensity = (value - 100_000_001) as f32 / 400_000_000.0;
+            Color::Srgba(Srgba {
+                red: 0.5 + intensity * 0.5,
+                green: 0.0,
+                blue: 1.0 - intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+
+        // 500_000_001..=3_000_000_000: Magenta to Hot Pink
+        500_000_001..=3_000_000_000 => {
+            let intensity = (value - 500_000_001) as f32 / 2_500_000_000.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.0 + intensity * 0.5,
+                blue: 1.0 - intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+
+        // 3_000_000_001+: White
+        _ => Color::Srgba(Srgba {
+            red: 1.0,
+            green: 1.0,
+            blue: 1.0,
+            alpha: 1.0,
+        }),
+    }
+}
+
+fn get_blocktime_color(value: i64) -> Color {
+    match value {
+        // -infinity to 0: White
+        i64::MIN..=0 => Color::Srgba(Srgba {
+            red: 1.0,
+            green: 1.0,
+            blue: 1.0,
+            alpha: 1.0,
+        }),
+
+        // 1 to 600: Light Green to Green
+        1..=600 => {
+            let intensity = value as f32 / 600.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: 0.8 - intensity * 0.5,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 601 to 1800: Light Blue to Blue
+        601..=1800 => {
+            let intensity = (value - 601) as f32 / 1200.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: 0.5 - intensity * 0.5,
+                blue: 1.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 1801 to 3600: Yellow to Dark Yellow
+        1801..=3600 => {
+            let intensity = (value - 1801) as f32 / 1800.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 1.0 - intensity * 0.3,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 3601 to 7200: Light Orange to Orange
+        3601..=7200 => {
+            let intensity = (value - 3601) as f32 / 3600.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.5 - intensity * 0.5,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 7201 to 10800: Light Red to Dark Red
+        7201..=10800 => {
+            let intensity = (value - 7201) as f32 / 3600.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.0,
+                blue: intensity * 0.2,
+                alpha: 1.0,
+            })
+        }
+
+        // 10801+: Black
+        _ => Color::Srgba(Srgba {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }),
+    }
+}
+
+fn get_tx_count_color(value: i32) -> Color {
+    match value {
+        // 1: Black
+        1 => Color::Srgba(Srgba {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }),
+
+        // 2 to 100: Light Green to Green
+        2..=100 => {
+            let intensity = (value - 2) as f32 / 98.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: 0.8 - intensity * 0.5,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 101 to 999: Light Blue to Blue
+        101..=999 => {
+            let intensity = (value - 101) as f32 / 898.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: 0.5 - intensity * 0.5,
+                blue: 1.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 1000 to 3000: Yellow to Orange
+        1000..=3000 => {
+            let intensity = (value - 1000) as f32 / 2000.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 1.0 - intensity * 0.5,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 3001 to 6000: Orange to Red
+        3001..=6000 => {
+            let intensity = (value - 3001) as f32 / 2999.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.5 - intensity * 0.5,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 6001 to 9000: Red to Pink
+        6001..=9000 => {
+            let intensity = (value - 6001) as f32 / 2999.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.0,
+                blue: intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+
+        // 9001+: White
+        _ => Color::Srgba(Srgba {
+            red: 1.0,
+            green: 1.0,
+            blue: 1.0,
+            alpha: 1.0,
+        }),
+    }
+}
+
+fn get_byte_color(value: i32) -> Color {
+    match value {
+        // 0 to 200: Black
+        0..=200 => Color::Srgba(Srgba {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }),
+
+        // 201 to 10,000: Light Green to Green
+        201..=10_000 => {
+            let intensity = (value - 201) as f32 / 9_800.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: 0.8 - intensity * 0.5,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 10,001 to 50,000: Light Blue to Blue
+        10_001..=50_000 => {
+            let intensity = (value - 10_001) as f32 / 39_999.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: 0.5 - intensity * 0.5,
+                blue: 1.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 50,001 to 200,000: Yellow to Light Orange
+        50_001..=200_000 => {
+            let intensity = (value - 50_001) as f32 / 149_999.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 1.0 - intensity * 0.2,
+                blue: intensity * 0.2,
+                alpha: 1.0,
+            })
+        }
+
+        // 200,001 to 400,000: Light Orange to Orange
+        200_001..=400_000 => {
+            let intensity = (value - 200_001) as f32 / 199_999.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.8 - intensity * 0.3,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 400,001 to 600,000: Light Red to Red
+        400_001..=600_000 => {
+            let intensity = (value - 400_001) as f32 / 199_999.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: intensity * 0.5,
+                blue: intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+
+        // 600,001 to 800,000: Light Purple to Magenta
+        600_001..=800_000 => {
+            let intensity = (value - 600_001) as f32 / 199_999.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: intensity * 0.0,
+                blue: 1.0 - intensity,
+                alpha: 1.0,
+            })
+        }
+
+        // 800,001 to 999,900: Light Magenta to Magenta
+        800_001..=999_900 => {
+            let intensity = (value - 800_001) as f32 / 199_899.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.0,
+                blue: 1.0 - intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+
+        // 999,901+: White
+        _ => Color::Srgba(Srgba {
+            red: 1.0,
+            green: 1.0,
+            blue: 1.0,
+            alpha: 1.0,
+        }),
+    }
+}
+
+fn get_weight_color(value: i64) -> Color {
+    match value {
+        // 0 to 800: Black
+        0..=800 => Color::Srgba(Srgba {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }),
+
+        // 801 to 40,000: Light Green to Green
+        801..=40_000 => {
+            let intensity = (value - 801) as f32 / 39_199.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: 0.8 - intensity * 0.5,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 40,001 to 200,000: Light Blue to Blue
+        40_001..=200_000 => {
+            let intensity = (value - 40_001) as f32 / 159_999.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: 0.5 - intensity * 0.5,
+                blue: 1.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 200,001 to 800,000: Yellow to Light Orange
+        200_001..=800_000 => {
+            let intensity = (value - 200_001) as f32 / 599_999.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 1.0 - intensity * 0.2,
+                blue: intensity * 0.2,
+                alpha: 1.0,
+            })
+        }
+
+        // 800,001 to 1,600,000: Light Orange to Orange
+        800_001..=1_600_000 => {
+            let intensity = (value - 800_001) as f32 / 799_999.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.8 - intensity * 0.3,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 1,600,001 to 2,400,000: Light Red to Red
+        1_600_001..=2_400_000 => {
+            let intensity = (value - 1_600_001) as f32 / 799_999.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: intensity * 0.5,
+                blue: intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+
+        // 2,400,001 to 3,200,000: Light Purple to Magenta
+        2_400_001..=3_200_000 => {
+            let intensity = (value - 2_400_001) as f32 / 799_999.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.0,
+                blue: 1.0 - intensity,
+                alpha: 1.0,
+            })
+        }
+
+        // 3,200,001 to 3,999,600: Light Magenta to Magenta
+        3_200_001..=3_999_600 => {
+            let intensity = (value - 3_200_001) as f32 / 799_599.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.0,
+                blue: 1.0 - intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+
+        // 3,999,601+: White
+        _ => Color::Srgba(Srgba {
+            red: 1.0,
+            green: 1.0,
+            blue: 1.0,
+            alpha: 1.0,
+        }),
+    }
+}
+
+fn get_bits_color(value: i64) -> Color {
+    // Create a hasher and hash the value
+    let mut hasher = DefaultHasher::new();
+    value.hash(&mut hasher);
+    let hash = hasher.finish();
+
+    // Extract RGB values from the hash
+    let r = (hash & 0xFF) as f32 / 255.0;
+    let g = ((hash >> 8) & 0xFF) as f32 / 255.0;
+    let b = ((hash >> 16) & 0xFF) as f32 / 255.0;
+
+    // Return the color
+    Color::Srgba(Srgba {
+        red: r,
+        green: g,
+        blue: b,
+        alpha: 1.0,
+    })
+}
+
+pub fn get_leading_zeros_color(value: usize) -> Color {
+    match value {
+        // 0-7: Black (Very low difficulty)
+        0..=7 => Color::Srgba(Srgba {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }),
+
+        // 8-11: Light Green to Green (Low difficulty)
+        8..=11 => {
+            let intensity = (value - 8) as f32 / 3.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: 0.8 - intensity * 0.4,
+                blue: 0.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 12-15: Green to Cyan (Moderate difficulty)
+        12..=15 => {
+            let intensity = (value - 12) as f32 / 3.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: 0.4 - intensity * 0.2,
+                blue: intensity * 0.8,
+                alpha: 1.0,
+            })
+        }
+
+        // 16-19: Cyan to Blue (Increased difficulty)
+        16..=19 => {
+            let intensity = (value - 16) as f32 / 3.0;
+            Color::Srgba(Srgba {
+                red: 0.0,
+                green: intensity * 0.5,
+                blue: 1.0,
+                alpha: 1.0,
+            })
+        }
+
+        // 20-23: Blue to Magenta (High difficulty)
+        20..=23 => {
+            let intensity = (value - 20) as f32 / 3.0;
+            Color::Srgba(Srgba {
+                red: intensity * 1.0,
+                green: 0.0,
+                blue: 1.0 - intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+
+        // 24+: Magenta to White (Very high difficulty)
+        _ => {
+            let intensity = (value - 24) as f32 / 40.0;
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: intensity * 1.0,
+                blue: 1.0,
+                alpha: 1.0,
+            })
+        }
+    }
+}
+
+pub fn get_excesswork_color(value: usize) -> Color {
+    match value {
+        // 1: Green
+        0 => Color::Srgba(Srgba {
+            red: 0.0,
+            green: 1.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }),
+
+        // 2: Light Blue
+        1 => Color::Srgba(Srgba {
+            red: 0.5,
+            green: 0.5,
+            blue: 1.0,
+            alpha: 1.0,
+        }),
+
+        // 4: Yellow
+        2 => Color::Srgba(Srgba {
+            red: 1.0,
+            green: 1.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }),
+
+        // 5: Orange
+        3 => Color::Srgba(Srgba {
+            red: 1.0,
+            green: 0.5,
+            blue: 0.0,
+            alpha: 1.0,
+        }),
+
+        // 6: Red
+        4 => Color::Srgba(Srgba {
+            red: 1.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }),
+
+        // 7: Purplish Magenta
+        5 => Color::Srgba(Srgba {
+            red: 0.8,
+            green: 0.0,
+            blue: 0.8,
+            alpha: 1.0,
+        }),
+
+        // 6+: Hot Pink (Intensifying with higher values)
+        _ => {
+            let intensity = ((value - 8) as f32 / 4.0).min(1.0);
+            Color::Srgba(Srgba {
+                red: 1.0,
+                green: 0.0,
+                blue: 0.5 + intensity * 0.5,
+                alpha: 1.0,
+            })
+        }
+    }
+}
+
+fn get_version_color(value: i32) -> Color {
+    // Create a hasher and hash the value
+    let mut hasher = DefaultHasher::new();
+    value.hash(&mut hasher);
+    let hash = hasher.finish();
+
+    // Extract RGB values from the hash
+    let r = (hash & 0xFF) as f32 / 255.0;
+    let g = ((hash >> 8) & 0xFF) as f32 / 255.0;
+    let b = ((hash >> 16) & 0xFF) as f32 / 255.0;
+
+    // Return the color
+    Color::Srgba(Srgba {
+        red: r,
+        green: g,
+        blue: b,
+        alpha: 1.0,
+    })
 }

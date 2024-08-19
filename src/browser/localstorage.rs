@@ -4,27 +4,26 @@ use crate::async_resource_comm_channels::{
 };
 use crate::browser::state::BrowserIndexedDBStorageState;
 use crate::comms::structy::{TrimExplorerTileVec, TrimTileLocalBrowserStorage};
-use crate::consty::DEFAULT_HASH;
 use crate::eventy::{RequestTileUpdates, UpdateTileTextureEvent};
-use crate::resourcey::{BlockExplorer, CheckpointTimetamp, TileData};
+use crate::resourcey::{
+    BlockExplorer, CheckpointTimetamp, TileData, WorldOwnedTileMapLod1, WorldOwnedTileMapLod2,
+};
 use crate::resourcey::{UpdateGameTimetamp, WorldOwnedTileMap};
-use crate::structy::{RequestTileType, TileResource};
+use crate::structy::RequestTileType;
 use crate::utils::{calculate_index_for_resourced_lands, get_land_index, get_resource_for_tile};
 use bevy::prelude::*;
 
 use chrono::{NaiveDateTime, Timelike, Utc};
-use serde_json::from_value;
-use wasm_bindgen::prelude::*;
+
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_futures::JsFuture;
 use wasm_bindgen_futures::{js_sys, wasm_bindgen};
 
-use super::event::{ReadIndexedDBStorage, ReadLocalBrowserStorage, WriteBrowserStorage};
+use super::event::{ReadLocalBrowserStorage, WriteBrowserStorage};
 use super::resource::BrowserPollingTimer;
 use super::state::BrowserLocalStorageState;
 
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_wasm_bindgen::from_value as wasm_from_value;
 use wasm_bindgen::prelude::*;
@@ -127,6 +126,8 @@ pub fn readcheck_local_storage(
     browser_poll_timer: Res<BrowserPollingTimer>,
     mut request_tiles_event: EventWriter<RequestTileUpdates>,
     mut tile_map: ResMut<WorldOwnedTileMap>,
+    mut tile_map_lod1: ResMut<WorldOwnedTileMapLod1>,
+    mut tile_map_lod2: ResMut<WorldOwnedTileMapLod2>,
     mut browser_state: ResMut<NextState<BrowserLocalStorageState>>,
     mut game_time: ResMut<UpdateGameTimetamp>,
     mut checkpoint_time: ResMut<CheckpointTimetamp>,
@@ -150,7 +151,8 @@ pub fn readcheck_local_storage(
                     match r_result {
                         Ok(o) => {
                             let world_map_converted = o.convert_trim_to_tilemap();
-
+                            *tile_map_lod1 = world_map_converted.to_lod1();
+                            *tile_map_lod2 = tile_map_lod1.to_lod2();
                             match checkpoint_res {
                                 Ok(o) => {
                                     // info!("this is the string for the date: {}", o);

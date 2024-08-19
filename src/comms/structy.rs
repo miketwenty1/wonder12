@@ -1,10 +1,8 @@
 use bevy::{color::Srgba, utils::HashMap};
 use chrono::{DateTime, Utc};
-use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    consty::INDEX_MAX_LAND,
     resourcey::{TileData, WorldOwnedTileMap},
     utils::{derive_cost_from_value, get_land_index, get_resource_for_tile},
 };

@@ -17,7 +17,6 @@ use crate::utils::{
 };
 use crate::{ServerURL, UpdateTileTextureEvent, WorldOwnedTileMap};
 use bevy::prelude::*;
-use bevy::utils::HashMap;
 use chrono::Duration;
 //use bevy::tasks::IoTaskPool;
 use wasm_bindgen_futures::spawn_local;
@@ -115,7 +114,6 @@ pub fn api_receive_server_tiles(
     if api_timer.timer.finished() && !channel.rx.is_empty() {
         //info!("checking for tiles response");
         let api_res = channel.rx.try_recv();
-        let mut rng = rand::thread_rng();
         let mut send_update = false;
         let mut request_more_ts = false;
         let mut request_more_height = false;

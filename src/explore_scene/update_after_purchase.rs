@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use rand::Rng;
 
 use crate::{
     consty::DEFAULT_HASH,

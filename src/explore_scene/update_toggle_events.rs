@@ -1,10 +1,14 @@
+use crate::{
+    building_config::utils::get_text_color, explore_scene::explore::get_index_color,
+    resourcey::ColorMapToggle,
+};
 use bevy::prelude::*;
 
 use crate::{
     componenty::{BuildingStructure, Land, Location, TileText},
-    consty::{INDEX_WHITE_LAND, TEXT_ZOOM_OUT_MAX},
+    consty::TEXT_ZOOM_OUT_MAX,
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
-    resourcey::{SpriteSheetLand, ToggleMap, WorldOwnedTileMap},
+    resourcey::{MapTileMode, SpriteSheetLand, ToggleMap, WorldOwnedTileMap},
     structy::TileTextType,
 };
 
@@ -28,31 +32,23 @@ pub fn buildings_visibility_event(
 #[allow(clippy::too_many_arguments)]
 pub fn land_color_event(
     mut toggle: EventReader<ToggleColors>,
-    mut land_q: Query<(&mut TextureAtlas, &mut Sprite, &Location), With<Land>>,
-    toggle_map: Res<ToggleMap>,
+    mut land_q: Query<(&mut TextureAtlas, &mut Sprite, &Location, &Children), With<Land>>,
+    mut text_query: Query<&mut Text>,
+    //toggle_map: Res<ToggleMap>,
     tile_res: Res<WorldOwnedTileMap>,
     land: Res<SpriteSheetLand>,
+    map_mode: Res<MapTileMode>,
 ) {
     for _t in toggle.read() {
-        for (mut texture, mut sprite, loc) in land_q.iter_mut() {
-            if !*toggle_map.0.get("showcolors").unwrap() {
-                let a = tile_res.map.get(&loc.ulam);
-                if let Some(val) = a {
-                    sprite.color = val.color;
-                    texture.index = INDEX_WHITE_LAND;
-                }
+        for (mut texture, mut sprite, loc, children) in land_q.iter_mut() {
+            (texture.index, sprite.color) = get_index_color(&map_mode, &tile_res, &loc.ulam);
+            let mut text = text_query.get_mut(children[0]).unwrap();
+
+            if map_mode.0 == ColorMapToggle::LandTile {
+                texture.layout = land.layout.clone();
+                text.sections[0].style.color = Srgba::WHITE.into();
             } else {
-                let a = tile_res.map.get(&loc.ulam);
-                if let Some(_val) = a {
-                    sprite.color = Color::Srgba(Srgba {
-                        red: 1.0,
-                        green: 1.0,
-                        blue: 1.0,
-                        alpha: 1.0,
-                    });
-                    texture.index = tile_res.map.get(&loc.ulam).unwrap().land_index;
-                    texture.layout = land.layout.clone();
-                }
+                text.sections[0].style.color = get_text_color(&sprite.color);
             }
         }
     }

@@ -1,8 +1,4 @@
-use bevy::{
-    color::palettes::css::WHITE,
-    ecs::system::{EntityCommand, EntityCommands},
-    prelude::*,
-};
+use bevy::{color::palettes::css::WHITE, prelude::*};
 
 use crate::{
     componenty::{
@@ -16,7 +12,9 @@ use crate::{
     },
     consty::{UI_ICON_SIZE, UI_SMALL_TEXT_SIZE},
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
-    resourcey::{BlockExplorer, ColorPalette, ToggleMap, ToggleVisible},
+    resourcey::{
+        BlockExplorer, ColorMapToggle, ColorPalette, MapTileMode, ToggleMap, ToggleVisible,
+    },
     structy::TileTextType,
 };
 
@@ -164,7 +162,7 @@ pub fn right_ui(
                 Toggle2Btn,
                 ShowColors,
                 Toggle2BtnText,
-                "Hide Colors",
+                "Show Land",
                 colors.clone(),
                 font.clone(),
             );
@@ -369,7 +367,7 @@ fn spawn_magnify_toggle_button<T: Component>(
             },
             UiInteractionBtn,
             toggle_type,
-            MagnifyToggleChild,
+            MagnifyToggleChild(btn_text.to_string()),
             UiOverlayingExplorerButton,
         ))
         .with_children(|parent| {
@@ -466,7 +464,7 @@ pub fn toggle_button_system(
     }
 }
 
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn toggle_button_sub_system_toggle1(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut touches: ResMut<Touches>,
@@ -516,7 +514,7 @@ pub fn toggle_button_sub_system_toggle1(
     }
 }
 
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn toggle_button_sub_system_toggle2(
     mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut touches: ResMut<Touches>,
@@ -529,6 +527,7 @@ pub fn toggle_button_sub_system_toggle2(
     mut toggle_map: ResMut<ToggleMap>,
     mut toggle: EventWriter<ToggleColors>,
     colors: Res<ColorPalette>,
+    mut map_mode: ResMut<MapTileMode>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         match *interaction {
@@ -539,14 +538,20 @@ pub fn toggle_button_sub_system_toggle2(
 
                 match text.sections[0].value.as_str() {
                     "Show Colors" => {
-                        text.sections[0].value = "Hide Colors".to_string();
+                        text.sections[0].value = "Show Land".to_string();
                         *toggle_map.0.get_mut("showcolors").unwrap() = false;
+                        // let tiles = tile_map.to_tiledata_vec();
+                        // update_tile_event.send(UpdateTileTextureEvent(tiles));
                         toggle.send(ToggleColors);
+                        map_mode.0 = ColorMapToggle::GameColor;
                     }
-                    "Hide Colors" => {
+                    "Show Land" => {
                         text.sections[0].value = "Show Colors".to_string();
                         *toggle_map.0.get_mut("showcolors").unwrap() = true;
                         toggle.send(ToggleColors);
+                        // let tiles = tile_map.to_tiledata_vec();
+                        // update_tile_event.send(UpdateTileTextureEvent(tiles));
+                        map_mode.0 = ColorMapToggle::LandTile;
                     }
                     _ => {
                         info!("wut bccc2");
@@ -715,40 +720,75 @@ pub fn toggle_magnify_button_system(
     }
 }
 
+// #[allow(clippy::type_complexity, clippy::too_many_arguments)]
+// pub fn toggle_magnify_child_button_system(
+//     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<MagnifyToggleChild>)>,
+//     mut child_btns: Query<&mut Style, With<MagnifyToggleChild>>,
+//     colors: Res<ColorPalette>,
+//     asset_server: Res<AssetServer>,
+// ) {
+//     for (interaction, mut color) in &mut interaction_query {
+//         //let default_bg_color = color;
+//         //let mut text = text_query.get_mut(children[0]).unwrap();
+//         match *interaction {
+//             Interaction::Pressed => {
+//                 *color = UiImage::new(asset_server.load("ui/bitcoinmagnify_120x120.png"));
+//                 for mut style in child_btns.iter_mut() {
+//                     if style.display == Display::None {
+//                         style.display = Display::Flex;
+//                     } else {
+//                         style.display = Display::None;
+//                     }
+//                 }
+//             }
+//             Interaction::Hovered => {
+//                 *color = UiImage::new(asset_server.load("ui/bitcoinmagnify_120x120.png"))
+//                     .with_color(colors.accent_color)
+//             }
+//             Interaction::None => {
+//                 *color = UiImage::new(asset_server.load("ui/bitcoinmagnify_120x120.png"))
+//                     .with_color(colors.light_color);
+//             }
+//         }
+//     }
+// }
+
 #[allow(clippy::type_complexity)]
-pub fn fees_map_btn(
-    mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<MagnifyToggleFee>)>,
-    mut tile_text_type: EventWriter<ToggleText>,
+pub fn magnify_child_btn(
+    mut interaction_query: Query<
+        (&Interaction, &MagnifyToggleChild, &mut BackgroundColor),
+        Changed<Interaction>,
+    >,
+    mut toggle: EventWriter<ToggleColors>,
     colors: Res<ColorPalette>,
+    mut map_mode: ResMut<MapTileMode>,
 ) {
-    for interaction in &mut interaction_query {
+    for (interaction, magnify_type, mut color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                let mut text = text_query.get_single_mut().unwrap();
-
-                match text.sections[0].value.as_str() {
-                    "Hide Text" => {
-                        text.sections[0].value = "Show Text".to_string();
-                        *toggle_map.0.get_mut("showtext").unwrap() = true;
-                        tile_text_type.send(ToggleText(TileTextType::Blank));
-                    }
-                    "Show Text" => {
-                        text.sections[0].value = "Hide Text".to_string();
-                        *toggle_map.0.get_mut("showtext").unwrap() = false;
-                        if *toggle_map.0.get("showvalues").unwrap() {
-                            tile_text_type.send(ToggleText(TileTextType::Height));
-                        } else {
-                            tile_text_type.send(ToggleText(TileTextType::Value));
-                        }
-                    }
-                    _ => {
-                        info!("wut bccc4");
-                    }
-                };
                 *color = colors.light_color.into();
+
+                match magnify_type.0.as_str() {
+                    "Block Fees" => map_mode.0 = ColorMapToggle::Fee,
+                    "Block Time" => map_mode.0 = ColorMapToggle::BlockTime,
+                    "Tx Count" => map_mode.0 = ColorMapToggle::TxCount,
+                    "Size Bytes" => map_mode.0 = ColorMapToggle::Byte,
+                    "Size Weight" => map_mode.0 = ColorMapToggle::Weight,
+                    "Target Difficulty" => map_mode.0 = ColorMapToggle::TargetDifficulty,
+                    "Leading Zeros" => map_mode.0 = ColorMapToggle::LeadingZeros,
+                    "Excess Work" => map_mode.0 = ColorMapToggle::ExcessWork,
+                    "Version" => map_mode.0 = ColorMapToggle::Version,
+                    _ => map_mode.0 = ColorMapToggle::GameColor,
+                };
+
+                toggle.send(ToggleColors);
             }
-            Interaction::Hovered => {}
-            Interaction::None => {}
+            Interaction::Hovered => {
+                *color = colors.accent_color.into();
+            }
+            Interaction::None => {
+                *color = colors.button_color.into();
+            }
         }
     }
 }
