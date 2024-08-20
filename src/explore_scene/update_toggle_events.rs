@@ -1,7 +1,4 @@
-use crate::{
-    building_config::utils::get_text_color, explore_scene::explore::get_index_color,
-    resourcey::ColorMapToggle,
-};
+use crate::{building_config::utils::get_text_color, resourcey::ColorMapToggle};
 use bevy::prelude::*;
 
 use crate::{
@@ -11,6 +8,8 @@ use crate::{
     resourcey::{MapTileMode, SpriteSheetLand, ToggleMap, WorldOwnedTileMap},
     structy::TileTextType,
 };
+
+use super::blockchain_color::get_index_color;
 
 #[allow(clippy::too_many_arguments)]
 pub fn buildings_visibility_event(
@@ -42,13 +41,15 @@ pub fn land_color_event(
     for _t in toggle.read() {
         for (mut texture, mut sprite, loc, children) in land_q.iter_mut() {
             (texture.index, sprite.color) = get_index_color(&map_mode, &tile_res, &loc.ulam);
-            let mut text = text_query.get_mut(children[0]).unwrap();
+            let mut text_r = text_query.get_mut(children[0]);
 
             if map_mode.0 == ColorMapToggle::LandTile {
                 texture.layout = land.layout.clone();
-                text.sections[0].style.color = Srgba::WHITE.into();
-            } else {
-                text.sections[0].style.color = get_text_color(&sprite.color);
+                if text_r.is_ok() {
+                    text_r.unwrap().sections[0].style.color = Srgba::WHITE.into();
+                }
+            } else if text_r.is_ok() {
+                text_r.unwrap().sections[0].style.color = get_text_color(&sprite.color);
             }
         }
     }

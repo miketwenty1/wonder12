@@ -42,7 +42,7 @@ pub fn zoom_out_button_system(
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;
                 //zoom_out = true;
-                let zoom_amount = 0.1;
+                let zoom_amount = 0.25;
                 for mut ortho in cam_query.iter_mut() {
                     ortho.scale += zoom_amount;
                     if ortho.scale > ZOOM_OUT_MAX {
@@ -94,7 +94,7 @@ pub fn zoom_in_button_system(
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;
                 // zoom_in = true;
-                let zoom_amount = 0.1;
+                let zoom_amount = 0.25;
                 for mut ortho in cam_query.iter_mut() {
                     ortho.scale -= zoom_amount;
                     if ortho.scale < ZOOM_IN_MAX {

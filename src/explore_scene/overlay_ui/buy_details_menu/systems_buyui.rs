@@ -478,6 +478,7 @@ pub fn buy_button_system(
     mut toast: EventWriter<ToastEvent>,
     mut mouse: ResMut<ButtonInput<MouseButton>>,
     mut keyboard: ResMut<KeyboardData>,
+    mut keyboard_state: ResMut<NextState<KeyboardState>>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         let index = cart.index;
@@ -496,6 +497,7 @@ pub fn buy_button_system(
                         mouse.clear();
                         keyboard.target = TargetType::Nothing;
                         keyboard.value = "".to_string();
+                        keyboard_state.set(KeyboardState::Off);
                     } else {
                         *color = colors.red_color.into();
                         text.sections[0].style.color = colors.red_color;

@@ -43,6 +43,8 @@ pub struct Location {
     pub ulam: u32,
     pub quad: ulam::Quad,
     pub selected: bool,
+    // used to help with despawn
+    pub despawn_status: bool,
 }
 
 #[derive(Component)]

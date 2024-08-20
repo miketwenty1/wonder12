@@ -1,4 +1,5 @@
 pub mod amount_ui;
+pub mod blockchain_color;
 pub mod core_ui;
 pub mod cron_systems;
 pub mod desktop_movement_systems;
@@ -104,7 +105,7 @@ impl Plugin for ExplorePlugin {
                         )
                             .run_if(
                                 in_state(ToolPaletteUiState::Off)
-                                    .or(in_state(ToolPaletteUiState::Move)),
+                                    .or_else(in_state(ToolPaletteUiState::Move)),
                             ),
                     )
                         .chain(),

@@ -45,9 +45,9 @@ impl Plugin for PaintPalettePlugin {
                 ui_interaction_enabled_buttons,
 
                 ((mouse_draw_choose_tile, draw_select_tile, touch_draw_choose_tile)
-                .run_if(not(in_state(ToolPaletteUiState::Off).or(in_state(ToolPaletteUiState::Move)))
-                .and(in_state(PaintPaletteUiState::On)
-                .and(in_state(DisplayBuyUiState::Off))))),
+                .run_if(not(in_state(ToolPaletteUiState::Off).or_else(in_state(ToolPaletteUiState::Move)))
+                .and_then(in_state(PaintPaletteUiState::On)
+                .and_then(in_state(DisplayBuyUiState::Off))))),
 
                 ui_interaction_released_buttons
 

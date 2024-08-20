@@ -1,18 +1,17 @@
 use bevy::color::{Color, Srgba};
 
-// used to be 400
+//used to be 400
 pub const CHUNK_PIXEL_SIZE: f32 = 400.0;
 pub const TILE_SCALE: f32 = 3.0;
 pub const TILE_PIXEL_SIZE: f32 = 32.0;
 //const TILE_PADDING_SIZE: f32 = 0.0;
 pub const TOTAL_TILE_SCALE_SIZE: f32 = TILE_PIXEL_SIZE * TILE_SCALE + 4.0;
 pub const CHUNK_TILE_SPAN_COUNT: i32 = (CHUNK_PIXEL_SIZE / TOTAL_TILE_SCALE_SIZE) as i32;
-pub const CHUNK_TILE_SPAN_MULTIPLIER: i32 = 8;
+pub const CHUNK_TILE_SPAN_MULTIPLIER: i32 = 10;
 // when to start despawning
-// used to be 40.
-pub const DESPAWN_TILE_THRESHOLD: i32 = 51 + CHUNK_TILE_SPAN_COUNT * 500;
+pub const DESPAWN_TILE_THRESHOLD: i32 = 51 + CHUNK_TILE_SPAN_COUNT * 80;
 pub const CAMERA_SANITY_FACTOR: f32 = 1.25;
-pub const MOVE_VELOCITY_FACTOR: f32 = 20.0;
+pub const MOVE_VELOCITY_FACTOR: f32 = 40.0;
 
 pub const MINIMUM_BLOCK_AMOUNT: u32 = 32;
 
@@ -33,7 +32,7 @@ pub const DEFAULT_NO_PICK_COLOR: Srgba = Srgba {
 pub const ZOOM_IN_MAX: f32 = 0.25;
 pub const TEXT_ZOOM_OUT_MAX: f32 = 3.0;
 pub const BUILDING_ZOOM_OUT_MAX: f32 = 7.0;
-pub const ZOOM_OUT_MAX: f32 = 100.0;
+pub const ZOOM_OUT_MAX: f32 = 50.0;
 
 pub const DARKEST_BUILDING: Srgba = Srgba {
     red: 0.2,
