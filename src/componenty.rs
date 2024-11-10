@@ -62,8 +62,9 @@ pub struct ZoomInButton;
 #[derive(Component, Clone, Copy)]
 pub struct Land;
 
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Clone, PartialEq, Copy, Debug)]
 pub enum BuildingStructure {
+    None,
     Camp,
     Hut,
     Shack,
@@ -72,6 +73,11 @@ pub enum BuildingStructure {
     Road,
     FirePit,
     Waterwell,
+}
+impl Default for BuildingStructure {
+    fn default() -> BuildingStructure {
+        BuildingStructure::None
+    }
 }
 
 #[derive(Component)]
@@ -114,7 +120,7 @@ pub struct MagnifyToggleBlockTime;
 pub struct MagnifyToggleExcessWork;
 
 #[derive(Component)]
-pub struct ToggleButton;
+pub struct ToggleGameButton;
 
 #[derive(Component)]
 pub struct HideBuilding;

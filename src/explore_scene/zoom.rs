@@ -2,7 +2,7 @@ use bevy::{input::mouse::MouseWheel, prelude::*};
 
 use crate::{
     componenty::{BuildingStructure, TileText, ZoomInButton, ZoomOutButton},
-    consty::{BUILDING_ZOOM_OUT_MAX, TEXT_ZOOM_OUT_MAX, ZOOM_IN_MAX, ZOOM_OUT_MAX},
+    consty::{BUILDING_ZOOM_OUT_MAX, TEXT_ZOOM_OUT_MAX, ZOOM_IN_MAX, ZOOM_OUT_MAX, ZOOM_VELOCITY},
     resourcey::{ColorPalette, ToggleMap},
     utils::distance_between_vecs,
 };
@@ -42,7 +42,7 @@ pub fn zoom_out_button_system(
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;
                 //zoom_out = true;
-                let zoom_amount = 0.25;
+                let zoom_amount = ZOOM_VELOCITY;
                 for mut ortho in cam_query.iter_mut() {
                     ortho.scale += zoom_amount;
                     if ortho.scale > ZOOM_OUT_MAX {
@@ -94,7 +94,7 @@ pub fn zoom_in_button_system(
                 *color = colors.button_color.into();
                 border_color.0 = colors.light_color;
                 // zoom_in = true;
-                let zoom_amount = 0.25;
+                let zoom_amount = ZOOM_VELOCITY;
                 for mut ortho in cam_query.iter_mut() {
                     ortho.scale -= zoom_amount;
                     if ortho.scale < ZOOM_IN_MAX {
@@ -122,7 +122,7 @@ pub fn zoom_wheel_system(
     time: Res<Time>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
 ) {
-    let zoom_amount = 0.25 * time.delta_seconds() * 20.0;
+    let zoom_amount = ZOOM_VELOCITY * time.delta_seconds() * 10.0;
 
     for mouse_wheel in mouse_wheel_events.read() {
         if mouse_wheel.y > 0.0 {
@@ -167,10 +167,10 @@ pub fn pinch_system(
                         if (*multitouch_distance - diff2).abs() > 2.0 {
                             if *multitouch_distance == 0.0 {
                             } else if *multitouch_distance > diff2 {
-                                zoom_amount = 0.25;
+                                zoom_amount = ZOOM_VELOCITY;
                                 info!("zooming out");
                             } else {
-                                zoom_amount = -0.25;
+                                zoom_amount = -ZOOM_VELOCITY;
                                 info!("zooming in");
                             }
                         }

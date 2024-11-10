@@ -4,7 +4,7 @@ use crate::{
     browser::event::WriteBrowserStorage,
     componenty::{InitLoadingText, UiOverlayingExplorerButton},
     eventy::ClearLastSelectedTile,
-    resourcey::{InitBlockCount, WorldOwnedTileMap},
+    resourcey::{BlockExplorerCount, LocalBrowserStorageCount, WorldOwnedTileMap},
     statey::InitLoadingBlocksState,
 };
 
@@ -29,19 +29,29 @@ pub fn clear_last_selected_tile_ui_button(
 pub fn init_block_loading_text(
     mut text_query: Query<&mut Text, With<InitLoadingText>>,
     tilemap: Res<WorldOwnedTileMap>,
-    init: Res<InitBlockCount>,
-    mut state: ResMut<NextState<InitLoadingBlocksState>>,
+    local_browaer_storage_count: Res<LocalBrowserStorageCount>,
+    indexeddb_count: Res<BlockExplorerCount>,
+    //mut state: ResMut<NextState<InitLoadingBlocksState>>,
+    cur_state: Res<State<InitLoadingBlocksState>>,
     mut browser: EventWriter<WriteBrowserStorage>,
 ) {
     for mut text in &mut text_query {
-        let blocks_loaded = tilemap.map.len();
-        let percentage = (blocks_loaded as f32 / (init.0 as f32)) * 100.0;
+        let (load_type, total_count) = match **cur_state {
+            InitLoadingBlocksState::Off => ("All Done", 0),
+            InitLoadingBlocksState::LocalBrowserStorage => {
+                ("Game Tiles", local_browaer_storage_count.0)
+            }
+            InitLoadingBlocksState::IndexedDB => ("Blockchain Tiles", indexeddb_count.0),
+        };
 
-        text.sections[0].value = format!("Initilizing Game Map {}%", percentage as u32);
+        let blocks_loaded = tilemap.map.len();
+        let percentage = (blocks_loaded as f32 / (total_count as f32)) * 100.0;
+
+        text.sections[0].value = format!("Initilizing {} {}%", load_type, percentage as u32);
 
         if percentage >= 100.0 {
             info!("yarr we initilized");
-            state.set(InitLoadingBlocksState::Off);
+            //state.set(InitLoadingBlocksState::Off);
             browser.send(WriteBrowserStorage);
         }
     }

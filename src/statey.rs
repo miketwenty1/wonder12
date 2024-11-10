@@ -50,9 +50,10 @@ pub enum DisplayBuyUiState {
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum InitLoadingBlocksState {
-    Off,
     #[default]
-    On,
+    Off,
+    LocalBrowserStorage,
+    IndexedDB,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]

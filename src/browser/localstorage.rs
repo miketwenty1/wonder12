@@ -2,15 +2,13 @@ use crate::async_resource_comm_channels::{
     BrowserCheckpointLocalStorageChannel, BrowserIndexedDBStorageChannel,
     BrowserMapLocalStorageChannel,
 };
-use crate::browser::state::BrowserIndexedDBStorageState;
 use crate::comms::structy::{TrimExplorerTileVec, TrimTileLocalBrowserStorage};
 use crate::eventy::{RequestTileUpdates, UpdateTileTextureEvent};
-use crate::resourcey::{
-    BlockExplorer, CheckpointTimetamp, TileData, WorldOwnedTileMapLod1, WorldOwnedTileMapLod2,
-};
+use crate::resourcey::{BlockExplorerCount, CheckpointTimetamp, TileData};
 use crate::resourcey::{UpdateGameTimetamp, WorldOwnedTileMap};
+use crate::statey::InitLoadingBlocksState;
 use crate::structy::RequestTileType;
-use crate::utils::{calculate_index_for_resourced_lands, get_land_index, get_resource_for_tile};
+use crate::utils::{get_land_index, get_resource_for_tile};
 use bevy::prelude::*;
 
 use chrono::{NaiveDateTime, Timelike, Utc};
@@ -20,9 +18,8 @@ use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_futures::JsFuture;
 use wasm_bindgen_futures::{js_sys, wasm_bindgen};
 
-use super::event::{ReadLocalBrowserStorage, WriteBrowserStorage};
+use super::event::WriteBrowserStorage;
 use super::resource::BrowserPollingTimer;
-use super::state::BrowserLocalStorageState;
 
 use serde_json::Value;
 use serde_wasm_bindgen::from_value as wasm_from_value;
@@ -81,41 +78,41 @@ extern "C" {
 
 // this function will grab the worldmap and checkpoint from localbrowser storage and put both of those items into a channel to be consumed.
 pub fn request_local_storage(
-    mut event: EventReader<ReadLocalBrowserStorage>,
+    //mut event: EventReader<ReadLocalBrowserStorage>,
     map_channel: Res<BrowserMapLocalStorageChannel>,
     checkpoint_channel: Res<BrowserCheckpointLocalStorageChannel>,
 ) {
-    for _e in event.read() {
-        let map_cc = map_channel.tx.clone();
-        let checkpoint_cc = checkpoint_channel.tx.clone();
-        spawn_local(async move {
-            let mapdata_promise = retrieveLocalBrowserGameData();
-            let checkpoint_promise = retrieveCheckpoint();
-            let checkpoint_result = JsFuture::from(checkpoint_promise).await;
-            let mapdata_result = JsFuture::from(mapdata_promise).await;
+    // for _e in event.read() {
+    let map_cc = map_channel.tx.clone();
+    let checkpoint_cc = checkpoint_channel.tx.clone();
+    spawn_local(async move {
+        let mapdata_promise = retrieveLocalBrowserGameData();
+        let checkpoint_promise = retrieveCheckpoint();
+        let checkpoint_result = JsFuture::from(checkpoint_promise).await;
+        let mapdata_result = JsFuture::from(mapdata_promise).await;
 
-            match checkpoint_result {
-                Ok(o) => {
-                    // info!("good checkpoint {:#?}", o);
-                    let _ = checkpoint_cc.try_send(o.as_string().unwrap_or_default());
-                }
-                Err(e) => {
-                    info!("error from checkpoint local browser storage {:#?}", e);
-                    let _ = checkpoint_cc.try_send("errorornotfound".to_string());
-                }
+        match checkpoint_result {
+            Ok(o) => {
+                // info!("good checkpoint {:#?}", o);
+                let _ = checkpoint_cc.try_send(o.as_string().unwrap_or_default());
             }
-            match mapdata_result {
-                Ok(o) => {
-                    let _ = map_cc.try_send(o.as_string().unwrap_or_default());
-                }
-                Err(e) => {
-                    info!("error from mapdata local browser storage {:#?}", e);
-                    let _ = map_cc.try_send("errorornotfound".to_string());
-                }
+            Err(e) => {
+                info!("error from checkpoint local browser storage {:#?}", e);
+                let _ = checkpoint_cc.try_send("errorornotfound".to_string());
             }
-        });
-        info!("read local storage");
-    }
+        }
+        match mapdata_result {
+            Ok(o) => {
+                let _ = map_cc.try_send(o.as_string().unwrap_or_default());
+            }
+            Err(e) => {
+                info!("error from mapdata local browser storage {:#?}", e);
+                let _ = map_cc.try_send("errorornotfound".to_string());
+            }
+        }
+    });
+    info!("read local storage");
+    // }
 }
 
 // this will consume from the 2 channels above on the internal of the polling timer
@@ -125,15 +122,11 @@ pub fn readcheck_local_storage(
     checkpoint_channel: Res<BrowserCheckpointLocalStorageChannel>,
     browser_poll_timer: Res<BrowserPollingTimer>,
     mut request_tiles_event: EventWriter<RequestTileUpdates>,
-    mut tile_map: ResMut<WorldOwnedTileMap>,
-    mut tile_map_lod1: ResMut<WorldOwnedTileMapLod1>,
-    mut tile_map_lod2: ResMut<WorldOwnedTileMapLod2>,
-    mut browser_state: ResMut<NextState<BrowserLocalStorageState>>,
+    mut browser_state: ResMut<NextState<InitLoadingBlocksState>>,
     mut game_time: ResMut<UpdateGameTimetamp>,
     mut checkpoint_time: ResMut<CheckpointTimetamp>,
     mut update_tile_event: EventWriter<UpdateTileTextureEvent>,
-    mut indexed_state: ResMut<NextState<BrowserIndexedDBStorageState>>,
-    indexed_res_bool: Res<BlockExplorer>,
+    block_explorer_count: Res<BlockExplorerCount>,
 ) {
     if browser_poll_timer.timer.just_finished() {
         info!("ticky boy");
@@ -151,8 +144,7 @@ pub fn readcheck_local_storage(
                     match r_result {
                         Ok(o) => {
                             let world_map_converted = o.convert_trim_to_tilemap();
-                            *tile_map_lod1 = world_map_converted.to_lod1();
-                            *tile_map_lod2 = tile_map_lod1.to_lod2();
+
                             match checkpoint_res {
                                 Ok(o) => {
                                     // info!("this is the string for the date: {}", o);
@@ -179,22 +171,24 @@ pub fn readcheck_local_storage(
                                             info!("before: {}, after {}", o, datetime_utc_nomicro);
                                             game_time.ts = datetime_utc_nomicro;
                                             checkpoint_time.ts = datetime_utc_nomicro;
-                                            *tile_map = world_map_converted.clone();
-                                            browser_state.set(BrowserLocalStorageState::Off);
-
-                                            // now trigger BrowserIndexedDBStorageState after completing the read with local browser storage.
-                                            if indexed_res_bool.0 {
-                                                indexed_state.set(BrowserIndexedDBStorageState::On);
-                                            } else {
-                                                info!("it didn't work?! indexeddb fail");
-                                            }
+                                            //*tile_map = world_map_converted.clone();
+                                            // browser_state.set(InitLoadingBlocksState::Off);
 
                                             request_tiles_event
                                                 .send(RequestTileUpdates(RequestTileType::Ts));
 
                                             let tiles = world_map_converted.to_tiledata_vec();
 
+                                            info!("readcheck_local_storage send event UpdateTileTextureEvent, vec size: {}", tiles.len());
                                             update_tile_event.send(UpdateTileTextureEvent(tiles));
+
+                                            // now trigger BrowserIndexedDBStorageState after completing the read with local browser storage.
+                                            if block_explorer_count.0 > 0 {
+                                                browser_state
+                                                    .set(InitLoadingBlocksState::IndexedDB);
+                                            } else {
+                                                info!("IndexedDB usage not detected");
+                                            }
                                         }
                                         Err(e) => {
                                             info!("oh no browser pull 2, {}", e);
@@ -214,7 +208,7 @@ pub fn readcheck_local_storage(
             }
             Err(e) => {
                 info!("probably don't have any browser storage, if this is a fresh session ignore this, otherwise: {}", e);
-                browser_state.set(BrowserLocalStorageState::Off);
+                browser_state.set(InitLoadingBlocksState::Off);
                 request_tiles_event.send(RequestTileUpdates(RequestTileType::Height));
             }
         }
@@ -263,8 +257,8 @@ pub fn readcheck_indexeddb_storage(
     //checkpoint_channel: Res<BrowserCheckpointLocalStorageChannel>,
     browser_poll_timer: Res<BrowserPollingTimer>,
     //mut request_tiles_event: EventWriter<RequestTileUpdates>,
-    mut tile_map: ResMut<WorldOwnedTileMap>,
-    mut browser_state: ResMut<NextState<BrowserIndexedDBStorageState>>,
+    tile_map: Res<WorldOwnedTileMap>,
+    mut browser_state: ResMut<NextState<InitLoadingBlocksState>>,
     // mut game_time: ResMut<UpdateGameTimetamp>,
     // mut checkpoint_time: ResMut<CheckpointTimetamp>,
     mut update_tile_event: EventWriter<UpdateTileTextureEvent>,
@@ -275,7 +269,6 @@ pub fn readcheck_indexeddb_storage(
 
         match res {
             Ok(o) => {
-                browser_state.set(BrowserIndexedDBStorageState::Off);
                 info!("data made it!");
                 //info!("{:#?}", o);
                 //let r_result = JsValue::from_str(&o);
@@ -334,37 +327,19 @@ pub fn readcheck_indexeddb_storage(
                                 },
                             };
                             holder_array.push(tt.clone());
-                            tile_map.map.insert(t.h as u32, tt.clone());
+                            //tile_map.map.insert(t.h as u32, tt.clone());
                         }
-                        let land_index_map = calculate_index_for_resourced_lands(&mut tile_map.map);
-                        *tile_map = land_index_map;
+                        //let land_index_map = calculate_index_for_resourced_lands(&mut tile_map.map);
+                        //*tile_map = land_index_map;
 
+                        info!("readcheck_indexeddb_storage send event UpdateTileTextureEvent, vec size: {}", holder_array.len());
                         update_tile_event.send(UpdateTileTextureEvent(holder_array));
                     }
                     Err(e) => {
                         info!("error for serde_json::from {:#?}", e);
                     }
                 }
-
-                // match r_result {
-                //     Ok(o) => {
-                //         info!("we parsed it!!!");
-                //         info!("{:#?}", o);
-                //         // let world_map_converted = o.convert_trim_to_tilemap();
-
-                //         // *tile_map = world_map_converted.clone();
-
-                //         // request_tiles_event.send(RequestTileUpdates(RequestTileType::Ts));
-
-                //         // let tiles = world_map_converted.to_tiledata_vec();
-
-                //         // update_tile_event.send(UpdateTileTextureEvent(tiles));
-                //     }
-                //     Err(e) => {
-                //         browser_state.set(BrowserIndexedDBStorageState::Off);
-                //         info!("some error with parsing indexed DB browser storage {}", e);
-                //     }
-                // }
+                browser_state.set(InitLoadingBlocksState::Off);
             }
             Err(e) => {
                 info!("{:#?}", e);

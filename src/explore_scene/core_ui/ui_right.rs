@@ -7,25 +7,26 @@ use crate::{
         MagnifyToggleLeadingZeros, MagnifyToggleParentBtn, MagnifyToggleSizeBytes,
         MagnifyToggleSizeWeight, MagnifyToggleTxCount, MagnifyToggleVersion, ShowColors,
         ShowValues, Toggle1Btn, Toggle1BtnText, Toggle2Btn, Toggle2BtnText, Toggle3Btn,
-        Toggle3BtnText, Toggle4Btn, Toggle4BtnText, ToggleButton, ToggleParent, UiInteractionBtn,
-        UiOverlayingExplorerButton, UiSideNode,
+        Toggle3BtnText, Toggle4Btn, Toggle4BtnText, ToggleGameButton, ToggleParent,
+        UiInteractionBtn, UiOverlayingExplorerButton, UiSideNode,
     },
     consty::{UI_ICON_SIZE, UI_SMALL_TEXT_SIZE},
     eventy::{ToggleBuildings, ToggleColors, ToggleText},
-    resourcey::{
-        BlockExplorer, ColorMapToggle, ColorPalette, MapTileMode, ToggleMap, ToggleVisible,
-    },
+    resourcey::{BlockExplorerCount, ColorMapToggle, ColorPalette, MapTileMode, ToggleMap},
     structy::TileTextType,
 };
 
-use super::components::ExplorerUiNodeRight;
+use super::{
+    components::ExplorerUiNodeRight,
+    event::{HideGameToggleChildren, HideMagnifyToggleChildren},
+};
 
 pub fn right_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     colors: Res<ColorPalette>,
     placement_query: Query<Entity, With<ExplorerUiNodeRight>>,
-    blockexplorer_bool: Res<BlockExplorer>,
+    block_explorer_count: Res<BlockExplorerCount>,
 ) {
     for ent in placement_query.iter() {
         let mut side_parent = commands.spawn((
@@ -186,7 +187,7 @@ pub fn right_ui(
             );
         });
 
-        if blockexplorer_bool.0 {
+        if block_explorer_count.0 > 0 {
             // bitcoin filter toggle
 
             side_parent
@@ -318,7 +319,7 @@ fn spawn_game_toggle_button<T: Component, U: Component, V: Component>(
             },
             UiInteractionBtn,
             toggle_btn_type,
-            ToggleButton,
+            ToggleGameButton,
             toggle_btn_position,
             UiOverlayingExplorerButton,
         ))
@@ -390,66 +391,30 @@ pub fn toggle_button_system(
         (&Interaction, &mut UiImage),
         (
             Changed<Interaction>,
-            (
-                With<ToggleParent>,
-                Without<Toggle1Btn>,
-                Without<Toggle2Btn>,
-                Without<Toggle3Btn>,
-                Without<Toggle4Btn>,
-            ),
+            (With<ToggleParent>, Without<ToggleGameButton>),
         ),
     >,
-    mut param_set: ParamSet<(
-        Query<&mut Style, With<Toggle1Btn>>,
-        Query<&mut Style, With<Toggle2Btn>>,
-        Query<&mut Style, With<Toggle3Btn>>,
-        Query<&mut Style, With<Toggle4Btn>>,
-    )>,
-    mut toggle_visible: ResMut<ToggleVisible>,
+    mut child_btns: Query<&mut Style, With<ToggleGameButton>>,
+    //mut toggle_visible: ResMut<ToggleVisible>,
     colors: Res<ColorPalette>,
     asset_server: Res<AssetServer>,
+    mut hide_blockchain_togggle: EventWriter<HideMagnifyToggleChildren>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         //let default_bg_color = color;
         //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
-                //text.sections[0].value = button_text;
-                *color = UiImage::new(asset_server.load("ui/toggle_120x120.png"));
-                //game_state.set(DisplayBuyUiState::On);
-                if toggle_visible.0 {
-                    for mut style in param_set.p0().iter_mut() {
+                for mut style in child_btns.iter_mut() {
+                    if style.display != Display::None {
                         style.display = Display::None;
-                    }
-                    for mut style in param_set.p1().iter_mut() {
-                        style.display = Display::None;
-                    }
-                    for mut style in param_set.p2().iter_mut() {
-                        style.display = Display::None;
-                    }
-                    for mut style in param_set.p3().iter_mut() {
-                        style.display = Display::None;
-                    }
-                    toggle_visible.0 = false;
-                } else {
-                    for mut style in param_set.p0().iter_mut() {
+                    } else {
                         style.display = Display::Flex;
                     }
-
-                    for mut style in param_set.p1().iter_mut() {
-                        style.display = Display::Flex;
-                    }
-
-                    for mut style in param_set.p2().iter_mut() {
-                        style.display = Display::Flex;
-                    }
-
-                    for mut style in param_set.p3().iter_mut() {
-                        style.display = Display::Flex;
-                    }
-
-                    toggle_visible.0 = true;
                 }
+
+                *color = UiImage::new(asset_server.load("ui/toggle_120x120.png"));
+                hide_blockchain_togggle.send(HideMagnifyToggleChildren);
             }
             Interaction::Hovered => {
                 *color = UiImage::new(asset_server.load("ui/toggle_120x120.png"))
@@ -693,6 +658,7 @@ pub fn toggle_magnify_button_system(
     mut child_btns: Query<&mut Style, With<MagnifyToggleChild>>,
     colors: Res<ColorPalette>,
     asset_server: Res<AssetServer>,
+    mut hide_game_togggle: EventWriter<HideGameToggleChildren>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
         //let default_bg_color = color;
@@ -703,6 +669,7 @@ pub fn toggle_magnify_button_system(
                 for mut style in child_btns.iter_mut() {
                     if style.display == Display::None {
                         style.display = Display::Flex;
+                        hide_game_togggle.send(HideGameToggleChildren);
                     } else {
                         style.display = Display::None;
                     }
@@ -719,39 +686,6 @@ pub fn toggle_magnify_button_system(
         }
     }
 }
-
-// #[allow(clippy::type_complexity, clippy::too_many_arguments)]
-// pub fn toggle_magnify_child_button_system(
-//     mut interaction_query: Query<&Interaction, (Changed<Interaction>, With<MagnifyToggleChild>)>,
-//     mut child_btns: Query<&mut Style, With<MagnifyToggleChild>>,
-//     colors: Res<ColorPalette>,
-//     asset_server: Res<AssetServer>,
-// ) {
-//     for (interaction, mut color) in &mut interaction_query {
-//         //let default_bg_color = color;
-//         //let mut text = text_query.get_mut(children[0]).unwrap();
-//         match *interaction {
-//             Interaction::Pressed => {
-//                 *color = UiImage::new(asset_server.load("ui/bitcoinmagnify_120x120.png"));
-//                 for mut style in child_btns.iter_mut() {
-//                     if style.display == Display::None {
-//                         style.display = Display::Flex;
-//                     } else {
-//                         style.display = Display::None;
-//                     }
-//                 }
-//             }
-//             Interaction::Hovered => {
-//                 *color = UiImage::new(asset_server.load("ui/bitcoinmagnify_120x120.png"))
-//                     .with_color(colors.accent_color)
-//             }
-//             Interaction::None => {
-//                 *color = UiImage::new(asset_server.load("ui/bitcoinmagnify_120x120.png"))
-//                     .with_color(colors.light_color);
-//             }
-//         }
-//     }
-// }
 
 #[allow(clippy::type_complexity)]
 pub fn magnify_child_btn(
@@ -788,6 +722,34 @@ pub fn magnify_child_btn(
             }
             Interaction::None => {
                 *color = colors.button_color.into();
+            }
+        }
+    }
+}
+
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
+pub fn toggle_game_children(
+    mut event: EventReader<HideGameToggleChildren>,
+    mut child_btns: Query<&mut Style, With<ToggleGameButton>>,
+) {
+    for _e in event.read() {
+        for mut style in child_btns.iter_mut() {
+            if style.display != Display::None {
+                style.display = Display::None;
+            }
+        }
+    }
+}
+
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
+pub fn toggle_magnify_children(
+    mut event: EventReader<HideMagnifyToggleChildren>,
+    mut child_btns: Query<&mut Style, With<MagnifyToggleChild>>,
+) {
+    for _e in event.read() {
+        for mut style in child_btns.iter_mut() {
+            if style.display != Display::None {
+                style.display = Display::None;
             }
         }
     }

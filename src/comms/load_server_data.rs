@@ -12,8 +12,8 @@ use crate::resourcey::{
 use crate::statey::CommsApiBlockLoadState;
 use crate::structy::RequestTileType;
 use crate::utils::{
-    calculate_index_for_resourced_lands, convert_color_to_hexstring, get_land_index,
-    get_resource_for_tile, logout_user, to_millisecond_precision,
+    convert_color_to_hexstring, get_land_index, get_resource_for_tile, logout_user,
+    to_millisecond_precision,
 };
 use crate::{ServerURL, UpdateTileTextureEvent, WorldOwnedTileMap};
 use bevy::prelude::*;
@@ -99,7 +99,7 @@ pub fn api_receive_server_tiles(
     channel: ResMut<TileDataChannel>,
     api_timer: Res<ApiPollingTimer>,
     mut api_state: ResMut<NextState<CommsApiBlockLoadState>>,
-    mut tile_map: ResMut<WorldOwnedTileMap>,
+    tile_map: Res<WorldOwnedTileMap>,
     mut update_tile_event: EventWriter<UpdateTileTextureEvent>,
     mut gametime: ResMut<UpdateGameTimetamp>,
     mut checkpoint_time: ResMut<CheckpointTimetamp>,
@@ -112,6 +112,7 @@ pub fn api_receive_server_tiles(
     mut browser_event: EventWriter<WriteBrowserStorage>,
 ) {
     if api_timer.timer.finished() && !channel.rx.is_empty() {
+        info!("api receive tiles");
         //info!("checking for tiles response");
         let api_res = channel.rx.try_recv();
         let mut send_update = false;
@@ -173,7 +174,7 @@ pub fn api_receive_server_tiles(
                         }
 
                         for block_data in server_block_data.blocks {
-                            let mut new_insert_update = false;
+                            //let mut new_insert_update = false;
                             let resource = get_resource_for_tile(&block_data.hash);
                             let land_index =
                                 get_land_index(block_data.height as u32, &resource, None);
@@ -229,27 +230,33 @@ pub fn api_receive_server_tiles(
                             //update_inventory(new_td);
                             let tile_check = tile_map.map.get(&(block_data.height as u32));
                             match tile_check {
-                                Some(s) => {
-                                    new_td.land_index = s.land_index;
-                                    if s != &new_td {
-                                        new_insert_update = true;
+                                Some(existing_tile) => {
+                                    new_td.land_index = existing_tile.land_index;
+                                    if existing_tile != &new_td {
+                                        // if new_td.height == 0 {
+                                        //     info!("A0 is: {:#?}", &new_td);
+                                        // }
+                                        //new_insert_update = true;
                                         send_update = true;
                                         new_tile_vec.push(new_td.clone());
                                     }
                                 }
                                 None => {
-                                    new_insert_update = true;
+                                    // if new_td.height == 0 {
+                                    //     info!("B0 is: {:#?}", &new_td);
+                                    // }
+                                    //new_insert_update = true;
                                     send_update = true;
                                     new_tile_vec.push(new_td.clone());
                                 }
                             }
-                            if new_insert_update {
-                                tile_map.map.insert(block_data.height as u32, new_td);
-                            }
+                            // if new_insert_update {
+                            //     tile_map.map.insert(block_data.height as u32, new_td);
+                            // }
                         }
 
-                        let land_index_map = calculate_index_for_resourced_lands(&mut tile_map.map);
-                        *tile_map = land_index_map;
+                        //let land_index_map = calculate_index_for_resourced_lands(&mut tile_map.map);
+                        //*tile_map = land_index_map;
 
                         // // // inventory update code
                         if !remove_inventory_holder.is_empty() {
@@ -263,6 +270,8 @@ pub fn api_receive_server_tiles(
                         // // // inventory update code
 
                         if send_update {
+                            info!("api_receive_server_tiles send event UpdateTileTextureEvent, vec size: {}", new_tile_vec.len());
+
                             update_tile_event.send(UpdateTileTextureEvent(new_tile_vec));
 
                             if request_more_height {

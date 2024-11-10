@@ -76,10 +76,14 @@ impl Plugin for ExplorePlugin {
             )
             .add_systems(
                 Update,
-                (init_block_loading_text).run_if(in_state(InitLoadingBlocksState::On)),
+                (init_block_loading_text).run_if(not(in_state(InitLoadingBlocksState::Off))),
             )
             .add_systems(
-                OnExit(InitLoadingBlocksState::On),
+                OnExit(InitLoadingBlocksState::LocalBrowserStorage),
+                despawn_screen::<InitLoadingNode>,
+            )
+            .add_systems(
+                OnExit(InitLoadingBlocksState::IndexedDB),
                 despawn_screen::<InitLoadingNode>,
             )
             .add_systems(

@@ -1,12 +1,12 @@
+use crate::statey::InitLoadingBlocksState;
+
 use self::{
     event::{ReadLocalBrowserStorage, WriteBrowserStorage},
     localstorage::{readcheck_local_storage, request_local_storage, write_local_storage},
     resource::{tick_browser_receive_timer, BrowserPollingTimer},
-    state::BrowserLocalStorageState,
 };
 use bevy::prelude::*;
 use localstorage::{readcheck_indexeddb_storage, request_indexeddb_storage};
-use state::BrowserIndexedDBStorageState;
 
 pub mod event;
 pub mod localstorage;
@@ -22,22 +22,22 @@ impl Plugin for BrowserPlugin {
             .add_event::<WriteBrowserStorage>()
             .add_systems(Update, write_local_storage)
             .add_systems(
-                Update,
-                (
-                    request_local_storage,
-                    readcheck_local_storage,
-                    tick_browser_receive_timer,
-                )
-                    .run_if(in_state(BrowserLocalStorageState::On)),
+                OnEnter(InitLoadingBlocksState::LocalBrowserStorage),
+                (request_local_storage).run_if(run_once()),
             )
             .add_systems(
-                OnEnter(BrowserIndexedDBStorageState::On),
+                Update,
+                (readcheck_local_storage, tick_browser_receive_timer)
+                    .run_if(in_state(InitLoadingBlocksState::LocalBrowserStorage)),
+            )
+            .add_systems(
+                OnEnter(InitLoadingBlocksState::IndexedDB),
                 (request_indexeddb_storage).run_if(run_once()),
             )
             .add_systems(
                 Update,
                 (readcheck_indexeddb_storage, tick_browser_receive_timer)
-                    .run_if(in_state(BrowserIndexedDBStorageState::On)),
+                    .run_if(in_state(InitLoadingBlocksState::IndexedDB)),
             );
     }
 }

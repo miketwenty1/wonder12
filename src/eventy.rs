@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    resourcey::TileData,
+    resourcey::{TileData, ZoomSpawnEvent},
     structy::{RequestTileType, TileTextType},
 };
 
@@ -81,3 +81,6 @@ pub struct MessageReceivedFromServer(pub u32);
 
 #[derive(Event, Debug)]
 pub struct TravelHeight(pub u32);
+
+#[derive(Event, Debug)]
+pub struct ZoomThresholdEvent(pub ZoomSpawnEvent);

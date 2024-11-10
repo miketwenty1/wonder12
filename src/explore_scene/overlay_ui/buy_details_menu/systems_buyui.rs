@@ -6,7 +6,7 @@ use crate::{
         BlockUiMessageItem, BtnShowingColor, BuyMenuButton, CartButton, CurrentBlockMessageNode,
         EditabledTextBox, HideMessageBtn, NewBlockColorButton, NewBlockColorText,
         NewBlockLnAddressButton, NewBlockLnAddressText, NewBlockMessageButton, NewBlockMessageText,
-        ToggleButton, UiOverlayingExplorerButton,
+        ToggleGameButton, UiOverlayingExplorerButton,
     },
     consty::{
         DEFAULT_NEW_COLOR_TEXT, DEFAULT_NEW_LN_TEXT, DEFAULT_NEW_MESSAGE_TEXT,
@@ -701,10 +701,10 @@ pub fn resolve_cart_item_data(
 }
 
 pub fn show_ui_buttons(
-    mut ui_buttons: Query<&mut Visibility, With<ToggleButton>>,
+    mut ui_buttons: Query<&mut Visibility, With<ToggleGameButton>>,
     mut toggle_ui_buttons: Query<
         &mut Visibility,
-        (With<UiOverlayingExplorerButton>, Without<ToggleButton>),
+        (With<UiOverlayingExplorerButton>, Without<ToggleGameButton>),
     >,
     toggle_visible: Res<ToggleVisible>,
 ) {

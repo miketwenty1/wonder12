@@ -29,7 +29,6 @@ use bevy::utils::HashSet;
 // use bevy::window::WindowResolution;
 use bevy::{prelude::*, utils::HashMap};
 use browser::event::{ReadIndexedDBStorage, ReadLocalBrowserStorage};
-use browser::state::{BrowserIndexedDBStorageState, BrowserLocalStorageState};
 use browser::BrowserPlugin;
 use chrono::{Duration, Utc};
 use eventy::{
@@ -42,9 +41,9 @@ use explore_scene::core_ui::paint_palette::resource::DefaultDrawColorPalette;
 use explore_scene::core_ui::paint_palette::state::{PaintPaletteUiState, ToolPaletteUiState};
 use explore_scene::overlay_ui::go_to::state::GoToUiState;
 use resourcey::{
-    BlockExplorer, CheckpointTimetamp, ColorMapToggle, ConfigAllCartBlocks, InitBlockCount,
-    InitGameMap, IsIphone, MapTileMode, Nwc, ToggleVisible, UiInteracting, UserInventoryBlocks,
-    WinSize, WorldOwnedTileMapLod1, WorldOwnedTileMapLod2,
+    BlockExplorerCount, CheckpointTimetamp, ColorMapToggle, ConfigAllCartBlocks, InitGameMap,
+    IsIphone, LocalBrowserStorageCount, MapTileMode, Nwc, ToggleVisible, UiInteracting,
+    UserInventoryBlocks, WinSize,
 };
 use spritesheetfns::setup_spritesheets;
 use statey::{CommsApiBlockLoadState, CommsApiInventoryState, InitLoadingBlocksState, ToastState};
@@ -86,7 +85,7 @@ pub fn game12(
     _device_pixel_ratio: f32,
     is_iphone: bool,
     nwc: bool,
-    blockexplorer: bool,
+    block_explorer_count: u32,
 ) {
     let mut toggle_map = HashMap::new();
     toggle_map.insert("showbuildings".to_string(), false);
@@ -232,12 +231,6 @@ pub fn game12(
         .insert_resource(WorldOwnedTileMap {
             map: HashMap::new(),
         })
-        .insert_resource(WorldOwnedTileMapLod1 {
-            map: HashMap::new(),
-        })
-        .insert_resource(WorldOwnedTileMapLod2 {
-            map: HashMap::new(),
-        })
         .insert_resource(TileCart {
             map: HashMap::new(),
         })
@@ -265,7 +258,7 @@ pub fn game12(
             name: username,
             ln_address,
         })
-        .insert_resource(InitBlockCount(block_init_count))
+        .insert_resource(LocalBrowserStorageCount(block_init_count))
         .insert_resource(UpdateGameTimetamp {
             ts: Utc::now() - Duration::minutes(5),
         })
@@ -278,13 +271,9 @@ pub fn game12(
             width: viewport_width as f32,
             height: viewport_height as f32,
         })
-        // .insert_resource(MultiTouchInfo {
-        //     //status: false,
-        //     distance: 0.0,
-        // })
         .insert_resource(ConfigAllCartBlocks(false))
         .insert_resource(IsIphone(is_iphone))
-        .insert_resource(BlockExplorer(blockexplorer))
+        .insert_resource(BlockExplorerCount(block_explorer_count))
         .insert_resource(Nwc(nwc))
         .insert_resource(UserInventoryBlocks {
             ownedblocks: HashMap::new(),
@@ -312,8 +301,8 @@ pub fn game12(
         .init_state::<InitLoadingBlocksState>()
         .init_state::<ToastState>()
         .init_state::<InventoryUiState>()
-        .init_state::<BrowserLocalStorageState>()
-        .init_state::<BrowserIndexedDBStorageState>()
+        // .init_state::<BrowserLocalStorageState>()
+        // .init_state::<BrowserIndexedDBStorageState>()
         .init_state::<GoToUiState>()
         .init_state::<PaintPaletteUiState>()
         .init_state::<ToolPaletteUiState>()
@@ -358,10 +347,11 @@ pub fn game12(
 fn setup(
     mut commands: Commands,
     mut ui_state: ResMut<NextState<ExploreState>>,
+    mut load_browser_state: ResMut<NextState<InitLoadingBlocksState>>,
     mut ui_select_state: ResMut<NextState<ExploreSelectState>>,
     mut request_inventory_event: EventWriter<RequestInventoryEvent>,
-    mut browser_check: EventWriter<ReadLocalBrowserStorage>,
-    mut explorer_check: EventWriter<ReadIndexedDBStorage>,
+    //mut browser_check: EventWriter<ReadLocalBrowserStorage>,
+    //mut explorer_check: EventWriter<ReadIndexedDBStorage>,
 ) {
     info!(
         "this is the init value for game ts: {}",
@@ -390,8 +380,10 @@ fn setup(
     commands.insert_resource(BlockMessagesStorageChannel { tx, rx });
 
     // request_tiles_event.send(RequestTileUpdates(RequestTileType::Height));
-    browser_check.send(ReadLocalBrowserStorage);
-    explorer_check.send(ReadIndexedDBStorage);
+    //browser_check.send(ReadLocalBrowserStorage);
+    //explorer_check.send(ReadIndexedDBStorage);
+    info!("hello world set?");
+    load_browser_state.set(InitLoadingBlocksState::LocalBrowserStorage);
     request_inventory_event.send(RequestInventoryEvent);
     ui_state.set(ExploreState::On);
     ui_select_state.set(ExploreSelectState::On);

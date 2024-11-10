@@ -11,9 +11,8 @@ use super::{
     core_ui::paint_palette::event::ViewSelectedTiles,
     overlay_ui::toast::{ToastEvent, ToastType},
 };
-use crate::building_config::utils::get_text_color;
-use crate::consty::CHUNK_TILE_SPAN_MULTIPLIER;
-use crate::resourcey::{MapTileMode, SpriteSheetLand};
+use crate::resourcey::{MapTileMode, SpriteSheetLand, ZoomSpawnEvent};
+use crate::{building_config::utils::get_text_color, resourcey::BlockExplorerCount};
 use crate::{
     building_config::{spawn_tile_level, utils::sanitize_building_color},
     componenty::{
@@ -31,21 +30,24 @@ use crate::{
         UpdateTileTextureEvent, UpdateUiAmount,
     },
     resourcey::{
-        ChunkManager, ColorPalette, Edge, InitBlockCount, MaxBlockHeight, SpriteIndexBuilding,
-        SpriteSheetBuilding, TileData, ToggleMap, WorldOwnedTileMap,
+        ChunkManager, ColorPalette, Edge, LocalBrowserStorageCount, MaxBlockHeight,
+        SpriteIndexBuilding, SpriteSheetBuilding, TileData, ToggleMap, WorldOwnedTileMap,
     },
     statey::{DisplayBuyUiState, InitLoadingBlocksState},
     structy::SpawnDiffData,
 };
+use crate::{consty::CHUNK_TILE_SPAN_MULTIPLIER, eventy::ZoomThresholdEvent};
 
 #[allow(clippy::too_many_arguments)]
 pub fn init_explorer(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
-    initblocks: Res<InitBlockCount>,
+    initblocks: Res<LocalBrowserStorageCount>,
     colors: Res<ColorPalette>,
     mut loading_init_block_text: ResMut<NextState<InitLoadingBlocksState>>,
+    block_explorer_count: Res<BlockExplorerCount>,
+    //local_browser_storage_count: Res<BlockExplorerCount>,
 ) {
     info!("initblockcount: {}", initblocks.0);
 
@@ -159,7 +161,13 @@ pub fn init_explorer(
         });
 
     sprite_spawn_event.send(SpriteSpawnEvent);
-    loading_init_block_text.set(InitLoadingBlocksState::On);
+
+    // if indexeddb is being used just ignore localbrowser storage
+    // if block_explorer_count.0 > 0 {
+    //     loading_init_block_text.set(InitLoadingBlocksState::IndexedDB);
+    // } else {
+    //     loading_init_block_text.set(InitLoadingBlocksState::LocalBrowserStorage);
+    // }
 }
 
 #[allow(clippy::too_many_arguments, clippy::type_complexity)]
@@ -485,9 +493,9 @@ pub fn update_tile_textures(
         (&mut TextureAtlas, &mut Sprite, &Location, Entity, &Children),
         (With<Land>, Without<BuildingStructure>),
     >,
-    buildings: Query<(&Location, Entity), (Without<Land>, With<BuildingStructure>)>,
+    buildings: Query<(&Location, Entity, &BuildingStructure), Without<Land>>,
     mut event: EventReader<UpdateTileTextureEvent>,
-    tile_map: Res<WorldOwnedTileMap>,
+    mut tile_map: ResMut<WorldOwnedTileMap>,
     texture_map: Res<SpriteIndexBuilding>,
     texture_atlas_handle_building: Res<SpriteSheetBuilding>,
     toggle_map: Res<ToggleMap>,
@@ -502,6 +510,7 @@ pub fn update_tile_textures(
         let tiles = tile_vec.0.clone();
         let tile_map_from_e: HashMap<u32, TileData> =
             tiles.into_iter().map(|tile| (tile.height, tile)).collect();
+        let mut tile_map_from_delta = tile_map_from_e.clone();
 
         // let showing_colors = toggle_map.0.get("hidecolors").unwrap();
         // let showing_buildings = toggle_map.0.get("hidebuildings").unwrap();
@@ -516,90 +525,340 @@ pub fn update_tile_textures(
         };
 
         for (mut texture, mut sprite, location, parent_entity, children) in lands.iter_mut() {
-            if tile_map.map.contains_key(&location.ulam)
-                && tile_map_from_e.contains_key(&location.ulam)
-            {
-                // making it where the event is driving not the tile resource
-                let tile_data = tile_map_from_e.get(&location.ulam).unwrap();
-                // info!("{:#?}", tile_data);
-                let building_sprite_index = *texture_map.0.get(&tile_data.value).unwrap() as usize;
+            let map_tile_check = tile_map.map.contains_key(&location.ulam);
+            let event_tile_check = tile_map_from_e.contains_key(&location.ulam);
 
-                let c = ulam::calc_coord::calc_coord(tile_data.height);
-                let mut locationcoord = Location {
-                    x: c.x,
-                    y: c.y,
-                    ulam: tile_data.height,
-                    quad: ulam::quad_of_xy(c.x, c.y),
-                    selected: false,
-                    despawn_status: false,
-                };
-                if locationcoord.ulam == 1 {
-                    locationcoord.quad = Quad::SouthEast
-                } else if locationcoord.quad == Quad::SouthEast {
-                    locationcoord.quad = Quad::South
-                } else if locationcoord.quad == Quad::East
-                    && ulam::quad_of_value(locationcoord.ulam - 1) == Quad::SouthEast
-                {
-                    locationcoord.quad = Quad::SouthEast;
-                }
+            match (map_tile_check, event_tile_check) {
+                // both map and event tiles are found
+                (true, true) => {
+                    // making it where the event is driving not the tile resource
+                    let map_tile = tile_map.map.get(&location.ulam).unwrap();
+                    let event_tile = tile_map_from_e.get(&location.ulam).unwrap();
 
-                // show correct color based on toggle
-
-                (texture.index, sprite.color) =
-                    get_index_color(&map_mode, &tile_map, &locationcoord.ulam);
-
-                // Not really a big deal to do this everytime because likely after each purchase we will need to configure the buildings differently.
-                /////////////////////
-
-                if zoom_level < BUILDING_ZOOM_OUT_MAX {
-                    for (building_location, building_entity) in buildings.iter() {
-                        if building_location.ulam == location.ulam {
-                            //info!("despawning old building stuff");
-                            commands.entity(building_entity).despawn_recursive();
-                        }
-                    }
-
-                    commands
-                        .entity(parent_entity)
-                        .with_children(|child_builder| {
-                            //info!("spawning??!");
-                            spawn_tile_level(
-                                building_sprite_index,
-                                &texture_atlas_handle_building.layout,
-                                &texture_atlas_handle_building.texture,
-                                child_builder,
-                                bevy::prelude::Color::Srgba(sanitize_building_color(
-                                    tile_data.color.into(),
-                                )),
-                                locationcoord,
-                                visibility_building_toggle,
+                    // see if we should update the world map
+                    if map_tile != event_tile {
+                        info!("are we getting here 1?");
+                        // see if we should update visually
+                        if !map_tile.compare_update_fields(event_tile) {
+                            info!(
+                                "are we getting here 2? map_tile: {:#?}\n\nevent_tile: {:#?}",
+                                map_tile, event_tile
                             );
-                        });
-                }
-                /////////////////////
-            }
-            let (mut text, loc) = text_q.get_mut(children[0]).unwrap();
+                            let building_sprite_index =
+                                *texture_map.0.get(&event_tile.value).unwrap() as usize;
 
-            //for (mut text, loc) in text_q.iter_mut() {
-            if zoom_level < TEXT_ZOOM_OUT_MAX {
-                if let Some(val) = tile_map.map.get(&loc.ulam) {
-                    if !*hiding_text {
-                        text.sections[0].style.color = get_text_color(&sprite.color);
-                        if *showing_value {
-                            text.sections[0].value = val.cost.to_string();
-                        } else {
-                            text.sections[0].value = val.height.to_string();
+                            let c = ulam::calc_coord::calc_coord(event_tile.height);
+                            let mut locationcoord = Location {
+                                x: c.x,
+                                y: c.y,
+                                ulam: event_tile.height,
+                                quad: ulam::quad_of_xy(c.x, c.y),
+                                selected: false,
+                                despawn_status: false,
+                            };
+                            if locationcoord.ulam == 1 {
+                                locationcoord.quad = Quad::SouthEast
+                            } else if locationcoord.quad == Quad::SouthEast {
+                                locationcoord.quad = Quad::South
+                            } else if locationcoord.quad == Quad::East
+                                && ulam::quad_of_value(locationcoord.ulam - 1) == Quad::SouthEast
+                            {
+                                locationcoord.quad = Quad::SouthEast;
+                            }
+
+                            // show correct color based on toggle
+
+                            info!("is this being triggered? height: {}", event_tile.height);
+                            (texture.index, sprite.color) =
+                                get_index_color(&map_mode, &tile_map, &locationcoord.ulam);
+
+                            // Not really a big deal to do this everytime because likely after each purchase we will need to configure the buildings differently.
+                            /////////////////////
+
+                            let prev_building_type_r = buildings.get(children[0]);
+                            let prev_building_type: &BuildingStructure = match prev_building_type_r
+                            {
+                                Ok(o) => {
+                                    info!("is this happening?");
+                                    o.2
+                                }
+                                Err(_) => &BuildingStructure::None,
+                            };
+                            if zoom_level < BUILDING_ZOOM_OUT_MAX {
+                                for (building_location, building_entity, building_type) in
+                                    buildings.iter()
+                                {
+                                    if building_location.ulam == location.ulam
+                                        && building_type != prev_building_type
+                                    {
+                                        //info!("despawning old building stuff");
+                                        commands.entity(building_entity).despawn_recursive();
+                                    }
+                                }
+
+                                // building
+                                commands
+                                    .entity(parent_entity)
+                                    .with_children(|child_builder| {
+                                        //info!("spawning??!");
+                                        spawn_tile_level(
+                                            building_sprite_index,
+                                            &texture_atlas_handle_building.layout,
+                                            &texture_atlas_handle_building.texture,
+                                            child_builder,
+                                            bevy::prelude::Color::Srgba(sanitize_building_color(
+                                                event_tile.color.into(),
+                                            )),
+                                            locationcoord,
+                                            visibility_building_toggle,
+                                        );
+                                    });
+                            }
+                        }
+                        //info!("tilemap insert for height: {}", event_tile.height);
+                        tile_map.map.insert(event_tile.height, event_tile.clone());
+                        tile_map_from_delta.remove(&event_tile.height);
+                    }
+
+                    // text
+                    let (mut text, loc) = text_q.get_mut(children[0]).unwrap();
+
+                    //for (mut text, loc) in text_q.iter_mut() {
+                    if zoom_level < TEXT_ZOOM_OUT_MAX {
+                        if let Some(val) = tile_map.map.get(&loc.ulam) {
+                            if !*hiding_text {
+                                text.sections[0].style.color = get_text_color(&sprite.color);
+                                if *showing_value {
+                                    text.sections[0].value = val.cost.to_string();
+                                } else {
+                                    text.sections[0].value = val.height.to_string();
+                                }
+                            }
                         }
                     }
                 }
-            }
-            // }
-        }
+                (true, false) => {
+                    //info!("ignore no event for this");
+                }
+                // no entry found in map
+                (false, true) => {
+                    let event_tile = tile_map_from_e.get(&location.ulam).unwrap();
 
-        // don't spawn text unless you are close by.
+                    // see if we should update visually
+                    let building_sprite_index =
+                        *texture_map.0.get(&event_tile.value).unwrap() as usize;
+
+                    let c = ulam::calc_coord::calc_coord(event_tile.height);
+                    let mut locationcoord = Location {
+                        x: c.x,
+                        y: c.y,
+                        ulam: event_tile.height,
+                        quad: ulam::quad_of_xy(c.x, c.y),
+                        selected: false,
+                        despawn_status: false,
+                    };
+                    if locationcoord.ulam == 1 {
+                        locationcoord.quad = Quad::SouthEast
+                    } else if locationcoord.quad == Quad::SouthEast {
+                        locationcoord.quad = Quad::South
+                    } else if locationcoord.quad == Quad::East
+                        && ulam::quad_of_value(locationcoord.ulam - 1) == Quad::SouthEast
+                    {
+                        locationcoord.quad = Quad::SouthEast;
+                    }
+
+                    // show correct color based on toggle
+
+                    // the worldmap isn't going to populated at this point so this will not get a good color on the first go when it's (false,true)
+                    // so use the event color instead for the first pass. "_"
+                    let (ind, _) = get_index_color(&map_mode, &tile_map, &locationcoord.ulam);
+
+                    texture.index = ind;
+                    sprite.color = event_tile.color;
+                    // Not really a big deal to do this everytime because likely after each purchase we will need to configure the buildings differently.
+                    /////////////////////
+
+                    let prev_building_type_r = buildings.get(children[0]);
+                    let prev_building_type: &BuildingStructure = match prev_building_type_r {
+                        Ok(o) => {
+                            info!("is this happening?");
+                            o.2
+                        }
+                        Err(_) => &BuildingStructure::None,
+                    };
+
+                    if zoom_level < BUILDING_ZOOM_OUT_MAX {
+                        for (building_location, building_entity, building_type) in buildings.iter()
+                        {
+                            if building_location.ulam == location.ulam
+                                && building_type != prev_building_type
+                            {
+                                //info!("despawning old building stuff");
+                                commands.entity(building_entity).despawn_recursive();
+                            }
+                        }
+
+                        // building
+                        commands
+                            .entity(parent_entity)
+                            .with_children(|child_builder| {
+                                //info!("spawning??!");
+                                spawn_tile_level(
+                                    building_sprite_index,
+                                    &texture_atlas_handle_building.layout,
+                                    &texture_atlas_handle_building.texture,
+                                    child_builder,
+                                    bevy::prelude::Color::Srgba(sanitize_building_color(
+                                        event_tile.color.into(),
+                                    )),
+                                    locationcoord,
+                                    visibility_building_toggle,
+                                );
+                            });
+                    }
+
+                    //info!("tilemap insert for height: {}", event_tile.height);
+                    tile_map.map.insert(event_tile.height, event_tile.clone());
+                    tile_map_from_delta.remove(&event_tile.height);
+                    // text
+                    let (mut text, loc) = text_q.get_mut(children[0]).unwrap();
+
+                    //for (mut text, loc) in text_q.iter_mut() {
+                    if zoom_level < TEXT_ZOOM_OUT_MAX {
+                        if let Some(val) = tile_map.map.get(&loc.ulam) {
+                            if !*hiding_text {
+                                text.sections[0].style.color = get_text_color(&sprite.color);
+                                if *showing_value {
+                                    text.sections[0].value = val.cost.to_string();
+                                } else {
+                                    text.sections[0].value = val.height.to_string();
+                                }
+                            }
+                        }
+                    }
+                }
+                (false, false) => {
+                    //info!("tile isn't loaded on screen");
+                }
+            }
+        }
+        info!(
+            "need to insert deltas count from map {}",
+            tile_map_from_delta.len()
+        );
+        for (k, v) in tile_map_from_delta.iter() {
+            tile_map.map.insert(*k, v.clone());
+        }
     }
 }
 
+// #[allow(clippy::too_many_arguments)]
+// pub fn spawn_block_text_and_buildings_on_zoom_event(
+//     asset_server: Res<AssetServer>,
+//     building_texture_mapping: Res<SpriteIndexBuilding>,
+//     mut commands: Commands,
+//     texture_atlas_handle_building: Res<SpriteSheetBuilding>,
+//     texture_atlas_handle_land: Res<SpriteSheetLand>,
+//     edge: Res<Edge>,
+//     mut chunk_set: ResMut<ChunkManager>,
+//     tile_map: Res<WorldOwnedTileMap>,
+//     toggle_map: Res<ToggleMap>,
+//     mut lands: Query<
+//         (&mut TextureAtlas, &mut Sprite, &Location, Entity, &Children),
+//         (With<Land>, Without<BuildingStructure>),
+//     >,
+//     mut zoom_event: EventReader<ZoomThresholdEvent>,
+// ) {
+//     for event_type in zoom_event.read() {
+//         match event_type.0 {
+//             ZoomSpawnEvent::YesText => {
+//                 //spawn_text_for_tile_edgebox(toggle_map, commands, edge, lands, &tile_map);
+//                 let text_visibility = if *toggle_map.0.get("showtext").unwrap() {
+//                     Visibility::Hidden
+//                 } else {
+//                     Visibility::Visible
+//                 };
+//                 let slightly_smaller_text_style = TextStyle {
+//                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+//                     font_size: 24.0,
+//                     color: get_text_color(&color_for_tile),
+//                 };
+//                 let tile_text = if *toggle_map.0.get("showvalues").unwrap() {
+//                     locationcoord.ulam.to_string()
+//                 } else if *toggle_map.0.get("showheights").unwrap() {
+//                     let a = value_from_tile;
+//                     if a == 0 {
+//                         "".to_string()
+//                     } else {
+//                         a.to_string()
+//                     }
+//                 } else {
+//                     "somethingwrongvalue".to_string()
+//                 };
+
+//                 for (mut texture, mut sprite, location, parent_entity, children) in lands.iter_mut()
+//                 {
+//                     let text_ent_cmd = commands.spawn((
+//                         Text2dBundle {
+//                             text: Text {
+//                                 sections: vec![TextSection::new(
+//                                     tile_text,
+//                                     slightly_smaller_text_style.clone(),
+//                                 )],
+//                                 justify: JustifyText::Left,
+//                                 ..Default::default()
+//                             },
+//                             text_2d_bounds: Text2dBounds { ..default() },
+//                             transform: Transform {
+//                                 translation: Vec3::new(0., 0., 5.),
+//                                 scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+//                                 ..Default::default()
+//                             },
+//                             visibility: text_visibility,
+//                             ..default()
+//                         },
+//                         locationcoord,
+//                         TileText,
+//                     ));
+//                     text_ent_cmd.insert(Aabb {
+//                         center: Vec3A::ZERO,
+//                         half_extents: Vec3A::ZERO,
+//                     });
+
+//                     text_ent_cmd.set_parent(parent_entity);
+//                 }
+//             }
+//             ZoomSpawnEvent::YesBuildings => {
+//                 // getting whether or not we should spawn buildings as hidden or visible depending on zoom level
+//                 let visibility_setting = if *toggle_map.0.get("showbuildings").unwrap() {
+//                     Visibility::Hidden
+//                 } else {
+//                     Visibility::Visible
+//                 };
+
+//                 commands
+//                     .entity(parent_entity)
+//                     .with_children(|child_builder| {
+//                         //info!("spawning??!");
+//                         spawn_tile_level(
+//                             building_sprite_index,
+//                             &texture_atlas_handle_building.layout,
+//                             &texture_atlas_handle_building.texture,
+//                             child_builder,
+//                             bevy::prelude::Color::Srgba(sanitize_building_color(
+//                                 event_tile.color.into(),
+//                             )),
+//                             locationcoord,
+//                             visibility_building_toggle,
+//                         );
+//                     });
+//             }
+//             _ => {
+//                 info!("this logic not reachable yet");
+//             }
+//         }
+//     }
+// }
 pub fn animate_sprites(
     time: Res<Time>,
     mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,

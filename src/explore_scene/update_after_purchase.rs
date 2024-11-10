@@ -5,7 +5,7 @@ use crate::{
     eventy::{UpdateTileTextureEvent, UpdateTilesAfterPurchase},
     resourcey::{TileCartVec, TileData, WorldOwnedTileMap},
     structy::TileResource,
-    utils::{calculate_index_for_resourced_lands, get_land_index, get_resource_for_tile},
+    utils::{get_land_index, get_resource_for_tile},
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -13,7 +13,7 @@ pub fn update_tiles_after_purchase(
     mut event: EventReader<UpdateTilesAfterPurchase>,
     mut update_tile_event: EventWriter<UpdateTileTextureEvent>,
     tile_cart_vec: Res<TileCartVec>,
-    mut tile_map: ResMut<WorldOwnedTileMap>,
+    tile_map: Res<WorldOwnedTileMap>,
 ) {
     for _e in event.read() {
         let mut new_tile_vec = Vec::new();
@@ -70,10 +70,14 @@ pub fn update_tiles_after_purchase(
             };
 
             new_tile_vec.push(new_td.clone());
-            tile_map.map.insert(new_td.height, new_td);
+            //tile_map.map.insert(new_td.height, new_td);
         }
-        let land_index_map = calculate_index_for_resourced_lands(&mut tile_map.map);
-        *tile_map = land_index_map;
+        //let land_index_map = calculate_index_for_resourced_lands(&mut tile_map.map);
+        //*tile_map = land_index_map;
+        info!(
+            "update_tiles_after_purchase send event UpdateTileTextureEvent, vec size: {}",
+            new_tile_vec.len()
+        );
 
         update_tile_event.send(UpdateTileTextureEvent(new_tile_vec));
     }

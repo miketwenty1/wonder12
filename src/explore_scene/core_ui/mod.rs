@@ -1,6 +1,8 @@
 use bevy::prelude::*;
+use event::{HideGameToggleChildren, HideMagnifyToggleChildren};
 use inventory::InventoryMenuPlugin;
 use paint_palette::PaintPalettePlugin;
+use ui_right::{toggle_game_children, toggle_magnify_children};
 
 use crate::statey::ExploreState;
 
@@ -10,6 +12,7 @@ use self::{
 };
 
 pub mod components;
+pub mod event;
 pub mod inventory;
 pub mod overall_ui;
 pub mod paint_palette;
@@ -36,6 +39,9 @@ impl Plugin for ExploreUiPlugin {
                 .chain())
             .run_if(run_once()),),
         )
+        .add_systems(Update, (toggle_game_children, toggle_magnify_children))
+        .add_event::<HideGameToggleChildren>()
+        .add_event::<HideMagnifyToggleChildren>()
         .add_plugins(InventoryMenuPlugin)
         .add_plugins(PaintPalettePlugin);
     }

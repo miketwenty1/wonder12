@@ -1,6 +1,5 @@
 use crate::consty::{DARKEST_BUILDING, LIGHTEST_TEXT};
 use bevy::color::{Color, Srgba};
-use bevy::prelude::info;
 pub fn sanitize_building_color(c: Srgba) -> Srgba {
     if c.red < DARKEST_BUILDING.red
         && c.green < DARKEST_BUILDING.green

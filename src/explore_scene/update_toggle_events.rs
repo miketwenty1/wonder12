@@ -41,7 +41,7 @@ pub fn land_color_event(
     for _t in toggle.read() {
         for (mut texture, mut sprite, loc, children) in land_q.iter_mut() {
             (texture.index, sprite.color) = get_index_color(&map_mode, &tile_res, &loc.ulam);
-            let mut text_r = text_query.get_mut(children[0]);
+            let text_r = text_query.get_mut(children[0]);
 
             if map_mode.0 == ColorMapToggle::LandTile {
                 texture.layout = land.layout.clone();
