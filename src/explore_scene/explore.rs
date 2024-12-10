@@ -1,11 +1,8 @@
 use std::collections::HashMap;
 
 use bevy::{
-    input::mouse::MouseMotion,
-    math::Vec3A,
-    prelude::*,
-    render::primitives::Aabb,
-    text::{FontSmoothing, TextBounds},
+    input::mouse::MouseMotion, math::Vec3A, prelude::*, reflect::Enum, render::primitives::Aabb,
+    text::FontSmoothing,
 };
 use ulam::Quad;
 
@@ -330,35 +327,23 @@ pub fn spawn_block_sprites(
                     // spawn text
                     if zoom_level < TEXT_ZOOM_OUT_MAX {
                         cmd.with_children(|builder| {
-                            let slightly_smaller_text_style = TextStyle {
+                            let slightly_smaller_text_style = TextFont {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: (SCALE_FACTOR / 3.0) * 24.0,
-                                color: get_text_color(&color_for_tile),
+                                font_smoothing: FontSmoothing::AntiAliased,
                             };
+                            //color: get_text_color(&color_for_tile),
 
                             let mut text_ent_cmd = builder.spawn((
-                                Text2dBundle {
-                                    text: Text {
-                                        sections: vec![TextSection::new(
-                                            tile_text,
-                                            slightly_smaller_text_style.clone(),
-                                        )],
-                                        justify: JustifyText::Left,
-                                        ..Default::default()
-                                    },
-                                    text_2d_bounds: Text2dBounds { ..default() },
-                                    transform: Transform {
-                                        translation: Vec3::new(0., 0., 5.),
-                                        scale: Vec3::new(
-                                            1.0 / SCALE_FACTOR,
-                                            1.0 / SCALE_FACTOR,
-                                            1.0,
-                                        ),
-                                        ..Default::default()
-                                    },
-                                    visibility: text_visibility,
-                                    ..default()
+                                Text2d::new(tile_text),
+                                slightly_smaller_text_style,
+                                TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
+                                Transform {
+                                    translation: Vec3::new(0., 0., 5.),
+                                    scale: Vec3::new(1.0 / SCALE_FACTOR, 1.0 / SCALE_FACTOR, 1.0),
+                                    ..Default::default()
                                 },
+                                text_visibility,
                                 locationcoord,
                                 TileText,
                             ));
@@ -475,7 +460,7 @@ pub fn set_camera_tile_bounds(
 pub fn update_tile_textures(
     mut commands: Commands,
     mut lands: Query<
-        (&mut TextureAtlas, &mut Sprite, &Location, Entity, &Children),
+        (&mut Sprite, &Location, Entity, &Children),
         (With<Land>, Without<BuildingStructure>),
     >,
     buildings: Query<(&Location, Entity, &BuildingStructure), Without<Land>>,
@@ -484,7 +469,7 @@ pub fn update_tile_textures(
     texture_map: Res<SpriteIndexBuilding>,
     texture_atlas_handle_building: Res<SpriteSheetBuilding>,
     toggle_map: Res<ToggleMap>,
-    mut text_q: Query<(&mut Text, &Location), With<TileText>>,
+    mut text_q: Query<(&mut Text, &mut TextColor, &Location), With<TileText>>,
     map_mode: Res<MapTileMode>,
     cam_query: Query<&OrthographicProjection, With<Camera>>,
 ) {
@@ -509,7 +494,7 @@ pub fn update_tile_textures(
             Visibility::Visible
         };
 
-        for (mut texture, mut sprite, location, parent_entity, children) in lands.iter_mut() {
+        for (mut sprite, location, parent_entity, children) in lands.iter_mut() {
             let map_tile_check = tile_map.map.contains_key(&location.ulam);
             let event_tile_check = tile_map_from_e.contains_key(&location.ulam);
 
@@ -554,8 +539,11 @@ pub fn update_tile_textures(
                             // show correct color based on toggle
 
                             info!("is this being triggered? height: {}", event_tile.height);
-                            (texture.index, sprite.color) =
-                                get_index_color(&map_mode, &tile_map, &locationcoord.ulam);
+
+                            if let Some(atlas) = &mut sprite.texture_atlas {
+                                (atlas.index, sprite.color) =
+                                    get_index_color(&map_mode, &tile_map, &locationcoord.ulam);
+                            }
 
                             // Not really a big deal to do this everytime because likely after each purchase we will need to configure the buildings differently.
                             /////////////////////
@@ -606,17 +594,17 @@ pub fn update_tile_textures(
                     }
 
                     // text
-                    let (mut text, loc) = text_q.get_mut(children[0]).unwrap();
+                    let (mut text, mut text_color, loc) = text_q.get_mut(children[0]).unwrap();
 
                     //for (mut text, loc) in text_q.iter_mut() {
                     if zoom_level < TEXT_ZOOM_OUT_MAX {
                         if let Some(val) = tile_map.map.get(&loc.ulam) {
                             if !*hiding_text {
-                                text.sections[0].style.color = get_text_color(&sprite.color);
+                                **text_color = get_text_color(&sprite.color);
                                 if *showing_value {
-                                    text.sections[0].value = val.cost.to_string();
+                                    **text = val.cost.to_string();
                                 } else {
-                                    text.sections[0].value = val.height.to_string();
+                                    **text = val.height.to_string();
                                 }
                             }
                         }
@@ -658,7 +646,10 @@ pub fn update_tile_textures(
                     // so use the event color instead for the first pass. "_"
                     let (ind, _) = get_index_color(&map_mode, &tile_map, &locationcoord.ulam);
 
-                    texture.index = ind;
+                    if let Some(atlas) = &mut sprite.texture_atlas {
+                        atlas.index = ind;
+                    }
+
                     sprite.color = event_tile.color;
                     // Not really a big deal to do this everytime because likely after each purchase we will need to configure the buildings differently.
                     /////////////////////
@@ -706,17 +697,17 @@ pub fn update_tile_textures(
                     tile_map.map.insert(event_tile.height, event_tile.clone());
                     tile_map_from_delta.remove(&event_tile.height);
                     // text
-                    let (mut text, loc) = text_q.get_mut(children[0]).unwrap();
+                    let (mut text, mut text_color, loc) = text_q.get_mut(children[0]).unwrap();
 
                     //for (mut text, loc) in text_q.iter_mut() {
                     if zoom_level < TEXT_ZOOM_OUT_MAX {
                         if let Some(val) = tile_map.map.get(&loc.ulam) {
                             if !*hiding_text {
-                                text.sections[0].style.color = get_text_color(&sprite.color);
+                                **text_color = get_text_color(&sprite.color);
                                 if *showing_value {
-                                    text.sections[0].value = val.cost.to_string();
+                                    **text = val.cost.to_string();
                                 } else {
-                                    text.sections[0].value = val.height.to_string();
+                                    **text = val.height.to_string();
                                 }
                             }
                         }
@@ -846,16 +837,18 @@ pub fn update_tile_textures(
 // }
 pub fn animate_sprites(
     time: Res<Time>,
-    mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
+    mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut Sprite)>,
 ) {
     for (indices, mut timer, mut sprite) in &mut query {
         timer.tick(time.delta());
         if timer.just_finished() {
-            sprite.index = if sprite.index == indices.last {
-                indices.first
-            } else {
-                sprite.index + 1
-            };
+            if let Some(atlas) = &mut sprite.texture_atlas {
+                atlas.index = if atlas.index == indices.last {
+                    indices.first
+                } else {
+                    atlas.index + 1
+                };
+            }
         }
     }
 }
@@ -885,18 +878,18 @@ pub fn clear_selection_button(
         match *interaction {
             Interaction::Pressed => {
                 palette_tiles_view_event.send(ViewSelectedTiles);
-                text.sections[0].value = "Clear".to_string();
+                **text = "Clear".to_string();
                 *color = colors.light_color.into();
                 border_color.0 = colors.light_color;
                 clear_event.send(ClearSelectionEvent);
             }
             Interaction::Hovered => {
-                text.sections[0].value = "Clear".to_string();
+                **text = "Clear".to_string();
                 *color = colors.accent_color.into();
                 border_color.0 = colors.node_color;
             }
             Interaction::None => {
-                text.sections[0].value = "Clear".to_string();
+                **text = "Clear".to_string();
                 *color = colors.red_color.into();
                 border_color.0 = colors.node_color;
             }

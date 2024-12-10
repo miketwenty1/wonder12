@@ -440,7 +440,7 @@ fn keyboard_button(
                             KeyBoardButton(key, alt_key),
                         ))
                         .id();
-                    parent.add_command(move |world: &mut World| {
+                    parent.enqueue_command(move |world: &mut World| {
                         world.entity_mut(ent_text).insert(Changeable);
                     });
                 });

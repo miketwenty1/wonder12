@@ -187,7 +187,7 @@ pub fn individual_color_palette_button(
             &Interaction,
             &mut BorderColor,
             &IndividualColorInPalette,
-            &mut Style,
+            &mut Node,
         ),
         (Changed<Interaction>, With<IndividualColorInPalette>),
     >,
@@ -240,7 +240,7 @@ pub fn new_color_picked_on_palette_event(
             let mut text = text_query.get_mut(children[0]).unwrap();
 
             //let new_color_hex = convert_color_to_hexstring();
-            text.sections[0].value = event_color.to_srgba().to_hex();
+            **text = event_color.to_srgba().to_hex();
 
             *bg_color = BackgroundColor(event_color);
             tool_palette_state_c.set(ToolPaletteUiState::Pencil);
@@ -381,7 +381,7 @@ pub fn change_palette_selection(
 pub fn hide_selected_tiles(
     mut event: EventReader<HideSelectedTiles>,
     mut selected_query: Query<&mut Visibility, With<Selected>>,
-    mut viewhide_query: Query<&mut UiImage, With<ViewHideImg>>,
+    mut viewhide_query: Query<&mut ImageNode, With<ViewHideImg>>,
     asset_server: Res<AssetServer>,
     mut view: ResMut<ViewablePaletteTiles>,
 ) {
@@ -391,7 +391,7 @@ pub fn hide_selected_tiles(
             *visi = Visibility::Hidden;
         }
         for mut image in viewhide_query.iter_mut() {
-            *image = UiImage::new(asset_server.load("ui/hide_120x120.png"));
+            *image = ImageNode::new(asset_server.load("ui/hide_120x120.png"));
         }
     }
 }
@@ -401,7 +401,7 @@ pub fn view_selected_tiles(
     mut event: EventReader<ViewSelectedTiles>,
     mut selected_query: Query<&mut Visibility, With<Selected>>,
     asset_server: Res<AssetServer>,
-    mut viewhide_query: Query<&mut UiImage, With<ViewHideImg>>,
+    mut viewhide_query: Query<&mut ImageNode, With<ViewHideImg>>,
     mut view: ResMut<ViewablePaletteTiles>,
 ) {
     for _e in event.read() {
@@ -410,7 +410,7 @@ pub fn view_selected_tiles(
             *visi = Visibility::Visible;
         }
         for mut image in viewhide_query.iter_mut() {
-            *image = UiImage::new(asset_server.load("ui/view_120x120.png"));
+            *image = ImageNode::new(asset_server.load("ui/view_120x120.png"));
         }
     }
 }

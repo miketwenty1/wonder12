@@ -1,4 +1,4 @@
-use bevy::{color::palettes::css::WHITE, prelude::*};
+use bevy::{color::palettes::css::WHITE, prelude::*, text::FontSmoothing};
 
 use crate::{
     componenty::{
@@ -67,15 +67,12 @@ pub fn right_ui(
                 ))
                 .with_children(|parent| {
                     parent.spawn((
-                        ImageBundle {
-                            style: Style {
-                                height: Val::Px(UI_ICON_SIZE),
-                                width: Val::Px(UI_ICON_SIZE),
-                                ..default()
-                            },
-                            image: UiImage::new(asset_server.load("ui/blank_120x120.png")),
+                        Node {
+                            height: Val::Px(UI_ICON_SIZE),
+                            width: Val::Px(UI_ICON_SIZE),
                             ..default()
                         },
+                        ImageNode::new(asset_server.load("ui/blank_120x120.png")),
                         DrawBtnImage,
                     ));
                 });
@@ -84,61 +81,55 @@ pub fn right_ui(
         side_parent.with_children(|parent| {
             parent
                 .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(UI_ICON_SIZE),
-                            height: Val::Px(UI_ICON_SIZE),
-                            border: UiRect::all(Val::Px(2.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            margin: UiRect::vertical(Val::Px(3.0)),
-                            ..default()
-                        },
-                        border_radius: BorderRadius::all(Val::Px(16.0)),
-                        //image: UiImage::new(asset_server.load("ui/goto2_120x120.png")),
-                        border_color: BorderColor(Color::BLACK),
-                        background_color: BackgroundColor(WHITE.into()),
-                        visibility: Visibility::Visible,
+                    Button,
+                    Node {
+                        width: Val::Px(UI_ICON_SIZE),
+                        height: Val::Px(UI_ICON_SIZE),
+                        border: UiRect::all(Val::Px(2.0)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
+                        margin: UiRect::vertical(Val::Px(3.0)),
                         ..default()
                     },
+                    Visibility::Visible,
+                    BackgroundColor(WHITE.into()),
+                    BorderColor(Color::BLACK),
+                    BorderRadius::all(Val::Px(16.0)),
                     UiInteractionBtn,
                     GoToBtn,
                     UiOverlayingExplorerButton,
                 ))
                 .with_children(|parent| {
-                    parent.spawn((ImageBundle {
-                        style: Style {
+                    parent.spawn((
+                        Node {
                             height: Val::Px(UI_ICON_SIZE),
                             width: Val::Px(UI_ICON_SIZE),
                             ..default()
                         },
-                        image: UiImage::new(asset_server.load("ui/goto2_120x120.png")),
-                        ..default()
-                    },));
+                        ImageNode::new(asset_server.load("ui/goto2_120x120.png")),
+                    ));
                 });
         });
         //toggle buttons
         side_parent.with_children(|parent| {
             parent.spawn((
-                ButtonBundle {
-                    style: Style {
-                        width: Val::Px(UI_ICON_SIZE),
-                        height: Val::Px(UI_ICON_SIZE),
-                        //border: UiRect::all(Val::Px(2.0)),
-                        // horizontally center child text
-                        justify_content: JustifyContent::Center,
-                        // vertically center child text
-                        align_items: AlignItems::Center,
-                        margin: UiRect::top(Val::Px(3.0)),
-                        ..default()
-                    },
-                    border_radius: BorderRadius::all(Val::Px(16.0)),
-                    image: UiImage::new(asset_server.load("ui/toggle_120x120.png")),
-                    visibility: Visibility::Visible,
+                Button,
+                Node {
+                    width: Val::Px(UI_ICON_SIZE),
+                    height: Val::Px(UI_ICON_SIZE),
+                    //border: UiRect::all(Val::Px(2.0)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
+                    margin: UiRect::top(Val::Px(3.0)),
                     ..default()
                 },
+                ImageNode::new(asset_server.load("ui/toggle_120x120.png")),
+                Visibility::Visible,
+                BorderRadius::all(Val::Px(16.0)),
                 UiInteractionBtn,
                 ToggleParent,
                 UiOverlayingExplorerButton,
@@ -188,23 +179,20 @@ pub fn right_ui(
             side_parent
                 .with_children(|parent| {
                     parent.spawn((
-                        ButtonBundle {
-                            style: Style {
-                                width: Val::Px(UI_ICON_SIZE),
-                                height: Val::Px(UI_ICON_SIZE),
-                                //border: UiRect::all(Val::Px(2.0)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
-                                margin: UiRect::top(Val::Px(3.0)),
-                                ..default()
-                            },
-                            //border_radius: BorderRadius::all(Val::Px(16.0)),
-                            image: UiImage::new(asset_server.load("ui/bitcoinmagnify_120x120.png")),
-                            visibility: Visibility::Visible,
+                        Button,
+                        Node {
+                            width: Val::Px(UI_ICON_SIZE),
+                            height: Val::Px(UI_ICON_SIZE),
+                            //border: UiRect::all(Val::Px(2.0)),
+                            // horizontally center child text
+                            justify_content: JustifyContent::Center,
+                            // vertically center child text
+                            align_items: AlignItems::Center,
+                            margin: UiRect::top(Val::Px(3.0)),
                             ..default()
                         },
+                        Visibility::Visible,
+                        ImageNode::new(asset_server.load("ui/bitcoinmagnify_120x120.png")),
                         UiInteractionBtn,
                         MagnifyToggleParentBtn,
                         UiOverlayingExplorerButton,
@@ -293,25 +281,23 @@ fn spawn_game_toggle_button<T: Component, U: Component, V: Component>(
 ) {
     parent
         .spawn((
-            ButtonBundle {
-                style: Style {
-                    width: Val::Px(UI_ICON_SIZE),
-                    height: Val::Px(UI_ICON_SIZE),
-                    border: UiRect::all(Val::Px(5.0)),
-                    // horizontally center child text
-                    justify_content: JustifyContent::Center,
-                    justify_items: JustifyItems::Center,
-                    align_content: AlignContent::Center,
-                    // vertically center child text
-                    align_items: AlignItems::Center,
-                    display: Display::None,
-                    ..default()
-                },
-                border_radius: BorderRadius::all(Val::Px(8.0)),
-                border_color: BorderColor(colors.node_color),
-                background_color: colors.button_color.into(),
+            Button,
+            Node {
+                width: Val::Px(UI_ICON_SIZE),
+                height: Val::Px(UI_ICON_SIZE),
+                border: UiRect::all(Val::Px(5.0)),
+                // horizontally center child text
+                justify_content: JustifyContent::Center,
+                justify_items: JustifyItems::Center,
+                align_content: AlignContent::Center,
+                // vertically center child text
+                align_items: AlignItems::Center,
+                display: Display::None,
                 ..default()
             },
+            BackgroundColor(colors.button_color.into()),
+            BorderColor(colors.node_color),
+            BorderRadius::all(Val::Px(8.0)),
             UiInteractionBtn,
             toggle_btn_type,
             ToggleGameButton,
@@ -320,14 +306,13 @@ fn spawn_game_toggle_button<T: Component, U: Component, V: Component>(
         ))
         .with_children(|parent| {
             parent.spawn((
-                TextBundle::from_section(
-                    btn_text,
-                    TextStyle {
-                        font,
-                        font_size: UI_SMALL_TEXT_SIZE,
-                        color: colors.text_color,
-                    },
-                ),
+                Text::new(btn_text),
+                TextFont {
+                    font,
+                    font_size: UI_SMALL_TEXT_SIZE,
+                    font_smoothing: FontSmoothing::AntiAliased,
+                },
+                TextColor(colors.text_color),
                 toggle_btn_text_position,
             ));
         });
@@ -342,39 +327,38 @@ fn spawn_magnify_toggle_button<T: Component>(
 ) {
     parent
         .spawn((
-            ButtonBundle {
-                style: Style {
-                    width: Val::Px(UI_ICON_SIZE),
-                    height: Val::Px(UI_ICON_SIZE),
-                    border: UiRect::all(Val::Px(5.0)),
-                    // horizontally center child text
-                    justify_content: JustifyContent::Center,
-                    justify_items: JustifyItems::Center,
-                    align_content: AlignContent::Center,
-                    // vertically center child text
-                    align_items: AlignItems::Center,
-                    display: Display::None,
-                    ..default()
-                },
-                border_radius: BorderRadius::all(Val::Px(8.0)),
-                border_color: BorderColor(colors.node_color),
-                background_color: colors.button_color.into(),
+            Button,
+            Node {
+                width: Val::Px(UI_ICON_SIZE),
+                height: Val::Px(UI_ICON_SIZE),
+                border: UiRect::all(Val::Px(5.0)),
+                // horizontally center child text
+                justify_content: JustifyContent::Center,
+                justify_items: JustifyItems::Center,
+                align_content: AlignContent::Center,
+                // vertically center child text
+                align_items: AlignItems::Center,
+                display: Display::None,
                 ..default()
             },
+            BackgroundColor(colors.button_color.into()),
+            BorderColor(colors.node_color),
+            BorderRadius::all(Val::Px(8.0)),
             UiInteractionBtn,
             toggle_type,
             MagnifyToggleChild(btn_text.to_string()),
             UiOverlayingExplorerButton,
         ))
         .with_children(|parent| {
-            parent.spawn((TextBundle::from_section(
-                btn_text,
-                TextStyle {
+            parent.spawn((
+                Text::new(btn_text),
+                TextFont {
                     font,
                     font_size: UI_SMALL_TEXT_SIZE,
-                    color: colors.text_color,
+                    font_smoothing: FontSmoothing::AntiAliased,
                 },
-            ),));
+                TextColor(colors.text_color),
+            ));
         });
 }
 
@@ -383,13 +367,13 @@ pub fn toggle_button_system(
     // mut mouse: ResMut<ButtonInput<MouseButton>>,
     // mut touches: ResMut<Touches>,
     mut interaction_query: Query<
-        (&Interaction, &mut UiImage),
+        (&Interaction, &mut ImageNode),
         (
             Changed<Interaction>,
             (With<ToggleParent>, Without<ToggleGameButton>),
         ),
     >,
-    mut child_btns: Query<&mut Style, With<ToggleGameButton>>,
+    mut child_btns: Query<&mut Node, With<ToggleGameButton>>,
     //mut toggle_visible: ResMut<ToggleVisible>,
     colors: Res<ColorPalette>,
     asset_server: Res<AssetServer>,
@@ -408,16 +392,16 @@ pub fn toggle_button_system(
                     }
                 }
 
-                *color = UiImage::new(asset_server.load("ui/toggle_120x120.png"));
+                *color = ImageNode::new(asset_server.load("ui/toggle_120x120.png"));
                 hide_blockchain_togggle.send(HideMagnifyToggleChildren);
             }
             Interaction::Hovered => {
-                *color = UiImage::new(asset_server.load("ui/toggle_120x120.png"))
+                *color = ImageNode::new(asset_server.load("ui/toggle_120x120.png"))
                     .with_color(colors.accent_color)
                 //colors.accent_color.into();
             }
             Interaction::None => {
-                *color = UiImage::new(asset_server.load("ui/toggle_120x120.png"))
+                *color = ImageNode::new(asset_server.load("ui/toggle_120x120.png"))
                     .with_color(colors.light_color);
             }
         }
@@ -445,14 +429,14 @@ pub fn toggle_button_sub_system_toggle1(
                 touches.clear();
                 let mut text = text_query.get_single_mut().unwrap();
 
-                match text.sections[0].value.as_str() {
+                match text.as_str() {
                     "Show Buildings" => {
-                        text.sections[0].value = "Hide Buildings".to_string();
+                        **text = "Hide Buildings".to_string();
                         *toggle_map.0.get_mut("showbuildings").unwrap() = false;
                         toggle.send(ToggleBuildings);
                     }
                     "Hide Buildings" => {
-                        text.sections[0].value = "Show Buildings".to_string();
+                        **text = "Show Buildings".to_string();
                         *toggle_map.0.get_mut("showbuildings").unwrap() = true;
                         toggle.send(ToggleBuildings);
                     }
@@ -496,9 +480,9 @@ pub fn toggle_button_sub_system_toggle2(
                 touches.clear();
                 let mut text = text_query.get_single_mut().unwrap();
 
-                match text.sections[0].value.as_str() {
+                match text.as_str() {
                     "Show Colors" => {
-                        text.sections[0].value = "Show Land".to_string();
+                        **text = "Show Land".to_string();
                         *toggle_map.0.get_mut("showcolors").unwrap() = false;
                         // let tiles = tile_map.to_tiledata_vec();
                         // update_tile_event.send(UpdateTileTextureEvent(tiles));
@@ -506,7 +490,7 @@ pub fn toggle_button_sub_system_toggle2(
                         map_mode.0 = ColorMapToggle::GameColor;
                     }
                     "Show Land" => {
-                        text.sections[0].value = "Show Colors".to_string();
+                        **text = "Show Colors".to_string();
                         *toggle_map.0.get_mut("showcolors").unwrap() = true;
                         toggle.send(ToggleColors);
                         // let tiles = tile_map.to_tiledata_vec();
@@ -553,15 +537,15 @@ pub fn toggle_button_sub_system_toggle3(
                 let mut text3 = text_query3.get_single_mut().unwrap();
                 let mut text4 = text_query4.get_single_mut().unwrap();
 
-                match text3.sections[0].value.as_str() {
+                match text3.as_str() {
                     "Show Values" => {
-                        text3.sections[0].value = "Show Heights".to_string();
+                        **text3 = "Show Heights".to_string();
                         *toggle_map.0.get_mut("showheights").unwrap() = true;
                         *toggle_map.0.get_mut("showvalues").unwrap() = false;
                         tile_text_type.send(ToggleText(TileTextType::Value));
                     }
                     "Show Heights" => {
-                        text3.sections[0].value = "Show Values".to_string();
+                        **text3 = "Show Values".to_string();
                         *toggle_map.0.get_mut("showheights").unwrap() = false;
                         *toggle_map.0.get_mut("showvalues").unwrap() = true;
                         tile_text_type.send(ToggleText(TileTextType::Height));
@@ -570,7 +554,7 @@ pub fn toggle_button_sub_system_toggle3(
                         info!("wut bccc3");
                     }
                 };
-                text4.sections[0].value = "Hide Text".to_string();
+                **text4 = "Hide Text".to_string();
                 *toggle_map.0.get_mut("showtext").unwrap() = false;
                 *color = colors.light_color.into();
             }
@@ -606,14 +590,14 @@ pub fn toggle_button_sub_system_toggle4(
                 touches.clear();
                 let mut text = text_query.get_single_mut().unwrap();
 
-                match text.sections[0].value.as_str() {
+                match text.as_str() {
                     "Hide Text" => {
-                        text.sections[0].value = "Show Text".to_string();
+                        **text = "Show Text".to_string();
                         *toggle_map.0.get_mut("showtext").unwrap() = true;
                         tile_text_type.send(ToggleText(TileTextType::Blank));
                     }
                     "Show Text" => {
-                        text.sections[0].value = "Hide Text".to_string();
+                        **text = "Hide Text".to_string();
                         *toggle_map.0.get_mut("showtext").unwrap() = false;
                         if *toggle_map.0.get("showvalues").unwrap() {
                             tile_text_type.send(ToggleText(TileTextType::Height));
@@ -644,13 +628,13 @@ pub fn toggle_magnify_button_system(
     // mut mouse: ResMut<ButtonInput<MouseButton>>,
     // mut touches: ResMut<Touches>,
     mut interaction_query: Query<
-        (&Interaction, &mut UiImage),
+        (&Interaction, &mut ImageNode),
         (
             Changed<Interaction>,
             (With<MagnifyToggleParentBtn>, Without<MagnifyToggleChild>),
         ),
     >,
-    mut child_btns: Query<&mut Style, With<MagnifyToggleChild>>,
+    mut child_btns: Query<&mut Node, With<MagnifyToggleChild>>,
     colors: Res<ColorPalette>,
     asset_server: Res<AssetServer>,
     mut hide_game_togggle: EventWriter<HideGameToggleChildren>,
@@ -660,7 +644,7 @@ pub fn toggle_magnify_button_system(
         //let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
-                *color = UiImage::new(asset_server.load("ui/bitcoinmagnify_120x120.png"));
+                *color = ImageNode::new(asset_server.load("ui/bitcoinmagnify_120x120.png"));
                 for mut style in child_btns.iter_mut() {
                     if style.display == Display::None {
                         style.display = Display::Flex;
@@ -671,11 +655,11 @@ pub fn toggle_magnify_button_system(
                 }
             }
             Interaction::Hovered => {
-                *color = UiImage::new(asset_server.load("ui/bitcoinmagnify_120x120.png"))
+                *color = ImageNode::new(asset_server.load("ui/bitcoinmagnify_120x120.png"))
                     .with_color(colors.accent_color)
             }
             Interaction::None => {
-                *color = UiImage::new(asset_server.load("ui/bitcoinmagnify_120x120.png"))
+                *color = ImageNode::new(asset_server.load("ui/bitcoinmagnify_120x120.png"))
                     .with_color(colors.light_color);
             }
         }
@@ -725,7 +709,7 @@ pub fn magnify_child_btn(
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn toggle_game_children(
     mut event: EventReader<HideGameToggleChildren>,
-    mut child_btns: Query<&mut Style, With<ToggleGameButton>>,
+    mut child_btns: Query<&mut Node, With<ToggleGameButton>>,
 ) {
     for _e in event.read() {
         for mut style in child_btns.iter_mut() {
@@ -739,7 +723,7 @@ pub fn toggle_game_children(
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn toggle_magnify_children(
     mut event: EventReader<HideMagnifyToggleChildren>,
-    mut child_btns: Query<&mut Style, With<MagnifyToggleChild>>,
+    mut child_btns: Query<&mut Node, With<MagnifyToggleChild>>,
 ) {
     for _e in event.read() {
         for mut style in child_btns.iter_mut() {

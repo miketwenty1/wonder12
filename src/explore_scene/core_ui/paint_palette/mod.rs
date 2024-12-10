@@ -23,7 +23,7 @@ impl Plugin for PaintPalettePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             OnEnter(PaintPaletteUiState::On),
-            ((spawn_layout).run_if(run_once()),
+            ((spawn_layout).run_if(run_once),
             show_layout, highlight_pencil).chain()
         )
         .add_event::<NewColorPicked>()

@@ -72,7 +72,7 @@ impl Plugin for ExplorePlugin {
             // OnEnter State Systems
             .add_systems(
                 OnEnter(ExploreSceneState::On),
-                (init_explorer, edge_system).run_if(run_once()),
+                (init_explorer, edge_system).run_if(run_once),
             )
             .add_systems(
                 Update,

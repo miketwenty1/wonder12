@@ -47,7 +47,7 @@ pub fn init_block_loading_text(
         let blocks_loaded = tilemap.map.len();
         let percentage = (blocks_loaded as f32 / (total_count as f32)) * 100.0;
 
-        text.sections[0].value = format!("Initilizing {} {}%", load_type, percentage as u32);
+        **text = format!("Initilizing {} {}%", load_type, percentage as u32);
 
         if percentage >= 100.0 {
             info!("yarr we initilized");

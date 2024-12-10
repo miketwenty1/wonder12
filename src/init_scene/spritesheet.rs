@@ -1,6 +1,6 @@
 use bevy::{
+    image::{ImageLoaderSettings, ImageSampler},
     prelude::*,
-    render::texture::{ImageLoaderSettings, ImageSampler},
 };
 
 use crate::resourcey::{SpriteSheetBuilding, SpriteSheetLand, SpriteSheetSelect};

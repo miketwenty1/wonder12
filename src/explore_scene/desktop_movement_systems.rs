@@ -60,10 +60,10 @@ pub fn mouse_movement_camera_system(
                     clear_last_selected.send(ClearLastSelectedTile);
                 }
 
-                let timefactor = if time.delta_seconds() > 0.01 {
+                let timefactor = if time.delta_secs() > 0.01 {
                     0.01
                 } else {
-                    time.delta_seconds()
+                    time.delta_secs()
                 };
 
                 let total_distance = direction
@@ -145,10 +145,10 @@ pub fn keyboard_movement_camera_system(
                 clear_last_selected.send(ClearLastSelectedTile);
             }
 
-            let timefactor = if time.delta_seconds() > 0.01 {
+            let timefactor = if time.delta_secs() > 0.01 {
                 0.01
             } else {
-                time.delta_seconds()
+                time.delta_secs()
             };
             let total_distance = direction
                 * timefactor
@@ -160,7 +160,7 @@ pub fn keyboard_movement_camera_system(
             cam_transform.translation += clamped_length;
 
             // cam_transform.translation += direction
-            //     * time.delta_seconds()
+            //     * time.delta_secs()
             //     * TILE_SCALE
             //     * cam_ortho.scale
             //     * MOVE_VELOCITY_FACTOR

@@ -6,7 +6,7 @@ use crate::{
     componenty::{CancelQrButton, ClipboardBtn, ExpirationQrText},
     eventy::{HideBackupCopyBtn, ShowBackupCopyBtn},
     resourcey::{ColorPalette, InvoiceDataFromServer, IsIphone},
-    statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreSceneState},
+    statey::{CommsApiState, DisplayBuyUiState, ExploreSceneState, ExploreSelectState},
 };
 
 use wasm_bindgen::prelude::*;
@@ -179,17 +179,17 @@ pub fn clean_up_qr(mut invoice_date: ResMut<InvoiceDataFromServer>) {
 }
 
 pub fn expiration_text(
-    mut text_query: Query<&mut Text, With<ExpirationQrText>>,
+    mut text_query: Query<(&mut Text, &mut TextColor), With<ExpirationQrText>>,
     invoice_res: Res<InvoiceDataFromServer>,
     colors: Res<ColorPalette>,
 ) {
-    for mut text in text_query.iter_mut() {
+    for (mut text, mut text_color) in text_query.iter_mut() {
         let time_left = (invoice_res.expires - Utc::now()).num_seconds();
-        text.sections[0].value = format!("Expires in: {}", time_left);
+        **text = format!("Expires in: {}", time_left);
         if time_left < 10 {
-            text.sections[0].style.color = colors.red_color
+            **text_color = colors.red_color
         } else if time_left < 20 {
-            text.sections[0].style.color = YELLOW.into()
+            **text_color = YELLOW.into()
         }
     }
 }

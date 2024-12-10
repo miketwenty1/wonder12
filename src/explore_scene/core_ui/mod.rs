@@ -37,7 +37,7 @@ impl Plugin for ExploreUiPlugin {
                 apply_deferred,
             )
                 .chain())
-            .run_if(run_once()),),
+            .run_if(run_once),),
         )
         .add_systems(Update, (toggle_game_children, toggle_magnify_children))
         .add_event::<HideGameToggleChildren>()

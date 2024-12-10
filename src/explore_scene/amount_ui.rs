@@ -104,7 +104,7 @@ pub fn update_amount_selected_text(
         }
         for mut text in amount_selected_text.iter_mut() {
             if total_cost == 0 {
-                text.sections[0].value = "".to_string();
+                **text = "".to_string();
 
                 for mut visibility in tile_selected_button_q.iter_mut() {
                     *visibility = Visibility::Hidden;
@@ -113,15 +113,15 @@ pub fn update_amount_selected_text(
                 for mut visibility in tile_selected_button_q.iter_mut() {
                     *visibility = Visibility::Visible;
                 }
-                text.sections[0].value = format!("Price: {} satoshis", total_cost);
+                **text = format!("Price: {} satoshis", total_cost);
             }
         }
         for mut text in block_count_text.iter_mut() {
             let selected_count = tile_cart.map.len();
             if selected_count == 0 {
-                text.sections[0].value = "".to_string();
+                **text = "".to_string();
             } else {
-                text.sections[0].value = format!("Blocks Selected: {}", selected_count);
+                **text = format!("Blocks Selected: {}", selected_count);
             }
         }
     }

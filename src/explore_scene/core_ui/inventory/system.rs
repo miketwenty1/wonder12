@@ -116,13 +116,13 @@ pub fn inventory_remover_system(
 #[allow(clippy::type_complexity)]
 pub fn visible_inventory_toggle_button(
     mut interaction_query: Query<
-        (&Interaction, &mut UiImage),
+        (&Interaction, &mut ImageNode),
         (Changed<Interaction>, With<InventoryToggleButton>),
     >,
     // mut clear_event: EventWriter<ClearSelectionEvent>,
     colors: Res<ColorPalette>,
     mut inventory_rows_node_q: Query<
-        &mut Style,
+        &mut Node,
         (With<InventoryToggleable>, Without<InventoryToggleButton>),
     >,
     asset_server: Res<AssetServer>,
@@ -136,37 +136,41 @@ pub fn visible_inventory_toggle_button(
                     if style.display == Display::Flex || style.display == Display::Grid {
                         style.display = Display::None;
 
-                        *image = UiImage {
-                            texture: asset_server.load("ui/expandarrow_60x60.png"),
+                        *image = ImageNode {
+                            image: asset_server.load("ui/expandarrow_60x60.png"),
                             flip_x: false,
                             flip_y: true,
                             color: colors.accent_color,
+                            ..Default::default()
                         };
                     } else {
                         style.display = Display::Grid;
-                        *image = UiImage {
-                            texture: asset_server.load("ui/expandarrow_60x60.png"),
+                        *image = ImageNode {
+                            image: asset_server.load("ui/expandarrow_60x60.png"),
                             flip_x: false,
                             flip_y: false,
                             color: colors.accent_color,
+                            ..Default::default()
                         };
                     }
                 }
             }
             Interaction::Hovered => {
-                *image = UiImage {
+                *image = ImageNode {
                     color: WHITE.into(),
-                    texture: asset_server.load("ui/expandarrow_60x60.png"),
+                    image: asset_server.load("ui/expandarrow_60x60.png"),
                     flip_x: image.flip_x,
                     flip_y: image.flip_y,
+                    ..Default::default()
                 };
             }
             Interaction::None => {
-                *image = UiImage {
+                *image = ImageNode {
                     color: colors.light_color,
-                    texture: asset_server.load("ui/expandarrow_60x60.png"),
+                    image: asset_server.load("ui/expandarrow_60x60.png"),
                     flip_x: image.flip_x,
                     flip_y: image.flip_y,
+                    ..Default::default()
                 };
             }
         }

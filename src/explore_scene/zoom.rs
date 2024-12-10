@@ -122,7 +122,7 @@ pub fn zoom_wheel_system(
     time: Res<Time>,
     mut cam_query: Query<&mut OrthographicProjection, With<Camera>>,
 ) {
-    let zoom_amount = ZOOM_VELOCITY * time.delta_seconds() * 10.0;
+    let zoom_amount = ZOOM_VELOCITY * time.delta_secs() * 10.0;
 
     for mouse_wheel in mouse_wheel_events.read() {
         if mouse_wheel.y > 0.0 {
@@ -180,10 +180,10 @@ pub fn pinch_system(
             }
 
             if zoom_amount != 0.0 {
-                let time_adjusted = if time.delta_seconds() > 0.01 {
+                let time_adjusted = if time.delta_secs() > 0.01 {
                     0.01
                 } else {
-                    time.delta_seconds()
+                    time.delta_secs()
                 };
                 for mut ortho in cam_query.iter_mut() {
                     ortho.scale += zoom_amount * time_adjusted * 30.0;

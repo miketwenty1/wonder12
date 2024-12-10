@@ -29,7 +29,7 @@ impl Plugin for InitPlugin {
                 init_js_comms_channels,
             )
                 .chain()
-                .run_if(run_once()),
+                .run_if(run_once),
         )
         .add_plugins((
             CommsPlugin,

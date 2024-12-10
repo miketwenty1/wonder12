@@ -47,10 +47,10 @@ pub fn touch_event_system(
 
             let direction = Vec3::new(-touch.delta().x, touch.delta().y, 0.0);
 
-            let timefactor = if time.delta_seconds() > 0.01 {
+            let timefactor = if time.delta_secs() > 0.01 {
                 0.01
             } else {
-                time.delta_seconds()
+                time.delta_secs()
             };
 
             // push back, change direction if detected past edge (left and up work the same as desktop but right and down need to be tweaked)

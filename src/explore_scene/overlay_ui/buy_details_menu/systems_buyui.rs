@@ -35,7 +35,7 @@ pub fn update_messages_ui_system(
     message_placement_q: Query<Entity, With<CurrentBlockMessageNode>>,
     asset_server: Res<AssetServer>,
     mut messages_received: EventReader<MessageReceivedFromServer>,
-    mut message_showhide_q: Query<&mut Style, With<HideMessageBtn>>,
+    mut message_showhide_q: Query<&mut Node, With<HideMessageBtn>>,
 ) {
     for block_height in messages_received.read() {
         if block_height.0 == cart.vec[cart.index].height {
@@ -123,7 +123,7 @@ pub fn leftright_cart_button_system(
                     resolve_cart_item_data(&mut cart_item, &mut cart);
 
                     for mut text in param_set.p0().iter_mut() {
-                        text.sections[0].value = format!("Block {}", cart.vec[cart.index].height);
+                        **text = format!("Block {}", cart.vec[cart.index].height);
                     }
                     // for mut text in param_set.p1().iter_mut() {
                     //     text.sections[0].value =
@@ -185,8 +185,7 @@ pub fn leftright_cart_button_system(
                     }
 
                     for mut text in param_set.p1().iter_mut() {
-                        text.sections[0].value =
-                            format!("Cost: {} sats", cart.vec[cart.index].cost);
+                        **text = format!("Cost: {} sats", cart.vec[cart.index].cost);
                     }
 
                     cart_item.message = cart.vec[cart.index].new_message.to_string();
@@ -231,12 +230,11 @@ pub fn leftright_cart_button_system_set_new_text(
                                 //                                          // TODO ^ see if we can remove this later
                             }
                         } else {
-                            text.sections[0].value =
-                                cart.vec[cart.index].new_color_text.to_string();
+                            **text = cart.vec[cart.index].new_color_text.to_string();
                         }
                     }
                     for mut text in message_new_text.iter_mut() {
-                        text.sections[0].value = cart.vec[cart.index].new_message.to_string();
+                        **text = cart.vec[cart.index].new_message.to_string();
                     }
                 }
             }
@@ -267,14 +265,14 @@ pub fn config_cart_button_system(
                 cart_config.0 = !cart_config.0;
                 for mut text in config_text.iter_mut() {
                     if cart_config.0 {
-                        text.sections[0].value = "X".to_string();
+                        **text = "X".to_string();
                         for block in cart.vec.iter_mut() {
                             //block.new_color_text = cart_item.color_text.to_string();
                             //block.new_color = cart_item.color;
                             block.new_message = cart_item.message.to_string();
                         }
                     } else {
-                        text.sections[0].value = " ".to_string();
+                        **text = " ".to_string();
                     }
                 }
             }
@@ -294,7 +292,7 @@ pub fn hide_message_btn_system(
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<HideMessageBtn>),
     >,
-    mut message_items: Query<&mut Style, With<CurrentBlockMessageNode>>,
+    mut message_items: Query<&mut Node, With<CurrentBlockMessageNode>>,
     colors: Res<ColorPalette>,
 ) {
     for (interaction, mut color) in &mut interaction_query {
@@ -416,37 +414,37 @@ pub fn new_message_button_system(
 #[allow(clippy::type_complexity)]
 pub fn set_default_text_for_empty_text(
     mut param_set: ParamSet<(
-        Query<&mut Text, With<NewBlockLnAddressText>>,
-        Query<&mut Text, With<NewBlockColorText>>,
-        Query<&mut Text, With<NewBlockMessageText>>,
+        Query<(&mut Text, &mut TextColor), With<NewBlockLnAddressText>>,
+        Query<(&mut Text, &mut TextColor), With<NewBlockColorText>>,
+        Query<(&mut Text, &mut TextColor), With<NewBlockMessageText>>,
     )>,
     block_new_data: Res<CurrentCartBlock>,
     colors: Res<ColorPalette>,
 ) {
     if block_new_data.ln_address.is_empty() {
-        for mut text in param_set.p0().iter_mut() {
-            text.sections[0].value = DEFAULT_NEW_LN_TEXT.to_string();
-            text.sections[0].style.color = DEFAULT_NO_PICK_COLOR.into();
+        for (mut text, mut text_color) in param_set.p0().iter_mut() {
+            **text = DEFAULT_NEW_LN_TEXT.to_string();
+            **text_color = DEFAULT_NO_PICK_COLOR.into();
         }
     }
     if block_new_data.color_text.is_empty() {
-        for mut text in param_set.p1().iter_mut() {
-            text.sections[0].value = DEFAULT_NEW_COLOR_TEXT.to_string();
-            text.sections[0].style.color = DEFAULT_NO_PICK_COLOR.into();
+        for (mut text, mut text_color) in param_set.p1().iter_mut() {
+            **text = DEFAULT_NEW_COLOR_TEXT.to_string();
+            **text_color = DEFAULT_NO_PICK_COLOR.into();
         }
     } else {
-        for mut text in param_set.p1().iter_mut() {
-            text.sections[0].style.color = colors.text_color;
+        for (_text, mut text_color) in param_set.p1().iter_mut() {
+            **text_color = colors.text_color;
         }
     }
     if block_new_data.message.is_empty() {
-        for mut text in param_set.p2().iter_mut() {
-            text.sections[0].value = DEFAULT_NEW_MESSAGE_TEXT.to_string();
-            text.sections[0].style.color = DEFAULT_NO_PICK_COLOR.into();
+        for (mut text, mut text_color) in param_set.p2().iter_mut() {
+            **text = DEFAULT_NEW_MESSAGE_TEXT.to_string();
+            **text_color = DEFAULT_NO_PICK_COLOR.into();
         }
     } else {
-        for mut text in param_set.p2().iter_mut() {
-            text.sections[0].style.color = colors.text_color;
+        for (_text, mut text_color) in param_set.p2().iter_mut() {
+            **text_color = colors.text_color;
         }
     }
 }
@@ -463,9 +461,9 @@ pub fn buy_button_system(
     mut cart: ResMut<TileCartVec>,
     mut cart_item: ResMut<CurrentCartBlock>,
     mut param_set: ParamSet<(
-        Query<&mut Text, With<NewBlockLnAddressText>>,
-        Query<&mut Text, With<NewBlockColorText>>,
-        Query<&mut Text, With<NewBlockMessageText>>,
+        Query<(&mut Text, &mut TextColor), With<NewBlockLnAddressText>>,
+        Query<(&mut Text, &mut TextColor), With<NewBlockColorText>>,
+        Query<(&mut Text, &mut TextColor), With<NewBlockMessageText>>,
     )>,
     mut user: ResMut<User>,
     colors: Res<ColorPalette>,
@@ -480,12 +478,12 @@ pub fn buy_button_system(
         match *interaction {
             Interaction::Pressed => {
                 resolve_target_cart_data(&keyboard, &mut cart_item, &mut cart); //text.sections[0].value = button_text;
-                for mut text in param_set.p0().iter_mut() {
-                    let a = &text.sections[0].value;
+                for (text, mut text_color) in param_set.p0().iter_mut() {
+                    let a = &text;
                     if is_valid_email_format_string(a) {
                         user.ln_address = a.to_string();
                         *color = colors.light_color.into();
-                        cart.vec[index].new_ln_address = text.sections[0].value.to_string();
+                        cart.vec[index].new_ln_address = text.to_string();
                         buy_event.send(BuyBlockRequest);
                         // help with jumpiness when leaving this screen - hopefully
                         mouse.clear();
@@ -494,7 +492,7 @@ pub fn buy_button_system(
                         keyboard_state.set(KeyboardState::Off);
                     } else {
                         *color = colors.red_color.into();
-                        text.sections[0].style.color = colors.red_color;
+                        **text_color = colors.red_color;
                         toast.send(ToastEvent {
                             ttype: ToastType::Bad,
                             message: "Please specify valid Lightning Address".to_string(),

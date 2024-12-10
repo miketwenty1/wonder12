@@ -31,25 +31,27 @@ pub fn buildings_visibility_event(
 #[allow(clippy::too_many_arguments)]
 pub fn land_color_event(
     mut toggle: EventReader<ToggleColors>,
-    mut land_q: Query<(&mut TextureAtlas, &mut Sprite, &Location, &Children), With<Land>>,
-    mut text_query: Query<&mut Text>,
+    mut land_q: Query<(&mut Sprite, &Location, &Children), With<Land>>,
+    mut text_query: Query<(&mut TextColor)>,
     //toggle_map: Res<ToggleMap>,
     tile_res: Res<WorldOwnedTileMap>,
     land: Res<SpriteSheetLand>,
     map_mode: Res<MapTileMode>,
 ) {
     for _t in toggle.read() {
-        for (mut texture, mut sprite, loc, children) in land_q.iter_mut() {
-            (texture.index, sprite.color) = get_index_color(&map_mode, &tile_res, &loc.ulam);
-            let text_r = text_query.get_mut(children[0]);
+        for (mut sprite, loc, children) in land_q.iter_mut() {
+            let tempnum;
+            (tempnum, sprite.color) = get_index_color(&map_mode, &tile_res, &loc.ulam);
 
-            if map_mode.0 == ColorMapToggle::LandTile {
-                texture.layout = land.layout.clone();
-                if text_r.is_ok() {
-                    text_r.unwrap().sections[0].style.color = Srgba::WHITE.into();
+            if let Some(atlas) = &mut sprite.texture_atlas {
+                atlas.index = tempnum;
+                let mut text_color = text_query.get_mut(children[0]).unwrap();
+                if map_mode.0 == ColorMapToggle::LandTile {
+                    atlas.layout = land.layout.clone();
+                    **text_color = Srgba::WHITE.into();
+                } else {
+                    **text_color = get_text_color(&sprite.color);
                 }
-            } else if text_r.is_ok() {
-                text_r.unwrap().sections[0].style.color = get_text_color(&sprite.color);
             }
         }
     }
@@ -73,13 +75,13 @@ pub fn change_tile_text_event(
                         if zoom_level < TEXT_ZOOM_OUT_MAX && *visibility == Visibility::Hidden {
                             *visibility = Visibility::Visible;
                         }
-                        text.sections[0].value = val.height.to_string();
+                        **text = val.height.to_string();
                     }
                     TileTextType::Value => {
                         if zoom_level < TEXT_ZOOM_OUT_MAX && *visibility == Visibility::Hidden {
                             *visibility = Visibility::Visible;
                         }
-                        text.sections[0].value = val.cost.to_string();
+                        **text = val.cost.to_string();
                     }
                     TileTextType::Blank => {
                         if *visibility == Visibility::Visible {
@@ -93,13 +95,13 @@ pub fn change_tile_text_event(
                         if zoom_level < TEXT_ZOOM_OUT_MAX && *visibility == Visibility::Hidden {
                             *visibility = Visibility::Visible;
                         }
-                        text.sections[0].value = loc.ulam.to_string();
+                        **text = loc.ulam.to_string();
                     }
                     TileTextType::Value => {
                         if zoom_level < TEXT_ZOOM_OUT_MAX && *visibility == Visibility::Visible {
                             *visibility = Visibility::Hidden;
                         }
-                        text.sections[0].value = "".to_string();
+                        **text = "".to_string();
                     }
                     TileTextType::Blank => {
                         if *visibility == Visibility::Visible {

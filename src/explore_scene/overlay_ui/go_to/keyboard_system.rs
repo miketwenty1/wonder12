@@ -9,7 +9,7 @@ use super::component::GoToTextBoxText;
 
 #[allow(clippy::type_complexity, clippy::single_match)]
 pub fn goto_write_keyboard_target(
-    mut text_query: ParamSet<(Query<&mut Text, With<GoToTextBoxText>>,)>,
+    mut text_query: ParamSet<(Query<(&mut Text, &mut TextColor), With<GoToTextBoxText>>,)>,
     keyboard: ResMut<KeyboardData>,
     colors: Res<ColorPalette>,
     //user: Res<User>,
@@ -17,9 +17,9 @@ pub fn goto_write_keyboard_target(
     if keyboard.is_changed() {
         match keyboard.target {
             TargetType::GoTo => {
-                for mut text in text_query.p0().iter_mut() {
-                    text.sections[0].value = keyboard.value.to_string();
-                    text.sections[0].style.color = colors.text_color;
+                for (mut text, mut text_color) in text_query.p0().iter_mut() {
+                    **text = keyboard.value.to_string();
+                    **text_color = colors.text_color;
                 }
             }
             _ => {}

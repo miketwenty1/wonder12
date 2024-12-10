@@ -3,7 +3,6 @@ use bevy::{
     render::{
         render_asset::RenderAssetUsages,
         render_resource::{Extent3d, TextureDimension, TextureFormat},
-        texture::BevyDefault,
     },
     text::FontSmoothing,
 };
@@ -194,8 +193,8 @@ pub fn spawn_qr(
             });
 
             inner_builder.with_children(|builder| {
-                builder.spawn(ImageBundle {
-                    style: Style {
+                builder.spawn((
+                    Node {
                         width: Val::Px(270.0),
                         height: Val::Px(270.0),
                         align_content: AlignContent::Center,
@@ -205,48 +204,36 @@ pub fn spawn_qr(
                         margin: UiRect::all(Val::Px(2.0)),
                         ..Default::default()
                     },
-                    image: handle.unwrap().into(),
-                    background_color: BackgroundColor(Color::WHITE),
-                    ..Default::default() // style: Style {
-                });
+                    ImageNode::new(handle.unwrap().into()),
+                    BackgroundColor(Color::WHITE),
+                ));
             });
             inner_builder.with_children(|builder| {
                 builder
                     .spawn((
-                        ButtonBundle {
-                            style: Style {
-                                width: Val::Px(80.0),
-                                height: Val::Px(30.0),
-                                justify_content: JustifyContent::Center,
-                                align_items: AlignItems::Center,
-                                margin: UiRect::all(Val::Px(2.0)),
-                                ..default()
-                            },
-                            background_color: colors.button_color.into(),
+                        Button,
+                        Node {
+                            width: Val::Px(80.0),
+                            height: Val::Px(30.0),
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            margin: UiRect::all(Val::Px(2.0)),
                             ..default()
                         },
+                        BackgroundColor(colors.button_color.into()),
                         ClipboardBtn,
                     ))
                     .with_children(|parent| {
-                        parent.spawn(TextBundle::from_section(
-                            "Copy Invoice",
-                            TextStyle {
+                        parent.spawn((
+                            Text::new("Copy Invoice"),
+                            TextFont {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: 16.0,
-                                color: colors.text_color,
+                                font_smoothing: FontSmoothing::AntiAliased,
                             },
+                            TextColor(colors.text_color),
                         ));
                     });
             });
-            // inner_builder.with_children(|builder| {
-            //     builder.spawn(TextBundle::from_section(
-            //         "Copy Button doesn't work on iOS",
-            //         TextStyle {
-            //             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-            //             font_size: 12.0,
-            //             color: colors.text_color,
-            //         },
-            //     ));
-            // });
         });
 }

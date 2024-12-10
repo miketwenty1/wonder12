@@ -23,7 +23,7 @@ impl Plugin for InventoryMenuPlugin {
         app.add_event::<AddInventoryRow>()
             .add_systems(
                 OnEnter(InventoryUiState::On),
-                ((spawn_layout).run_if(run_once()), show_layout),
+                ((spawn_layout).run_if(run_once), show_layout),
             )
             .add_systems(
                 Update,
