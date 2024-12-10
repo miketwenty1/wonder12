@@ -30,18 +30,15 @@ pub fn right_ui(
 ) {
     for ent in placement_query.iter() {
         let mut side_parent = commands.spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::FlexEnd,
-                    justify_content: JustifyContent::Center,
-                    flex_direction: FlexDirection::Column,
-                    ..default()
-                },
-                border_radius: BorderRadius::all(Val::Px(4.0)),
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                align_items: AlignItems::FlexEnd,
+                justify_content: JustifyContent::Center,
+                flex_direction: FlexDirection::Column,
                 ..default()
             },
+            BorderRadius::all(Val::Px(4.0)),
             UiSideNode,
         ));
 
@@ -50,22 +47,20 @@ pub fn right_ui(
         side_parent.with_children(|parent| {
             parent
                 .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(UI_ICON_SIZE), // to make it a square.
-                            height: Val::Px(UI_ICON_SIZE),
-                            //border: UiRect::all(Val::Px(2.0)),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            margin: UiRect::vertical(Val::Px(3.0)),
-                            ..default()
-                        },
-                        image: UiImage::new(asset_server.load("ui/palette_120x120.png")),
-                        visibility: Visibility::Visible,
+                    Button,
+                    Node {
+                        width: Val::Px(UI_ICON_SIZE), // to make it a square.
+                        height: Val::Px(UI_ICON_SIZE),
+                        //border: UiRect::all(Val::Px(2.0)),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
+                        margin: UiRect::vertical(Val::Px(3.0)),
                         ..default()
                     },
+                    ImageNode::new(asset_server.load("ui/palette_120x120.png")),
+                    Visibility::Visible,
                     UiInteractionBtn,
                     DrawBtn,
                     UiOverlayingExplorerButton,

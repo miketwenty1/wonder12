@@ -1,7 +1,7 @@
 use bevy::{color::palettes::css::WHITE, prelude::*};
 use rand::Rng;
 
-use crate::componenty::Location;
+use crate::{componenty::Location, consty::SCALE_FACTOR};
 
 use super::building_templates::{hut::spawn_hut, road::spawn_road};
 
@@ -26,7 +26,7 @@ pub fn spawn(
         locationcoord,
         visibility_toggle,
         Vec3::new(x, y, 3.0),
-        Some(0.85),
+        Some(0.85 * SCALE_FACTOR / 3.0),
     );
 
     spawn_road(

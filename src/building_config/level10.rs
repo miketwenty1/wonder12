@@ -1,7 +1,7 @@
 use bevy::{color::palettes::css::WHITE, prelude::*};
 use rand::Rng;
 
-use crate::componenty::Location;
+use crate::{componenty::Location, consty::SCALE_FACTOR};
 
 use super::building_templates::{house::spawn_house, road::spawn_road, waterwell::spawn_waterwell};
 
@@ -26,7 +26,7 @@ pub fn spawn(
         locationcoord,
         visibility_toggle,
         Vec3::new(x, y, 3.0),
-        Some(1.5),
+        Some(1.5 * SCALE_FACTOR / 3.0),
     );
 
     let x: f32 = rng.gen_range(-9.0..9.0);
@@ -39,7 +39,7 @@ pub fn spawn(
         locationcoord,
         visibility_toggle,
         Vec3::new(x, y, 4.0),
-        Some(0.75),
+        Some(0.75 * SCALE_FACTOR / 3.0),
         1,
     );
 

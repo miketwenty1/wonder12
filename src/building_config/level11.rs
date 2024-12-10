@@ -1,6 +1,6 @@
 use bevy::{color::palettes::css::WHITE, prelude::*};
 
-use crate::componenty::Location;
+use crate::{componenty::Location, consty::SCALE_FACTOR};
 
 use super::building_templates::{castle::spawn_castle, road::spawn_road};
 
@@ -21,7 +21,7 @@ pub fn spawn(
         locationcoord,
         visibility_toggle,
         Vec3::new(0., 0., 3.0),
-        Some(2.0),
+        Some(2.0 * SCALE_FACTOR / 3.0),
     );
 
     spawn_road(

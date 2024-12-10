@@ -19,7 +19,7 @@ pub fn inventory_adder_system(
     mut commands: Commands,
     mut inventory_row_node: Query<Entity, (With<InventoryRowsNode>, Without<InventoryColorBox>)>,
     mut inventory_node: Query<
-        &mut Style,
+        &mut Node,
         (
             With<InventoryNode>,
             Without<InventoryColorBox>,

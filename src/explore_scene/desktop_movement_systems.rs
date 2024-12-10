@@ -1,7 +1,7 @@
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
 use crate::{
-    consty::{MOVE_VELOCITY_FACTOR, THRESHOLD_FOR_PUSHBACK, TILE_SCALE},
+    consty::{MOVE_VELOCITY_FACTOR, SCALE_FACTOR, THRESHOLD_FOR_PUSHBACK},
     eventy::{ClearLastSelectedTile, EdgeEvent},
     resourcey::{Edge, LastSelectedTile, MaxBlockHeight},
 };
@@ -66,8 +66,11 @@ pub fn mouse_movement_camera_system(
                     time.delta_seconds()
                 };
 
-                let total_distance =
-                    direction * timefactor * TILE_SCALE * cam_ortho.scale * MOVE_VELOCITY_FACTOR;
+                let total_distance = direction
+                    * timefactor
+                    * (3.0 / SCALE_FACTOR)
+                    * cam_ortho.scale
+                    * MOVE_VELOCITY_FACTOR;
 
                 let clamped_length = total_distance.clamp_length_max(300.0);
 
@@ -147,8 +150,11 @@ pub fn keyboard_movement_camera_system(
             } else {
                 time.delta_seconds()
             };
-            let total_distance =
-                direction * timefactor * TILE_SCALE * cam_ortho.scale * MOVE_VELOCITY_FACTOR;
+            let total_distance = direction
+                * timefactor
+                * (3.0 / SCALE_FACTOR)
+                * cam_ortho.scale
+                * MOVE_VELOCITY_FACTOR;
             let clamped_length = total_distance.clamp_length_max(300.0);
 
             cam_transform.translation += clamped_length;

@@ -1,4 +1,4 @@
-use crate::async_resource_comm_channels::{
+use crate::comms::async_resource_comm_channels::{
     BrowserCheckpointLocalStorageChannel, BrowserIndexedDBStorageChannel,
     BrowserMapLocalStorageChannel,
 };
@@ -31,15 +31,15 @@ pub fn write_local_storage(
     gametime: Res<UpdateGameTimetamp>,
 ) {
     for _e in event.read() {
-        let mut event_map = web_sys::CustomEventInit::new();
-        let mut event_ts = web_sys::CustomEventInit::new();
+        let event_map = web_sys::CustomEventInit::new();
+        let event_ts = web_sys::CustomEventInit::new();
         let trim_browser_tile = tile_map.trim_for_browser_storage();
         let www = serde_json::to_string(&trim_browser_tile).expect("world map is a string");
         let map_json_val = &JsValue::from_str(&www);
         let ts_json_val = &JsValue::from_str(&gametime.ts.to_string());
         info!("ts to be inserted {:#?}", ts_json_val);
-        event_map.detail(map_json_val);
-        event_ts.detail(ts_json_val);
+        event_map.set_detail(map_json_val);
+        event_ts.set_detail(ts_json_val);
         let mapdata_event =
             web_sys::CustomEvent::new_with_event_init_dict("localbrowserstorage", &event_map);
         let ts_event = web_sys::CustomEvent::new_with_event_init_dict("mapcheckpoint", &event_ts);

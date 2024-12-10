@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use layout::{clean_layout, show_layout};
 use system::{inventory_colorbox_buttons, visible_inventory_toggle_button};
 
+use crate::statey::ExploreSceneState;
+
 use self::{
     event::AddInventoryRow,
     layout::spawn_layout,
@@ -25,12 +27,13 @@ impl Plugin for InventoryMenuPlugin {
             )
             .add_systems(
                 Update,
-                (
+                ((
                     inventory_remover_system,
                     inventory_adder_system,
                     visible_inventory_toggle_button,
                     inventory_colorbox_buttons,
-                ),
+                )
+                    .run_if(in_state(ExploreSceneState::On)),),
             )
             .add_systems(OnExit(InventoryUiState::On), clean_layout);
     }

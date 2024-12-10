@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{despawn_screen, statey::ToastState};
+use crate::{
+    despawn_screen,
+    statey::{ExploreSceneState, ToastState},
+};
 
 use self::systems::{despawn_toast_setter, tick_api_receive_timer, toast_event_reader};
 
@@ -53,7 +56,12 @@ impl Plugin for ToastUiPlugin {
                 Update,
                 (tick_api_receive_timer, despawn_toast_setter).run_if(in_state(ToastState::On)),
             )
-            .add_systems(Update, toast_event_reader)
+            .add_systems(
+                Update,
+                (toast_event_reader).run_if(
+                    in_state(ExploreSceneState::On).or_else(in_state(ExploreSceneState::Paused)),
+                ),
+            )
             .add_systems(OnExit(ToastState::On), despawn_screen::<ToastNode>);
     }
 }

@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    text::{FontSmoothing, FontStyle},
+};
 
 use crate::{
     componenty::UiInteractionBtn,
@@ -49,47 +52,39 @@ pub fn setup_keyboard(
 
             let font = asset_server.load("fonts/FiraSans-Bold.ttf");
             let mut keyboardcmds = commands.spawn((
-                NodeBundle {
-                    style: Style {
-                        display: Display::Grid,
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        grid_template_columns: vec![GridTrack::flex(1.0)],
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::SpaceEvenly,
-                        // gap: Size {
-                        //     width: Val::Px(0.0),
-                        //     height: Val::Px(0.0),
-                        // },
-                        grid_template_rows: vec![
-                            GridTrack::auto(),
-                            GridTrack::auto(),
-                            GridTrack::auto(),
-                            GridTrack::auto(),
-                            GridTrack::auto(),
-                            GridTrack::flex(1.0),
-                        ],
-                        ..default()
-                    },
-                    border_radius: BorderRadius::all(Val::Px(4.0)),
-                    background_color: BackgroundColor(colors.node_color),
-                    //z_index: ZIndex::Global(20),
+                Node {
+                    display: Display::Grid,
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    grid_template_columns: vec![GridTrack::flex(1.0)],
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::SpaceEvenly,
+                    // gap: Size {
+                    //     width: Val::Px(0.0),
+                    //     height: Val::Px(0.0),
+                    // },
+                    grid_template_rows: vec![
+                        GridTrack::auto(),
+                        GridTrack::auto(),
+                        GridTrack::auto(),
+                        GridTrack::auto(),
+                        GridTrack::auto(),
+                        GridTrack::flex(1.0),
+                    ],
                     ..default()
                 },
+                BackgroundColor(colors.node_color),
+                BorderRadius::all(Val::Px(4.0)),
                 KeyBoard,
             ));
 
             keyboardcmds.with_children(|builder| {
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            display: Display::Grid,
-                            justify_items: JustifyItems::Center,
-                            padding: UiRect::all(Val::Px(0.0)),
-                            height: Val::Px(row_height),
-                            ..default()
-                        },
-
+                    .spawn(Node {
+                        display: Display::Grid,
+                        justify_items: JustifyItems::Center,
+                        padding: UiRect::all(Val::Px(0.0)),
+                        height: Val::Px(row_height),
                         ..default()
                     })
                     .with_children(|builder| {
@@ -104,14 +99,11 @@ pub fn setup_keyboard(
                         );
                     });
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            display: Display::Grid,
-                            justify_items: JustifyItems::Center,
-                            padding: UiRect::all(Val::Px(0.0)),
-                            height: Val::Px(row_height),
-                            ..default()
-                        },
+                    .spawn(Node {
+                        display: Display::Grid,
+                        justify_items: JustifyItems::Center,
+                        padding: UiRect::all(Val::Px(0.0)),
+                        height: Val::Px(row_height),
                         ..default()
                     })
                     .with_children(|builder| {
@@ -126,14 +118,11 @@ pub fn setup_keyboard(
                         );
                     });
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            display: Display::Grid,
-                            justify_items: JustifyItems::Center,
-                            padding: UiRect::all(Val::Px(0.0)),
-                            height: Val::Px(row_height),
-                            ..default()
-                        },
+                    .spawn(Node {
+                        display: Display::Grid,
+                        justify_items: JustifyItems::Center,
+                        padding: UiRect::all(Val::Px(0.0)),
+                        height: Val::Px(row_height),
                         ..default()
                     })
                     .with_children(|builder| {
@@ -148,14 +137,11 @@ pub fn setup_keyboard(
                         );
                     });
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            display: Display::Grid,
-                            justify_items: JustifyItems::Center,
-                            padding: UiRect::all(Val::Px(0.0)),
-                            height: Val::Px(row_height),
-                            ..default()
-                        },
+                    .spawn(Node {
+                        display: Display::Grid,
+                        justify_items: JustifyItems::Center,
+                        padding: UiRect::all(Val::Px(0.0)),
+                        height: Val::Px(row_height),
                         ..default()
                     })
                     .with_children(|builder| {
@@ -170,14 +156,11 @@ pub fn setup_keyboard(
                         );
                     });
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            display: Display::Grid,
-                            justify_items: JustifyItems::Center,
-                            padding: UiRect::all(Val::Px(0.0)),
-                            height: Val::Px(row_height),
-                            ..default()
-                        },
+                    .spawn(Node {
+                        display: Display::Grid,
+                        justify_items: JustifyItems::Center,
+                        padding: UiRect::all(Val::Px(0.0)),
+                        height: Val::Px(row_height),
                         ..default()
                     })
                     .with_children(|builder| {
@@ -227,47 +210,40 @@ pub fn setup_keyboard_numbers(
 
             let font = asset_server.load("fonts/FiraSans-Bold.ttf");
             let mut keyboardcmds = commands.spawn((
-                NodeBundle {
-                    style: Style {
-                        display: Display::Grid,
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        grid_template_columns: vec![GridTrack::flex(1.0)],
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::SpaceEvenly,
-                        // gap: Size {
-                        //     width: Val::Px(0.0),
-                        //     height: Val::Px(0.0),
-                        // },
-                        grid_template_rows: vec![
-                            GridTrack::auto(),
-                            GridTrack::auto(),
-                            GridTrack::auto(),
-                            GridTrack::auto(),
-                            //GridTrack::auto(),
-                            //GridTrack::flex(1.0),
-                        ],
-                        ..default()
-                    },
-                    border_radius: BorderRadius::all(Val::Px(4.0)),
-                    background_color: BackgroundColor(colors.node_color),
+                Node {
+                    display: Display::Grid,
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    grid_template_columns: vec![GridTrack::flex(1.0)],
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::SpaceEvenly,
+                    // gap: Size {
+                    //     width: Val::Px(0.0),
+                    //     height: Val::Px(0.0),
+                    // },
+                    grid_template_rows: vec![
+                        GridTrack::auto(),
+                        GridTrack::auto(),
+                        GridTrack::auto(),
+                        GridTrack::auto(),
+                        //GridTrack::auto(),
+                        //GridTrack::flex(1.0),
+                    ],
                     //z_index: ZIndex::Global(20),
                     ..default()
                 },
+                BackgroundColor(colors.node_color),
+                BorderRadius::all(Val::Px(4.0)),
                 KeyBoard,
             ));
 
             keyboardcmds.with_children(|builder| {
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            display: Display::Grid,
-                            justify_items: JustifyItems::Center,
-                            padding: UiRect::all(Val::Px(0.0)),
-                            height: Val::Px(row_height),
-                            ..default()
-                        },
-
+                    .spawn(Node {
+                        display: Display::Grid,
+                        justify_items: JustifyItems::Center,
+                        padding: UiRect::all(Val::Px(0.0)),
+                        height: Val::Px(row_height),
                         ..default()
                     })
                     .with_children(|builder| {
@@ -282,14 +258,11 @@ pub fn setup_keyboard_numbers(
                         );
                     });
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            display: Display::Grid,
-                            justify_items: JustifyItems::Center,
-                            padding: UiRect::all(Val::Px(0.0)),
-                            height: Val::Px(row_height),
-                            ..default()
-                        },
+                    .spawn(Node {
+                        display: Display::Grid,
+                        justify_items: JustifyItems::Center,
+                        padding: UiRect::all(Val::Px(0.0)),
+                        height: Val::Px(row_height),
                         ..default()
                     })
                     .with_children(|builder| {
@@ -304,14 +277,11 @@ pub fn setup_keyboard_numbers(
                         );
                     });
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            display: Display::Grid,
-                            justify_items: JustifyItems::Center,
-                            padding: UiRect::all(Val::Px(0.0)),
-                            height: Val::Px(row_height),
-                            ..default()
-                        },
+                    .spawn(Node {
+                        display: Display::Grid,
+                        justify_items: JustifyItems::Center,
+                        padding: UiRect::all(Val::Px(0.0)),
+                        height: Val::Px(row_height),
                         ..default()
                     })
                     .with_children(|builder| {
@@ -326,14 +296,11 @@ pub fn setup_keyboard_numbers(
                         );
                     });
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            display: Display::Grid,
-                            justify_items: JustifyItems::Center,
-                            padding: UiRect::all(Val::Px(0.0)),
-                            height: Val::Px(row_height),
-                            ..default()
-                        },
+                    .spawn(Node {
+                        display: Display::Grid,
+                        justify_items: JustifyItems::Center,
+                        padding: UiRect::all(Val::Px(0.0)),
+                        height: Val::Px(row_height),
                         ..default()
                     })
                     .with_children(|builder| {
@@ -347,16 +314,6 @@ pub fn setup_keyboard_numbers(
                             keyboard_row_justification,
                         );
                     });
-                // builder.spawn(NodeBundle {
-                //     style: Style {
-                //         display: Display::Grid,
-                //         justify_items: JustifyItems::Center,
-                //         padding: UiRect::all(Val::Px(0.0)),
-                //         height: Val::Px(row_height),
-                //         ..default()
-                //     },
-                //     ..default()
-                // });
             });
 
             keyboardcmds.set_parent(ent);
@@ -375,8 +332,8 @@ fn spawn_keyboard_row(
     keyboard_row_justification: JustifyContent,
 ) {
     builder
-        .spawn(NodeBundle {
-            style: Style {
+        .spawn((
+            Node {
                 width: Val::Percent(99.5),
                 height: Val::Percent(99.5),
                 flex_direction: FlexDirection::Row,
@@ -394,9 +351,8 @@ fn spawn_keyboard_row(
                 // },
                 ..Default::default()
             },
-            background_color: BackgroundColor(Color::BLACK),
-            ..Default::default()
-        })
+            BackgroundColor(Color::BLACK),
+        ))
         .with_children(|builder| {
             for (key, alt_key) in row_keys.0.chars().zip(row_keys.1.chars()) {
                 keyboard_button(
@@ -437,36 +393,31 @@ fn keyboard_button(
     // }
 
     builder
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                padding: UiRect::horizontal(Val::Px(padding_size)),
-                ..default()
-            },
+        .spawn(Node {
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            padding: UiRect::horizontal(Val::Px(padding_size)),
             ..default()
         })
         .with_children(|parent| {
             //let keyin = key_type.clone();
             parent
                 .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            //size: Size::new(Val::Px(40.0), Val::Px(40.0)),
-                            width: Val::Percent(100.0),
-                            height: Val::Percent(100.0),
-                            // horizontally center child text
-                            justify_content: JustifyContent::Center,
-                            // vertically center child text
-                            align_items: AlignItems::Center,
-                            ..default()
-                        },
-                        border_radius: BorderRadius::all(Val::Px(4.0)),
-                        background_color: button_color.into(),
+                    Button,
+                    Node {
+                        //size: Size::new(Val::Px(40.0), Val::Px(40.0)),
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
+                        // horizontally center child text
+                        justify_content: JustifyContent::Center,
+                        // vertically center child text
+                        align_items: AlignItems::Center,
                         ..default()
                     },
+                    BackgroundColor(button_color.into()),
+                    BorderRadius::all(Val::Px(4.0)),
                     UiInteractionBtn,
                     KeyBoardButton(key, alt_key),
                     //key_type.clone(),
@@ -474,19 +425,18 @@ fn keyboard_button(
                 .with_children(|parent| {
                     let ent_text = parent
                         .spawn((
-                            TextBundle::from_section(
-                                key.to_string(),
-                                TextStyle {
-                                    font,
-                                    font_size,
-                                    color: Color::Srgba(Srgba {
-                                        red: 0.9,
-                                        blue: 0.9,
-                                        green: 0.9,
-                                        alpha: 1.0,
-                                    }),
-                                },
-                            ),
+                            Text::new(key.to_string()),
+                            TextFont {
+                                font,
+                                font_size,
+                                font_smoothing: FontSmoothing::AntiAliased,
+                            },
+                            TextColor(Color::Srgba(Srgba {
+                                red: 0.9,
+                                blue: 0.9,
+                                green: 0.9,
+                                alpha: 1.0,
+                            })),
                             KeyBoardButton(key, alt_key),
                         ))
                         .id();

@@ -8,7 +8,7 @@ use system::{
     change_palette_selection, eraser_palette_button, eyedrop_palette_button, hide_selected_tiles, individual_color_palette_button, move_palette_button, new_color_picked_on_palette_event, pencil_palette_button, trash_palette_button, ui_interaction_enabled_buttons, ui_interaction_released_buttons, view_selected_tiles, viewhide_palette_button
 };
 
-use crate::statey::DisplayBuyUiState;
+use crate::statey::{DisplayBuyUiState, ExploreSceneState};
 
 pub mod component;
 pub mod layout;
@@ -52,7 +52,7 @@ impl Plugin for PaintPalettePlugin {
                 ui_interaction_released_buttons
 
         ).chain())
-        .add_systems(Update, (change_palette_selection).run_if(state_changed::<ToolPaletteUiState>))
+        .add_systems(Update, ((change_palette_selection).run_if(state_changed::<ToolPaletteUiState>)).run_if(in_state(ExploreSceneState::On)))
         // .add_systems(
         //     Update,
         //     .run_if(in_state(ToolPaletteUiState::Eraser))

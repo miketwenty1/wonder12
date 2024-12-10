@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-#[derive(Resource, Clone, Debug)]
+#[derive(Resource, Clone, Debug, Default)]
 pub struct DefaultDrawColorPalette {
     pub colors: Vec<Color>,
 }

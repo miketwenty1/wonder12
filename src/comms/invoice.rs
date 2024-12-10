@@ -2,22 +2,24 @@ use bevy::{prelude::*, tasks::IoTaskPool};
 use serde::Deserialize;
 
 use crate::{
-    async_resource_comm_channels::{CheckInvoiceChannel, RequestInvoiceChannel},
     comms::server_structs::UserGameBlock,
     eventy::{
         BuyBlockRequest, ClearSelectionEvent, HideBackupCopyBtn, ShowBackupCopyBtn,
         UpdateTilesAfterPurchase,
     },
     explore_scene::core_ui::inventory::event::AddInventoryRow,
-   explore_scene::overlay_ui::toast::{ToastEvent, ToastType},
+    explore_scene::overlay_ui::toast::{ToastEvent, ToastType},
     resourcey::{InvoiceCheckFromServer, InvoiceDataFromServer, IsIphone, Nwc, TileCartVec, User},
-    statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState},
+    statey::{CommsApiState, DisplayBuyUiState, ExploreSceneState, ExploreSelectState},
     structy::{ErrorMessage, GameInvoiceData, InvoiceGameBlock},
     utils::{convert_color_to_hexstring, extract_number, logout_user},
     ServerURL,
 };
 
-use super::api_timer::ApiPollingTimer;
+use super::{
+    api_timer::ApiPollingTimer,
+    async_resource_comm_channels::{CheckInvoiceChannel, RequestInvoiceChannel},
+};
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::wasm_bindgen;
@@ -44,6 +46,7 @@ pub fn api_request_invoice(
     nwc: Res<Nwc>,
 ) {
     for _buy_block_data in button_event_reader.read() {
+        info!("received invoice");
         //info!("{:#?}", tile_cart_vec.vec);
         if invoice_data.invoice.is_empty() {
             info!("requested invoice from buy button");
@@ -175,8 +178,8 @@ pub fn api_receive_invoice(
                         // qr_state.set(DisplayInvoiceQr::On);
 
                         // trigger browser extension to pay
-                        let mut event_init = web_sys::CustomEventInit::new();
-                        event_init.detail(&JsValue::from_str(&invoice));
+                        let event_init = web_sys::CustomEventInit::new();
+                        event_init.set_detail(&JsValue::from_str(&invoice));
                         let event =
                             web_sys::CustomEvent::new_with_event_init_dict("weblnpay", &event_init);
 
@@ -285,7 +288,7 @@ pub fn api_receive_invoice_check(
     mut invoice_check_res: ResMut<InvoiceCheckFromServer>,
     api_timer: Res<ApiPollingTimer>,
     mut api_name_set_state: ResMut<NextState<CommsApiState>>,
-    mut game_set_state: ResMut<NextState<ExploreState>>,
+    mut game_set_state: ResMut<NextState<ExploreSceneState>>,
     mut game_select_set_state: ResMut<NextState<ExploreSelectState>>,
     mut qr_set_state: ResMut<NextState<DisplayBuyUiState>>,
     mut invoice_data: ResMut<InvoiceDataFromServer>,
@@ -328,7 +331,7 @@ pub fn api_receive_invoice_check(
                                 inv_event.send(AddInventoryRow(inv));
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
-                                game_set_state.set(ExploreState::On);
+                                game_set_state.set(ExploreSceneState::On);
                                 game_select_set_state.set(ExploreSelectState::On);
                                 clear_event.send(ClearSelectionEvent);
                                 if iphone.0 {
@@ -347,7 +350,7 @@ pub fn api_receive_invoice_check(
                                 info!("expired invoice");
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
-                                game_set_state.set(ExploreState::On);
+                                game_set_state.set(ExploreSceneState::On);
                                 game_select_set_state.set(ExploreSelectState::On);
                                 if iphone.0 {
                                     bkp_clipboard_btn.send(HideBackupCopyBtn);
@@ -364,7 +367,7 @@ pub fn api_receive_invoice_check(
                                 info!("error invoice");
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
-                                game_set_state.set(ExploreState::On);
+                                game_set_state.set(ExploreSceneState::On);
                                 game_select_set_state.set(ExploreSelectState::On);
                                 toast.send(ToastEvent {
                                     ttype: ToastType::Bad,
@@ -375,7 +378,7 @@ pub fn api_receive_invoice_check(
                                 info!("Something very bizaare happened picka2");
                                 api_name_set_state.set(CommsApiState::Off);
                                 qr_set_state.set(DisplayBuyUiState::Off);
-                                game_set_state.set(ExploreState::On);
+                                game_set_state.set(ExploreSceneState::On);
                                 game_select_set_state.set(ExploreSelectState::On);
                                 toast.send(ToastEvent {
                                     ttype: ToastType::Bad,

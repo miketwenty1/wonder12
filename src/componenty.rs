@@ -74,11 +74,11 @@ pub enum BuildingStructure {
     FirePit,
     Waterwell,
 }
-impl Default for BuildingStructure {
-    fn default() -> BuildingStructure {
-        BuildingStructure::None
-    }
-}
+// impl Default for BuildingStructure {
+//     fn default() -> BuildingStructure {
+//         BuildingStructure::None
+//     }
+// }
 
 #[derive(Component)]
 pub struct UiSideNode;

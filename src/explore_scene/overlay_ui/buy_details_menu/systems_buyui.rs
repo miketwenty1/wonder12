@@ -19,7 +19,7 @@ use crate::{
         ColorPalette, ConfigAllCartBlocks, CurrentCartBlock, TargetType, TileCartVec,
         ToggleVisible, User,
     },
-    statey::{ExploreSelectState, ExploreState},
+    statey::{ExploreSceneState, ExploreSelectState},
     utils::is_valid_email_format_string,
     DisplayBuyUiState,
 };
@@ -44,26 +44,23 @@ pub fn update_messages_ui_system(
                 commands.entity(message_item.0).despawn_recursive();
             }
 
-            match &cart.vec[cart.index].messages {
-                Some(s) => {
-                    if !s.is_empty() {
-                        for mut style in message_showhide_q.iter_mut() {
-                            style.display = Display::Grid;
-                        }
-                    }
-                    for node in message_placement_q.iter() {
-                        commands.entity(node).with_children(|child_builder| {
-                            spawn_messages(
-                                child_builder,
-                                font.clone(),
-                                s.to_vec(),
-                                16.0,
-                                colors.clone(),
-                            );
-                        });
+            if let Some(s) = &cart.vec[cart.index].messages {
+                if !s.is_empty() {
+                    for mut style in message_showhide_q.iter_mut() {
+                        style.display = Display::Grid;
                     }
                 }
-                None => {}
+                for node in message_placement_q.iter() {
+                    commands.entity(node).with_children(|child_builder| {
+                        spawn_messages(
+                            child_builder,
+                            font.clone(),
+                            s.to_vec(),
+                            16.0,
+                            colors.clone(),
+                        );
+                    });
+                }
             };
         }
     }
@@ -152,21 +149,18 @@ pub fn leftright_cart_button_system(
                         commands.entity(message_item.0).despawn_recursive();
                     }
 
-                    match &cart.vec[cart.index].messages {
-                        Some(s) => {
-                            for node in message_placement_q.iter() {
-                                commands.entity(node).with_children(|child_builder| {
-                                    spawn_messages(
-                                        child_builder,
-                                        font.clone(),
-                                        s.to_vec(),
-                                        16.0,
-                                        colors.clone(),
-                                    );
-                                });
-                            }
+                    if let Some(s) = &cart.vec[cart.index].messages {
+                        for node in message_placement_q.iter() {
+                            commands.entity(node).with_children(|child_builder| {
+                                spawn_messages(
+                                    child_builder,
+                                    font.clone(),
+                                    s.to_vec(),
+                                    16.0,
+                                    colors.clone(),
+                                );
+                            });
                         }
-                        None => {}
                     };
 
                     match cart.vec[cart.index].value {
@@ -528,7 +522,7 @@ pub fn back_button_system(
     >,
     //mut text_query: Query<&mut Text>,
     mut overlay_state: ResMut<NextState<DisplayBuyUiState>>,
-    mut explore_state: ResMut<NextState<ExploreState>>,
+    mut explore_state: ResMut<NextState<ExploreSceneState>>,
     mut explore_select_state: ResMut<NextState<ExploreSelectState>>,
     mut keyboard_state: ResMut<NextState<KeyboardState>>,
     colors: Res<ColorPalette>,
@@ -541,7 +535,7 @@ pub fn back_button_system(
             Interaction::Pressed => {
                 *color = colors.light_color.into();
                 //text.sections[0].value = button_text;
-                explore_state.set(ExploreState::On);
+                explore_state.set(ExploreSceneState::On);
                 explore_select_state.set(ExploreSelectState::On);
                 keyboard_state.set(KeyboardState::Off);
                 // help with jumpiness when leaving this screen - hopefully

@@ -26,27 +26,24 @@ pub fn spawn_road(
         ulam::Quad::NorthWest => (3, RADIAN_90 * 2.),
         ulam::Quad::Center => (2, 0.0),
     };
+    let transform = Transform {
+        translation: Vec3::new(0., 0., 2.),
+        // scale: Vec3::new(TILE_SCALE, TILE_SCALE, 1.0),
+        rotation: Quat::from_rotation_z(road.1),
+        ..Default::default()
+    };
     builder.spawn((
-        SpriteBundle {
-            sprite: Sprite {
-                color,
-                ..Default::default()
-            },
-            transform: Transform {
-                translation: Vec3::new(0., 0., 2.),
-                // scale: Vec3::new(TILE_SCALE, TILE_SCALE, 1.0),
-                rotation: Quat::from_rotation_z(road.1),
-                ..Default::default()
-            },
-            texture: texture.clone(),
-            visibility,
+        Sprite {
+            color,
+            image: texture.clone(),
+            texture_atlas: Some(TextureAtlas {
+                layout: layout.clone(),
+                index: road.0 + offset,
+            }),
             ..Default::default()
         },
+        visibility,
         BuildingStructure::Road,
         locationcoord,
-        TextureAtlas {
-            layout: layout.clone(),
-            index: road.0 + offset,
-        },
     ));
 }

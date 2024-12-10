@@ -26,11 +26,18 @@ pub enum CommsApiInventoryState {
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-pub enum ExploreState {
+pub enum ExploreSceneState {
     On,
     #[default]
     Off,
     Paused,
+}
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum InitSceneState {
+    #[default]
+    On,
+    Done,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]

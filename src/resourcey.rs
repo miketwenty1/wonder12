@@ -409,7 +409,7 @@ pub struct TileCartVec {
     pub index: usize,
 }
 
-#[derive(Resource, Clone)]
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct SpriteIndexBuilding(pub HashMap<u32, u32>);
 
 #[derive(Resource, Clone)]
@@ -464,7 +464,7 @@ pub struct User {
     pub name: String,
 }
 
-#[derive(Resource, Clone)]
+#[derive(Resource, Clone, Debug, Default, Deserialize)]
 pub struct ToggleMap(pub HashMap<String, bool>);
 
 #[derive(Resource, Clone, PartialEq)]
@@ -594,10 +594,10 @@ pub enum ColorMapToggle {
     Version,
 }
 
-#[derive(Resource, Clone, PartialEq, Debug)]
-pub enum ZoomSpawnEvent {
-    NoText,
-    NoBuildings,
-    YesText,
-    YesBuildings,
-}
+// #[derive(Resource, Clone, PartialEq, Debug)]
+// pub enum ZoomSpawnEvent {
+//     NoText,
+//     NoBuildings,
+//     YesText,
+//     YesBuildings,
+// }

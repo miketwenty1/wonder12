@@ -28,8 +28,8 @@ use zoom::zoom_wheel_system;
 use crate::{
     componenty::InitLoadingNode,
     despawn_screen,
-    statey::{ExploreSelectState, InitLoadingBlocksState},
-    ExploreState,
+    statey::{ExploreSelectState, InitLoadingBlocksState, InitSceneState},
+    ExploreSceneState,
 };
 
 use self::{
@@ -71,8 +71,8 @@ impl Plugin for ExplorePlugin {
             .init_resource::<CronPollingTimer>()
             // OnEnter State Systems
             .add_systems(
-                OnEnter(ExploreState::On),
-                (init_explorer).run_if(run_once()),
+                OnEnter(ExploreSceneState::On),
+                (init_explorer, edge_system).run_if(run_once()),
             )
             .add_systems(
                 Update,
@@ -127,14 +127,14 @@ impl Plugin for ExplorePlugin {
                     draw_button_system,
                     go_to_button_system,
                 )
-                    .run_if(in_state(ExploreState::On)),
+                    .run_if(in_state(ExploreSceneState::On)),
             )
             .add_systems(
                 Update,
                 (
                     (select_tile.run_if(in_state(PaintPaletteUiState::Off))),
                     apply_deferred,
-                    update_amount_selected_text,
+                    (update_amount_selected_text).run_if(in_state(ExploreSceneState::On)),
                 )
                     .chain()
                     .run_if(in_state(ExploreSelectState::On)),
@@ -142,15 +142,18 @@ impl Plugin for ExplorePlugin {
             .add_systems(
                 Update,
                 (
-                    update_tile_textures,
-                    animate_sprites,
                     cron_update_tiles.run_if(in_state(InitLoadingBlocksState::Off)),
-                    tick_update_tile_cron_timer,
-                    update_tiles_after_purchase,
-                    cam_ortho_scale_text_visibility,
-                    travel_event,
+                    (
+                        update_tile_textures,
+                        animate_sprites,
+                        tick_update_tile_cron_timer,
+                        update_tiles_after_purchase,
+                        travel_event,
+                        cam_ortho_scale_text_visibility,
+                    )
+                        .run_if(in_state(ExploreSceneState::On)),
                 ),
             );
-        //.add_systems(OnExit(ExploreState::On), reset_mouse);
+        //.add_systems(OnExit(ExploreSceneState::On), reset_mouse);
     }
 }

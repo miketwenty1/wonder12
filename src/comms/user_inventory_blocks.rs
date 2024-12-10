@@ -1,5 +1,5 @@
 use super::api_timer::ApiPollingTimer;
-use crate::async_resource_comm_channels::UserBlockInventoryChannel;
+use super::async_resource_comm_channels::UserBlockInventoryChannel;
 use crate::eventy::RequestInventoryEvent;
 use crate::explore_scene::core_ui::inventory::state::InventoryUiState;
 use crate::explore_scene::overlay_ui::toast::{ToastEvent, ToastType};

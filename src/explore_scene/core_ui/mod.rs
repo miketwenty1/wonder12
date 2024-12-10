@@ -4,7 +4,7 @@ use inventory::InventoryMenuPlugin;
 use paint_palette::PaintPalettePlugin;
 use ui_right::{toggle_game_children, toggle_magnify_children};
 
-use crate::statey::ExploreState;
+use crate::statey::ExploreSceneState;
 
 use self::{
     overall_ui::ui_explorer, ui_bottom::bottom_ui, ui_left::left_ui, ui_right::right_ui,
@@ -27,7 +27,7 @@ pub struct ExploreUiPlugin;
 impl Plugin for ExploreUiPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            OnEnter(ExploreState::On),
+            OnEnter(ExploreSceneState::On),
             (((
                 ui_explorer,
                 top_ui,

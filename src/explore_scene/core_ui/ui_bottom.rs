@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, text::FontSmoothing};
 
 use crate::{
     componenty::{
@@ -22,134 +22,130 @@ pub fn bottom_ui(
     for parent_node in placement_query.iter() {
         commands
             .spawn((
-                ButtonBundle {
-                    style: Style {
-                        width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                        border: UiRect::all(Val::Px(2.0)),
-                        // horizontally center child text
-                        justify_content: JustifyContent::Center,
-                        // vertically center child text
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    border_color: BorderColor(colors.lite_button_color),
-                    background_color: colors.button_color.into(),
-                    visibility: Visibility::Hidden,
+                Button,
+                Node {
+                    width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                    height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+                    border: UiRect::all(Val::Px(2.0)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
                     ..default()
                 },
+                BackgroundColor(colors.button_color.into()),
+                BorderColor(colors.lite_button_color),
+                Visibility::Hidden,
                 UiInteractionBtn,
                 ClearSelectionButton,
                 SelectedTileUi,
                 UiOverlayingExplorerButton,
             ))
             .with_children(|parent| {
-                parent.spawn(TextBundle::from_section(
-                    "Clear",
-                    TextStyle {
+                parent.spawn((
+                    Text::new("Clear"),
+                    TextFont {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: UI_MEDIUM_TEXT_SIZE,
-                        color: colors.text_color,
+                        font_smoothing: FontSmoothing::AntiAliased,
                     },
+                    TextColor(colors.text_color),
                 ));
             })
             .set_parent(parent_node);
 
         commands
             .spawn((
-                ButtonBundle {
-                    style: Style {
-                        width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                        border: UiRect::all(Val::Px(2.0)),
-                        // horizontally center child text
-                        justify_content: JustifyContent::Center,
-                        // vertically center child text
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    border_color: BorderColor(colors.lite_button_color),
-                    background_color: colors.button_color.into(),
+                Button,
+                Node {
+                    width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                    height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+                    border: UiRect::all(Val::Px(2.0)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
                     ..default()
                 },
+                BackgroundColor(colors.button_color.into()),
+                BorderColor(colors.lite_button_color),
                 UiInteractionBtn,
                 ZoomOutButton,
                 UiOverlayingExplorerButton,
             ))
             .with_children(|parent| {
-                parent.spawn(TextBundle::from_section(
-                    "-",
-                    TextStyle {
+                parent.spawn((
+                    Text::new("-"),
+                    TextFont {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: UI_LARGE_TEXT_SIZE,
-                        color: colors.text_color,
+                        font_smoothing: FontSmoothing::AntiAliased,
                     },
+                    TextColor(colors.text_color),
                 ));
             })
             .set_parent(parent_node);
         commands
             .spawn((
-                ButtonBundle {
-                    style: Style {
-                        width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                        border: UiRect::all(Val::Px(2.0)),
-                        // horizontally center child text
-                        justify_content: JustifyContent::Center,
-                        // vertically center child text
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    border_color: BorderColor(colors.lite_button_color),
-                    background_color: colors.button_color.into(),
+                Button,
+                Node {
+                    width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                    height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+                    border: UiRect::all(Val::Px(2.0)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
                     ..default()
                 },
+                BorderColor(colors.lite_button_color),
+                BackgroundColor(colors.button_color.into()),
                 UiInteractionBtn,
                 ZoomInButton,
                 UiOverlayingExplorerButton,
             ))
             .with_children(|parent| {
-                parent.spawn(TextBundle::from_section(
-                    "+",
-                    TextStyle {
+                parent.spawn((
+                    Text::new("+"),
+                    TextFont {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: UI_LARGE_TEXT_SIZE,
-                        color: colors.text_color,
+                        font_smoothing: FontSmoothing::AntiAliased,
                     },
+                    TextColor(colors.text_color),
                 ));
             })
             .set_parent(parent_node);
         commands
             .spawn((
-                ButtonBundle {
-                    style: Style {
-                        width: Val::Px(UI_LARGE_BUTTON_WIDTH),
-                        height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
-                        border: UiRect::all(Val::Px(2.0)),
-                        // horizontally center child text
-                        justify_content: JustifyContent::Center,
-                        // vertically center child text
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    border_color: BorderColor(colors.lite_button_color),
-                    background_color: colors.button_color.into(),
-                    visibility: Visibility::Hidden,
+                Button,
+                Node {
+                    width: Val::Px(UI_LARGE_BUTTON_WIDTH),
+                    height: Val::Px(UI_LARGE_BUTTON_HEIGHT),
+                    border: UiRect::all(Val::Px(2.0)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
                     ..default()
                 },
+                BackgroundColor(colors.button_color.into()),
+                Visibility::Hidden,
+                BorderColor(colors.lite_button_color),
                 UiInteractionBtn,
                 UiOverlayingExplorerButton,
                 BuySelectionButton,
                 SelectedTileUi,
             ))
             .with_children(|parent| {
-                parent.spawn(TextBundle::from_section(
-                    "Buy",
-                    TextStyle {
+                parent.spawn((
+                    Text::new("Buy"),
+                    TextFont {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: UI_MEDIUM_TEXT_SIZE,
-                        color: colors.text_color,
+                        font_smoothing: FontSmoothing::AntiAliased,
                     },
+                    TextColor(colors.text_color),
                 ));
             })
             .set_parent(parent_node);

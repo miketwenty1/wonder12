@@ -222,10 +222,10 @@ pub fn virtual_capitalize_system(
         for (mut text, char_comp) in &mut letter_query {
             if !c_toggle.0 {
                 //info!("first one");
-                text.sections[0].value = char_comp.0.to_string();
+                **text = char_comp.0.to_string();
             } else {
                 //info!("second one");
-                text.sections[0].value = char_comp.1.to_string();
+                **text = char_comp.1.to_string();
             }
         }
     }

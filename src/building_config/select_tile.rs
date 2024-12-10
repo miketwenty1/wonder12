@@ -13,24 +13,24 @@ pub fn spawn(
     locationcoord: Location,
 ) {
     let animation_indices = AnimationIndices { first: 0, last: 7 };
-    //info!("spawn select");
+    let transform = Transform {
+        translation: Vec3::new(0., 0., 10.),
+        scale: Vec3::new(1.0, 1.0, 1.0),
+        ..Default::default()
+    };
     builder.spawn((
-        SpriteBundle {
-            transform: Transform {
-                translation: Vec3::new(0., 0., 10.),
-                scale: Vec3::new(1.0, 1.0, 1.0),
-                ..Default::default()
-            },
-            texture: texture.clone(),
+        Sprite {
+            texture_atlas: Some(TextureAtlas {
+                layout: layout.clone(),
+                index: animation_indices.first,
+            }),
+            image: texture.clone(),
             ..Default::default()
         },
         ManualSelected,
         Selected(bevy::prelude::Color::Srgba(get_random_color())),
         locationcoord,
-        TextureAtlas {
-            layout: layout.clone(),
-            index: animation_indices.first,
-        },
+        transform,
         animation_indices,
         AnimationTimer(Timer::from_seconds(0.25, TimerMode::Repeating)),
     ));

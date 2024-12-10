@@ -1,7 +1,7 @@
 use bevy::{color::palettes::css::WHITE, prelude::*};
 use rand::Rng;
 
-use crate::componenty::Location;
+use crate::{componenty::Location, consty::SCALE_FACTOR};
 
 use super::building_templates::{firepit::spawn_firepit, hut::spawn_hut, road::spawn_road};
 
@@ -26,7 +26,7 @@ pub fn spawn(
         locationcoord,
         visibility_toggle,
         Vec3::new(x, y, 3.0),
-        Some(1.4),
+        Some(1.4 * SCALE_FACTOR / 3.0),
     );
 
     let x: f32 = rng.gen_range(-10.0..-3.0);
@@ -40,7 +40,7 @@ pub fn spawn(
         locationcoord,
         visibility_toggle,
         Vec3::new(x, y, 3.0),
-        Some(0.85),
+        Some(0.85 * SCALE_FACTOR / 3.0),
     );
     let x: f32 = rng.gen_range(1.0..5.0);
     let y: f32 = rng.gen_range(-7.0..-4.0);
@@ -52,7 +52,7 @@ pub fn spawn(
         locationcoord,
         visibility_toggle,
         Vec3::new(x, y, 4.0),
-        Some(0.66),
+        Some(0.66 * SCALE_FACTOR / 3.0),
     );
 
     spawn_road(

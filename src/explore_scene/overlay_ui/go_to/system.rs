@@ -4,7 +4,7 @@ use crate::{
     eventy::TravelHeight,
     keyboard::{resources::KeyboardData, KeyboardState},
     resourcey::{ColorPalette, MaxBlockHeight, TargetType},
-    statey::{ExploreSelectState, ExploreState},
+    statey::{ExploreSelectState, ExploreSceneState},
 };
 
 use super::{
@@ -20,7 +20,7 @@ pub fn back_button_system(
     >,
     //mut text_query: Query<&mut Text>,
     mut overlay_state: ResMut<NextState<GoToUiState>>,
-    mut explore_state: ResMut<NextState<ExploreState>>,
+    mut explore_state: ResMut<NextState<ExploreSceneState>>,
     mut explore_select_state: ResMut<NextState<ExploreSelectState>>,
     mut keyboard_state: ResMut<NextState<KeyboardState>>,
     colors: Res<ColorPalette>,
@@ -37,7 +37,7 @@ pub fn back_button_system(
                 keyboard.target = TargetType::Nothing;
                 keyboard.value = "".to_string();
                 overlay_state.set(GoToUiState::Off);
-                explore_state.set(ExploreState::On);
+                explore_state.set(ExploreSceneState::On);
                 explore_select_state.set(ExploreSelectState::On);
                 keyboard_state.set(KeyboardState::Off);
             }

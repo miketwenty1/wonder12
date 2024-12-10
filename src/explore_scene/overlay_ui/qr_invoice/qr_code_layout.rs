@@ -5,6 +5,7 @@ use bevy::{
         render_resource::{Extent3d, TextureDimension, TextureFormat},
         texture::BevyDefault,
     },
+    text::FontSmoothing,
 };
 
 use qrcode_generator::QrCodeEcc;
@@ -64,30 +65,27 @@ pub fn spawn_qr(
     // main qr
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_content: AlignContent::Center,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    justify_items: JustifyItems::Center,
-                    ..default()
-                },
-                background_color: BackgroundColor(Color::Srgba(Srgba {
-                    red: 1.,
-                    green: 1.,
-                    blue: 1.,
-                    alpha: 0.,
-                })),
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                align_content: AlignContent::Center,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                justify_items: JustifyItems::Center,
                 ..default()
             },
+            BackgroundColor(Color::Srgba(Srgba {
+                red: 1.,
+                green: 1.,
+                blue: 1.,
+                alpha: 0.,
+            })),
             QrInvoiceOverlay,
         ))
         // the actual qr code box wrapper
         .with_children(|builder2| {
-            let mut inner_builder = builder2.spawn(NodeBundle {
-                style: Style {
+            let mut inner_builder = builder2.spawn((
+                Node {
                     flex_direction: FlexDirection::Column,
                     width: Val::Px(300.0),
                     height: Val::Px(360.0),
@@ -97,16 +95,15 @@ pub fn spawn_qr(
                     justify_items: JustifyItems::Center,
                     margin: UiRect::all(Val::Px(0.0)),
                     padding: UiRect::all(Val::Px(0.0)),
-                    ..default()
+                    ..Default::default() // style: Style {
                 },
-                background_color: BackgroundColor(colors.node_color),
-                ..Default::default() // style: Style {
-            });
+                BackgroundColor(colors.node_color),
+            ));
             // top row
             inner_builder.with_children(|builder| {
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
+                    .spawn((
+                        Node {
                             flex_direction: FlexDirection::Row,
                             width: Val::Percent(100.0),
                             // height: Val::Percent(100.0),
@@ -118,13 +115,12 @@ pub fn spawn_qr(
                             padding: UiRect::all(Val::Px(0.0)),
                             ..default()
                         },
-                        background_color: BackgroundColor(colors.node_color),
-                        ..default()
-                    })
+                        BackgroundColor(colors.node_color),
+                    ))
                     .with_children(|row_node| {
                         row_node
-                            .spawn(NodeBundle {
-                                style: Style {
+                            .spawn((
+                                Node {
                                     width: Val::Percent(100.0),
                                     // height: Val::Percent(100.0),
                                     align_content: AlignContent::Center,
@@ -135,27 +131,25 @@ pub fn spawn_qr(
                                     padding: UiRect::all(Val::Px(0.0)),
                                     ..default()
                                 },
-                                background_color: BackgroundColor(colors.node_color),
-                                ..default()
-                            })
+                                BackgroundColor(colors.node_color),
+                            ))
                             .with_children(|left| {
                                 left.spawn((
-                                    TextBundle::from_section(
-                                        "",
-                                        TextStyle {
-                                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                            font_size: 16.0,
-                                            color: colors.text_color,
-                                        },
-                                    ),
+                                    Text::new(""),
+                                    TextFont {
+                                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                        font_size: 16.0,
+                                        font_smoothing: FontSmoothing::AntiAliased,
+                                    },
+                                    TextColor(colors.text_color),
                                     ExpirationQrText,
                                 ));
                             });
                     })
                     .with_children(|row_node| {
                         row_node
-                            .spawn(NodeBundle {
-                                style: Style {
+                            .spawn((
+                                Node {
                                     width: Val::Percent(50.0),
                                     // height: Val::Percent(100.0),
                                     align_content: AlignContent::Center,
@@ -166,35 +160,32 @@ pub fn spawn_qr(
                                     padding: UiRect::all(Val::Px(0.0)),
                                     ..default()
                                 },
-                                background_color: BackgroundColor(colors.node_color),
-                                ..default()
-                            })
+                                BackgroundColor(colors.node_color),
+                            ))
                             .with_children(|right| {
                                 right
                                     .spawn((
-                                        ButtonBundle {
-                                            style: Style {
-                                                width: Val::Px(20.0),
-                                                height: Val::Px(20.0),
-                                                //justify_content: JustifyContent::Center,
-                                                align_items: AlignItems::Center,
-                                                align_content: AlignContent::Center,
-                                                justify_items: JustifyItems::Center,
-                                                justify_content: JustifyContent::Center,
-                                                ..default()
-                                            },
-                                            background_color: colors.button_color.into(),
+                                        Button,
+                                        Node {
+                                            width: Val::Px(20.0),
+                                            height: Val::Px(20.0),
+                                            //justify_content: JustifyContent::Center,
+                                            align_items: AlignItems::Center,
+                                            align_content: AlignContent::Center,
+                                            justify_items: JustifyItems::Center,
+                                            justify_content: JustifyContent::Center,
                                             ..default()
                                         },
+                                        BackgroundColor(colors.button_color.into()),
                                         CancelQrButton,
                                     ))
                                     .with_children(|ccbuilder| {
-                                        ccbuilder.spawn(TextBundle::from_section(
-                                            "X",
-                                            TextStyle {
+                                        ccbuilder.spawn((
+                                            Text::new("X"),
+                                            TextFont {
                                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                                 font_size: 16.0,
-                                                color: colors.text_color,
+                                                font_smoothing: FontSmoothing::AntiAliased,
                                             },
                                         ));
                                     });

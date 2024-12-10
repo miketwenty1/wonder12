@@ -13,26 +13,24 @@ pub fn spawn(
     locationcoord: Location,
     color: Color,
 ) {
+    let transform = Transform {
+        translation: Vec3::new(0., 0., 10.),
+        scale: Vec3::new(1.0, 1.0, 1.0),
+        ..Default::default()
+    };
     builder.spawn((
-        SpriteBundle {
-            sprite: Sprite {
-                color,
-                ..Default::default()
-            },
-            transform: Transform {
-                translation: Vec3::new(0., 0., 10.),
-                scale: Vec3::new(1.0, 1.0, 1.0),
-                ..Default::default()
-            },
-            texture: texture.clone(),
+        Sprite {
+            color,
+            image: texture.clone(),
+            texture_atlas: Some(TextureAtlas {
+                layout: layout.clone(),
+                index: INDEX_WHITE_LAND,
+            }),
             ..Default::default()
         },
+        transform,
         DrawSelected,
         Selected(color),
         locationcoord,
-        TextureAtlas {
-            layout: layout.clone(),
-            index: INDEX_WHITE_LAND,
-        },
     ));
 }

@@ -1,6 +1,6 @@
 use super::api_timer::ApiPollingTimer;
+use super::async_resource_comm_channels::TileDataChannel;
 use super::server_structs::GameBlockDataFromDBMod;
-use crate::async_resource_comm_channels::TileDataChannel;
 use crate::browser::event::WriteBrowserStorage;
 use crate::comms::server_structs::UserGameBlock;
 use crate::eventy::{DespawnInventoryHeights, RequestTileUpdates};

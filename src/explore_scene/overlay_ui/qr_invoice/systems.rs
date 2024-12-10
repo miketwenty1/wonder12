@@ -6,7 +6,7 @@ use crate::{
     componenty::{CancelQrButton, ClipboardBtn, ExpirationQrText},
     eventy::{HideBackupCopyBtn, ShowBackupCopyBtn},
     resourcey::{ColorPalette, InvoiceDataFromServer, IsIphone},
-    statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreState},
+    statey::{CommsApiState, DisplayBuyUiState, ExploreSelectState, ExploreSceneState},
 };
 
 use wasm_bindgen::prelude::*;
@@ -67,60 +67,58 @@ pub fn clipboard_button_system(
                     let _task = spawn_local(async move {
                         let window: web_sys::Window = web_sys::window().expect("window"); // { obj: val };
 
-                        let nav = window.navigator().clipboard();
-                        match nav {
-                            Some(a) => {
-                                let navigator: NavigatorExt =
-                                    web_sys::window().unwrap().navigator().unchecked_into();
-                                let is_active: bool = navigator.user_activation().is_active();
-                                info!("is_active? {}", is_active);
-                                let is_secure = window.is_secure_context();
-                                info!("is_secure_context? {}", is_secure);
-                                // let clean_invoice = invoice
-                                // .strip_prefix("lightning:")
-                                // .unwrap_or_else(|| &invoice);
-                                let p = a.write_text(&invoice);
+                        let nav: web_sys::Clipboard = window.navigator().clipboard();
+                        if !nav.is_falsy() {
+                            let navigator: NavigatorExt =
+                                web_sys::window().unwrap().navigator().unchecked_into();
+                            let is_active: bool = navigator.user_activation().is_active();
+                            info!("is_active? {}", is_active);
+                            let is_secure = window.is_secure_context();
+                            info!("is_secure_context? {}", is_secure);
+                            // let clean_invoice = invoice
+                            // .strip_prefix("lightning:")
+                            // .unwrap_or_else(|| &invoice);
+                            let p = nav.write_text(&invoice);
 
-                                let result = wasm_bindgen_futures::JsFuture::from(p).await;
+                            let result = wasm_bindgen_futures::JsFuture::from(p).await;
 
-                                match result {
-                                    Ok(_) => {
-                                        info!("clippyboy worked")
-                                    }
-                                    Err(e) => {
-                                        info!("clipboard fail {:?}", e);
-                                        let item_data = Object::new();
-                                        let item_value = Blob::new_with_blob_sequence_and_options(
-                                            &Array::of1(&invoice.into()),
-                                            BlobPropertyBag::new().type_("text/plain"),
-                                        )
-                                        .unwrap();
-                                        js_sys::Reflect::set(
-                                            &item_data,
-                                            &"text/plain".into(),
-                                            &item_value,
-                                        )
-                                        .unwrap();
-                                        let item = ClipboardItem::new(&item_data);
-                                        let p2 = a.write(&Array::of1(&item));
-                                        let result2 =
-                                            wasm_bindgen_futures::JsFuture::from(p2).await;
+                            match result {
+                                Ok(_) => {
+                                    info!("clippyboy worked")
+                                }
+                                Err(e) => {
+                                    let blob = BlobPropertyBag::new();
+                                    blob.set_type("text/plain");
+                                    info!("clipboard fail {:?}", e);
+                                    let item_data = Object::new();
+                                    let item_value = Blob::new_with_blob_sequence_and_options(
+                                        &Array::of1(&invoice.into()),
+                                        &blob,
+                                    )
+                                    .unwrap();
+                                    js_sys::Reflect::set(
+                                        &item_data,
+                                        &"text/plain".into(),
+                                        &item_value,
+                                    )
+                                    .unwrap();
+                                    let item = ClipboardItem::new(&item_data);
+                                    let p2 = nav.write(&Array::of1(&item));
+                                    let result2 = wasm_bindgen_futures::JsFuture::from(p2).await;
 
-                                        match result2 {
-                                            Ok(_) => {
-                                                info!("second copy method worked");
-                                            }
-                                            Err(e) => {
-                                                info!("second copy method also failed {:#?}, going to give you a html copy button instead", e);
-                                            }
+                                    match result2 {
+                                        Ok(_) => {
+                                            info!("second copy method worked");
+                                        }
+                                        Err(e) => {
+                                            info!("second copy method also failed {:#?}, going to give you a html copy button instead", e);
                                         }
                                     }
                                 }
                             }
-                            None => {
-                                warn!("failed to get a clipboard");
-                            }
-                        };
+                        } else {
+                            warn!("failed to get a clipboard");
+                        }
                     });
                 }
             }
@@ -143,7 +141,7 @@ pub fn cancel_qr_button_system(
         (Changed<Interaction>, With<CancelQrButton>),
     >,
     colors: Res<ColorPalette>,
-    mut explore_state: ResMut<NextState<ExploreState>>,
+    mut explore_state: ResMut<NextState<ExploreSceneState>>,
     mut explore_select_state: ResMut<NextState<ExploreSelectState>>,
     mut ui_state: ResMut<NextState<DisplayBuyUiState>>,
     mut comms_state: ResMut<NextState<CommsApiState>>,
@@ -154,7 +152,7 @@ pub fn cancel_qr_button_system(
         match *interaction {
             Interaction::Pressed => {
                 *color = colors.light_color.into();
-                explore_state.set(ExploreState::On);
+                explore_state.set(ExploreSceneState::On);
                 explore_select_state.set(ExploreSelectState::On);
                 ui_state.set(DisplayBuyUiState::Off);
                 comms_state.set(CommsApiState::Off);

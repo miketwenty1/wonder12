@@ -23,7 +23,7 @@ impl Plugin for BrowserPlugin {
             .add_systems(Update, write_local_storage)
             .add_systems(
                 OnEnter(InitLoadingBlocksState::LocalBrowserStorage),
-                (request_local_storage).run_if(run_once()),
+                (request_local_storage).run_if(run_once),
             )
             .add_systems(
                 Update,
@@ -32,7 +32,7 @@ impl Plugin for BrowserPlugin {
             )
             .add_systems(
                 OnEnter(InitLoadingBlocksState::IndexedDB),
-                (request_indexeddb_storage).run_if(run_once()),
+                (request_indexeddb_storage).run_if(run_once),
             )
             .add_systems(
                 Update,

@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::statey::ExploreSceneState;
+
 use self::{
     cleanup::cleanup_keyboard_system,
     event::ToggleKeyboardEvent,
@@ -58,7 +60,10 @@ impl Plugin for KeyboardPlugin {
                 )
                     .run_if(in_state(KeyboardState::On)),
             )
-            .add_systems(Update, (setup_keyboard, setup_keyboard_numbers))
+            .add_systems(
+                Update,
+                (setup_keyboard, setup_keyboard_numbers).run_if(in_state(ExploreSceneState::On)),
+            )
             .add_systems(
                 OnExit(KeyboardState::On),
                 cleanup_keyboard_system, //(despawn_screen::<KeyBoard>, cleanup_keyboard_system),

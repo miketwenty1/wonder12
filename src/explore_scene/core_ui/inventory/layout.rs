@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, text::FontSmoothing};
 
 use crate::{
     comms::server_structs::UserGameBlock,
@@ -41,36 +41,36 @@ pub fn spawn_layout(
         info!("spawn inventory layout");
         let font = asset_server.load("fonts/FiraSans-Bold.ttf");
         let mut overall_inventory_node = commands.spawn((
-            NodeBundle {
-                style: Style {
-                    display,
-                    //height: Val::Percent(100.0),
-                    // grid_template_columns: vec![GridTrack::auto()],
-                    // grid_template_rows: vec![
-                    //     GridTrack::min_content(),
-                    //     GridTrack::min_content(),
-                    //     GridTrack::min_content(),
-                    // ],
-                    justify_items: JustifyItems::Start,
-                    justify_self: JustifySelf::Start,
-                    flex_direction: FlexDirection::Column,
-                    // padding: UiRect::all(Val::Px(4.0)),
-                    margin: UiRect::bottom(Val::Auto),
+            Node {
+                // style: Style {
+                display,
+                //height: Val::Percent(100.0),
+                // grid_template_columns: vec![GridTrack::auto()],
+                // grid_template_rows: vec![
+                //     GridTrack::min_content(),
+                //     GridTrack::min_content(),
+                //     GridTrack::min_content(),
+                // ],
+                justify_items: JustifyItems::Start,
+                justify_self: JustifySelf::Start,
+                flex_direction: FlexDirection::Column,
+                // padding: UiRect::all(Val::Px(4.0)),
+                margin: UiRect::bottom(Val::Auto),
 
-                    ..default()
-                },
+                //  ..default()
+                //},
                 //visibility,
-                background_color: BackgroundColor(colors.node_color_lighter), //colors.node_color),
                 ..default()
             },
+            BackgroundColor(colors.node_color_lighter),
             InventoryNode,
         ));
 
         // inventory text row
         overall_inventory_node.with_children(|builder| {
             builder
-                .spawn(NodeBundle {
-                    style: Style {
+                .spawn((
+                    Node {
                         display: Display::Flex,
                         // grid_template_columns: vec![GridTrack::auto(), GridTrack::auto()],
                         // grid_template_rows: vec![GridTrack::auto()],
@@ -80,64 +80,58 @@ pub fn spawn_layout(
                         margin: UiRect::all(Val::Px(4.0)),
                         ..default()
                     },
-                    background_color: BackgroundColor(colors.node_color),
-                    ..default()
-                })
+                    BackgroundColor(colors.node_color),
+                ))
                 .with_children(|child_builder| {
                     // inventory text
                     child_builder
-                        .spawn(NodeBundle {
-                            style: Style {
+                        .spawn((
+                            Node {
                                 display: Display::Flex,
                                 padding: UiRect::all(Val::Px(4.0)),
                                 margin: UiRect::all(Val::Px(4.0)),
                                 ..default()
                             },
-                            background_color: BackgroundColor(colors.node_color),
-                            ..default()
-                        })
+                            BackgroundColor(colors.node_color),
+                        ))
                         .with_children(|inner| {
-                            inner.spawn(TextBundle::from_section(
-                                "Inventory",
-                                TextStyle {
+                            inner.spawn((
+                                Text::new("Inventory"),
+                                TextFont {
                                     font: font.clone(),
                                     font_size: UI_MEDIUM_TEXT_SIZE,
-                                    color: colors.text_color,
+                                    font_smoothing: FontSmoothing::AntiAliased,
                                 },
+                                TextColor(colors.text_color),
                             ));
                         });
                     //where button will live
                     child_builder
-                        .spawn(NodeBundle {
-                            style: Style {
+                        .spawn((
+                            Node {
                                 display: Display::Flex,
                                 padding: UiRect::all(Val::Px(4.0)),
                                 margin: UiRect::all(Val::Px(4.0)),
                                 ..default()
                             },
-                            background_color: BackgroundColor(colors.node_color),
-                            ..default()
-                        })
+                            BackgroundColor(colors.node_color),
+                        ))
                         .with_children(|inner| {
                             inner.spawn((
-                                ButtonBundle {
-                                    style: Style {
-                                        width: Val::Px(20.0),
-                                        height: Val::Px(20.0),
-                                        // horizontally center child text
-                                        justify_content: JustifyContent::Center,
-                                        // vertically center child text
-                                        align_items: AlignItems::Center,
-                                        border: UiRect::all(Val::Px(2.0)),
-                                        ..default()
-                                    },
-                                    border_color: BorderColor(colors.lite_button_color),
-                                    background_color: colors.button_color.into(),
-                                    image: UiImage::new(
-                                        asset_server.load("ui/expandarrow_60x60.png"),
-                                    ),
+                                Button,
+                                ImageNode::new(asset_server.load("ui/expandarrow_60x60.png")),
+                                Node {
+                                    width: Val::Px(20.0),
+                                    height: Val::Px(20.0),
+                                    // horizontally center child text
+                                    justify_content: JustifyContent::Center,
+                                    // vertically center child text
+                                    align_items: AlignItems::Center,
+                                    border: UiRect::all(Val::Px(2.0)),
                                     ..default()
                                 },
+                                BackgroundColor(colors.button_color),
+                                BorderColor(colors.lite_button_color),
                                 InventoryToggleButton,
                                 UiOverlayingExplorerButton,
                             ));
@@ -148,24 +142,18 @@ pub fn spawn_layout(
         // inventory blocks row
         overall_inventory_node.with_children(|builder| {
             builder.spawn((
-                NodeBundle {
-                    style: Style {
-                        display: Display::Grid,
-                        justify_items: JustifyItems::Start,
-                        justify_self: JustifySelf::Start,
-                        grid_template_columns: vec![
-                            GridTrack::min_content(),
-                            GridTrack::min_content(),
-                        ],
-                        //grid_template_rows: vec![GridTrack::min_content()],
-                        grid_auto_flow: GridAutoFlow::Row,
-                        padding: UiRect::all(Val::Px(4.0)),
-                        margin: UiRect::all(Val::Px(4.0)),
-                        ..default()
-                    },
-                    background_color: BackgroundColor(colors.node_color),
+                Node {
+                    display: Display::Grid,
+                    justify_items: JustifyItems::Start,
+                    justify_self: JustifySelf::Start,
+                    grid_template_columns: vec![GridTrack::min_content(), GridTrack::min_content()],
+                    //grid_template_rows: vec![GridTrack::min_content()],
+                    grid_auto_flow: GridAutoFlow::Row,
+                    padding: UiRect::all(Val::Px(4.0)),
+                    margin: UiRect::all(Val::Px(4.0)),
                     ..default()
                 },
+                BackgroundColor(colors.node_color),
                 InventoryRowsNode,
                 InventoryToggleable,
             ));
@@ -180,24 +168,6 @@ pub fn spawn_layout(
                 inv_event.send(AddInventoryRow(inv));
             }
         });
-
-        // placeholder row in the grid to help with looks
-        // overall_inventory_node.with_children(|builder| {
-        //     builder.spawn((
-        //         NodeBundle {
-        //             style: Style {
-        //                 display: Display::Grid,
-        //                 //grid_template_rows: vec![GridTrack::min_content()],
-        //                 grid_auto_flow: GridAutoFlow::Row,
-        //                 ..default()
-        //             },
-        //             background_color: BackgroundColor(Color::GOLD),
-        //             ..default()
-        //         },
-        //         PlaceHolderInventoryNode,
-        //         InventoryToggleable,
-        //     ));
-        // });
         overall_inventory_node.set_parent(parent_node);
     }
 }
@@ -211,34 +181,30 @@ pub fn spawn_inventory_row(
 ) {
     let _left_item = builder
         .spawn((
-            NodeBundle {
-                style: Style {
-                    display: Display::Grid,
-                    //width: Val::Px(200.0),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    // align_content: AlignContent::SpaceAround,
-                    // justify_items: JustifyItems::Start,
-                    height: Val::Px(30.0),
-                    padding: UiRect::all(Val::Px(3.0)),
-                    margin: UiRect::all(Val::Px(3.0)),
-                    flex_direction: FlexDirection::Row,
-                    ..default()
-                },
+            Node {
+                display: Display::Grid,
+                //width: Val::Px(200.0),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                // align_content: AlignContent::SpaceAround,
+                // justify_items: JustifyItems::Start,
+                height: Val::Px(30.0),
+                padding: UiRect::all(Val::Px(3.0)),
+                margin: UiRect::all(Val::Px(3.0)),
+                flex_direction: FlexDirection::Row,
                 ..default()
             },
             InventoryHeightTextNode(block.height),
         ))
         .with_children(|builder| {
             builder.spawn((
-                TextBundle::from_section(
-                    format!("{}", block.height),
-                    TextStyle {
-                        font: font.clone(),
-                        font_size: 20.0,
-                        color: colors.text_color,
-                    },
-                ),
+                Text::new(format!("{}", block.height)),
+                TextFont {
+                    font: font.clone(),
+                    font_size: 20.0,
+                    font_smoothing: FontSmoothing::AntiAliased,
+                },
+                TextColor(colors.text_color),
                 InventoryHeightText,
             ));
         })
@@ -246,41 +212,36 @@ pub fn spawn_inventory_row(
 
     let _right_item = builder
         .spawn((
-            NodeBundle {
-                style: Style {
-                    display: Display::Grid,
-                    //width: Val::Px(200.0),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    // align_content: AlignContent::SpaceAround,
-                    // justify_items: JustifyItems::Start,
-                    height: Val::Px(30.0),
-                    padding: UiRect::all(Val::Px(3.0)),
-                    margin: UiRect::all(Val::Px(3.0)),
-                    flex_direction: FlexDirection::Row,
-                    ..default()
-                },
+            Node {
+                display: Display::Grid,
+                //width: Val::Px(200.0),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                // align_content: AlignContent::SpaceAround,
+                // justify_items: JustifyItems::Start,
+                height: Val::Px(30.0),
+                padding: UiRect::all(Val::Px(3.0)),
+                margin: UiRect::all(Val::Px(3.0)),
+                flex_direction: FlexDirection::Row,
                 ..default()
             },
             InventoryColorBoxNode(block.height),
         ))
         .with_children(|builder| {
             builder.spawn((
-                ButtonBundle {
-                    style: Style {
-                        width: Val::Px(26.0),
-                        height: Val::Px(26.0),
-                        border: UiRect::all(Val::Px(2.0)),
-                        // horizontally center child text
-                        justify_content: JustifyContent::Center,
-                        // vertically center child text
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    border_color: BorderColor(colors.light_color),
-                    background_color: Srgba::hex(block.color.clone()).unwrap().into(),
+                Button,
+                Node {
+                    width: Val::Px(26.0),
+                    height: Val::Px(26.0),
+                    border: UiRect::all(Val::Px(2.0)),
+                    // horizontally center child text
+                    justify_content: JustifyContent::Center,
+                    // vertically center child text
+                    align_items: AlignItems::Center,
                     ..default()
                 },
+                BorderColor(colors.light_color),
+                BackgroundColor(Srgba::hex(block.color.clone()).unwrap().into()),
                 UiInteractionBtn,
                 InventoryColorBox(block.height),
                 UiOverlayingExplorerButton,
@@ -290,7 +251,7 @@ pub fn spawn_inventory_row(
 }
 
 pub fn show_layout(
-    mut style_query: Query<&mut Style, With<InventoryNode>>,
+    mut style_query: Query<&mut Node, With<InventoryNode>>,
     inventory_blocks: Res<UserInventoryBlocks>,
 ) {
     for mut style in style_query.iter_mut() {
@@ -304,7 +265,7 @@ pub fn show_layout(
     }
 }
 
-pub fn clean_layout(mut style_query: Query<&mut Style, With<InventoryNode>>) {
+pub fn clean_layout(mut style_query: Query<&mut Node, With<InventoryNode>>) {
     for mut style in style_query.iter_mut() {
         style.display = Display::None;
     }

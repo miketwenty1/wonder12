@@ -1,8 +1,11 @@
 use std::collections::HashMap;
 
 use bevy::{
-    input::mouse::MouseMotion, math::Vec3A, prelude::*, render::primitives::Aabb,
-    text::Text2dBounds,
+    input::mouse::MouseMotion,
+    math::Vec3A,
+    prelude::*,
+    render::primitives::Aabb,
+    text::{FontSmoothing, TextBounds},
 };
 use ulam::Quad;
 
@@ -11,7 +14,8 @@ use super::{
     core_ui::paint_palette::event::ViewSelectedTiles,
     overlay_ui::toast::{ToastEvent, ToastType},
 };
-use crate::resourcey::{MapTileMode, SpriteSheetLand, ZoomSpawnEvent};
+use crate::consty::CHUNK_TILE_SPAN_MULTIPLIER;
+use crate::resourcey::{MapTileMode, SpriteSheetLand};
 use crate::{building_config::utils::get_text_color, resourcey::BlockExplorerCount};
 use crate::{
     building_config::{spawn_tile_level, utils::sanitize_building_color},
@@ -22,7 +26,7 @@ use crate::{
     },
     consty::{
         BUILDING_ZOOM_OUT_MAX, CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT,
-        DESPAWN_TILE_THRESHOLD, MAX_SELECTION_SIZE, TEXT_ZOOM_OUT_MAX, TILE_SCALE,
+        DESPAWN_TILE_THRESHOLD, MAX_SELECTION_SIZE, SCALE_FACTOR, TEXT_ZOOM_OUT_MAX,
         TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
@@ -36,7 +40,6 @@ use crate::{
     statey::{DisplayBuyUiState, InitLoadingBlocksState},
     structy::SpawnDiffData,
 };
-use crate::{consty::CHUNK_TILE_SPAN_MULTIPLIER, eventy::ZoomThresholdEvent};
 
 #[allow(clippy::too_many_arguments)]
 pub fn init_explorer(
@@ -45,21 +48,18 @@ pub fn init_explorer(
     mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
     initblocks: Res<LocalBrowserStorageCount>,
     colors: Res<ColorPalette>,
-    mut loading_init_block_text: ResMut<NextState<InitLoadingBlocksState>>,
+    loading_init_block_text: ResMut<NextState<InitLoadingBlocksState>>,
     block_explorer_count: Res<BlockExplorerCount>,
     //local_browser_storage_count: Res<BlockExplorerCount>,
 ) {
     info!("initblockcount: {}", initblocks.0);
 
     commands.spawn((
-        NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::FlexEnd,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
+        Node {
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            align_items: AlignItems::FlexEnd,
+            justify_content: JustifyContent::Center,
             ..default()
         },
         UiNode,
@@ -68,46 +68,38 @@ pub fn init_explorer(
     // this is the same text as below but outlined
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::Center,
-                    align_content: AlignContent::Center,
-                    justify_content: JustifyContent::Center,
-                    justify_items: JustifyItems::Center,
-                    ..default()
-                },
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                align_items: AlignItems::Center,
+                align_content: AlignContent::Center,
+                justify_content: JustifyContent::Center,
+                justify_items: JustifyItems::Center,
                 ..default()
             },
             InitLoadingNode,
         ))
         .with_children(|child| {
             child
-                .spawn(NodeBundle {
-                    style: Style {
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        align_items: AlignItems::Start,
-                        align_content: AlignContent::Center,
-                        justify_content: JustifyContent::Center, //nope left right
-                        justify_items: JustifyItems::Center,
-                        margin: UiRect::top(Val::Percent(29.9)),
-                        ..default()
-                    },
-                    // background_color: Color::PINK.into(),
+                .spawn(Node {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::Start,
+                    align_content: AlignContent::Center,
+                    justify_content: JustifyContent::Center, //nope left right
+                    justify_items: JustifyItems::Center,
+                    margin: UiRect::top(Val::Percent(29.9)),
                     ..default()
                 })
                 .with_children(|childtext| {
                     childtext.spawn((
-                        TextBundle::from_section(
-                            "Initilizing Game Map 0%",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 30.2,
-                                color: colors.text_color,
-                            },
-                        ),
+                        Text::new("Initilizing Game Map 0%"),
+                        TextFont {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 30.2,
+                            font_smoothing: FontSmoothing::AntiAliased,
+                        },
+                        TextColor(colors.text_color),
                         InitLoadingText,
                     ));
                 });
@@ -115,46 +107,38 @@ pub fn init_explorer(
 
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::Center,
-                    align_content: AlignContent::Center,
-                    justify_content: JustifyContent::Center,
-                    justify_items: JustifyItems::Center,
-                    ..default()
-                },
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                align_items: AlignItems::Center,
+                align_content: AlignContent::Center,
+                justify_content: JustifyContent::Center,
+                justify_items: JustifyItems::Center,
                 ..default()
             },
             InitLoadingNode,
         ))
         .with_children(|child| {
             child
-                .spawn(NodeBundle {
-                    style: Style {
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        align_items: AlignItems::Start,
-                        align_content: AlignContent::Center,
-                        justify_content: JustifyContent::Center, //nope left right
-                        justify_items: JustifyItems::Center,
-                        margin: UiRect::top(Val::Percent(30.0)),
-                        ..default()
-                    },
-                    // background_color: Color::PINK.into(),
+                .spawn(Node {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::Start,
+                    align_content: AlignContent::Center,
+                    justify_content: JustifyContent::Center, //nope left right
+                    justify_items: JustifyItems::Center,
+                    margin: UiRect::top(Val::Percent(30.0)),
                     ..default()
                 })
                 .with_children(|childtext| {
                     childtext.spawn((
-                        TextBundle::from_section(
-                            "Initilizing Game Map 0%",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 30.0,
-                                color: colors.accent_color,
-                            },
-                        ),
+                        Text::new("Initilizing Game Map 0%"),
+                        TextFont {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 30.0,
+                            font_smoothing: FontSmoothing::AntiAliased,
+                        },
+                        TextColor(colors.accent_color),
                         InitLoadingText,
                     ));
                 });
@@ -302,31 +286,28 @@ pub fn spawn_block_sprites(
                         color_for_sprites = color_for_tile;
                     }
 
+                    let transform = Transform {
+                        translation: Vec3::new(
+                            TOTAL_TILE_SCALE_SIZE * x as f32,
+                            TOTAL_TILE_SCALE_SIZE * y as f32,
+                            0.,
+                        ),
+                        scale: Vec3::new(SCALE_FACTOR, SCALE_FACTOR, 1.0),
+                        ..Default::default()
+                    };
                     let mut cmd = commands.spawn((
-                        SpriteBundle {
-                            sprite: Sprite {
-                                color: color_for_tile,
-                                ..Default::default()
-                            },
-
-                            transform: Transform {
-                                translation: Vec3::new(
-                                    TOTAL_TILE_SCALE_SIZE * x as f32,
-                                    TOTAL_TILE_SCALE_SIZE * y as f32,
-                                    0.,
-                                ),
-                                scale: Vec3::new(TILE_SCALE, TILE_SCALE, 1.0),
-                                ..Default::default()
-                            },
-                            texture: texture_atlas_handle_land.texture.clone(),
+                        Sprite {
+                            color: color_for_tile,
+                            texture_atlas: Some(TextureAtlas {
+                                layout: texture_atlas_handle_land.layout.clone(),
+                                index,
+                            }),
+                            image: texture_atlas_handle_land.texture.clone(),
                             ..Default::default()
                         },
+                        transform,
                         locationcoord,
                         Land,
-                        TextureAtlas {
-                            layout: texture_atlas_handle_land.layout.clone(),
-                            index,
-                        },
                     ));
 
                     // SPAWN correct text for tile based on toggle
@@ -351,7 +332,7 @@ pub fn spawn_block_sprites(
                         cmd.with_children(|builder| {
                             let slightly_smaller_text_style = TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 24.0,
+                                font_size: (SCALE_FACTOR / 3.0) * 24.0,
                                 color: get_text_color(&color_for_tile),
                             };
 
@@ -368,7 +349,11 @@ pub fn spawn_block_sprites(
                                     text_2d_bounds: Text2dBounds { ..default() },
                                     transform: Transform {
                                         translation: Vec3::new(0., 0., 5.),
-                                        scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+                                        scale: Vec3::new(
+                                            1.0 / SCALE_FACTOR,
+                                            1.0 / SCALE_FACTOR,
+                                            1.0,
+                                        ),
                                         ..Default::default()
                                     },
                                     visibility: text_visibility,
@@ -811,7 +796,7 @@ pub fn update_tile_textures(
 //                             text_2d_bounds: Text2dBounds { ..default() },
 //                             transform: Transform {
 //                                 translation: Vec3::new(0., 0., 5.),
-//                                 scale: Vec3::new(1.0 / TILE_SCALE, 1.0 / TILE_SCALE, 1.0),
+//                                 scale: Vec3::new(1.0 / SCALE_FACTOR, 1.0 / SCALE_FACTOR, 1.0),
 //                                 ..Default::default()
 //                             },
 //                             visibility: text_visibility,

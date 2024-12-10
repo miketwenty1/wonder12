@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     componenty::{BuildingStructure, Location},
-    consty::TILE_SCALE,
+    consty::SCALE_FACTOR,
 };
 
 use super::utils::process_scale;
@@ -19,30 +19,27 @@ pub fn spawn_shack(
     scale_modifier: Option<f32>,
 ) {
     let scale_modifier = process_scale(scale_modifier);
+    let transform = Transform {
+        translation,
+        scale: Vec3::new(
+            scale_modifier / SCALE_FACTOR,
+            scale_modifier / SCALE_FACTOR,
+            1.0,
+        ),
+        ..Default::default()
+    };
     builder.spawn((
-        SpriteBundle {
-            sprite: Sprite {
-                color,
-                ..Default::default()
-            },
-            transform: Transform {
-                translation,
-                scale: Vec3::new(
-                    scale_modifier / TILE_SCALE,
-                    scale_modifier / TILE_SCALE,
-                    1.0,
-                ),
-                ..Default::default()
-            },
-            texture: texture.clone(),
-            visibility: visibility_toggle,
+        Sprite {
+            color,
+            texture_atlas: Some(TextureAtlas {
+                layout: layout.clone(),
+                index: 13,
+            }),
+            image: texture.clone(),
             ..Default::default()
         },
+        visibility_toggle,
         BuildingStructure::Shack,
         locationcoord,
-        TextureAtlas {
-            layout: layout.clone(),
-            index: 13,
-        },
     ));
 }

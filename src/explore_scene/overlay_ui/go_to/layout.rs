@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, text::FontSmoothing};
 
 use crate::{
     componenty::{EditabledTextBox, UiInteractionBtn},
@@ -36,24 +36,21 @@ pub fn spawn_layout(
         210.0
     };
     let mut overlay_goto = commands.spawn((
-        NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_content: AlignContent::Center,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                justify_items: JustifyItems::Center,
-                ..default()
-            },
+        Node {
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            align_content: AlignContent::Center,
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            justify_items: JustifyItems::Center,
             ..default()
         },
         GoToNode,
     ));
 
     overlay_goto.with_children(|builder| {
-        let mut goto_node = builder.spawn(NodeBundle {
-            style: Style {
+        let mut goto_node = builder.spawn((
+            Node {
                 //display: Display::Grid,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::SpaceBetween,
@@ -62,106 +59,98 @@ pub fn spawn_layout(
                 flex_direction: FlexDirection::Column,
                 width: Val::Px(w_size),
                 border: UiRect::all(Val::Px(5.0)),
-                //max_height: Val::Px(h_size),
                 ..default()
             },
-            border_color: BorderColor(colors.node_color_lighter),
-            border_radius: BorderRadius::all(Val::Px(10.0)),
-            background_color: BackgroundColor(colors.node_color),
-            ..default()
-        });
+            BorderColor(colors.node_color_lighter),
+            BorderRadius::all(Val::Px(10.0)),
+            BackgroundColor(colors.node_color),
+        ));
 
         goto_node.with_children(|builder| {
             // // //
             // top row
             // // //
-            let mut toprow = builder.spawn(NodeBundle {
-                style: Style {
+            let mut toprow = builder.spawn((
+                Node {
                     width: Val::Percent(100.0),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
-
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::SpaceBetween,
                     ..Default::default()
                 },
-                border_radius: BorderRadius::all(Val::Px(5.0)),
-                background_color: BackgroundColor(colors.node_color),
-                ..Default::default()
-            });
+                BorderRadius::all(Val::Px(5.0)),
+                BackgroundColor(colors.node_color),
+            ));
             toprow.with_children(|builder| {
-                builder.spawn(NodeBundle {
+                builder.spawn(Node {
                     ..Default::default()
                 });
             });
             toprow.with_children(|builder| {
-                builder.spawn(NodeBundle {
+                builder.spawn(Node {
                     ..Default::default()
                 });
             });
             toprow.with_children(|builder| {
-                builder.spawn(NodeBundle {
+                builder.spawn(Node {
                     ..Default::default()
                 });
             });
             toprow.with_children(|builder| {
                 builder
-                    .spawn(NodeBundle {
-                        style: Style {
-                            margin: UiRect::vertical(Val::Px(8.0)),
-                            //padding: UiRect::all(Val::Px(1.0)),
-                            ..default()
-                        },
+                    .spawn(Node {
+                        margin: UiRect::vertical(Val::Px(8.0)),
                         ..default()
                     })
                     .with_children(|builder| {
-                        builder.spawn(TextBundle::from_section(
-                            "Type in a Block Height to Travel",
-                            TextStyle {
+                        builder.spawn((
+                            Text::new("Type in a Block Height to Travel"),
+                            TextFont {
                                 font: font.clone(),
                                 font_size: 20.0,
-                                color: colors.text_color,
+                                font_smoothing: FontSmoothing::AntiAliased,
                             },
+                            TextColor(colors.text_color),
                         ));
                     });
             });
             toprow.with_children(|builder| {
-                builder.spawn(NodeBundle {
+                builder.spawn(Node {
                     ..Default::default()
                 });
             });
             toprow.with_children(|builder| {
                 builder
-                    .spawn(NodeBundle { ..default() })
+                    .spawn(Node { ..default() })
                     .with_children(|innerbuilder| {
                         innerbuilder
                             .spawn((
-                                ButtonBundle {
-                                    style: Style {
-                                        width: Val::Px(30.0),
-                                        height: Val::Px(30.0),
-                                        justify_content: JustifyContent::Center,
-                                        align_items: AlignItems::Center,
-                                        align_content: AlignContent::Center,
-                                        justify_items: JustifyItems::Center,
-                                        margin: UiRect::all(Val::Px(2.0)),
-                                        ..default()
-                                    },
-                                    border_radius: BorderRadius::all(Val::Px(3.0)),
-                                    background_color: colors.red_color.into(),
+                                Button,
+                                Node {
+                                    width: Val::Px(30.0),
+                                    height: Val::Px(30.0),
+                                    justify_content: JustifyContent::Center,
+                                    align_items: AlignItems::Center,
+                                    align_content: AlignContent::Center,
+                                    justify_items: JustifyItems::Center,
+                                    margin: UiRect::all(Val::Px(2.0)),
                                     ..default()
                                 },
+                                BackgroundColor(colors.red_color.into()),
+                                BorderRadius::all(Val::Px(3.0)),
                                 UiInteractionBtn,
                                 GoToBackBtn,
                             ))
                             .with_children(|ccbuilder| {
-                                ccbuilder.spawn(TextBundle::from_section(
-                                    "X",
-                                    TextStyle {
+                                ccbuilder.spawn((
+                                    Text::new("X"),
+                                    TextFont {
                                         font: font.clone(),
                                         font_size: 30.0,
-                                        color: colors.text_color,
+                                        font_smoothing: FontSmoothing::AntiAliased,
                                     },
+                                    TextColor(colors.text_color),
                                 ));
                             });
                     });
@@ -183,22 +172,17 @@ pub fn spawn_layout(
 
             //keyboard node
             builder.spawn((
-                NodeBundle {
-                    style: Style {
-                        width: Val::Percent(100.0),
-                        //height: Val::Percent(23.0),
-                        display: Display::Grid,
-                        justify_items: JustifyItems::Center,
-                        border: UiRect::all(Val::Px(5.0)),
-                        margin: UiRect::top(Val::Px(4.0)),
-                        //padding: UiRect::all(Val::Px(1.0)),
-                        ..default()
-                    },
-                    border_radius: BorderRadius::all(Val::Px(4.0)),
-                    border_color: BorderColor(colors.node_color_lighter),
-                    //background_color: BackgroundColor(Color::YELLOW),
+                Node {
+                    width: Val::Percent(100.0),
+                    //height: Val::Percent(23.0),
+                    display: Display::Grid,
+                    justify_items: JustifyItems::Center,
+                    border: UiRect::all(Val::Px(5.0)),
+                    margin: UiRect::top(Val::Px(4.0)),
                     ..default()
                 },
+                BorderColor(colors.node_color_lighter),
+                BorderRadius::all(Val::Px(4.0)),
                 NumberKeyboardNode,
             ));
             keyboard_event.send(NumberKeyboardSpawnEvent);
@@ -217,8 +201,8 @@ fn height_input_box(
     edit_box_width: f32,
 ) {
     builder
-        .spawn(NodeBundle {
-            style: Style {
+        .spawn((
+            Node {
                 display: Display::Flex,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
@@ -230,50 +214,43 @@ fn height_input_box(
                 max_width: Val::Px(edit_box_width),
                 min_height: Val::Px(36.0),
                 max_height: Val::Px(36.0),
-                //padding: UiRect::all(Val::Px(2.0)),
-                //margin: UiRect::bottom(Val::Px(5.0)),
                 ..default()
             },
-            border_radius: BorderRadius::all(Val::Px(3.0)),
-            background_color: BackgroundColor(node_color),
-            ..default()
-        })
+            BorderRadius::all(Val::Px(3.0)),
+            BackgroundColor(node_color),
+        ))
         .with_children(|parent| {
             parent
                 .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            justify_items: JustifyItems::Center,
-                            align_content: AlignContent::Center,
-                            //margin: UiRect::all(Val::Px(1.0)),
-                            flex_wrap: FlexWrap::Wrap,
-                            min_width: Val::Px(edit_box_width - 2.0),
-                            max_width: Val::Px(edit_box_width - 2.0),
-                            min_height: Val::Px(34.0),
-                            max_height: Val::Px(34.0),
-                            //min_height: Val::Px(80.0),
-                            ..default()
-                        },
-                        border_radius: BorderRadius::all(Val::Px(8.0)),
-                        background_color: button_color.into(),
+                    Button,
+                    Node {
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        justify_items: JustifyItems::Center,
+                        align_content: AlignContent::Center,
+                        //margin: UiRect::all(Val::Px(1.0)),
+                        flex_wrap: FlexWrap::Wrap,
+                        min_width: Val::Px(edit_box_width - 2.0),
+                        max_width: Val::Px(edit_box_width - 2.0),
+                        min_height: Val::Px(34.0),
+                        max_height: Val::Px(34.0),
                         ..default()
                     },
+                    BackgroundColor(button_color.into()),
+                    BorderRadius::all(Val::Px(8.0)),
                     UiInteractionBtn,
                     GoToTextBoxButton,
                     EditabledTextBox,
                 ))
                 .with_children(|parent2| {
                     parent2.spawn((
-                        TextBundle::from_section(
-                            button_text.clone(),
-                            TextStyle {
-                                font: font.clone(),
-                                font_size,
-                                color: DEFAULT_NO_PICK_COLOR.into(),
-                            },
-                        ),
+                        Text::new(button_text.clone()),
+                        TextFont {
+                            font: font.clone(),
+                            font_size,
+                            font_smoothing: FontSmoothing::AntiAliased,
+                        },
+                        TextColor(DEFAULT_NO_PICK_COLOR.into()),
                         GoToTextBoxText,
                     ));
                 });
@@ -287,48 +264,41 @@ fn setup_goto_go_button(
     colors: ColorPalette,
 ) {
     builder
-        .spawn(NodeBundle {
-            style: Style {
-                display: Display::Flex,
-                justify_items: JustifyItems::Start,
-                align_items: AlignItems::Center,
-                align_content: AlignContent::Start,
-                margin: UiRect::vertical(Val::Px(16.0)),
-                //margin: UiRect::all(Val::Px(5.)),
-                //padding: UiRect::all(Val::Px(1.0)),
-                ..default()
-            },
-            //background_color: BackgroundColor(Color::PURPLE), //colors.node_color),
+        .spawn(Node {
+            display: Display::Flex,
+            justify_items: JustifyItems::Start,
+            align_items: AlignItems::Center,
+            align_content: AlignContent::Start,
+            margin: UiRect::vertical(Val::Px(16.0)),
             ..default()
         })
         .with_children(|parent| {
             parent
                 .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            min_width: Val::Px(80.0),
-                            min_height: Val::Px(50.0),
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            border: UiRect::all(Val::Px(2.0)),
-                            ..default()
-                        },
-                        border_radius: BorderRadius::all(Val::Px(8.0)),
-                        border_color: BorderColor(colors.text_color),
-                        background_color: colors.button_color.into(),
+                    Button,
+                    Node {
+                        min_width: Val::Px(80.0),
+                        min_height: Val::Px(50.0),
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        border: UiRect::all(Val::Px(2.0)),
                         ..default()
                     },
+                    BackgroundColor(colors.button_color.into()),
+                    BorderColor(colors.text_color),
+                    BorderRadius::all(Val::Px(8.0)),
                     UiInteractionBtn,
                     GoToGoBtn,
                 ))
                 .with_children(|parent2| {
-                    parent2.spawn(TextBundle::from_section(
-                        button_text,
-                        TextStyle {
+                    parent2.spawn((
+                        Text::new(button_text),
+                        TextFont {
                             font: font.clone(),
                             font_size: 28.0,
-                            color: colors.text_color,
+                            font_smoothing: FontSmoothing::AntiAliased,
                         },
+                        TextColor(colors.text_color),
                     ));
                 });
         });
