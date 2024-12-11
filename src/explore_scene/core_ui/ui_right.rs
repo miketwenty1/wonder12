@@ -295,7 +295,7 @@ fn spawn_game_toggle_button<T: Component, U: Component, V: Component>(
                 display: Display::None,
                 ..default()
             },
-            BackgroundColor(colors.button_color.into()),
+            BackgroundColor(colors.button_color),
             BorderColor(colors.node_color),
             BorderRadius::all(Val::Px(8.0)),
             UiInteractionBtn,
@@ -310,7 +310,7 @@ fn spawn_game_toggle_button<T: Component, U: Component, V: Component>(
                 TextFont {
                     font,
                     font_size: UI_SMALL_TEXT_SIZE,
-                    font_smoothing: FontSmoothing::AntiAliased,
+                    font_smoothing: FontSmoothing::None,
                 },
                 TextColor(colors.text_color),
                 toggle_btn_text_position,
@@ -341,7 +341,7 @@ fn spawn_magnify_toggle_button<T: Component>(
                 display: Display::None,
                 ..default()
             },
-            BackgroundColor(colors.button_color.into()),
+            BackgroundColor(colors.button_color),
             BorderColor(colors.node_color),
             BorderRadius::all(Val::Px(8.0)),
             UiInteractionBtn,
@@ -355,7 +355,7 @@ fn spawn_magnify_toggle_button<T: Component>(
                 TextFont {
                     font,
                     font_size: UI_SMALL_TEXT_SIZE,
-                    font_smoothing: FontSmoothing::AntiAliased,
+                    font_smoothing: FontSmoothing::None,
                 },
                 TextColor(colors.text_color),
             ));

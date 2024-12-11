@@ -138,7 +138,7 @@ pub fn spawn_qr(
                                     TextFont {
                                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                         font_size: 16.0,
-                                        font_smoothing: FontSmoothing::AntiAliased,
+                                        font_smoothing: FontSmoothing::None,
                                     },
                                     TextColor(colors.text_color),
                                     ExpirationQrText,
@@ -175,7 +175,7 @@ pub fn spawn_qr(
                                             justify_content: JustifyContent::Center,
                                             ..default()
                                         },
-                                        BackgroundColor(colors.button_color.into()),
+                                        BackgroundColor(colors.button_color),
                                         CancelQrButton,
                                     ))
                                     .with_children(|ccbuilder| {
@@ -184,7 +184,7 @@ pub fn spawn_qr(
                                             TextFont {
                                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                                 font_size: 16.0,
-                                                font_smoothing: FontSmoothing::AntiAliased,
+                                                font_smoothing: FontSmoothing::None,
                                             },
                                         ));
                                     });
@@ -204,7 +204,7 @@ pub fn spawn_qr(
                         margin: UiRect::all(Val::Px(2.0)),
                         ..Default::default()
                     },
-                    ImageNode::new(handle.unwrap().into()),
+                    ImageNode::new(handle.unwrap()),
                     BackgroundColor(Color::WHITE),
                 ));
             });
@@ -220,7 +220,7 @@ pub fn spawn_qr(
                             margin: UiRect::all(Val::Px(2.0)),
                             ..default()
                         },
-                        BackgroundColor(colors.button_color.into()),
+                        BackgroundColor(colors.button_color),
                         ClipboardBtn,
                     ))
                     .with_children(|parent| {
@@ -229,7 +229,7 @@ pub fn spawn_qr(
                             TextFont {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: 16.0,
-                                font_smoothing: FontSmoothing::AntiAliased,
+                                font_smoothing: FontSmoothing::None,
                             },
                             TextColor(colors.text_color),
                         ));

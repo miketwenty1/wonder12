@@ -28,7 +28,7 @@ use zoom::zoom_wheel_system;
 use crate::{
     componenty::InitLoadingNode,
     despawn_screen,
-    statey::{ExploreSelectState, InitLoadingBlocksState, InitSceneState},
+    statey::{ExploreSelectState, InitLoadingBlocksState},
     ExploreSceneState,
 };
 
@@ -109,7 +109,7 @@ impl Plugin for ExplorePlugin {
                         )
                             .run_if(
                                 in_state(ToolPaletteUiState::Off)
-                                    .or_else(in_state(ToolPaletteUiState::Move)),
+                                    .or(in_state(ToolPaletteUiState::Move)),
                             ),
                     )
                         .chain(),

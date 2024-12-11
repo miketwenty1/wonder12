@@ -109,7 +109,7 @@ pub fn spawn_layout(
                             TextFont {
                                 font: font.clone(),
                                 font_size: 20.0,
-                                font_smoothing: FontSmoothing::AntiAliased,
+                                font_smoothing: FontSmoothing::None,
                             },
                             TextColor(colors.text_color),
                         ));
@@ -137,7 +137,7 @@ pub fn spawn_layout(
                                     margin: UiRect::all(Val::Px(2.0)),
                                     ..default()
                                 },
-                                BackgroundColor(colors.red_color.into()),
+                                BackgroundColor(colors.red_color),
                                 BorderRadius::all(Val::Px(3.0)),
                                 UiInteractionBtn,
                                 GoToBackBtn,
@@ -148,7 +148,7 @@ pub fn spawn_layout(
                                     TextFont {
                                         font: font.clone(),
                                         font_size: 30.0,
-                                        font_smoothing: FontSmoothing::AntiAliased,
+                                        font_smoothing: FontSmoothing::None,
                                     },
                                     TextColor(colors.text_color),
                                 ));
@@ -236,7 +236,7 @@ fn height_input_box(
                         max_height: Val::Px(34.0),
                         ..default()
                     },
-                    BackgroundColor(button_color.into()),
+                    BackgroundColor(button_color),
                     BorderRadius::all(Val::Px(8.0)),
                     UiInteractionBtn,
                     GoToTextBoxButton,
@@ -248,7 +248,7 @@ fn height_input_box(
                         TextFont {
                             font: font.clone(),
                             font_size,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(DEFAULT_NO_PICK_COLOR.into()),
                         GoToTextBoxText,
@@ -284,7 +284,7 @@ fn setup_goto_go_button(
                         border: UiRect::all(Val::Px(2.0)),
                         ..default()
                     },
-                    BackgroundColor(colors.button_color.into()),
+                    BackgroundColor(colors.button_color),
                     BorderColor(colors.text_color),
                     BorderRadius::all(Val::Px(8.0)),
                     UiInteractionBtn,
@@ -296,7 +296,7 @@ fn setup_goto_go_button(
                         TextFont {
                             font: font.clone(),
                             font_size: 28.0,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(colors.text_color),
                     ));

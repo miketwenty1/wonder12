@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use crate::{
     statey::{
         CommsApiBlockLoadState, CommsApiInventoryState, DisplayBuyUiState, ExploreSceneState,
-        InitSceneState,
     },
     CommsApiState,
 };
@@ -75,8 +74,7 @@ impl Plugin for CommsPlugin {
                     show_backup_copy_btn,
                 )
                     .run_if(
-                        in_state(ExploreSceneState::On)
-                            .or_else(in_state(ExploreSceneState::Paused)),
+                        in_state(ExploreSceneState::On).or(in_state(ExploreSceneState::Paused)),
                     ),),
             );
     }

@@ -181,7 +181,7 @@ pub fn spawn_layout(
                                     margin: UiRect::all(Val::Px(3.0)),
                                     ..default()
                                 },
-                                BackgroundColor(colors.red_color.into()),
+                                BackgroundColor(colors.red_color),
                                 BorderRadius::all(Val::Px(3.0)),
                                 UiInteractionBtn,
                                 ButtonBack,
@@ -192,7 +192,7 @@ pub fn spawn_layout(
                                     TextFont {
                                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                         font_size: 30.0,
-                                        font_smoothing: FontSmoothing::AntiAliased,
+                                        font_smoothing: FontSmoothing::None,
                                     },
                                     TextColor(colors.text_color),
                                 ));
@@ -484,7 +484,7 @@ fn spawn_new_total_cart_cost(
                 TextFont {
                     font,
                     font_size,
-                    font_smoothing: FontSmoothing::AntiAliased,
+                    font_smoothing: FontSmoothing::None,
                 },
                 TextColor(text_color),
             ));
@@ -518,7 +518,7 @@ fn spawn_new_value_block_cost(
                 TextFont {
                     font,
                     font_size,
-                    font_smoothing: FontSmoothing::AntiAliased,
+                    font_smoothing: FontSmoothing::None,
                 },
                 TextColor(text_color),
                 BlockCostText,
@@ -560,7 +560,7 @@ fn setup_message_for_all_blocks_button(
                         justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    BackgroundColor(button_color.into()),
+                    BackgroundColor(button_color),
                     BorderRadius::all(Val::Px(2.0)),
                     AllCartConfigButton,
                 ))
@@ -570,7 +570,7 @@ fn setup_message_for_all_blocks_button(
                         TextFont {
                             font: font.clone(),
                             font_size: 12.0,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(text_color),
                         AllCartConfigText,
@@ -611,7 +611,7 @@ fn setup_buy_create_invoice_button(
                         margin: UiRect::horizontal(Val::Px(2.0)),
                         ..default()
                     },
-                    BackgroundColor(button_color.into()),
+                    BackgroundColor(button_color),
                     BorderRadius::all(Val::Px(4.0)),
                     UiInteractionBtn,
                     BuyMenuButton,
@@ -622,7 +622,7 @@ fn setup_buy_create_invoice_button(
                         TextFont {
                             font: font.clone(),
                             font_size: 16.0,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(text_color),
                     ));
@@ -662,7 +662,7 @@ fn setup_back_from_buy_menu_button(
                         margin: UiRect::horizontal(Val::Px(2.0)),
                         ..default()
                     },
-                    BackgroundColor(button_color.into()),
+                    BackgroundColor(button_color),
                     BorderRadius::all(Val::Px(4.0)),
                     UiInteractionBtn,
                     ButtonBack,
@@ -673,7 +673,7 @@ fn setup_back_from_buy_menu_button(
                         TextFont {
                             font: font.clone(),
                             font_size: 16.0,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(text_color),
                     ));
@@ -693,7 +693,7 @@ fn spawn_block_text_bundle(
         TextFont {
             font,
             font_size,
-            font_smoothing: FontSmoothing::AntiAliased,
+            font_smoothing: FontSmoothing::None,
         },
         TextColor(color),
         BlockHeightCartText,
@@ -725,7 +725,7 @@ fn spawn_nested_text_bundle_flex(
                 TextFont {
                     font,
                     font_size,
-                    font_smoothing: FontSmoothing::AntiAliased,
+                    font_smoothing: FontSmoothing::None,
                 },
                 TextColor(text_color),
             ));
@@ -759,7 +759,7 @@ fn setup_left_block_menu_button(
                 ..default()
             },
             visibility,
-            BackgroundColor(button_color.into()),
+            BackgroundColor(button_color),
             BorderRadius::all(Val::Px(10.0)),
             CartButton(-1),
         ))
@@ -769,7 +769,7 @@ fn setup_left_block_menu_button(
                 TextFont {
                     font: font.clone(),
                     font_size: 20.0,
-                    font_smoothing: FontSmoothing::AntiAliased,
+                    font_smoothing: FontSmoothing::None,
                 },
                 TextColor(text_color),
             ));
@@ -802,7 +802,8 @@ fn setup_right_block_menu_button(
                 },
                 ..default()
             },
-            BackgroundColor(button_color.into()),
+            visibility,
+            BackgroundColor(button_color),
             BorderRadius::all(Val::Px(10.0)),
             CartButton(1),
         ))
@@ -812,7 +813,7 @@ fn setup_right_block_menu_button(
                 TextFont {
                     font: font.clone(),
                     font_size: 20.0,
-                    font_smoothing: FontSmoothing::AntiAliased,
+                    font_smoothing: FontSmoothing::None,
                 },
                 TextColor(text_color),
             ));
@@ -862,7 +863,7 @@ fn current_message_title(
                         TextFont {
                             font: font.clone(),
                             font_size,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(text_color),
                     ));
@@ -899,7 +900,7 @@ pub fn spawn_messages(
                     TextFont {
                         font: font.clone(),
                         font_size: 18.0,
-                        font_smoothing: FontSmoothing::AntiAliased,
+                        font_smoothing: FontSmoothing::None,
                     },
                     TextColor(colors.accent_color),
                 ));
@@ -925,7 +926,7 @@ pub fn spawn_messages(
                     TextFont {
                         font: font.clone(),
                         font_size,
-                        font_smoothing: FontSmoothing::AntiAliased,
+                        font_smoothing: FontSmoothing::None,
                     },
                     TextColor(colors.text_color),
                 ));
@@ -951,7 +952,7 @@ pub fn spawn_messages(
                     TextFont {
                         font: font.clone(),
                         font_size,
-                        font_smoothing: FontSmoothing::AntiAliased,
+                        font_smoothing: FontSmoothing::None,
                     },
                     TextColor(colors.accent_color),
                 ));
@@ -1007,7 +1008,7 @@ fn new_value_title(
                     TextFont {
                         font,
                         font_size,
-                        font_smoothing: FontSmoothing::AntiAliased,
+                        font_smoothing: FontSmoothing::None,
                     },
                     TextColor(text_color),
                 ));
@@ -1097,7 +1098,7 @@ fn setup_ln_addr_menu_button(
                         max_height: Val::Px(34.0),
                         ..default()
                     },
-                    BackgroundColor(button_color.into()),
+                    BackgroundColor(button_color),
                     BorderRadius::all(Val::Px(8.0)),
                     NewBlockLnAddressButton,
                     NewBlockDataButton,
@@ -1109,7 +1110,7 @@ fn setup_ln_addr_menu_button(
                         TextFont {
                             font: font.clone(),
                             font_size,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(DEFAULT_NO_PICK_COLOR.into()),
                         NewBlockLnAddressText,
@@ -1164,7 +1165,7 @@ fn setup_color_menu_button(
                         max_height: Val::Px(34.0),
                         ..default()
                     },
-                    BackgroundColor(button_color.into()),
+                    BackgroundColor(button_color),
                     BorderRadius::all(Val::Px(8.0)),
                     NewBlockColorButton,
                     NewBlockDataButton,
@@ -1177,7 +1178,7 @@ fn setup_color_menu_button(
                         TextFont {
                             font: font.clone(),
                             font_size,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(DEFAULT_NO_PICK_COLOR.into()),
                         NewBlockColorText,
@@ -1228,7 +1229,7 @@ fn setup_message_menu_button(
                         margin: UiRect::all(Val::Px(1.0)),
                         ..default()
                     },
-                    BackgroundColor(button_color.into()),
+                    BackgroundColor(button_color),
                     BorderRadius::all(Val::Px(8.0)),
                     NewBlockMessageButton,
                     NewBlockDataButton,
@@ -1241,7 +1242,7 @@ fn setup_message_menu_button(
                         TextFont {
                             font: font.clone(),
                             font_size,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(DEFAULT_NO_PICK_COLOR.into()),
                         NewBlockMessageText,

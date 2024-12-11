@@ -45,7 +45,7 @@ pub fn spawn_toast(
                         //margin: UiRect::top(Val::Percent(30.0)),
                         ..default()
                     },
-                    BackgroundColor(bg_color.into()),
+                    BackgroundColor(bg_color),
                     Visibility::Visible,
                     ToastInnerNode,
                 ))
@@ -55,7 +55,7 @@ pub fn spawn_toast(
                         TextFont {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                             font_size: 22.0,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(colors.text_color),
                         ToastText,

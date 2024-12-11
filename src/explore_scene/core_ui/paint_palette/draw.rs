@@ -30,7 +30,7 @@ pub fn mouse_draw_choose_tile(
             let window = q_window.single();
             if let Some(world_position) = window
                 .cursor_position()
-                .and_then(|cursor| Some(camera.viewport_to_world(camera_transform, cursor)))
+                .map(|cursor| camera.viewport_to_world(camera_transform, cursor))
                 .map(|ray| ray.unwrap().origin.truncate())
             {
                 //mycoords.0 = world_position;

@@ -39,6 +39,7 @@ pub fn spawn_waterwell(
             }),
             ..Default::default()
         },
+        transform,
         visibility_toggle,
         BuildingStructure::Waterwell,
         locationcoord,

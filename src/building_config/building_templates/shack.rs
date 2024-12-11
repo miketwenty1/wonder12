@@ -38,6 +38,7 @@ pub fn spawn_shack(
             image: texture.clone(),
             ..Default::default()
         },
+        transform,
         visibility_toggle,
         BuildingStructure::Shack,
         locationcoord,

@@ -26,7 +26,7 @@ pub fn top_ui(
                     ..default()
                 },
                 Visibility::Hidden,
-                BackgroundColor(colors.button_color.into()),
+                BackgroundColor(colors.button_color),
                 BorderRadius::all(Val::Px(8.0)),
                 BlockCountNode,
                 SelectedTileUi,
@@ -37,7 +37,7 @@ pub fn top_ui(
                     TextFont {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: UI_MEDIUM_TEXT_SIZE,
-                        font_smoothing: FontSmoothing::AntiAliased,
+                        font_smoothing: FontSmoothing::None,
                     },
                     TextColor(colors.text_color),
                     BlockCountText,
@@ -58,7 +58,7 @@ pub fn top_ui(
                     ..default()
                 },
                 Visibility::Hidden,
-                BackgroundColor(colors.button_color.into()),
+                BackgroundColor(colors.button_color),
                 BorderRadius::all(Val::Px(8.0)),
                 SelectedTileUi,
                 AmountNode,
@@ -69,7 +69,7 @@ pub fn top_ui(
                     TextFont {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: UI_MEDIUM_TEXT_SIZE,
-                        font_smoothing: FontSmoothing::AntiAliased,
+                        font_smoothing: FontSmoothing::None,
                     },
                     AmountText,
                 ));

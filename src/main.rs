@@ -204,7 +204,7 @@ fn setup(
         "this is the init value for game ts: {}",
         Utc::now() - Duration::minutes(5)
     );
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
 }
 
 fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {

@@ -100,7 +100,7 @@ pub fn spawn_layout(
                                 TextFont {
                                     font: font.clone(),
                                     font_size: UI_MEDIUM_TEXT_SIZE,
-                                    font_smoothing: FontSmoothing::AntiAliased,
+                                    font_smoothing: FontSmoothing::None,
                                 },
                                 TextColor(colors.text_color),
                             ));
@@ -202,7 +202,7 @@ pub fn spawn_inventory_row(
                 TextFont {
                     font: font.clone(),
                     font_size: 20.0,
-                    font_smoothing: FontSmoothing::AntiAliased,
+                    font_smoothing: FontSmoothing::None,
                 },
                 TextColor(colors.text_color),
                 InventoryHeightText,

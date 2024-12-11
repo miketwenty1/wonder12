@@ -32,7 +32,7 @@ pub fn buildings_visibility_event(
 pub fn land_color_event(
     mut toggle: EventReader<ToggleColors>,
     mut land_q: Query<(&mut Sprite, &Location, &Children), With<Land>>,
-    mut text_query: Query<(&mut TextColor)>,
+    mut text_query: Query<&mut TextColor>,
     //toggle_map: Res<ToggleMap>,
     tile_res: Res<WorldOwnedTileMap>,
     land: Res<SpriteSheetLand>,

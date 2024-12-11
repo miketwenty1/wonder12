@@ -59,7 +59,7 @@ impl Plugin for ToastUiPlugin {
             .add_systems(
                 Update,
                 (toast_event_reader).run_if(
-                    in_state(ExploreSceneState::On).or_else(in_state(ExploreSceneState::Paused)),
+                    in_state(ExploreSceneState::On).or(in_state(ExploreSceneState::Paused)),
                 ),
             )
             .add_systems(OnExit(ToastState::On), despawn_screen::<ToastNode>);

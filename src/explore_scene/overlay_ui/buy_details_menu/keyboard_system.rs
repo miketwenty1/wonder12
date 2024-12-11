@@ -55,7 +55,7 @@ pub fn write_keyboard_target(
             _ => {}
         }
         if clear_configbox {
-            for (mut text, mut text_color) in text_query.p3().iter_mut() {
+            for (mut text, _text_color) in text_query.p3().iter_mut() {
                 **text = "".to_string();
                 cart_config.0 = false;
             }

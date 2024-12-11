@@ -1,7 +1,4 @@
-use bevy::{
-    prelude::*,
-    text::{FontSmoothing, FontStyle},
-};
+use bevy::{prelude::*, text::FontSmoothing};
 
 use crate::{
     componenty::UiInteractionBtn,
@@ -416,7 +413,7 @@ fn keyboard_button(
                         align_items: AlignItems::Center,
                         ..default()
                     },
-                    BackgroundColor(button_color.into()),
+                    BackgroundColor(button_color),
                     BorderRadius::all(Val::Px(4.0)),
                     UiInteractionBtn,
                     KeyBoardButton(key, alt_key),
@@ -429,7 +426,7 @@ fn keyboard_button(
                             TextFont {
                                 font,
                                 font_size,
-                                font_smoothing: FontSmoothing::AntiAliased,
+                                font_smoothing: FontSmoothing::None,
                             },
                             TextColor(Color::Srgba(Srgba {
                                 red: 0.9,

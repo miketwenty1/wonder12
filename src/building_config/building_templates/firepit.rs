@@ -38,6 +38,7 @@ pub fn spawn_firepit(
             }),
             ..Default::default()
         },
+        transform,
         visibility_toggle,
         AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
         BuildingStructure::FirePit,

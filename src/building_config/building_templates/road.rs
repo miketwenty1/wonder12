@@ -42,6 +42,7 @@ pub fn spawn_road(
             }),
             ..Default::default()
         },
+        transform,
         visibility,
         BuildingStructure::Road,
         locationcoord,

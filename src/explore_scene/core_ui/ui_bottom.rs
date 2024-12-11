@@ -33,7 +33,7 @@ pub fn bottom_ui(
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                BackgroundColor(colors.button_color.into()),
+                BackgroundColor(colors.button_color),
                 BorderColor(colors.lite_button_color),
                 Visibility::Hidden,
                 UiInteractionBtn,
@@ -47,7 +47,7 @@ pub fn bottom_ui(
                     TextFont {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: UI_MEDIUM_TEXT_SIZE,
-                        font_smoothing: FontSmoothing::AntiAliased,
+                        font_smoothing: FontSmoothing::None,
                     },
                     TextColor(colors.text_color),
                 ));
@@ -67,7 +67,7 @@ pub fn bottom_ui(
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                BackgroundColor(colors.button_color.into()),
+                BackgroundColor(colors.button_color),
                 BorderColor(colors.lite_button_color),
                 UiInteractionBtn,
                 ZoomOutButton,
@@ -79,7 +79,7 @@ pub fn bottom_ui(
                     TextFont {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: UI_LARGE_TEXT_SIZE,
-                        font_smoothing: FontSmoothing::AntiAliased,
+                        font_smoothing: FontSmoothing::None,
                     },
                     TextColor(colors.text_color),
                 ));
@@ -99,7 +99,7 @@ pub fn bottom_ui(
                     ..default()
                 },
                 BorderColor(colors.lite_button_color),
-                BackgroundColor(colors.button_color.into()),
+                BackgroundColor(colors.button_color),
                 UiInteractionBtn,
                 ZoomInButton,
                 UiOverlayingExplorerButton,
@@ -110,7 +110,7 @@ pub fn bottom_ui(
                     TextFont {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: UI_LARGE_TEXT_SIZE,
-                        font_smoothing: FontSmoothing::AntiAliased,
+                        font_smoothing: FontSmoothing::None,
                     },
                     TextColor(colors.text_color),
                 ));
@@ -129,7 +129,7 @@ pub fn bottom_ui(
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                BackgroundColor(colors.button_color.into()),
+                BackgroundColor(colors.button_color),
                 Visibility::Hidden,
                 BorderColor(colors.lite_button_color),
                 UiInteractionBtn,
@@ -143,7 +143,7 @@ pub fn bottom_ui(
                     TextFont {
                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                         font_size: UI_MEDIUM_TEXT_SIZE,
-                        font_smoothing: FontSmoothing::AntiAliased,
+                        font_smoothing: FontSmoothing::None,
                     },
                     TextColor(colors.text_color),
                 ));

@@ -94,7 +94,7 @@ pub fn init_explorer(
                         TextFont {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                             font_size: 30.2,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(colors.text_color),
                         InitLoadingText,
@@ -133,7 +133,7 @@ pub fn init_explorer(
                         TextFont {
                             font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                             font_size: 30.0,
-                            font_smoothing: FontSmoothing::AntiAliased,
+                            font_smoothing: FontSmoothing::None,
                         },
                         TextColor(colors.accent_color),
                         InitLoadingText,
@@ -330,7 +330,7 @@ pub fn spawn_block_sprites(
                             let slightly_smaller_text_style = TextFont {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: (SCALE_FACTOR / 3.0) * 24.0,
-                                font_smoothing: FontSmoothing::AntiAliased,
+                                font_smoothing: FontSmoothing::None,
                             };
                             //color: get_text_color(&color_for_tile),
 

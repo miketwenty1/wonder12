@@ -355,7 +355,7 @@ pub fn spawn_layout(
                                 TextFont {
                                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                     font_size: UI_SMALL_TEXT_SIZE,
-                                    font_smoothing: FontSmoothing::AntiAliased,
+                                    font_smoothing: FontSmoothing::None,
                                 },
                                 TextColor(colors.text_color),
                                 ColorPaletteViewText,
