@@ -6,7 +6,7 @@ use crate::{
     resourcey::{Edge, LastSelectedTile, MaxBlockHeight},
 };
 
-use super::explore::set_camera_tile_bounds;
+//use super::explore::set_camera_tile_bounds;
 
 pub fn clear_last_selected_tile(
     mut clear_tile_event: EventReader<ClearLastSelectedTile>,
@@ -66,17 +66,14 @@ pub fn mouse_movement_camera_system(
                     time.delta_secs()
                 };
 
-                let total_distance = direction
-                    * timefactor
-                    * (3.0 / SCALE_FACTOR)
-                    * cam_ortho.scale
-                    * MOVE_VELOCITY_FACTOR;
+                let total_distance =
+                    direction * timefactor * SCALE_FACTOR * cam_ortho.scale * MOVE_VELOCITY_FACTOR;
 
                 let clamped_length = total_distance.clamp_length_max(300.0);
 
                 cam_transform.translation += clamped_length;
 
-                set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
+                // set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
             }
         }
     }
@@ -105,16 +102,16 @@ pub fn keyboard_movement_camera_system(
     {
         for (mut cam_transform, cam_ortho) in q_camera.iter_mut() {
             let y: f32 = if keys.pressed(KeyCode::KeyW) || keys.pressed(KeyCode::ArrowUp) {
-                15.0
+                25.0 * SCALE_FACTOR
             } else if keys.pressed(KeyCode::KeyS) || keys.pressed(KeyCode::ArrowDown) {
-                -15.0
+                -25.0 * SCALE_FACTOR
             } else {
                 0.0
             };
             let x: f32 = if keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft) {
-                -15.0
+                -25.0 * SCALE_FACTOR
             } else if keys.pressed(KeyCode::KeyD) || keys.pressed(KeyCode::ArrowRight) {
-                15.0
+                25.0 * SCALE_FACTOR
             } else {
                 0.0
             };
@@ -165,7 +162,7 @@ pub fn keyboard_movement_camera_system(
             //     * cam_ortho.scale
             //     * MOVE_VELOCITY_FACTOR
             //     * 1.0;
-            set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
+            //set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
         }
     }
 }

@@ -6,7 +6,7 @@ use crate::{
     resourcey::{Edge, MaxBlockHeight},
 };
 
-use super::explore::set_camera_tile_bounds;
+//use super::explore::set_camera_tile_bounds;
 
 #[allow(clippy::too_many_arguments)]
 pub fn touch_event_system(
@@ -78,7 +78,7 @@ pub fn touch_event_system(
             cam_transform.translation +=
                 direction * timefactor * cam_ortho.scale * MOVE_VELOCITY_FACTOR * 5.0;
 
-            set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
+            //set_camera_tile_bounds(cam_transform.translation, &mut edge, &mut edge_event);
 
             if touches.just_pressed(touch.id()) {
                 //info!("send touch select");

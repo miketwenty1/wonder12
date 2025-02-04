@@ -60,11 +60,12 @@ pub fn land_color_event(
 #[allow(clippy::too_many_arguments)]
 pub fn change_tile_text_event(
     mut toggle: EventReader<ToggleText>,
-    mut text_q: Query<(&mut Text, &Location, &mut Visibility), With<TileText>>,
+    mut text_q: Query<(&mut Text2d, &Location, &mut Visibility), With<TileText>>,
     tile_res: Res<WorldOwnedTileMap>,
     cam_query: Query<&mut OrthographicProjection, With<Camera>>,
 ) {
     for t in toggle.read() {
+        info!("event toggle text {:?}", t);
         let zoom_level = cam_query.get_single().unwrap().scale;
 
         for (mut text, loc, mut visibility) in text_q.iter_mut() {

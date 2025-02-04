@@ -22,9 +22,8 @@ use crate::{
         Selected, SelectedTileUi, TileText, UiNode, UiOverlayingExplorerButton,
     },
     consty::{
-        BUILDING_ZOOM_OUT_MAX, CAMERA_SANITY_FACTOR, CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT,
-        DESPAWN_TILE_THRESHOLD, MAX_SELECTION_SIZE, SCALE_FACTOR, TEXT_ZOOM_OUT_MAX,
-        TOTAL_TILE_SCALE_SIZE,
+        BUILDING_ZOOM_OUT_MAX, CAMERA_SANITY_FACTOR, MAX_SELECTION_SIZE, SCALE_FACTOR,
+        TEXT_ZOOM_OUT_MAX, TOTAL_TILE_SCALE_SIZE,
     },
     eventy::{
         ClearManualSelectionEvent, ClearSelectionEvent, EdgeEvent, SpriteSpawnEvent,
@@ -151,37 +150,37 @@ pub fn init_explorer(
     // }
 }
 
-#[allow(clippy::too_many_arguments, clippy::type_complexity)]
-pub fn edge_system(
-    mut commands: Commands,
-    mut blocks: Query<(Entity, &mut Location), With<Land>>,
-    mut edge_event: EventReader<EdgeEvent>,
-    mut chunk_set: ResMut<ChunkManager>,
-    mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
-    mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
-) {
-    for edge_e in edge_event.read() {
-        // fuck despawn
-        for (block_entity, mut block_location) in blocks.iter_mut() {
-            if ((block_location.y - edge_e.y).abs() > DESPAWN_TILE_THRESHOLD
-                || (block_location.x - edge_e.x).abs() > DESPAWN_TILE_THRESHOLD)
-                && !block_location.despawn_status
-            {
-                block_location.despawn_status = true;
-                //info!("despawning");
-                let ulam_i = ulam::value_of_xy(block_location.x, block_location.y);
-                commands.entity(block_entity).despawn_recursive();
-                chunk_set.set.remove(&ulam_i);
-            }
-        }
-        //debug!("reached edge: {:?}", edge_e.edge_type);
-        sprite_spawn_event.send(SpriteSpawnEvent);
-        //info!("yo momma1");
+// #[allow(clippy::too_many_arguments, clippy::type_complexity)]
+// pub fn edge_system(
+//     mut commands: Commands,
+//     mut blocks: Query<(Entity, &mut Location), With<Land>>,
+//     mut edge_event: EventReader<EdgeEvent>,
+//     mut chunk_set: ResMut<ChunkManager>,
+//     mut sprite_spawn_event: EventWriter<SpriteSpawnEvent>,
+//     mut update_ui_amount_event: EventWriter<UpdateUiAmount>,
+// ) {
+//     for edge_e in edge_event.read() {
+//         // fuck despawn
+//         for (block_entity, mut block_location) in blocks.iter_mut() {
+//             if ((block_location.y - edge_e.y).abs() > DESPAWN_TILE_THRESHOLD
+//                 || (block_location.x - edge_e.x).abs() > DESPAWN_TILE_THRESHOLD)
+//                 && !block_location.despawn_status
+//             {
+//                 block_location.despawn_status = true;
+//                 //info!("despawning");
+//                 let ulam_i = ulam::value_of_xy(block_location.x, block_location.y);
+//                 commands.entity(block_entity).despawn_recursive();
+//                 chunk_set.set.remove(&ulam_i);
+//             }
+//         }
+//         //debug!("reached edge: {:?}", edge_e.edge_type);
+//         sprite_spawn_event.send(SpriteSpawnEvent);
+//         //info!("yo momma1");
 
-        // We are calling so many edge events that this update amount is being called constantly when the camera moves around, just FYI
-        update_ui_amount_event.send(UpdateUiAmount);
-    }
-}
+//         // We are calling so many edge events that this update amount is being called constantly when the camera moves around, just FYI
+//         update_ui_amount_event.send(UpdateUiAmount);
+//     }
+// }
 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn_block_sprites(
@@ -220,11 +219,17 @@ pub fn spawn_block_sprites(
         let middle_x = (edge.left.tile + edge.right.tile) / 2;
 
         // removing "4" here as it seem arbitrary. We should make this a CONST
+        // let spawn_diff = SpawnDiffData {
+        //     xstart: middle_x - CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+        //     xend: middle_x + CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+        //     ystart: middle_y - CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+        //     yend: middle_y + CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+        // };
         let spawn_diff = SpawnDiffData {
-            xstart: middle_x - CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
-            xend: middle_x + CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
-            ystart: middle_y - CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
-            yend: middle_y + CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+            xstart: middle_x - 100_000, //CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+            xend: middle_x + 100_000,   //CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+            ystart: middle_y - 100_000, //CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
+            yend: middle_y + 100_000,   //CHUNK_TILE_SPAN_COUNT * CHUNK_TILE_SPAN_MULTIPLIER,
         };
 
         //info!("spawning {:#?}", spawn_diff);
@@ -329,7 +334,7 @@ pub fn spawn_block_sprites(
                         cmd.with_children(|builder| {
                             let slightly_smaller_text_style = TextFont {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: (SCALE_FACTOR / 3.0) * 24.0,
+                                font_size: SCALE_FACTOR * 24.0,
                                 font_smoothing: FontSmoothing::None,
                             };
                             //color: get_text_color(&color_for_tile),
@@ -340,7 +345,7 @@ pub fn spawn_block_sprites(
                                 TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
                                 Transform {
                                     translation: Vec3::new(0., 0., 5.),
-                                    scale: Vec3::new(1.0 / SCALE_FACTOR, 1.0 / SCALE_FACTOR, 1.0),
+                                    scale: Vec3::new(SCALE_FACTOR, SCALE_FACTOR, 1.0),
                                     ..Default::default()
                                 },
                                 text_visibility,
@@ -377,81 +382,81 @@ pub fn spawn_block_sprites(
     }
 }
 
-pub fn set_camera_tile_bounds(
-    mut camera_vec3: Vec3,
-    edge: &mut ResMut<Edge>,
-    edge_event: &mut EventWriter<EdgeEvent>,
-) {
-    if camera_vec3.x < edge.left.pixel {
-        //info!("LEFT WRITER");
-        edge.left.pixel -= CHUNK_PIXEL_SIZE;
-        edge.left.tile -= CHUNK_TILE_SPAN_COUNT;
-        edge.right.pixel -= CHUNK_PIXEL_SIZE;
-        edge.right.tile -= CHUNK_TILE_SPAN_COUNT;
+// pub fn set_camera_tile_bounds(
+//     mut camera_vec3: Vec3,
+//     edge: &mut ResMut<Edge>,
+//     edge_event: &mut EventWriter<EdgeEvent>,
+// ) {
+//     if camera_vec3.x < edge.left.pixel {
+//         //info!("LEFT WRITER");
+//         edge.left.pixel -= CHUNK_PIXEL_SIZE;
+//         edge.left.tile -= CHUNK_TILE_SPAN_COUNT;
+//         edge.right.pixel -= CHUNK_PIXEL_SIZE;
+//         edge.right.tile -= CHUNK_TILE_SPAN_COUNT;
 
-        edge_event.send(EdgeEvent {
-            //edge_type: EdgeType::Left,
-            x: edge.left.tile,
-            y: (edge.top.tile + edge.bottom.tile) / 2,
-        });
-    }
-    if camera_vec3.x > edge.right.pixel {
-        //info!("RIGHT WRITER");
-        //cam_transform.translation.x = edge.right.pixel;
-        edge.right.pixel += CHUNK_PIXEL_SIZE;
-        edge.right.tile += CHUNK_TILE_SPAN_COUNT;
-        edge.left.pixel += CHUNK_PIXEL_SIZE;
-        edge.left.tile += CHUNK_TILE_SPAN_COUNT;
-        edge_event.send(EdgeEvent {
-            //edge_type: EdgeType::Right,
-            x: edge.right.tile,
-            y: (edge.top.tile + edge.bottom.tile) / 2,
-        });
-        //info!("new right {}", edge.right.pixel);
+//         edge_event.send(EdgeEvent {
+//             //edge_type: EdgeType::Left,
+//             x: edge.left.tile,
+//             y: (edge.top.tile + edge.bottom.tile) / 2,
+//         });
+//     }
+//     if camera_vec3.x > edge.right.pixel {
+//         //info!("RIGHT WRITER");
+//         //cam_transform.translation.x = edge.right.pixel;
+//         edge.right.pixel += CHUNK_PIXEL_SIZE;
+//         edge.right.tile += CHUNK_TILE_SPAN_COUNT;
+//         edge.left.pixel += CHUNK_PIXEL_SIZE;
+//         edge.left.tile += CHUNK_TILE_SPAN_COUNT;
+//         edge_event.send(EdgeEvent {
+//             //edge_type: EdgeType::Right,
+//             x: edge.right.tile,
+//             y: (edge.top.tile + edge.bottom.tile) / 2,
+//         });
+//         //info!("new right {}", edge.right.pixel);
 
-        if camera_vec3.x > edge.right.pixel * CAMERA_SANITY_FACTOR {
-            //info!("adjust right?");
-            camera_vec3.x = edge.right.pixel;
-        }
-    }
-    if camera_vec3.y > edge.top.pixel {
-        //info!("TOP WRITER");
-        //cam_transform.translation.y = edge.top.pixel;
-        edge.top.pixel += CHUNK_PIXEL_SIZE;
-        edge.top.tile += CHUNK_TILE_SPAN_COUNT;
-        edge.bottom.pixel += CHUNK_PIXEL_SIZE;
-        edge.bottom.tile += CHUNK_TILE_SPAN_COUNT;
-        edge_event.send(EdgeEvent {
-            //edge_type: EdgeType::Top,
-            x: (edge.left.tile + edge.right.tile) / 2,
-            y: edge.top.tile,
-        });
+//         if camera_vec3.x > edge.right.pixel * CAMERA_SANITY_FACTOR {
+//             //info!("adjust right?");
+//             camera_vec3.x = edge.right.pixel;
+//         }
+//     }
+//     if camera_vec3.y > edge.top.pixel {
+//         //info!("TOP WRITER");
+//         //cam_transform.translation.y = edge.top.pixel;
+//         edge.top.pixel += CHUNK_PIXEL_SIZE;
+//         edge.top.tile += CHUNK_TILE_SPAN_COUNT;
+//         edge.bottom.pixel += CHUNK_PIXEL_SIZE;
+//         edge.bottom.tile += CHUNK_TILE_SPAN_COUNT;
+//         edge_event.send(EdgeEvent {
+//             //edge_type: EdgeType::Top,
+//             x: (edge.left.tile + edge.right.tile) / 2,
+//             y: edge.top.tile,
+//         });
 
-        //info!("new top {}", edge.top.pixel);
-        if camera_vec3.y > edge.top.pixel * CAMERA_SANITY_FACTOR {
-            //info!("adjust top");
-            camera_vec3.y = edge.top.pixel;
-        }
-    }
-    if camera_vec3.y < edge.bottom.pixel {
-        //info!("BOTTOM WRITER");
-        //cam_transform.translation.y = edge.bottom.pixel;
-        edge.bottom.pixel -= CHUNK_PIXEL_SIZE;
-        edge.bottom.tile -= CHUNK_TILE_SPAN_COUNT;
-        edge.top.pixel -= CHUNK_PIXEL_SIZE;
-        edge.top.tile -= CHUNK_TILE_SPAN_COUNT;
-        edge_event.send(EdgeEvent {
-            //edge_type: EdgeType::Bottom,
-            x: (edge.left.tile + edge.right.tile) / 2,
-            y: edge.bottom.tile,
-        });
-        //info!("new bottom {}", edge.bottom.pixel);
-        if camera_vec3.y < edge.bottom.pixel * CAMERA_SANITY_FACTOR {
-            //info!("adjust bottom");
-            camera_vec3.y = edge.bottom.pixel;
-        }
-    }
-}
+//         //info!("new top {}", edge.top.pixel);
+//         if camera_vec3.y > edge.top.pixel * CAMERA_SANITY_FACTOR {
+//             //info!("adjust top");
+//             camera_vec3.y = edge.top.pixel;
+//         }
+//     }
+//     if camera_vec3.y < edge.bottom.pixel {
+//         //info!("BOTTOM WRITER");
+//         //cam_transform.translation.y = edge.bottom.pixel;
+//         edge.bottom.pixel -= CHUNK_PIXEL_SIZE;
+//         edge.bottom.tile -= CHUNK_TILE_SPAN_COUNT;
+//         edge.top.pixel -= CHUNK_PIXEL_SIZE;
+//         edge.top.tile -= CHUNK_TILE_SPAN_COUNT;
+//         edge_event.send(EdgeEvent {
+//             //edge_type: EdgeType::Bottom,
+//             x: (edge.left.tile + edge.right.tile) / 2,
+//             y: edge.bottom.tile,
+//         });
+//         //info!("new bottom {}", edge.bottom.pixel);
+//         if camera_vec3.y < edge.bottom.pixel * CAMERA_SANITY_FACTOR {
+//             //info!("adjust bottom");
+//             camera_vec3.y = edge.bottom.pixel;
+//         }
+//     }
+// }
 
 // this function is weird because the event takes in UpdateTileTextureEvent but then only
 // uses it to check to see if the height is in the tilemap.
@@ -469,7 +474,7 @@ pub fn update_tile_textures(
     texture_map: Res<SpriteIndexBuilding>,
     texture_atlas_handle_building: Res<SpriteSheetBuilding>,
     toggle_map: Res<ToggleMap>,
-    mut text_q: Query<(&mut Text, &mut TextColor, &Location), With<TileText>>,
+    mut text_q: Query<(&mut Text2d, &mut TextColor, &Location), With<TileText>>,
     map_mode: Res<MapTileMode>,
     cam_query: Query<&OrthographicProjection, With<Camera>>,
 ) {
@@ -697,21 +702,26 @@ pub fn update_tile_textures(
                     tile_map.map.insert(event_tile.height, event_tile.clone());
                     tile_map_from_delta.remove(&event_tile.height);
                     // text
-                    let (mut text, mut text_color, loc) = text_q.get_mut(children[0]).unwrap();
 
-                    //for (mut text, loc) in text_q.iter_mut() {
-                    if zoom_level < TEXT_ZOOM_OUT_MAX {
-                        if let Some(val) = tile_map.map.get(&loc.ulam) {
-                            if !*hiding_text {
-                                **text_color = get_text_color(&sprite.color);
-                                if *showing_value {
-                                    **text = val.cost.to_string();
-                                } else {
-                                    **text = val.height.to_string();
+                    let res = text_q.get_mut(children[0]);
+
+                    if let Ok((mut text, mut text_color, loc)) = res {
+                        if zoom_level < TEXT_ZOOM_OUT_MAX {
+                            if let Some(val) = tile_map.map.get(&loc.ulam) {
+                                if !*hiding_text {
+                                    **text_color = get_text_color(&sprite.color);
+                                    if *showing_value {
+                                        **text = val.cost.to_string();
+                                    } else {
+                                        **text = val.height.to_string();
+                                    }
                                 }
                             }
                         }
+                    } else {
+                        info!("hmm fail 6921938");
                     }
+                    //for (mut text, loc) in text_q.iter_mut() {
                 }
                 (false, false) => {
                     //info!("tile isn't loaded on screen");

@@ -48,7 +48,7 @@ use self::{
     },
     explore::{
         animate_sprites, buy_selection_button, clear_selection, clear_selection_button,
-        edge_system, init_explorer, spawn_block_sprites, update_tile_textures,
+        init_explorer, spawn_block_sprites, update_tile_textures,
     },
     explorer_overlay_system::{clear_last_selected_tile_ui_button, init_block_loading_text},
     go_to_systems::go_to_button_system,
@@ -72,7 +72,7 @@ impl Plugin for ExplorePlugin {
             // OnEnter State Systems
             .add_systems(
                 OnEnter(ExploreSceneState::On),
-                (init_explorer, edge_system).run_if(run_once),
+                (init_explorer).run_if(run_once),
             )
             .add_systems(
                 Update,
@@ -115,7 +115,7 @@ impl Plugin for ExplorePlugin {
                         .chain(),
                     zoom_wheel_system,
                     keyboard_movement_camera_system,
-                    edge_system,
+                    //edge_system,
                     spawn_block_sprites,
                     buildings_visibility_event,
                     land_color_event,

@@ -1,7 +1,6 @@
 use bevy::{color::palettes::css::DARK_GREEN, prelude::*, utils::HashMap};
 
 use crate::{
-    consty::{CHUNK_PIXEL_SIZE, CHUNK_TILE_SPAN_COUNT},
     explore_scene::core_ui::paint_palette::resource::DefaultDrawColorPalette,
     resourcey::{ColorPalette, Edge, SpriteIndexBuilding, ToggleMap},
     structy::EdgeData,
@@ -122,21 +121,37 @@ pub fn init_hardcoded_res(mut commands: Commands) {
 
     // dividing by 2 to get middle locations.
     let start_edge = Edge {
+        // top: EdgeData {
+        //     pixel: CHUNK_PIXEL_SIZE / 2.0,
+        //     tile: CHUNK_TILE_SPAN_COUNT,
+        // },
+        // bottom: EdgeData {
+        //     pixel: -CHUNK_PIXEL_SIZE / 2.0,
+        //     tile: -CHUNK_TILE_SPAN_COUNT,
+        // },
+        // left: EdgeData {
+        //     pixel: -CHUNK_PIXEL_SIZE / 2.0,
+        //     tile: -CHUNK_TILE_SPAN_COUNT,
+        // },
+        // right: EdgeData {
+        //     pixel: CHUNK_PIXEL_SIZE / 2.0,
+        //     tile: CHUNK_TILE_SPAN_COUNT,
+        // },
         top: EdgeData {
-            pixel: CHUNK_PIXEL_SIZE / 2.0,
-            tile: CHUNK_TILE_SPAN_COUNT,
+            pixel: 100.0 / 2.0,
+            tile: 500,
         },
         bottom: EdgeData {
-            pixel: -CHUNK_PIXEL_SIZE / 2.0,
-            tile: -CHUNK_TILE_SPAN_COUNT,
+            pixel: -100.0 / 2.0,
+            tile: -500,
         },
         left: EdgeData {
-            pixel: -CHUNK_PIXEL_SIZE / 2.0,
-            tile: -CHUNK_TILE_SPAN_COUNT,
+            pixel: -100.0 / 2.0,
+            tile: -500,
         },
         right: EdgeData {
-            pixel: CHUNK_PIXEL_SIZE / 2.0,
-            tile: CHUNK_TILE_SPAN_COUNT,
+            pixel: 100.0 / 2.0,
+            tile: 500,
         },
     };
     commands.insert_resource(start_edge);
