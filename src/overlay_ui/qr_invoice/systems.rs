@@ -68,59 +68,48 @@ pub fn clipboard_button_system(
                         let window: web_sys::Window = web_sys::window().expect("window"); // { obj: val };
 
                         let nav = window.navigator().clipboard();
-                        match nav {
-                            Some(a) => {
-                                let navigator: NavigatorExt =
-                                    web_sys::window().unwrap().navigator().unchecked_into();
-                                let is_active: bool = navigator.user_activation().is_active();
-                                info!("is_active? {}", is_active);
-                                let is_secure = window.is_secure_context();
-                                info!("is_secure_context? {}", is_secure);
-                                // let clean_invoice = invoice
-                                // .strip_prefix("lightning:")
-                                // .unwrap_or_else(|| &invoice);
-                                let p = a.write_text(&invoice);
+                        let a = nav;
+                        let navigator: NavigatorExt =
+                            web_sys::window().unwrap().navigator().unchecked_into();
+                        let is_active: bool = navigator.user_activation().is_active();
+                        info!("is_active? {}", is_active);
+                        let is_secure = window.is_secure_context();
+                        info!("is_secure_context? {}", is_secure);
+                        // let clean_invoice = invoice
+                        // .strip_prefix("lightning:")
+                        // .unwrap_or_else(|| &invoice);
+                        let p = a.write_text(&invoice);
 
-                                let result = wasm_bindgen_futures::JsFuture::from(p).await;
+                        let result = wasm_bindgen_futures::JsFuture::from(p).await;
 
-                                match result {
+                        match result {
+                            Ok(_) => {
+                                info!("clippyboy worked")
+                            }
+                            Err(e) => {
+                                info!("clipboard fail {:?}", e);
+                                let item_data = Object::new();
+                                let item_value = Blob::new_with_blob_sequence_and_options(
+                                    &Array::of1(&invoice.into()),
+                                    BlobPropertyBag::new().type_("text/plain"),
+                                )
+                                .unwrap();
+                                js_sys::Reflect::set(&item_data, &"text/plain".into(), &item_value)
+                                    .unwrap();
+                                let item = ClipboardItem::new(&item_data);
+                                let p2 = a.write(&Array::of1(&item));
+                                let result2 = wasm_bindgen_futures::JsFuture::from(p2).await;
+
+                                match result2 {
                                     Ok(_) => {
-                                        info!("clippyboy worked")
+                                        info!("second copy method worked");
                                     }
                                     Err(e) => {
-                                        info!("clipboard fail {:?}", e);
-                                        let item_data = Object::new();
-                                        let item_value = Blob::new_with_blob_sequence_and_options(
-                                            &Array::of1(&invoice.into()),
-                                            BlobPropertyBag::new().type_("text/plain"),
-                                        )
-                                        .unwrap();
-                                        js_sys::Reflect::set(
-                                            &item_data,
-                                            &"text/plain".into(),
-                                            &item_value,
-                                        )
-                                        .unwrap();
-                                        let item = ClipboardItem::new(&item_data);
-                                        let p2 = a.write(&Array::of1(&item));
-                                        let result2 =
-                                            wasm_bindgen_futures::JsFuture::from(p2).await;
-
-                                        match result2 {
-                                            Ok(_) => {
-                                                info!("second copy method worked");
-                                            }
-                                            Err(e) => {
-                                                info!("second copy method also failed {:#?}, going to give you a html copy button instead", e);
-                                            }
-                                        }
+                                        info!("second copy method also failed {:#?}, going to give you a html copy button instead", e);
                                     }
                                 }
                             }
-                            None => {
-                                warn!("failed to get a clipboard");
-                            }
-                        };
+                        }
                     });
                 }
             }

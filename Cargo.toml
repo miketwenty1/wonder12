@@ -32,7 +32,7 @@ bevy = { git = "https://github.com/bevyengine/bevy.git", rev = "011f71a24520d140
 # ] }
 # bevy_ecs = "=0.12.0"
 rand = "0.8"
-ulam = "0.5.2"
+ulam = "0.6"
 wasm-bindgen = "0.2"
 async-channel = "2.1"
 reqwest = { version = "0.11", features = ["json"] }
@@ -80,3 +80,7 @@ opt-level = 3
 lto = true
 opt-level = 'z'
 codegen-units = 1
+
+[dependencies.uuid]
+version = "1.0"  # Replace with the actual version you are using
+features = ["js"]

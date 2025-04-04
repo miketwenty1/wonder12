@@ -186,7 +186,7 @@ pub fn edge_system(
                 || (block_location.x - edge_e.x).abs() > DESPAWN_TILE_THRESHOLD
             {
                 //info!("despawning");
-                let ulam_i = ulam::value_of_xy(block_location.x, block_location.y);
+                let ulam_i = ulam::get_value_from_xy(block_location.x, block_location.y);
                 commands.entity(block_entity).despawn_recursive();
                 chunk_map.map.remove(&ulam_i);
             }
@@ -257,7 +257,7 @@ pub fn spawn_block_sprites(
 
         for x in spawn_diff.xstart..=spawn_diff.xend {
             for y in spawn_diff.ystart..=spawn_diff.yend {
-                let ulam_i = ulam::value_of_xy(x, y);
+                let ulam_i = ulam::get_value_from_xy(x, y);
 
                 if max_height.0 >= ulam_i && !chunk_map.map.contains_key(&ulam_i) {
                     chunk_map.map.insert(ulam_i, true);
@@ -267,7 +267,7 @@ pub fn spawn_block_sprites(
                     let mut locationcoord = Location {
                         x,
                         y,
-                        ulam: ulam::value_of_xy(x, y),
+                        ulam: ulam::get_value_from_xy(x, y),
                         quad: ulam::quad_of_xy(x, y),
                         selected: false,
                     };

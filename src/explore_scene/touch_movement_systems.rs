@@ -54,20 +54,20 @@ pub fn touch_event_system(
             };
 
             // push back, change direction if detected past edge (left and up work the same as desktop but right and down need to be tweaked)
-            let direction = if ulam::value_of_xy(0, edge.bottom.tile) as i32
+            let direction = if ulam::get_value_from_xy(0, edge.bottom.tile) as i32
                 + THRESHOLD_FOR_PUSHBACK
                 > max_height.0 as i32
             {
                 Vec3::new(0., 100.0, 0.0)
-            } else if ulam::value_of_xy(0, edge.top.tile) as i32 + THRESHOLD_FOR_PUSHBACK
+            } else if ulam::get_value_from_xy(0, edge.top.tile) as i32 + THRESHOLD_FOR_PUSHBACK
                 > max_height.0 as i32
             {
                 Vec3::new(0., -100.0, 0.0)
-            } else if ulam::value_of_xy(edge.left.tile, 0) as i32 + THRESHOLD_FOR_PUSHBACK
+            } else if ulam::get_value_from_xy(edge.left.tile, 0) as i32 + THRESHOLD_FOR_PUSHBACK
                 > max_height.0 as i32
             {
                 Vec3::new(100.0, 0., 0.0)
-            } else if ulam::value_of_xy(edge.right.tile, 0) as i32 + THRESHOLD_FOR_PUSHBACK
+            } else if ulam::get_value_from_xy(edge.right.tile, 0) as i32 + THRESHOLD_FOR_PUSHBACK
                 > max_height.0 as i32
             {
                 Vec3::new(-100.0, 0.0, 0.0)
